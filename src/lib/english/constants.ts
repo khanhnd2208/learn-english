@@ -16,6 +16,8 @@ export const EN_MAX_EXAMPLES_PER_WORD = 8;
 export const EN_HINTS_REQUIRED = 3;
 export const EN_TX_TIMEOUT_MS = 30_000;
 export const EN_TX_MAX_WAIT_MS = 10_000;
+/** Saving a whole pack (up to EN_MAX_WORDS_PER_PACK words) runs in one transaction. */
+export const EN_PACK_TX_TIMEOUT_MS = 120_000;
 
 export const EN_CEFR_LEVELS = ['pre_a1', 'a1', 'a2', 'b1', 'b2', 'c1', 'c2'] as const;
 
