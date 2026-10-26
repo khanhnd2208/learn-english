@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { buildDailyQueue, dueAt, isDue, isNearMiss, nextBox, scheduleAnswer, stageOf } from '@/lib/english/schedule';
+import { buildDailyQueue, dueAt, isDue, isNearMiss, nextBox, scheduleAnswer, scheduleMove, stageOf } from '@/lib/english/schedule';
 
 describe('Leitner schedule', () => {
 	const now = new Date('2026-10-26T10:00:00+07:00');
@@ -17,6 +17,12 @@ describe('Leitner schedule', () => {
 		expect(scheduleAnswer({ box: 0, lapses: 0 }, true)).toEqual({ box: 1, lapses: 0 });
 		expect(scheduleAnswer({ box: 3, lapses: 1 }, false)).toEqual({ box: 1, lapses: 2 });
 		expect(scheduleAnswer({ box: 3, lapses: 1 }, true)).toEqual({ box: 4, lapses: 1 });
+	});
+
+	it('resets an early wrong answer but leaves an early correct answer alone', () => {
+		const early = state('early', 3, '2026-11-10T00:00:00Z');
+		expect(scheduleMove(early, false, now)).toEqual({ box: 1, lapses: 1, dueAt: dueAt(1, now), scheduled: true });
+		expect(scheduleMove(early, true, now)).toEqual({ box: 3, lapses: 0, dueAt: early.dueAt, scheduled: false });
 	});
 
 	it('makes words due from 00:00 Vietnam time on the due day', () => {

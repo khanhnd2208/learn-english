@@ -1,5 +1,7 @@
 import { redirect } from 'next/navigation';
-import TodayHome from '@/components/english/TodayHome';
+import HomeDashboard from '@/components/english/HomeDashboard';
+import { listEnglishSets } from '@/services/english/enCatalogService';
+import { getDailyTasks } from '@/services/english/enQuizService';
 import { auth } from '@/lib/auth';
 import { getTodayOverview } from '@/services/english/enDailyService';
 
@@ -18,7 +20,7 @@ export default async function EnglishHomePage() {
 	const session = await auth();
 	if (!session?.user) redirect('/login');
 	const now = new Date();
-	const overview = await getTodayOverview(session.user.id, now);
+	const [overview, sets, tasks] = await Promise.all([getTodayOverview(session.user.id, now), listEnglishSets(session.user.id, session.user.role === 'admin'), getDailyTasks(session.user.id, now)]);
 	const dateLabel = new Intl.DateTimeFormat('vi-VN', { timeZone: VN_TIME_ZONE, weekday: 'long', day: 'numeric', month: 'long' }).format(now);
-	return <TodayHome overview={overview} greeting={greetingFor(now, session.user.name)} dateLabel={dateLabel.charAt(0).toUpperCase() + dateLabel.slice(1)} />;
+	return <HomeDashboard overview={overview} sets={sets} tasks={tasks} greeting={greetingFor(now, session.user.name)} dateLabel={dateLabel.charAt(0).toUpperCase() + dateLabel.slice(1)} />;
 }

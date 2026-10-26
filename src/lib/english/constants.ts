@@ -15,6 +15,7 @@ export const EN_SUSPEND_DISPUTE_USERS = 3;
 export const EN_SUSPEND_MIN_ATTEMPTS = 8;
 export const EN_SUSPEND_AUDIO_RATE = 0.7;
 export const EN_REVIEW_BATCH = 20;
+export const EN_QUIZ_MAX_ITEMS = 20;
 export const EN_MAX_JSON_BODY_BYTES = 4 * 1024 * 1024;
 export const EN_ALTERNATIVES_REQUIRED = 5;
 export const EN_MAX_WORDS_PER_PACK = 500;

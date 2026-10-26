@@ -72,7 +72,7 @@ function scheduleNote(feedback: Feedback): string {
 	return `Ôn lại sau ${days} ngày.`;
 }
 
-export default function StudySession({ onClose }: { onClose: (studied: boolean) => void }) {
+export default function StudySession({ onClose, extra = false }: { onClose: (studied: boolean) => void; extra?: boolean }) {
 	const [phase, setPhase] = useState<'loading' | 'study' | 'summary' | 'error'>('loading');
 	const [sessionId, setSessionId] = useState<string | null>(null);
 	const [steps, setSteps] = useState<Step[]>([]);
@@ -119,19 +119,26 @@ export default function StudySession({ onClose }: { onClose: (studied: boolean) 
 		setPhase('error');
 	}, []);
 
-	const load = useCallback(() => englishPost<Started>('/api/daily/start', {}).then(apply, fail), [apply, fail]);
+	const load = useCallback(() => englishPost<Started>('/api/daily/start', { extra }).then(apply, fail), [apply, fail, extra]);
 
 	useEffect(() => {
 		let active = true;
-		englishPost<Started>('/api/daily/start', {}).then((started) => { if (active) apply(started); }, (cause) => { if (active) fail(cause); });
+		englishPost<Started>('/api/daily/start', { extra }).then((started) => { if (active) apply(started); }, (cause) => { if (active) fail(cause); });
 		return () => { active = false; };
-	}, [apply, fail]);
+	}, [apply, fail, extra]);
 
 	function start() {
 		setPhase('loading');
 		setError('');
 		void load();
 	}
+
+	useEffect(() => {
+		if (phase !== 'study') return;
+		const warn = (event: BeforeUnloadEvent) => { event.preventDefault(); };
+		window.addEventListener('beforeunload', warn);
+		return () => window.removeEventListener('beforeunload', warn);
+	}, [phase]);
 
 	useEffect(() => {
 		const previous = document.body.style.overflow;
@@ -216,6 +223,7 @@ export default function StudySession({ onClose }: { onClose: (studied: boolean) 
 	useEffect(() => () => { if (advanceTimer.current) clearTimeout(advanceTimer.current); }, []);
 
 	async function close() {
+		if (phase === 'study' && !window.confirm('Thoát phiên Tổng hợp đang làm?')) return;
 		if (phase === 'study' && answeredAny.current && sessionId) await englishPost('/api/daily/finish', { sessionId }).catch(() => undefined);
 		onClose(answeredAny.current);
 	}

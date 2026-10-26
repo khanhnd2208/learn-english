@@ -210,7 +210,7 @@ body::before {
 }
 
 @utility label-caps {
-	@apply text-[10px] font-bold uppercase tracking-[0.15em] text-muted;
+	@apply text-xs font-bold uppercase tracking-[0.15em] text-muted;
 }
 
 @utility nav-pill-active {
@@ -323,13 +323,14 @@ body::before {
 
 /* Pixel parchment design system — inspired by the supplied RPG reference. */
 
-h1, h2, h3, .game-number {
-	font-family: var(--font-pixel), var(--font-sans), system-ui, sans-serif;
+h1, h2, .game-number {
+	font-family: var(--font-pixel), var(--font-pixel-fallback), var(--font-sans), system-ui, sans-serif;
 	letter-spacing: .015em;
+	line-height: 1.2;
 }
 .label-caps {
-	font-family: var(--font-pixel), var(--font-sans), system-ui, sans-serif;
-	font-size: 11px;
+	font-family: var(--font-sans), system-ui, sans-serif;
+	font-size: 12px;
 	letter-spacing: .055em;
 }
 
@@ -453,9 +454,6 @@ h1, h2, h3, .game-number {
 .week-day-tile.is-done { border-color: #637f58; background: #dfe9cf; color: #355c3b; box-shadow: 0 3px 0 #b8caa4; }
 .week-day-tile.is-pending { border-color: #d7c79d; background: #fff4d6; color: #8b7337; }
 .week-day-tile.is-future { border-style: dashed; background: rgb(255 250 243 / 65%); color: #9690a1; }
-.rest-note { border: 2px solid #b9a3cb; background: #eee4f3; color: #42344f; box-shadow: 0 3px 0 #d2c0dd; }
-.xp-gain-note { border: 2px solid #d6b760; background: #fff3cf; color: #41364a; box-shadow: 0 3px 0 #e1cc8c; }
-.reward-unlock-note { border: 2px solid #c1abd2; background: #f0e7f5; color: #40344f; box-shadow: 0 3px 0 #d4c3df; }
 
 button { letter-spacing: .045em; }
 button:not(:disabled) { transition: transform 120ms steps(2, end), filter 120ms ease, box-shadow 120ms ease; }
@@ -490,8 +488,6 @@ input:focus-visible, textarea:focus-visible, select:focus-visible { outline-colo
 .dark .week-day-tile.is-done { border-color: #829775; background: #43513f; color: #e2f0d4; box-shadow: 0 3px 0 #303c32; }
 .dark .week-day-tile.is-pending { border-color: #8b7955; background: #49402f; color: #f2d98f; }
 .dark .week-day-tile.is-future { background: #34313e; color: #b1a8bb; }
-.dark .rest-note, .dark .reward-unlock-note { border-color: #725d83; background: #3e334a; color: var(--foreground); box-shadow: 0 3px 0 #30283b; }
-.dark .xp-gain-note { border-color: #897546; background: #49402f; color: var(--foreground); box-shadow: 0 3px 0 #393225; }
 .dark button.bg-accent { background: #8967a4; border-color: #d7c3e4; color: #211d2c; }
 
 @media (max-width: 640px) {
@@ -499,3 +495,17 @@ input:focus-visible, textarea:focus-visible, select:focus-visible { outline-colo
 	.game-hero > .adventure-landscape { width: 86%; height: 75%; opacity: .13; }
 	.adventure-icon { width: 34px; height: 34px; }
 }
+
+.task-row,.mode-card,.word-row { border: 1px solid var(--border); background: var(--surface); border-radius: 14px; }
+.task-row { display:flex; align-items:center; gap:12px; padding:14px; min-height:56px; }
+.mode-card { padding:20px; }
+.word-row { display:flex; align-items:center; gap:12px; padding:10px 14px; min-height:60px; }
+.choice-btn { display:block; width:100%; min-height:52px; padding:12px 16px; text-align:left; border:2px solid var(--border); border-radius:12px; background:var(--surface); color:var(--foreground); }
+.choice-btn:hover,.choice-btn:focus-visible { border-color:var(--accent); outline:none; }
+.choice-btn[data-state="selected"] { border-color:var(--accent); background:var(--accent-subtle); }
+.choice-btn[data-state="correct"] { border-color:var(--success); background:var(--success-subtle); }
+.choice-btn[data-state="wrong"] { border-color:var(--error); background:color-mix(in srgb,var(--error) 12%,var(--surface)); }
+.segment-progress { display:flex; gap:3px; }
+.segment-progress>span { height:7px; flex:1; border-radius:3px; background:var(--surface-dim); }
+.segment-progress>span[data-done="true"] { background:var(--accent); }
+.dark .choice-btn[data-state="wrong"] { background:color-mix(in srgb,var(--error) 20%,var(--surface)); }

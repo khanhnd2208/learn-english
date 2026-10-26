@@ -30,6 +30,7 @@ export interface ActivityContext {
 	rng: Rng;
 	preferOutsideTest?: boolean;
 	allowSyntheticAudio?: boolean;
+	recallPrompt?: 'meaning' | 'any';
 }
 
 export interface ActivityDefinition {

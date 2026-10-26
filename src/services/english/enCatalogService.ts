@@ -1,4 +1,6 @@
 import { prisma } from '@/lib/prisma';
+import { getDailyTasks } from '@/services/english/enQuizService';
+import type { QuizKind } from '@/lib/english/quiz';
 import { AppError } from '@/lib/appError';
 import { getEnglishBlueprint, listEnglishActivities } from '@/services/english/enActivityService';
 import { getSenseBundles } from '@/services/english/enContentService';
@@ -8,7 +10,10 @@ import type { SenseBundle } from '@/lib/english/senseBundle';
 import type { WordStatusName } from '@/lib/english/wordState';
 import type { FinishedEnglishTest } from '@/lib/english/testTypes';
 
+export type SetDailyTasks = Partial<Record<QuizKind, { passedCount: number; wordCount: number }>>;
+
 export interface EnglishSetSummary {
+	dailyTasks: SetDailyTasks;
 	id: string;
 	title: string;
 	description: string;
@@ -36,6 +41,7 @@ export interface EnglishSetWord {
 }
 
 export interface EnglishSetDetail {
+	dailyTasks: SetDailyTasks;
 	id: string;
 	title: string;
 	description: string;
@@ -77,6 +83,7 @@ export async function listEnglishSets(userId: string, includeDrafts: boolean): P
 			select: { senseId: true, status: true, lastExposureAt: true, inMistakeBook: true, box: true },
 		});
 	const bySense = new Map(states.map((state) => [state.senseId, state]));
+	const daily = await getDailyTasks(userId);
 	return sets.map((set) => {
 		const published = set.items.flatMap((item) => (
 			item.senseId && (includeDrafts || item.sense?.status === 'published') ? [item.senseId] : []
@@ -86,6 +93,7 @@ export async function listEnglishSets(userId: string, includeDrafts: boolean): P
 		const inMistakeBook = published.filter((id) => bySense.get(id)?.inMistakeBook).length;
 		const exposed = published.some((id) => bySense.get(id)?.status !== 'new' && bySense.get(id)?.lastExposureAt);
 		return {
+			dailyTasks: Object.fromEntries(Object.entries(daily).filter(([, task]) => task?.setId === set.id).map(([kind, task]) => [kind, { passedCount: task!.passedCount, wordCount: task!.wordCount }])),
 			id: set.id,
 			title: set.title,
 			description: set.description,
@@ -188,7 +196,9 @@ export async function getEnglishSetDetail(userId: string, setId: string, include
 			})),
 		};
 	}
+	const daily = await getDailyTasks(userId);
 	return {
+		dailyTasks: Object.fromEntries(Object.entries(daily).filter(([, task]) => task?.setId === set.id).map(([kind, task]) => [kind, { passedCount: task!.passedCount, wordCount: task!.wordCount }])),
 		id: set.id,
 		title: set.title,
 		description: set.description,

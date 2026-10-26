@@ -45,6 +45,16 @@ export function scheduleAnswer(state: { box: number; lapses: number } | null, co
 	return { box: nextBox(box, correct), lapses: correct ? lapses : lapses + 1 };
 }
 
+/** Wrong answers always reset to box 1, including early practice in Review. */
+export function scheduleMove(state: Pick<ScheduledState, 'box' | 'lapses' | 'dueAt'> | null, correct: boolean, now: Date) {
+	const box = state?.box ?? 0;
+	const lapses = state?.lapses ?? 0;
+	if (!correct) return { box: 1, lapses: lapses + (box > 0 ? 1 : 0), dueAt: dueAt(1, now), scheduled: true };
+	if (state && box > 0 && state.dueAt > now) return { box, lapses, dueAt: state.dueAt, scheduled: false };
+	const next = scheduleAnswer(state, true);
+	return { ...next, dueAt: dueAt(next.box, now), scheduled: true };
+}
+
 /** Start of the due day in Vietnam, so a word due "tomorrow" is available from 00:00 local time. */
 export function dueAt(box: number, from: Date): Date {
 	const safeBox = Math.min(EN_LEITNER_INTERVALS.length - 1, Math.max(0, Math.trunc(box)));

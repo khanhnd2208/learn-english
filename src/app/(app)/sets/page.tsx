@@ -34,15 +34,16 @@ export default async function EnglishSetsPage() {
 				</div>
 				<p className="text-xs text-muted"><span className="font-bold text-foreground-secondary">{set.learned}</span>/{set.words} đã học · <span className="font-bold text-success">{set.longTerm}</span> nhớ lâu</p>
 			</div>}
+			{set.enrolled && <p className="mt-3 text-xs text-muted">Hôm nay: {Object.entries(set.dailyTasks).map(([kind, result]) => `✓ ${kind} ${result?.passedCount}/${result?.wordCount}`).join(' · ') || 'Chưa kiểm tra'}</p>}
 			<div className="mt-auto flex items-center justify-between gap-3 pt-4">
-				<Link href={`/sets/${set.id}`} className="inline-flex items-center gap-1 text-sm font-bold text-accent hover:underline">{set.enrolled ? 'Xem từ · luyện tự do' : 'Xem trước'} <MaterialIcon name="arrow_forward" size={16} /></Link>
+				<Link href={`/sets/${set.id}`} className="inline-flex items-center gap-1 text-sm font-bold text-accent hover:underline">{set.enrolled ? 'Mở bộ' : 'Xem trước'} <MaterialIcon name="arrow_forward" size={16} /></Link>
 				{set.status === 'published' && <EnrollButton setId={set.id} enrolled={set.enrolled} />}
 			</div>
 		</li>;
 	};
 
 	return <div className="mx-auto max-w-5xl space-y-8 px-4 py-6 sm:px-6 sm:py-10">
-		<header><h1 className="text-3xl font-black tracking-tight sm:text-4xl">Bộ từ</h1><p className="mt-1 text-sm text-muted">Mỗi ngày, Hôm nay lấy 10 từ mới từ các bộ bạn đang học, theo thứ tự trong bộ.</p></header>
+		<header><h1 className="text-3xl font-black tracking-tight sm:text-4xl">Bộ từ</h1><p className="mt-1 text-sm text-muted">Chọn bộ từ để luyện tập hoặc làm bài kiểm tra. Tổng hợp sẽ ôn từ đến hạn từ mọi bộ.</p></header>
 		{sets.length === 0 ? <EmptyState icon="library_books" title="Chưa có bộ từ" description="Admin cần nhập và xuất bản nội dung trước." /> : <>
 			{enrolled.length > 0 && <section className="space-y-3"><h2 className="label-caps">Đang học · {enrolled.length}</h2><ul className="grid gap-3 md:grid-cols-2">{enrolled.map(card)}</ul></section>}
 			{others.length > 0 && <section className="space-y-3"><h2 className="label-caps">{enrolled.length ? 'Thêm bộ khác' : 'Chọn bộ để bắt đầu'}</h2><ul className="grid gap-3 md:grid-cols-2">{others.map(card)}</ul></section>}

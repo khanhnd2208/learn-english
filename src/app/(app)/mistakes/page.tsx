@@ -1,5 +1,2 @@
 import { redirect } from 'next/navigation';
-
-export default function MistakesPage() {
-	redirect('/');
-}
+export default function Page() { redirect('/'); }
