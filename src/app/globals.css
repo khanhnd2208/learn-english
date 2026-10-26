@@ -390,6 +390,7 @@ h1, h2, h3, .game-number {
 	backdrop-filter: blur(12px);
 }
 .adventure-mobile-header a, .adventure-mobile-nav a { color: var(--foreground-secondary); }
+.adventure-mobile-header .text-amber-300 { color: #8b68a7; }
 .adventure-mobile-nav a.text-amber-200 { color: #765292; }
 
 .game-hero {

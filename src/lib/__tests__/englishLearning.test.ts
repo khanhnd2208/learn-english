@@ -69,7 +69,7 @@ describe('english grading and mastery', () => {
 
 describe('english area boundaries', () => {
 	it('uses root-level routes in the standalone app', () => {
-		expect(MAIN_NAV.map((item) => item.href)).toEqual(['/', '/review', '/mistakes', '/progress']);
+		expect(MAIN_NAV.map((item) => item.href)).toEqual(['/', '/sets', '/progress']);
 	});
 
 	it('suspends a question after three valid reports or a high audio-open rate', () => {

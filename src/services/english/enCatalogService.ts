@@ -3,6 +3,7 @@ import { AppError } from '@/lib/appError';
 import { getEnglishBlueprint, listEnglishActivities } from '@/services/english/enActivityService';
 import { getSenseBundles } from '@/services/english/enContentService';
 import { vnDayKey } from '@/lib/english/gapRule';
+import { isLongTerm } from '@/lib/english/schedule';
 import type { SenseBundle } from '@/lib/english/senseBundle';
 import type { WordStatusName } from '@/lib/english/wordState';
 import type { FinishedEnglishTest } from '@/lib/english/testTypes';
@@ -19,6 +20,10 @@ export interface EnglishSetSummary {
 	practicing: number;
 	inMistakeBook: number;
 	label: string;
+	/** Words with a review schedule (box ≥ 1). */
+	learned: number;
+	/** Words recalled after a gap of at least 7 days (box ≥ 4). */
+	longTerm: number;
 }
 
 export interface EnglishSetWord {
@@ -26,6 +31,8 @@ export interface EnglishSetWord {
 	status: WordStatusName;
 	inMistakeBook: boolean;
 	lastExposureAt: string | null;
+	box: number;
+	lapses: number;
 }
 
 export interface EnglishSetDetail {
@@ -67,7 +74,7 @@ export async function listEnglishSets(userId: string, includeDrafts: boolean): P
 		? []
 		: await prisma.enWordState.findMany({
 			where: { userId, senseId: { in: senseIds } },
-			select: { senseId: true, status: true, lastExposureAt: true, inMistakeBook: true },
+			select: { senseId: true, status: true, lastExposureAt: true, inMistakeBook: true, box: true },
 		});
 	const bySense = new Map(states.map((state) => [state.senseId, state]));
 	return sets.map((set) => {
@@ -90,6 +97,8 @@ export async function listEnglishSets(userId: string, includeDrafts: boolean): P
 			practicing,
 			inMistakeBook,
 			label: studyLabel(mastered, published.length, exposed),
+			learned: published.filter((id) => (bySense.get(id)?.box ?? 0) >= 1).length,
+			longTerm: published.filter((id) => isLongTerm(bySense.get(id)?.box ?? 0)).length,
 		};
 	});
 }
@@ -134,6 +143,8 @@ export async function getEnglishSetDetail(userId: string, setId: string, include
 			status: state?.status ?? 'new',
 			inMistakeBook: state?.inMistakeBook ?? false,
 			lastExposureAt: state?.lastExposureAt?.toISOString() ?? null,
+			box: state?.box ?? 0,
+			lapses: state?.lapses ?? 0,
 		};
 	});
 	const mastered = words.filter((word) => word.status === 'mastered').length;

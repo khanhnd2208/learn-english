@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Button from '@/components/ui/Button';
+import MaterialIcon from '@/components/ui/MaterialIcon';
 
 export default function EnrollButton({ setId, enrolled }: { setId: string; enrolled: boolean }) {
 	const router = useRouter();
@@ -22,7 +23,7 @@ export default function EnrollButton({ setId, enrolled }: { setId: string; enrol
 			const body = await response.json() as { ok?: boolean; error?: string };
 			if (!response.ok || !body.ok) throw new Error(body.error ?? 'Không theo học được');
 			setDone(true);
-			router.push(`/sets/${setId}`);
+			router.push('/');
 			router.refresh();
 		} catch (enrollError) {
 			setError(enrollError instanceof Error ? enrollError.message : 'Không theo học được');
@@ -31,10 +32,12 @@ export default function EnrollButton({ setId, enrolled }: { setId: string; enrol
 		}
 	}
 
+	if (done && !pending) return <span className="inline-flex items-center gap-1 text-xs font-bold text-success"><MaterialIcon name="check_circle" filled size={16} />Đang học</span>;
+
 	return (
 		<div className="space-y-2">
 			<Button type="button" disabled={done || pending} onClick={() => void enroll()}>
-				{done ? 'Đang học' : 'Theo học'}
+				Theo học
 			</Button>
 			{error && <p className="text-sm text-error">{error}</p>}
 		</div>

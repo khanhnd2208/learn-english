@@ -475,12 +475,37 @@ model EnWordState {
   masteredAt     DateTime?
   inMistakeBook  Boolean      @default(false)
   mistakeAddedAt DateTime?
+  box            Int          @default(0)
+  dueAt          DateTime     @default(now())
+  lapses         Int          @default(0)
+  introducedAt   DateTime     @default(now())
+  lastReviewedAt DateTime?
   updatedAt      DateTime     @updatedAt
   sense          EnSense      @relation(fields: [senseId], references: [id], onDelete: Cascade)
 
   @@unique([userId, senseId])
   @@index([userId, inMistakeBook])
   @@index([userId, lastExposureAt])
+  @@index([userId, dueAt])
+}
+
+model EnReview {
+  id         String   @id @default(cuid())
+  sessionId  String
+  userId     String
+  senseId    String
+  at         DateTime @default(now())
+  prompt     String
+  correct    Boolean
+  responseMs Int      @default(0)
+  boxBefore  Int
+  boxAfter   Int
+  /// False for answers that did not move the schedule (in-session retries, answers before the due date).
+  scheduled  Boolean  @default(true)
+
+  @@index([userId, at])
+  @@index([userId, senseId, at])
+  @@index([sessionId])
 }
 
 model EnPracticeSession {

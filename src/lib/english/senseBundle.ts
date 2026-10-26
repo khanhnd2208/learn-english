@@ -399,3 +399,19 @@ export function clozeOf(example: {
 		tag: example.targetTag,
 	};
 }
+
+const BLANK = /_{3,}/;
+
+/** Split an example around its target, whether it marks the target by offsets or with a `___` blank. */
+export function exampleParts(example: Parameters<typeof clozeOf>[0]): ClozeParts | null {
+	const cloze = clozeOf(example);
+	if (cloze) return cloze;
+	const match = BLANK.exec(example.english);
+	if (!match || !example.target.trim()) return null;
+	return {
+		before: example.english.slice(0, match.index),
+		answer: example.target.trim(),
+		after: example.english.slice(match.index + match[0].length),
+		tag: example.targetTag,
+	};
+}
