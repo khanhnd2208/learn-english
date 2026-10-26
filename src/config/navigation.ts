@@ -7,10 +7,10 @@ export interface NavLink {
 
 /** Main learner navigation. */
 export const MAIN_NAV: NavLink[] = [
-	{ href: '/', label: 'Bộ từ', icon: 'library_books', shortLabel: 'Bộ từ' },
-	{ href: '/review', label: 'Tổng hợp', icon: 'history', shortLabel: 'Tổng hợp' },
-	{ href: '/mistakes', label: 'Sổ từ sai', icon: 'menu_book', shortLabel: 'Sổ' },
-	{ href: '/progress', label: 'Tiến bộ', icon: 'trending_up', shortLabel: 'Tiến bộ' },
+	{ href: '/', label: 'Bộ từ', icon: 'map', shortLabel: 'Bộ từ' },
+	{ href: '/review', label: 'Tổng hợp', icon: 'target', shortLabel: 'Tổng hợp' },
+	{ href: '/mistakes', label: 'Sổ từ sai', icon: 'auto_stories', shortLabel: 'Sổ' },
+	{ href: '/progress', label: 'Nhân vật', icon: 'explore', shortLabel: 'Nhân vật' },
 ];
 
 export const BOTTOM_NAV = MAIN_NAV;

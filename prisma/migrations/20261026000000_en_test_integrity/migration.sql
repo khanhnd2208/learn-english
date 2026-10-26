@@ -1,0 +1,4 @@
+ALTER TABLE "EnTestAttempt" ADD COLUMN "recallLockedAt" TIMESTAMP(3);
+ALTER TABLE "EnTestItem" ADD COLUMN "servedAt" TIMESTAMP(3);
+ALTER TABLE "EnTestItem" ADD COLUMN "leftPage" BOOLEAN NOT NULL DEFAULT false;
+ALTER TABLE "EnTestWordResult" ADD COLUMN "voidReason" TEXT;

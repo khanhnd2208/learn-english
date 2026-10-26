@@ -7,6 +7,7 @@ const bodySchema = z.object({
 	itemId: z.string().min(1),
 	answer: z.string(),
 	responseMs: z.number(),
+	leftPage: z.boolean().optional(),
 }).strict();
 
 export const POST = withAuth(async (request, user) => {

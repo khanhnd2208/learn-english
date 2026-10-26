@@ -32,6 +32,7 @@ describe('finishEnglishPractice', () => {
 			userId: 'user-a',
 			startedAt: new Date('2026-10-22T00:00:00.000Z'),
 			endedAt: null,
+			senseIds: ['sense-1'],
 		});
 		harness.findUnique.mockResolvedValue(null);
 	});

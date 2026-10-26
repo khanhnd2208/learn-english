@@ -36,4 +36,5 @@ export interface EnglishTestStart {
 	items: EnglishTestItemView[];
 	resumed: boolean;
 	wordCount: number;
+	phase?: 'recall' | 'recognize';
 }

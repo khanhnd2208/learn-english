@@ -14,6 +14,7 @@ export interface RecallTiming {
 export interface StudySpan {
 	startedAt: Date;
 	seconds: number;
+	senseCount?: number;
 }
 
 export function median(values: number[]): number | null {
@@ -32,17 +33,15 @@ function weekStart(day: string): string {
 	return shiftVnDay(day, delta);
 }
 
-/** Running count of mastered senses. A counted pass adds one; a counted miss removes one, floored at zero per sense. */
+/** Running count of distinct senses currently mastered. */
 export function masteredSeries(results: CountedWordResult[], now: Date, days = 90): Array<{ day: string; mastered: number }> {
 	const sorted = [...results].sort((a, b) => a.createdAt.getTime() - b.createdAt.getTime());
-	const tally = new Map<string, number>();
+	const mastered = new Set<string>();
 	const endOfDay = new Map<string, number>();
 	for (const result of sorted) {
-		const current = tally.get(result.senseId) ?? 0;
-		tally.set(result.senseId, Math.max(0, current + (result.passed ? 1 : -1)));
-		let total = 0;
-		for (const value of tally.values()) total += value;
-		endOfDay.set(vnDayKey(result.createdAt), total);
+		if (result.passed) mastered.add(result.senseId);
+		else mastered.delete(result.senseId);
+		endOfDay.set(vnDayKey(result.createdAt), mastered.size);
 	}
 	const today = vnDayKey(now);
 	const firstDay = shiftVnDay(today, -(days - 1));
@@ -93,6 +92,12 @@ export function recallMedianByWeek(timings: RecallTiming[], now: Date, weeks = 8
 		if (bucket) bucket.push(timing.responseMs);
 	}
 	return keys.map((week) => ({ week, medianMs: median(buckets.get(week) ?? []) }));
+}
+
+export function studyDaysThisWeek(events: Date[], now: Date): string[] {
+	const today = vnDayKey(now);
+	const start = weekStart(today);
+	return [...new Set(events.map(vnDayKey).filter((day) => day >= start && day <= today))].sort();
 }
 
 export function studySecondsByWeek(spans: StudySpan[], now: Date, weeks = 8): Array<{ week: string; seconds: number }> {

@@ -5,6 +5,7 @@ export interface ReviewCandidate {
 	inMistakeBook: boolean;
 	mistakeAddedAt: Date | null;
 	lastExposureAt: Date | null;
+	holdDue?: boolean;
 }
 
 function byTime(a: Date | null, b: Date | null): number {
@@ -25,6 +26,8 @@ export function pickReviewSenses(states: ReviewCandidate[], count: number, rng: 
 		.filter((row) => row.inMistakeBook)
 		.sort((a, b) => byTime(a.mistakeAddedAt, b.mistakeAddedAt));
 	for (const row of mistakes) take(row);
+	const holdDue = states.filter((row) => !picked.has(row.senseId) && row.holdDue).sort((a, b) => byTime(a.lastExposureAt, b.lastExposureAt));
+	for (const row of holdDue) take(row);
 	const stale = states
 		.filter((row) => !picked.has(row.senseId) && row.lastExposureAt)
 		.sort((a, b) => byTime(a.lastExposureAt, b.lastExposureAt));

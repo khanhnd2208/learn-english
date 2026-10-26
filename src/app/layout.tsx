@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from 'next';
 import { Source_Sans_3 } from 'next/font/google';
+import { Pixelify_Sans } from 'next/font/google';
 import Providers from '@/components/Providers';
 import PwaRegister from '@/components/PwaRegister';
 import './globals.css';
@@ -11,12 +12,13 @@ const sans = Source_Sans_3({
 	subsets: ['latin', 'vietnamese'],
 	weight: ['400', '600', '700', '800', '900'],
 });
+const pixel = Pixelify_Sans({ variable: '--font-pixel', subsets: ['latin'], weight: ['400', '500', '600', '700'] });
 
 export const viewport: Viewport = {
 	width: 'device-width',
 	initialScale: 1,
 	viewportFit: 'cover',
-	themeColor: '#1d4ed8',
+	themeColor: '#fbf2e8',
 };
 
 export const metadata: Metadata = {
@@ -45,7 +47,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
 					rel="stylesheet"
 				/>
 			</head>
-			<body className={`${sans.variable} antialiased selection:bg-accent-subtle selection:text-accent`}>
+			<body className={`${sans.variable} ${pixel.variable} antialiased selection:bg-accent-subtle selection:text-accent`}>
 				<Providers>
 					<PwaRegister />
 					{children}

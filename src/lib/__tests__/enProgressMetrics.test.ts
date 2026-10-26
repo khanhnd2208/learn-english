@@ -7,6 +7,7 @@ describe('progress metrics', () => {
 	it('adds a counted pass and removes a later counted miss', () => {
 		const series = masteredSeries([
 			{ senseId: 'a', passed: true, createdAt: new Date('2026-10-20T03:00:00.000Z') },
+			{ senseId: 'a', passed: true, createdAt: new Date('2026-10-20T04:00:00.000Z') },
 			{ senseId: 'b', passed: true, createdAt: new Date('2026-10-20T05:00:00.000Z') },
 			{ senseId: 'a', passed: false, createdAt: new Date('2026-10-21T03:00:00.000Z') },
 		], now);

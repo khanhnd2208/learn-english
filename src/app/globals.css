@@ -1,30 +1,30 @@
 @import "tailwindcss";
 
-/* Học Hán Ngữ — Paper & Ink design system (seal 學 as guiding light) */
+/* Pixel Parchment — a calm, playful RPG visual system for language learning. */
 
 :root {
-	--background: #f7f4ef;
-	--background-secondary: #efe9e0;
-	--surface: #fffcf8;
-	--surface-secondary: #f3ede4;
-	--surface-hover: #fff1eb;
-	--surface-container: #fceae3;
-	--surface-dim: #e7d7d0;
-	--foreground: #221a16;
-	--foreground-secondary: #4a3f38;
-	--muted: #8a7b72;
-	--border: #ddd2c4;
-	--accent: #9e0027;
-	--accent-bright: #c41e3a;
-	--accent-hover: #e8364f;
-	--accent-subtle: #fdf0f2;
+	--background: #fbf0e5;
+	--background-secondary: #f5e8dc;
+	--surface: #fffaf3;
+	--surface-secondary: #f8eee2;
+	--surface-hover: #f3e8f8;
+	--surface-container: #efe7f5;
+	--surface-dim: #e6d8ca;
+	--foreground: #20233f;
+	--foreground-secondary: #494864;
+	--muted: #777488;
+	--border: #cdbca8;
+	--accent: #725195;
+	--accent-bright: #9270b3;
+	--accent-hover: #5c3d7e;
+	--accent-subtle: #e9def2;
 	--accent-foreground: #ffffff;
-	--ink: #1a1a1a;
-	--gold: #b8860b;
-	--success: #17573e;
-	--success-subtle: #b1f0ce;
-	--warning: #b45309;
-	--error: #ba1a1a;
+	--ink: #20233f;
+	--gold: #e9ad37;
+	--success: #4c7650;
+	--success-subtle: #e1edd8;
+	--warning: #a85d21;
+	--error: #a94355;
 	--sidebar-width: 240px;
 	/* Motion */
 	--duration-instant: 100ms;
@@ -34,25 +34,25 @@
 }
 
 .dark {
-	--background: #0f0e0d;
-	--background-secondary: #171514;
-	--surface: #1c1a18;
-	--surface-secondary: #242120;
-	--surface-hover: #2c2926;
-	--surface-container: #382e2a;
-	--surface-dim: #2c2926;
-	--foreground: #ffede6;
-	--foreground-secondary: #c9bfb3;
-	--muted: #8a8278;
-	--border: #3a3530;
-	--accent: #e8364f;
-	--accent-bright: #c41e3a;
-	--accent-hover: #ff4d66;
-	--accent-subtle: #2a1518;
-	--accent-foreground: #ffdada;
-	--ink: #f5f0e8;
-	--success: #95d4b3;
-	--success-subtle: #0e5138;
+	--background: #211f2d;
+	--background-secondary: #292638;
+	--surface: #302d3d;
+	--surface-secondary: #393547;
+	--surface-hover: #423b50;
+	--surface-container: #3b3449;
+	--surface-dim: #4a4053;
+	--foreground: #fff4e7;
+	--foreground-secondary: #e0d4e6;
+	--muted: #b1a8bb;
+	--border: #65596b;
+	--accent: #c5a1e3;
+	--accent-bright: #ddc0f1;
+	--accent-hover: #e4ccf6;
+	--accent-subtle: #493b5c;
+	--accent-foreground: #292139;
+	--ink: #fff4e7;
+	--success: #b8d4a9;
+	--success-subtle: #394a3d;
 }
 
 @theme inline {
@@ -101,8 +101,8 @@
 	--radius-pill: 9999px;
 
 	/* Elevation shadows (use sparingly) */
-	--shadow-elevated: 0 4px 12px rgb(34 26 22 / 0.08);
-	--shadow-overlay: 0 8px 24px rgb(34 26 22 / 0.12);
+	--shadow-elevated: 0 3px 0 rgb(93 72 88 / 0.12), 0 8px 16px rgb(65 48 63 / 0.06);
+	--shadow-overlay: 0 8px 24px rgb(47 38 55 / 0.18);
 
 	/* Z-index */
 	--z-index-sticky: 30;
@@ -121,22 +121,27 @@
 }
 
 body {
-	background: var(--background);
+	background-color: var(--background);
+	background-image: radial-gradient(ellipse at 8% 2%, rgb(255 255 255 / 72%), transparent 34%), linear-gradient(180deg, #fbf2e8 0%, #f8eee4 62%, #f5e9de 100%);
 	color: var(--foreground);
 	font-family: var(--font-sans), system-ui, sans-serif;
 	-webkit-font-smoothing: antialiased;
 }
 
-/* Subtle paper grain texture */
+/* Soft pixel-grid paper texture */
 body::before {
 	content: '';
 	position: fixed;
 	inset: 0;
 	pointer-events: none;
 	z-index: 0;
-	opacity: 0.35;
-	background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+	opacity: .22;
+	background-image: radial-gradient(rgb(99 77 122 / 19%) .8px, transparent .8px);
+	background-size: 16px 16px;
+	mask-image: linear-gradient(to bottom, black, transparent 70%);
 }
+.dark body { background-image: radial-gradient(ellipse at 10% 0%, rgb(126 92 155 / 18%), transparent 34%), linear-gradient(180deg, var(--background), var(--background-secondary)); }
+.dark body::before { opacity: .1; background-image: radial-gradient(rgb(231 209 245 / 24%) .8px, transparent .8px); }
 
 .hanzi-display {
 	font-family: var(--font-hanzi), "PingFang SC", "Noto Sans SC", sans-serif;
@@ -209,11 +214,12 @@ body::before {
 }
 
 @utility nav-pill-active {
-	@apply mx-4 flex items-center gap-4 rounded-full bg-accent px-4 py-2 text-sm font-extrabold text-accent-foreground;
+	@apply mx-3 flex min-h-12 items-center gap-3 rounded-2xl bg-[#347f54] px-3 py-3 text-sm font-extrabold text-[#f5f4d8];
+	box-shadow: inset 0 -3px 0 rgb(14 65 42 / 38%), 0 5px 12px rgb(7 29 19 / 22%);
 }
 
 @utility nav-pill {
-	@apply mx-4 flex items-center gap-4 rounded-full px-4 py-2 text-sm font-extrabold text-foreground-secondary transition-colors duration-200 hover:bg-surface-hover hover:text-accent;
+	@apply mx-3 flex min-h-12 items-center gap-3 rounded-2xl px-3 py-3 text-sm font-extrabold text-emerald-100/75 transition-colors duration-200 hover:bg-white/10 hover:text-white;
 }
 
 /* Session & page entrance animations */
@@ -313,4 +319,182 @@ body::before {
 		opacity: 1;
 		transform: none;
 	}
+}
+
+/* Pixel parchment design system — inspired by the supplied RPG reference. */
+
+h1, h2, h3, .game-number {
+	font-family: var(--font-pixel), var(--font-sans), system-ui, sans-serif;
+	letter-spacing: .015em;
+}
+.label-caps {
+	font-family: var(--font-pixel), var(--font-sans), system-ui, sans-serif;
+	font-size: 11px;
+	letter-spacing: .055em;
+}
+
+.rounded-card { border-radius: 12px; }
+.rounded-panel { border-radius: 16px; }
+.rounded-control, .rounded-pill { border-radius: 8px; }
+.rounded-dialog { border-radius: 14px; }
+.bg-surface.rounded-card {
+	border-width: 2px;
+	box-shadow: 0 3px 0 color-mix(in srgb, var(--border) 78%, transparent), 0 8px 16px rgb(65 48 63 / 5%);
+}
+.adventure-sidebar {
+	background: linear-gradient(180deg, #fff8ee, #f8eee2);
+	border-color: #d7c7b6;
+	box-shadow: 5px 0 18px rgb(83 62 70 / 8%);
+}
+.adventure-sidebar .text-white { color: var(--foreground); }
+.adventure-sidebar .text-amber-300 { color: #8b68a7; }
+.adventure-sidebar .text-emerald-100\/70, .adventure-sidebar .text-emerald-100\/75 { color: #777488; }
+.adventure-sidebar .label-caps { color: #777488; }
+.brand-compass {
+	width: 40px; height: 40px;
+	border: 2px solid #282b45;
+	border-radius: 8px;
+	color: #fff8e9;
+	background: linear-gradient(145deg, #9878b5, #6e4f91);
+	box-shadow: 0 3px 0 #49345f;
+}
+.nav-pill, .nav-pill-active {
+	min-height: 44px;
+	margin-inline: 12px;
+	border-radius: 8px;
+	font-weight: 750;
+}
+.nav-pill { color: #58566d; }
+.nav-pill:hover { color: #282641; background: #f0e7f2; }
+.nav-pill-active {
+	color: #302844;
+	background: #e5d8ee;
+	box-shadow: inset 0 0 0 1px #bda8d0, 0 3px 0 #c7b2d4;
+}
+.nav-glyph { color: #71568e; background: #f0e7f2; border: 1px solid #ddcfe7; border-radius: 7px; }
+.nav-pill-active .nav-glyph { color: #fff9ef; background: #795a99; }
+.sidebar-quest {
+	border: 2px solid #c4aed1;
+	border-radius: 10px;
+	background: #eee3f3;
+	box-shadow: 0 3px 0 #d3c1dd;
+}
+.sidebar-quest p.text-white { color: #302844; }
+.sidebar-quest p.text-emerald-100\/70 { color: #676278; }
+.sidebar-quest > svg { color: #795a99; }
+.adventure-mobile-header, .adventure-mobile-nav {
+	color: var(--foreground);
+	border-color: #cdbca8;
+	background: rgb(255 248 239 / 96%);
+	box-shadow: 0 -4px 15px rgb(71 54 63 / 8%);
+	backdrop-filter: blur(12px);
+}
+.adventure-mobile-header a, .adventure-mobile-nav a { color: var(--foreground-secondary); }
+.adventure-mobile-nav a.text-amber-200 { color: #765292; }
+
+.game-hero {
+	min-height: 220px;
+	border: 2px solid #bbabc5;
+	border-radius: 14px;
+	background: linear-gradient(120deg, #f5e9f2 0%, #fff7e8 66%, #f8efd9 100%);
+	box-shadow: 0 4px 0 #d3c4d6, 0 10px 20px rgb(65 48 63 / 7%);
+}
+.game-hero::before, .game-hero::after { display: none; }
+.game-hero > .adventure-landscape { opacity: .22; filter: saturate(.62) sepia(.16); }
+.game-hero-stamps { color: #a87e39; opacity: .8; }
+.game-avatar {
+	border: 3px solid #34344d;
+	border-radius: 9px;
+	background: linear-gradient(145deg, #f2d4ee, #d5c1ed);
+	color: #60427d;
+	box-shadow: 0 4px 0 #a48bb4, 0 7px 14px rgb(63 47 72 / 14%);
+	transform: none;
+}
+.adventure-icon {
+	width: 38px; height: 38px;
+	border: 2px solid #48445e;
+	border-radius: 8px;
+	box-shadow: 0 3px 0 rgb(49 43 66 / 17%);
+	transform: none;
+}
+.adventure-icon svg { shape-rendering: crispEdges; image-rendering: pixelated; }
+.game-stat-box {
+	border: 2px solid #c7a95d;
+	border-radius: 10px;
+	background: linear-gradient(145deg, #fff3c8, #fffaf0);
+	box-shadow: 0 4px 0 #ddc478;
+}
+.game-progress-track {
+	border: 2px solid #635672;
+	border-radius: 4px;
+	background: #fffaf0;
+	box-shadow: none;
+}
+.game-progress-fill { border-radius: 2px; background: linear-gradient(90deg, #8e6ca8, #b488c9); }
+.game-card {
+	border-width: 2px;
+	border-radius: 11px;
+	box-shadow: 0 4px 0 color-mix(in srgb, var(--border) 78%, transparent);
+}
+.game-card:hover { transform: translateY(-2px); box-shadow: 0 6px 0 color-mix(in srgb, var(--border) 78%, transparent); }
+.game-card-amber { background: linear-gradient(145deg, #fff2ce, #fffaf0); border-color: #d6b760; }
+.game-card-lilac { background: linear-gradient(145deg, #eee5f5, #fcf8ff); border-color: #c1abd2; }
+.game-card-rose { background: linear-gradient(110deg, #fbe5e5, #fff5ea); border-color: #d9a8aa; }
+.game-action {
+	min-height: 68px;
+	border: 2px solid #d9cdbb;
+	border-radius: 8px;
+	background: #fffaf2;
+	color: #302f49;
+}
+.game-action:hover { transform: translateY(-2px); box-shadow: 0 4px 0 #d9cdbb; }
+.week-day-tile { border: 2px solid #cdbca8; border-radius: 7px; }
+.week-day-tile.is-done { border-color: #637f58; background: #dfe9cf; color: #355c3b; box-shadow: 0 3px 0 #b8caa4; }
+.week-day-tile.is-pending { border-color: #d7c79d; background: #fff4d6; color: #8b7337; }
+.week-day-tile.is-future { border-style: dashed; background: rgb(255 250 243 / 65%); color: #9690a1; }
+.rest-note { border: 2px solid #b9a3cb; background: #eee4f3; color: #42344f; box-shadow: 0 3px 0 #d2c0dd; }
+.xp-gain-note { border: 2px solid #d6b760; background: #fff3cf; color: #41364a; box-shadow: 0 3px 0 #e1cc8c; }
+.reward-unlock-note { border: 2px solid #c1abd2; background: #f0e7f5; color: #40344f; box-shadow: 0 3px 0 #d4c3df; }
+
+button { letter-spacing: .045em; }
+button:not(:disabled) { transition: transform 120ms steps(2, end), filter 120ms ease, box-shadow 120ms ease; }
+button:not(:disabled):active { transform: translateY(2px); }
+button.bg-accent {
+	border: 2px solid #41354e;
+	border-bottom-width: 4px;
+	border-radius: 8px;
+	background: #785596;
+	color: #fffaf1;
+	box-shadow: 0 2px 0 #d0bed8;
+}
+button.bg-accent:hover { filter: brightness(1.07); }
+input, textarea, select { border-radius: 8px !important; }
+input:focus-visible, textarea:focus-visible, select:focus-visible { outline-color: #8a69a8; }
+.dark body { color: var(--foreground); }
+.dark .adventure-sidebar { background: linear-gradient(180deg, #302b3c, #262332); border-color: #51485d; }
+.dark .adventure-sidebar .text-white, .dark .sidebar-quest p.text-white { color: var(--foreground); }
+.dark .nav-pill { color: #d8cde1; }
+.dark .nav-pill:hover, .dark .nav-pill-active { color: #fff5ea; background: #493b58; box-shadow: inset 0 0 0 1px #725d83, 0 3px 0 #3a3048; }
+.dark .nav-glyph, .dark .nav-pill-active .nav-glyph { color: #f4e7ff; background: #5c4771; border-color: #806b91; }
+.dark .sidebar-quest { background: #3e334a; border-color: #675475; box-shadow: 0 3px 0 #33283d; }
+.dark .adventure-mobile-header, .dark .adventure-mobile-nav { background: rgb(43 39 55 / 96%); border-color: #51485d; }
+.dark .adventure-mobile-header a, .dark .adventure-mobile-nav a { color: #eee1f3; }
+.dark .game-hero { background: linear-gradient(120deg, #3c3048, #393447 66%, #443d31); border-color: #6e5a7d; box-shadow: 0 4px 0 #33293d; }
+.dark .game-hero > .adventure-landscape { opacity: .13; }
+.dark .game-stat-box { background: linear-gradient(145deg, #49402f, #35313a); border-color: #897546; box-shadow: 0 4px 0 #554a35; }
+.dark .game-card-amber { background: linear-gradient(145deg, #49402f, #35313a); border-color: #897546; }
+.dark .game-card-lilac { background: linear-gradient(145deg, #3b3247, #302d3d); border-color: #6c5a7c; }
+.dark .game-card-rose { background: linear-gradient(110deg, #49323c, #35313a); border-color: #805b64; }
+.dark .game-action { background: #35313e; border-color: #625568; color: var(--foreground); }
+.dark .week-day-tile.is-done { border-color: #829775; background: #43513f; color: #e2f0d4; box-shadow: 0 3px 0 #303c32; }
+.dark .week-day-tile.is-pending { border-color: #8b7955; background: #49402f; color: #f2d98f; }
+.dark .week-day-tile.is-future { background: #34313e; color: #b1a8bb; }
+.dark .rest-note, .dark .reward-unlock-note { border-color: #725d83; background: #3e334a; color: var(--foreground); box-shadow: 0 3px 0 #30283b; }
+.dark .xp-gain-note { border-color: #897546; background: #49402f; color: var(--foreground); box-shadow: 0 3px 0 #393225; }
+.dark button.bg-accent { background: #8967a4; border-color: #d7c3e4; color: #211d2c; }
+
+@media (max-width: 640px) {
+	.game-hero { min-height: 200px; }
+	.game-hero > .adventure-landscape { width: 86%; height: 75%; opacity: .13; }
+	.adventure-icon { width: 34px; height: 34px; }
 }

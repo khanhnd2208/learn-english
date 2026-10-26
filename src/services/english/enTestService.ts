@@ -9,9 +9,17 @@ import { assertEnrolled } from '@/services/english/enCatalogService';
 import { getSenseBundles } from '@/services/english/enContentService';
 import { getEnglishBlueprint, listEnglishActivities, usableKinds } from '@/services/english/enActivityService';
 import { reviewSenseIds } from '@/services/english/enPracticeService';
+import { applyPracticeExposure } from '@/lib/english/wordState';
+import { xpEventsForResult } from '@/lib/english/gamify/xp';
+import { levelFromXp } from '@/lib/english/gamify/level';
 import type { EnglishTestStart, FinishedEnglishTest } from '@/lib/english/testTypes';
 
 const DAY_MS = 86_400_000;
+
+function vnTodayStart(now = new Date()): Date {
+	const day = new Intl.DateTimeFormat('en-CA', { timeZone: 'Asia/Ho_Chi_Minh', year: 'numeric', month: '2-digit', day: '2-digit' }).format(now);
+	return new Date(`${day}T00:00:00+07:00`);
+}
 
 function json(value: unknown): Prisma.InputJsonValue {
 	return value as Prisma.InputJsonValue;
@@ -89,6 +97,17 @@ function publicItems(items: Array<{ id: string; position: number; activityKey: s
 		}));
 }
 
+async function exposeAttempt(userId: string, attempt: EnTestAttempt & { items: EnTestItem[] }) {
+	const sentIds = [...new Set(attempt.items.filter((item) => item.servedAt).map((item) => item.senseId))];
+	if (!sentIds.length) return;
+	const now = new Date();
+	for (const senseId of sentIds) {
+		const existing = await prisma.enWordState.findUnique({ where: { userId_senseId: { userId, senseId } } });
+		const next = applyPracticeExposure(existing ? snapshot(existing) : emptyWordState(), now);
+		await prisma.enWordState.upsert({ where: { userId_senseId: { userId, senseId } }, create: { userId, senseId, ...next }, update: next });
+	}
+}
+
 async function presentAttempt(attempt: EnTestAttempt & { items: EnTestItem[]; words: EnTestWordResult[] }): Promise<FinishedEnglishTest> {
 	const senseIds = [...new Set(attempt.words.map((word) => word.senseId))];
 	const senses = await prisma.enSense.findMany({
@@ -134,7 +153,7 @@ export async function getEnglishTestStartInfo(userId: string, input: { mode: 'se
 				mode: input.mode,
 				setId: input.setId ?? null,
 				status: 'in_progress',
-				startedAt: { gte: new Date(Date.now() - DAY_MS) },
+				startedAt: { gte: vnTodayStart() },
 			},
 			orderBy: { startedAt: 'desc' },
 			select: { id: true, wordCount: true, items: { select: { answer: true } } },
@@ -153,14 +172,18 @@ export async function getEnglishTestStartInfo(userId: string, input: { mode: 'se
 }
 
 export async function startEnglishTest(userId: string, input: { mode: 'set' | 'mistakes' | 'review'; setId?: string; restart?: boolean }): Promise<EnglishTestStart> {
-	const cutoff = new Date(Date.now() - DAY_MS);
+	const todayStart = vnTodayStart();
+	const cutoff = new Date(todayStart.getTime() - DAY_MS);
 	await prisma.enTestAttempt.updateMany({
 		where: { userId, status: 'in_progress', startedAt: { lt: cutoff } },
 		data: { status: 'abandoned' },
 	});
 	const match = { userId, mode: input.mode, setId: input.setId ?? null, status: 'in_progress' as const };
 	if (input.restart) {
+		const current = await prisma.enTestAttempt.findFirst({ where: match, include: { items: true } });
+		if (current && current.items) await exposeAttempt(userId, current);
 		await prisma.enTestAttempt.updateMany({ where: match, data: { status: 'abandoned' } });
+		if (current) throw new AppError('Bài kiểm tra đã được mở hôm nay. Quay lại ngày mai để kiểm tra lại; lần mở này không làm mất tiến bộ.', 409);
 	} else {
 		const existing = await prisma.enTestAttempt.findFirst({
 			where: { ...match, startedAt: { gte: cutoff } },
@@ -168,9 +191,17 @@ export async function startEnglishTest(userId: string, input: { mode: 'set' | 'm
 			include: { items: { orderBy: { position: 'asc' } } },
 		});
 		if (existing) {
-			return { attemptId: existing.id, items: publicItems(existing.items), resumed: true, wordCount: existing.wordCount };
+			const phase = existing.recallLockedAt ? 'recognize' : 'recall';
+			const phaseItems = existing.items.filter((item) => item.role === phase);
+			const newlyServed = phaseItems.filter((item) => !item.servedAt);
+			if (newlyServed.length) await prisma.enTestItem.updateMany({ where: { id: { in: newlyServed.map((item) => item.id) } }, data: { servedAt: new Date() } });
+			return { attemptId: existing.id, items: publicItems(phaseItems), resumed: true, wordCount: existing.wordCount, phase };
 		}
 	}
+	const abandonedToday = await prisma.enTestAttempt.findFirst({ where: { userId, mode: input.mode, setId: input.setId ?? null, status: 'abandoned', startedAt: { gte: todayStart } } });
+	if (abandonedToday) throw new AppError('Bài này đã được mở hôm nay. Hãy quay lại ngày mai để kiểm tra lại.', 409);
+	const completedToday = await prisma.enTestAttempt.findFirst({ where: { userId, mode: input.mode, setId: input.setId ?? null, status: 'finished', startedAt: { gte: todayStart } } });
+	if (completedToday) throw new AppError('Bài kiểm tra từ này đã được tính hôm nay. Hãy quay lại sau khoảng cách phù hợp.', 409);
 	const [blueprint, activities] = await Promise.all([getEnglishBlueprint(), listEnglishActivities()]);
 	const recognizeKinds = usableKinds(blueprint.recognizeKinds, activities, 'recognize');
 	const recallKinds = usableKinds(blueprint.recallKinds, activities, 'recall');
@@ -219,6 +250,7 @@ export async function startEnglishTest(userId: string, input: { mode: 'set' | 'm
 	const testedSenseIds = [...new Set(built.items.map((item) => item.senseId))];
 	const prior: Record<string, string | null> = {};
 	for (const senseId of testedSenseIds) prior[senseId] = exposure.get(senseId)?.toISOString() ?? null;
+	const attemptStartedAt = new Date();
 	const snapshotBlueprint: BlueprintSnapshot = {
 		recognizeKinds,
 		recallKinds,
@@ -234,6 +266,7 @@ export async function startEnglishTest(userId: string, input: { mode: 'set' | 'm
 			setId: input.setId ?? null,
 			blueprint: json(snapshotBlueprint),
 			wordCount: testedSenseIds.length,
+			startedAt: attemptStartedAt,
 			items: {
 				create: built.items.map((item, position) => ({
 					senseId: item.senseId,
@@ -248,7 +281,22 @@ export async function startEnglishTest(userId: string, input: { mode: 'set' | 'm
 		},
 		include: { items: { orderBy: { position: 'asc' } } },
 	});
-	return { attemptId: attempt.id, items: publicItems(attempt.items), resumed: false, wordCount: attempt.wordCount };
+	const recallItems = attempt.items.filter((item) => item.role === 'recall');
+	if (prisma.enTestItem?.updateMany) await prisma.enTestItem.updateMany({ where: { id: { in: recallItems.map((item) => item.id) } }, data: { servedAt: new Date() } });
+	return { attemptId: attempt.id, items: publicItems(recallItems), resumed: false, wordCount: attempt.wordCount, phase: 'recall' };
+}
+
+export async function lockEnglishRecall(userId: string, attemptId: string) {
+	const attempt = await prisma.enTestAttempt.findFirst({ where: { id: attemptId, userId, status: 'in_progress' }, include: { items: { orderBy: { position: 'asc' } } } });
+	if (!attempt) throw new AppError('Không tìm thấy bài kiểm tra đang làm', 404);
+	if (!attempt.recallLockedAt) {
+		const recallItems = attempt.items.filter((item) => item.role === 'recall');
+		if (recallItems.some((item) => item.answer === null)) throw new AppError('Hãy trả lời hoặc chọn “Tôi chưa nhớ” cho tất cả câu Tự nhớ trước khi khoá phần này.', 400);
+		await prisma.enTestAttempt.update({ where: { id: attempt.id }, data: { recallLockedAt: new Date() } });
+	}
+	const recognizeItems = attempt.items.filter((item) => item.role === 'recognize');
+	await prisma.enTestItem.updateMany({ where: { id: { in: recognizeItems.map((item) => item.id) } }, data: { servedAt: new Date() } });
+	return { attemptId, items: publicItems(recognizeItems), phase: 'recognize' as const, wordCount: attempt.wordCount };
 }
 
 export async function answerEnglishTest(userId: string, input: {
@@ -256,11 +304,15 @@ export async function answerEnglishTest(userId: string, input: {
 	itemId: string;
 	answer: string;
 	responseMs: number;
+	leftPage?: boolean;
 }) {
 	const item = await prisma.enTestItem.findFirst({
-		where: { id: input.itemId, attemptId: input.attemptId, attempt: { userId, status: 'in_progress' } },
+		where: { id: input.itemId, attemptId: input.attemptId, servedAt: { not: null }, attempt: { userId, status: 'in_progress' } },
+		include: { attempt: true },
 	});
 	if (!item) throw new AppError('Không sửa được câu này', 400);
+	if (input.leftPage && item.role !== 'recall') throw new AppError('Chỉ câu Tự nhớ mới có trạng thái rời trang', 400);
+	if (item.role === 'recall' && item.attempt.recallLockedAt) throw new AppError('Phần Tự nhớ đã được khoá', 400);
 	await prisma.enTestItem.update({
 		where: { id: item.id },
 		data: {
@@ -269,6 +321,7 @@ export async function answerEnglishTest(userId: string, input: {
 			answeredAt: new Date(),
 		},
 	});
+	if (input.leftPage) await prisma.enTestItem.update({ where: { id: item.id }, data: { leftPage: true } });
 	return { ok: true as const };
 }
 
@@ -296,6 +349,8 @@ export async function finishEnglishTest(userId: string, attemptId: string) {
 		if (!attempt) throw new AppError('Không tìm thấy bài kiểm tra', 404);
 		if (attempt.status === 'finished') return presentAttempt(attempt);
 		if (attempt.status !== 'in_progress') throw new AppError('Bài này đã đóng', 400);
+		if (!attempt.recallLockedAt) throw new AppError('Hãy hoàn thành phần Tự nhớ trước khi nộp bài', 400);
+	if (attempt.items.some((item) => item.role === 'recognize' && !item.servedAt)) throw new AppError('Hãy hoàn thành phần Nhận ra trước khi nộp bài', 400);
 		const now = new Date();
 		const blueprint = readBlueprint(attempt.blueprint);
 		const graded = new Map<string, boolean>();
@@ -317,7 +372,8 @@ export async function finishEnglishTest(userId: string, attemptId: string) {
 			if (passed) passedCount += 1;
 			const priorRaw = blueprint.prior[senseId];
 			const prior = priorRaw ? new Date(priorRaw) : null;
-			const counted = isCounted(prior, attempt.startedAt, blueprint.minGapDays);
+			const recallLeft = items.some((item) => item.role === 'recall' && item.leftPage);
+			const counted = !recallLeft && isCounted(prior, now, blueprint.minGapDays);
 			const recallMs = recall && graded.get(recall.id) === true ? recall.responseMs : null;
 			await tx.enTestWordResult.create({
 				data: {
@@ -326,6 +382,7 @@ export async function finishEnglishTest(userId: string, attemptId: string) {
 					senseId,
 					passed,
 					counted,
+					voidReason: recallLeft ? 'left_page' : null,
 					priorExposureAt: prior,
 					recallMs,
 				},
@@ -337,6 +394,27 @@ export async function finishEnglishTest(userId: string, attemptId: string) {
 				create: { userId, senseId, ...next },
 				update: next,
 			});
+			if (passed && counted && existing?.inMistakeBook) {
+				const profile = await tx.enLearnerProfile.findUnique({ where: { userId }, select: { rescuedSenses: true } });
+				const rescuedSenses = [...new Set([...(profile?.rescuedSenses ?? []), senseId])];
+				await tx.enLearnerProfile.upsert({ where: { userId }, create: { userId, rescuedSenses }, update: { rescuedSenses } });
+			}
+			if (passed && counted) {
+				const history = await tx.enTestWordResult.findMany({ where: { userId, senseId, attemptId: { not: attempt.id } }, orderBy: { createdAt: 'asc' }, select: { passed: true, counted: true, createdAt: true } });
+				const earned = await tx.enXpEvent.findMany({ where: { userId, senseId }, select: { kind: true } });
+				const events = xpEventsForResult(history, { passed, counted, createdAt: now }, earned.map((event) => event.kind), now);
+				if (events.length) {
+					await tx.enXpEvent.createMany({ data: events.map((event) => ({ userId, senseId, kind: event.kind, amount: event.amount, attemptId: attempt.id })) });
+					const beforeProfile = await tx.enLearnerProfile.findUnique({ where: { userId }, select: { totalXp: true } });
+					const beforeXp = beforeProfile?.totalXp ?? 0;
+					const amount = events.reduce((sum, event) => sum + event.amount, 0);
+					await tx.enLearnerProfile.upsert({ where: { userId }, create: { userId, totalXp: amount }, update: { totalXp: { increment: amount } } });
+					const oldTotal = await tx.enLearnerProfile.findUnique({ where: { userId }, select: { totalXp: true } });
+					const oldLevel = levelFromXp(beforeXp);
+					const newLevel = levelFromXp(oldTotal?.totalXp ?? amount);
+					if (newLevel > oldLevel) await tx.enReward.updateMany({ where: { userId, unlockLevel: { lte: newLevel }, unlockedAt: null }, data: { unlockedAt: now } });
+				}
+			}
 		}
 		const saved = await tx.enTestAttempt.update({
 			where: { id: attempt.id },
@@ -353,8 +431,25 @@ export async function getEnglishTest(userId: string, attemptId: string) {
 		include: { items: true, words: true },
 	});
 	if (!attempt) throw new AppError('Không tìm thấy bài kiểm tra', 404);
-	if (attempt.status === 'in_progress') return { attemptId: attempt.id, status: attempt.status, items: publicItems(attempt.items), wordCount: attempt.wordCount };
+	if (attempt.status === 'in_progress') {
+		const phase = attempt.recallLockedAt ? 'recognize' : 'recall';
+		if (!attempt.recallLockedAt) {
+			await prisma.enTestItem.updateMany({ where: { id: { in: attempt.items.filter((item) => item.role === 'recall').map((item) => item.id) } }, data: { servedAt: new Date() } });
+		}
+		return { attemptId: attempt.id, status: attempt.status, phase, items: publicItems(attempt.items.filter((item) => item.role === phase)), wordCount: attempt.wordCount };
+	}
 	return presentAttempt(attempt);
+}
+
+export async function getAttemptXp(userId: string, attemptId: string) {
+	const attempt = await prisma.enTestAttempt.findFirst({ where: { id: attemptId, userId, status: 'finished' }, select: { id: true } });
+	if (!attempt) throw new AppError('Không tìm thấy kết quả', 404);
+	const [profile, earned] = await Promise.all([
+		prisma.enLearnerProfile.findUnique({ where: { userId }, select: { totalXp: true } }),
+		prisma.enXpEvent.findMany({ where: { userId, attemptId }, select: { kind: true, amount: true } }),
+	]);
+	const totalXp = profile?.totalXp ?? 0;
+	return { totalXp, level: levelFromXp(totalXp), earned };
 }
 
 export function testMinutes(wordCount: number): number {

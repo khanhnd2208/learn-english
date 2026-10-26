@@ -1,0 +1,204 @@
+# Kế hoạch: Tối giản hệ thống học từ vựng (First principles + Pareto)
+
+> Ngày: 2026-10-26. Trạng thái: **đề xuất, chờ duyệt**.
+> Liên quan: `en-practice-test-plan.md`, `en-gamification-plan.md`, `en-vocab-data-model-plan.md`.
+> Bản này đề xuất thay một phần quyết định D1, D3, D5' của các spec trên. Mục 6 liệt kê các điểm cần chốt.
+
+## 0. Hiện trạng (đo từ code, 2026-10-26)
+
+| Hạng mục | Số lượng | Ghi chú |
+|---|---|---|
+| Prisma model | 32 | 18 model nội dung + cấu hình, 14 model dữ liệu người học |
+| Enum | 21 | 6 enum chỉ để mô tả nội dung (register, region, hint kind, relation kind, confusable type, family kind) |
+| Chế độ Luyện | 9 | "Lộ trình" + 8 dạng bài chọn tay |
+| Luồng chạy | 5 | Luyện bộ từ, Luyện sổ từ sai, Test bộ từ, Test Tổng hợp, Quest |
+| Trạng thái của một từ | 4 trục | `status` (new/practicing/mastered), `inMistakeBook`, mốc XP hold 7d/30d, luật cách ngày `counted` |
+| Màn hình người học | 5 | Bộ từ, Tổng hợp, Sổ từ sai, Nhân vật, Quests |
+
+**Phần chết (không có đường gọi từ UI người học):**
+
+- `EnQuestion`: vẫn sinh khi import (`questionsFromContent`), nhưng Luyện và Test dùng `activities/registry.ts` + `EnTestItem`.
+- `EnAnswerLog`, `EnAudioOpen`, `EnDispute`: chỉ dùng trong `enAnswerService.ts`. Không component nào gọi `/api/dispute` hay `/api/audio-open`.
+- `EnPatternProgress`: không có chỗ nào đọc hoặc ghi.
+- `EnPattern`, `EnPatternExample`, `EnPatternSense`: chỉ được import vào. D4 đã để ngoài phạm vi.
+- Thư mục rỗng `src/app/api/answer/`, `src/app/api/session/`.
+- `EnSense.imagePath`: không được hiển thị ở đâu.
+- `register`, `region`, `topics`, `frequencyRank`, `inflections`: chỉ đi qua `senseBundle.ts`, không ảnh hưởng tới người học.
+
+## 1. First principles: một từ được "học" khi nào?
+
+Mục tiêu đã chốt: **khi cần, người học tự lôi ra được từ đó, sau một thời gian, đủ nhanh.**
+
+Bỏ hết lớp vỏ thì việc nhớ một từ chỉ cần 4 thứ. Đây là các kết quả nghiên cứu vững nhất về trí nhớ:
+
+| # | Yếu tố | Cơ chế | Hệ thống cần gì tối thiểu |
+|---|---|---|---|
+| P1 | **Mã hoá có nghĩa** | Gắn từ với nghĩa, âm thanh, và một câu thật | 1 thẻ từ: từ, IPA, audio, nghĩa Việt, 1–2 câu ví dụ, 1 lưu ý (nếu có) |
+| P2 | **Truy hồi chủ động** | Tự lôi từ ra khỏi trí nhớ mới làm nó bền. Nhận ra (chọn đáp án) yếu hơn nhiều | Gõ lại từ khi nhìn nghĩa hoặc câu đục lỗ |
+| P3 | **Giãn cách** | Ôn đúng lúc sắp quên thì hiệu quả nhất | Mỗi từ có `dueAt`, khoảng cách tăng dần khi nhớ được |
+| P4 | **Phản hồi ngay khi sai** | Sửa sai lúc còn nhớ câu trả lời của mình | Hiện đáp án + thẻ từ, cho làm lại cuối phiên |
+
+Ngoài 4 thứ này còn một điều kiện: **người học phải quay lại mỗi ngày**. Muốn vậy thì việc phải nghĩ "hôm nay làm gì" càng ít càng tốt.
+
+**Hệ quả:** "Đã học xong một từ" chỉ cần **một con số**: khoảng giãn cách hiện tại của từ đó. Nếu một từ đã được tự nhớ lại thành công sau 21 ngày, thì từ đó là "nhớ lâu". Không cần thêm trạng thái nào.
+
+## 2. Pareto: 20% nào tạo ra 80% hiệu quả?
+
+| Thành phần | Đóng góp cho P1–P4 | Chi phí (code, nội dung, nhận thức người học) | Kết luận |
+|---|---|---|---|
+| Gõ lại từ (`recall_type`: nghĩa → từ, câu đục lỗ → từ) | P2 rất cao | Thấp | **Giữ, là trung tâm** |
+| Lịch ôn giãn cách theo từng từ | P3 rất cao. **Hiện đang thiếu**: chỉ có luật "cách ≥ 1 ngày" và mốc XP 7d/30d | Thấp | **Thêm, thay 4 trục trạng thái** |
+| Thẻ từ (nghĩa, audio, ví dụ, lưu ý) | P1 cao | Trung bình | **Giữ, rút gọn trường** |
+| Phản hồi + làm lại cuối phiên (`practiceLoop`, `explain`) | P4 cao | Thấp | **Giữ** |
+| Chọn nghĩa (`meaning_choice`) | P1 vừa, chỉ dùng làm bước làm quen từ mới | Thấp | **Giữ cho từ mới** |
+| Nghe → gõ (`listen_type`) | P2 cho kỹ năng nghe | Thấp | Giữ làm biến thể của bước gõ, không phải chế độ riêng |
+| `listen_choice`, `cloze_choice`, `match_pairs`, `spell_hinted`, `speak_shadow` | Thấp. Trùng với các dạng trên, hoặc chỉ là nhận ra | Mỗi dạng = UI + chấm + phân phối | **Bỏ khỏi UI**. `spell_hinted` thành gợi ý "hiện chữ đầu" khi sai lần 1 |
+| Chọn tay 1 trong 9 chế độ Luyện | Âm: người học phải tự quyết dạng bài | Cao | **Bỏ**. Hệ thống tự chọn |
+| Tách Luyện / Test, khoá phần Tự nhớ, `leftPage`, `voidReason`, `counted` | Chống gian lận để giữ XP | Rất cao (`enTestService` 457 dòng) | **Gộp**: lượt ôn đến hạn chính là bài kiểm tra |
+| Sổ từ sai (màn riêng + trường riêng) | P3/P4, nhưng trùng với hàng đợi ôn | Trung bình | **Gộp**: từ vừa quên (hộp 0) được ôn đầu tiên. Sổ chỉ còn là một bộ lọc |
+| Tổng hợp (màn riêng) | Trùng với hàng đợi ôn | Trung bình | **Gộp vào "Hôm nay"** |
+| XP, Level, Quest, Reward, DailyNote, Avatar, Goal | Gián tiếp (động lực). Quest/Reward/Note không gắn với việc nhớ | Cao (7 bảng, 5 API, 4 component) | **Giữ 1 chỉ số**: số từ nhớ lâu, và chuỗi các ngày đã ôn hết từ đến hạn. Phần còn lại tạm ẩn |
+| Hint 6 loại, Relation 5 loại, Word family, Register/Region/Topic, ảnh | P1 thấp. Người mới học thường bỏ qua | **Rất cao về soạn nội dung**: mỗi trường là thêm chi phí sinh nội dung và kiểm tra | Chỉ giữ `confusable` (để chọn đáp án nhiễu). Phần còn lại ngừng soạn |
+| Pattern + Question bank + Dispute + AudioOpen | 0 (không có đường gọi) | Bảo trì, migration, test | **Xoá** |
+| Activity admin + Test blueprint admin | 0 cho người học | Trung bình | **Thay bằng hằng số** trong `constants.ts` |
+
+## 3. Thiết kế tối giản
+
+### 3.1 Một vòng học duy nhất: "Hôm nay"
+
+```
+Mở app → [Học hôm nay: 23 từ ôn · 10 từ mới] → 1 phiên ~10–15 phút → Xong (tóm tắt)
+```
+
+Thứ tự trong phiên:
+
+1. **Từ đến hạn**: hộp thấp và quá hạn lâu ra trước.
+2. **Từ mới** lấy từ các bộ đã đăng ký, theo thứ tự trong bộ. Mặc định 10 từ/ngày, người học chỉnh được. Không lấy từ mới nếu đang tồn hơn 50 từ đến hạn.
+
+Mỗi từ đi qua các bước:
+
+| Loại | Bước |
+|---|---|
+| Từ mới | Thẻ từ (có audio) → chọn nghĩa → gõ từ (nhìn nghĩa) → cuối phiên gõ lại 1 lần (nhìn câu đục lỗ) |
+| Từ ôn | Gõ từ. Đề lấy ngẫu nhiên: nghĩa / câu đục lỗ / nghe, tuỳ nội dung có sẵn. Audio phát sau khi trả lời |
+| Sai | Hiện đáp án + thẻ từ → đưa xuống cuối phiên làm lại (lần sau có gợi ý chữ đầu) |
+| "Tôi chưa nhớ" | Xử lý như sai, không bị phạt thêm (giữ G4) |
+
+Người học vẫn có thể **luyện thêm một bộ từ** (Luyện tự do). Luyện tự do không đổi lịch ôn, chỉ dùng phần chạy luyện có sẵn.
+
+### 3.2 Một mô hình trạng thái: hộp Leitner
+
+Bảng `EnWordState` có các trường `status`, `inMistakeBook`, `mistakeAddedAt`, `lastTestedAt`, `masteredAt`, được thay bằng:
+
+```prisma
+model EnWordState {
+  userId         String
+  senseId        String
+  box            Int       @default(0)   // 0..5
+  dueAt          DateTime
+  lapses         Int       @default(0)
+  introducedAt   DateTime  @default(now())
+  lastReviewedAt DateTime?
+  @@unique([userId, senseId])
+  @@index([userId, dueAt])
+}
+```
+
+- Khoảng cách theo hộp: `[0, 1, 3, 7, 21, 60]` ngày, tính theo ngày lịch `Asia/Ho_Chi_Minh` (dùng lại `gapRule.ts`).
+- Lượt ôn **đến hạn**, gõ đúng ngay lần đầu: `box+1`. Sai: `box = 1`, `lapses+1`, ôn lại ngày mai.
+- Trả lời đúng **trước hạn** (luyện tự do, hoặc làm lại trong phiên) không đổi `box`. Nhờ vậy luật "cách ≥ 1 ngày" (D1) được giữ mà không cần `counted`/`voidReason`.
+- Các khái niệm cũ suy ra từ trạng thái này:
+  - Đang học = hộp 1–3.
+  - **Nhớ lâu** = hộp ≥ 4, tức đã nhớ lại sau ít nhất 7 ngày. Thay cho "Đã nắm" và mốc hold 7d.
+  - Sổ từ sai = `lapses > 0` và hộp ≤ 2. Đây là bộ lọc, không phải trường riêng.
+
+### 3.3 Một bảng log
+
+`EnReview { userId, senseId, at, prompt('meaning'|'cloze'|'listen'), correct, responseMs, boxBefore, boxAfter }`.
+
+Bảng này thay `EnTestAttempt` + `EnTestItem` + `EnTestWordResult` + `EnPracticeSession` + `EnXpEvent`. Mọi thống kê đều tính được từ nó: số ngày học, độ chính xác, đường cong nhớ, từ hay sai. `activeSeconds` lấy bằng tổng `responseMs` của phiên.
+
+### 3.4 Nội dung: chỉ những trường người học thật sự thấy
+
+| Model | Giữ | Ngừng soạn (để trường, không bắt buộc) |
+|---|---|---|
+| `EnWord` | lemma, lemmaKey, ipa, audioPath, partOfSpeech, forms, cefr, status | ipaUk/Us, audioUk/Us, syllables, stressIndex, inflections, frequencyRank, entryType |
+| `EnSense` | meaningVi, definitionEnSimple, pitfallVi, chunks, distractorLemmas, sortOrder, status | definitionEn, register, region, topics, grammarTags, grammarNoteVi, image*, commonErrors, distractorMeanings |
+| `EnExample` | english, meaningVi, target, alternatives, audioPath | role, targetTag, origin, sourceNote, cefr |
+| `EnSenseRelation` | chỉ `kind = confusable` (để chọn đáp án nhiễu và hiện "dễ nhầm với…") | synonym/antonym/broader/narrower |
+| `EnSet`, `EnSetItem`, `EnEnrollment` | Giữ. Bỏ `EnSetItem.patternId` | |
+
+Validator (`contentValidation.ts`) chỉ **bắt buộc** nhóm "Giữ". Các trường khác được cảnh báo, không chặn. Nhờ vậy chi phí soạn hoặc sinh bằng AI cho mỗi từ giảm khoảng một nửa.
+
+### 3.5 Màn hình: từ 5 xuống 3
+
+| Màn | Nội dung |
+|---|---|
+| **Hôm nay** (`/`) | Nút "Học hôm nay" với số từ ôn và số từ mới. Chuỗi ngày đã ôn hết từ đến hạn. Danh sách từ vừa quên |
+| **Bộ từ** (`/sets`) | Đăng ký bộ, xem thẻ từ, Luyện tự do |
+| **Tiến độ** (`/progress`) | Số từ theo hộp, số từ nhớ lâu, lịch 7 ngày tới (bao nhiêu từ đến hạn), từ hay quên |
+
+Màn Admin giữ phần Import / Publish / QA. Bỏ tab Activities, Test blueprint, Disputes.
+
+### 3.6 Động lực (thay D5')
+
+Chỉ một chỉ số chính: **Số từ nhớ lâu** (hộp ≥ 4). Chỉ số này tự đúng theo G1–G3: không cày được, vì muốn tăng thì phải nhớ được qua ít nhất 7 ngày.
+
+Phần phụ: chuỗi ngày "đã ôn hết từ đến hạn". Khác streak thường, ngày không có từ đến hạn vẫn được tính. Nếu muốn giữ cảm giác RPG, có thể quy đổi Level = f(số từ nhớ lâu), không cần bảng XP.
+
+Quest, Reward, DailyNote, Avatar, Goal: **ẩn khỏi UI, giữ bảng ở giai đoạn 1**. Sau 4 tuần, nếu không thấy thiếu thì xoá.
+
+## 4. Kết quả sau khi tối giản
+
+| | Trước | Sau |
+|---|---|---|
+| Model | 32 | **12**: Word, Sense, Example, SenseRelation, Set, SetItem, Enrollment, WordState, Review, LearnerProfile (rút gọn) + 2 bảng gamify tạm giữ |
+| Enum | 21 | ~6 |
+| Chế độ người học phải chọn | 9 dạng bài + 5 luồng | **1 nút** (+ Luyện tự do) |
+| Trục trạng thái của một từ | 4 | **1** (box) |
+| Màn hình | 5 | 3 |
+| Dạng bài | 8 | 3 (chọn nghĩa, gõ từ, nghe → gõ) |
+
+## 5. Lộ trình triển khai
+
+Nguyên tắc: **ẩn trước, xoá sau**. Mỗi giai đoạn tự đứng được, qua `npm run quality` và `npm test`.
+
+### Giai đoạn 0: Dọn phần chết (rủi ro gần 0, ~0.5 ngày)
+- Xoá `EnQuestion`, `EnAnswerLog`, `EnAudioOpen`, `EnDispute`, `EnPatternProgress`, `EnPattern*`, `EnSetItem.patternId`.
+- Xoá `enAnswerService.ts`, `questions.ts`, `suspend.ts`, các route `dispute`, `audio-open`, `admin/disputes`, các thư mục API rỗng, cùng test liên quan.
+- Bỏ bước `questionsFromContent` / `draftsForAssessedPack` khi import.
+- Migration: `DROP TABLE`. Trước khi chạy, `pg_dump` các bảng này.
+
+### Giai đoạn 1: Lịch ôn + "Hôm nay" (lõi giá trị, ~3–4 ngày)
+- `src/lib/english/schedule.ts` (thuần, có unit test): `nextBox`, `dueAt`, `isDue`, `buildDailyQueue(states, newPool, limits)`.
+- Migration `EnWordState`: thêm `box`, `dueAt`, `lapses`, `introducedAt`, `lastReviewedAt`. Backfill:
+  - `mastered` → box 4, `dueAt = masteredAt + 21d`
+  - `practicing` → box 1, `dueAt = ngày mai`
+  - `inMistakeBook` → box 1, `lapses = 1`
+  - `new` → xoá dòng (chưa học)
+- Thêm bảng `EnReview` và service `enDailyService.ts`: `startToday`, `answer`, `finish`. Dùng lại `registry.ts` (meaning_choice, recall_type, listen_type), `grade.ts`, `practiceLoop.ts`.
+- Màn `/` mới = Hôm nay. Nav còn 3 mục.
+
+### Giai đoạn 2: Ẩn phần thừa (~1–2 ngày)
+- Ẩn Test, Tổng hợp, Sổ từ sai, Quests, chọn dạng bài. `/review` và `/mistakes` redirect về `/`.
+- Thay `EnActivityType` và `EnTestBlueprint` bằng hằng số.
+- Tiến độ đọc từ `EnWordState` + `EnReview`.
+- Validator: hạ các trường "Ngừng soạn" thành cảnh báo.
+
+### Giai đoạn 3: Xoá hẳn (sau 4 tuần dùng thật)
+- Xoá `EnTestAttempt`, `EnTestItem`, `EnTestWordResult`, `EnPracticeSession`, `EnXpEvent`, `EnQuest`, `EnReward`, `EnDailyNote`, `enTestService.ts`, `gamify/*`.
+- Xoá các trường cũ của `EnWordState` và các trường nội dung không còn dùng.
+
+## 6. Các điểm cần chốt
+
+1. **Bỏ Test riêng, lượt ôn đến hạn chính là kiểm tra?** Đề xuất: Có. Người học tự học, không có bảng xếp hạng, nên gian lận chỉ làm hại chính họ. Bộ máy chống gian lận tốn nhiều hơn giá trị nó mang lại.
+2. **Gamification vừa làm xong (chưa commit) thì xử lý sao?** Đề xuất: commit để giữ lịch sử, rồi ẩn ở giai đoạn 2. Không cố giữ chỉ vì đã tốn công làm (sunk cost).
+3. **Có giữ Pattern cho sau này không?** Đề xuất: Xoá. Git đã giữ lịch sử, khi cần thì làm lại theo mô hình mới.
+4. **Số từ mới mỗi ngày mặc định:** 10. Ngưỡng tồn để dừng lấy từ mới: 50.
+5. **Khoảng giãn cách:** `[1, 3, 7, 21, 60]` ngày, Leitner đơn giản. Nếu sau này có đủ dữ liệu `EnReview` thì nâng lên FSRS. Không làm FSRS ngay.
+
+## 7. Cách đo hiệu quả (sau giai đoạn 1)
+
+- **Tỉ lệ nhớ khi đến hạn**, theo từng hộp (từ `EnReview`). Mục tiêu khoảng 85–90%. Nếu thấp hơn thì rút ngắn khoảng cách; nếu cao hơn thì giãn ra.
+- **Số từ nhớ lâu / tuần**: chỉ số North Star.
+- **Tỉ lệ ngày ôn hết từ đến hạn**: thói quen.

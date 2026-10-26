@@ -40,6 +40,33 @@ enum EnTestStatus {
   abandoned
 }
 
+enum EnXpKind {
+  first_mastery
+  hold_7d
+  hold_30d
+}
+
+enum EnQuestKind {
+  set_mastery
+  hold_words
+  clear_mistakes
+  study_days
+}
+
+enum EnQuestStatus {
+  active
+  done
+  ended
+}
+
+enum EnLearnerGoal {
+  communication
+  work
+  travel
+  exam
+  other
+}
+
 enum EnQuestionKind {
   meaning_choice
   meaning_confusable
@@ -481,10 +508,73 @@ model EnTestAttempt {
   finishedAt  DateTime?
   wordCount   Int
   passedCount Int?
+  recallLockedAt DateTime?
   items       EnTestItem[]
   words       EnTestWordResult[]
+  xpEvents    EnXpEvent[]
 
   @@index([userId, startedAt])
+}
+
+model EnLearnerProfile {
+  userId         String        @id
+  avatarKey      String        @default("default")
+  goal           EnLearnerGoal @default(communication)
+  targetCefr     EnCefr?
+  weeklyDaysGoal Int           @default(4)
+  totalXp        Int           @default(0)
+  rescuedSenses  String[]      @default([])
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+}
+
+model EnXpEvent {
+  id        String   @id @default(cuid())
+  userId    String
+  senseId   String
+  kind      EnXpKind
+  amount    Int
+  attemptId String
+  createdAt DateTime @default(now())
+  attempt   EnTestAttempt @relation(fields: [attemptId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, senseId, kind])
+  @@index([userId, createdAt])
+}
+
+model EnQuest {
+  id          String        @id @default(cuid())
+  userId      String
+  kind        EnQuestKind
+  setId       String?
+  target      Int
+  startDay    String
+  endDay      String
+  status      EnQuestStatus @default(active)
+  completedAt DateTime?
+  createdAt   DateTime      @default(now())
+  rewards     EnReward[]
+  @@index([userId, status])
+}
+
+model EnReward {
+  id          String    @id @default(cuid())
+  userId      String
+  title       String
+  unlockLevel Int?
+  questId     String?
+  unlockedAt  DateTime?
+  claimedAt   DateTime?
+  createdAt   DateTime  @default(now())
+  quest       EnQuest?  @relation(fields: [questId], references: [id], onDelete: SetNull)
+  @@index([userId])
+}
+
+model EnDailyNote {
+  userId String
+  dayKey String
+  note   String @default("")
+  @@id([userId, dayKey])
 }
 
 model EnTestItem {
@@ -501,6 +591,8 @@ model EnTestItem {
   correct     Boolean?
   responseMs  Int?
   answeredAt  DateTime?
+  servedAt    DateTime?
+  leftPage    Boolean       @default(false)
   attempt     EnTestAttempt @relation(fields: [attemptId], references: [id], onDelete: Cascade)
 
   @@unique([attemptId, position])
@@ -516,6 +608,7 @@ model EnTestWordResult {
   counted         Boolean
   priorExposureAt DateTime?
   recallMs        Int?
+  voidReason      String?
   createdAt       DateTime      @default(now())
   attempt         EnTestAttempt @relation(fields: [attemptId], references: [id], onDelete: Cascade)
 

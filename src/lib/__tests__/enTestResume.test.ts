@@ -42,7 +42,7 @@ describe('startEnglishTest resume and restart', () => {
 	});
 
 	it('returns a recent matching attempt with saved answers', async () => {
-		mocks.findFirst.mockResolvedValue({ id: 'open-1', wordCount: 1, items: [{ id: 'item-1', position: 0, activityKey: 'recall_type', prompt: { meaningVi: 'vé' }, answer: 'ticket' }] });
+		mocks.findFirst.mockResolvedValue({ id: 'open-1', wordCount: 1, recallLockedAt: null, items: [{ id: 'item-1', position: 0, role: 'recall', activityKey: 'recall_type', prompt: { meaningVi: 'vé' }, answer: 'ticket', servedAt: new Date() }] });
 		const result = await startEnglishTest('user-1', { mode: 'set', setId: 'set-1' });
 		expect(result.resumed).toBe(true);
 		expect(result.items[0]?.answer).toBe('ticket');

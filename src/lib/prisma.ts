@@ -43,7 +43,7 @@ function createPrismaClient(): PrismaClient {
 					port: Number(process.env.PG_PORT ?? 5432),
 					user: process.env.PG_USER ?? 'postgres',
 					password: process.env.PG_PASSWORD ?? '',
-					database: process.env.PG_DATABASE ?? 'learn_chinese',
+					database: process.env.PG_DATABASE ?? 'learn_english',
 					max: poolMax,
 					idleTimeoutMillis,
 			  },

@@ -1,0 +1,2 @@
+ALTER TABLE "EnLearnerProfile"
+ADD COLUMN IF NOT EXISTS "rescuedSenses" TEXT[] NOT NULL DEFAULT ARRAY[]::TEXT[];
