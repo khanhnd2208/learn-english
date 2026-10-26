@@ -2,6 +2,7 @@ import { Prisma } from '@prisma/client';
 import { prisma } from '@/lib/prisma';
 import { AppError } from '@/lib/appError';
 import { lowestCefr } from '@/lib/english/cefr';
+import { EN_PACK_TX_TIMEOUT_MS, EN_TX_MAX_WAIT_MS } from '@/lib/english/constants';
 import { asChunks, asCommonErrors, asContrast, asMistake } from '@/lib/english/senseBundle';
 import {
 	assessEnglishPack,
@@ -392,7 +393,7 @@ export async function saveEnglishPack(input: unknown): Promise<EnglishPackSaveRe
 			}
 		}
 		return set.id;
-	});
+	}, { timeout: EN_PACK_TX_TIMEOUT_MS, maxWait: EN_TX_MAX_WAIT_MS });
 	return { setId, issues: assessment.issues, schemaError: null };
 }
 
