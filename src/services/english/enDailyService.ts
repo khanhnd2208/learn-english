@@ -1,7 +1,8 @@
+import { cache } from 'react';
 import { prisma } from '@/lib/prisma';
 import { AppError } from '@/lib/appError';
-import { EN_DAILY_DUE_LIMIT, EN_NEW_WORDS_DEFAULT, EN_ROUND_REVIEW_LIMIT, EN_TX_MAX_WAIT_MS, EN_TX_TIMEOUT_MS, EN_WEEKLY_DAYS_DEFAULT } from '@/lib/english/constants';
-import { buildDailyQueue, isLongTerm, isNearMiss, scheduleMove, stageOf, vnDayStart, type ScheduledState } from '@/lib/english/schedule';
+import { EN_DAILY_DUE_LIMIT, EN_EXTRA_ROUND_SIZE, EN_NEW_WORDS_DEFAULT, EN_ROUND_REVIEW_LIMIT, EN_TX_MAX_WAIT_MS, EN_TX_TIMEOUT_MS, EN_WEEKLY_DAYS_DEFAULT } from '@/lib/english/constants';
+import { buildDailyQueue, isLongTerm, isNearMiss, scheduleMove, vnDayStart, type ScheduledState } from '@/lib/english/schedule';
 import { gradeEnglishAnswer } from '@/lib/english/grade';
 import { shiftVnDay, vnDayKey } from '@/lib/english/gapRule';
 import { exampleParts, type SenseBundle } from '@/lib/english/senseBundle';
@@ -52,7 +53,7 @@ const SCHEDULED_SELECT = { id: true, senseId: true, box: true, dueAt: true, laps
 /** Every word the learner has started, from any set, so unenrolling never orphans a word from review. */
 async function scheduledStates(userId: string): Promise<ScheduledState[]> {
 	return prisma.enWordState.findMany({
-		where: { userId, status: { not: 'new' }, sense: { status: 'published' } },
+		where: { userId, box: { gt: 0 }, sense: { status: 'published' } },
 		select: SCHEDULED_SELECT,
 	});
 }
@@ -116,10 +117,11 @@ function promptFor(bundle: SenseBundle, kind: 'review' | 'new' | 'extra'): { pro
 export async function startToday(userId: string, options: { extra?: boolean } = {}, now = new Date()) {
 	const plan = await planToday(userId, now);
 	const { dueTotal } = plan;
+	// The extra round revisits the weakest words that are not due yet; it never moves them up a box.
 	const queue = options.extra
 		? [...plan.states].filter((state) => state.dueAt > now)
 			.sort((a, b) => a.box - b.box || b.lapses - a.lapses || (a.lastReviewedAt?.getTime() ?? 0) - (b.lastReviewedAt?.getTime() ?? 0))
-			.slice(0, 20).map((state) => ({ kind: 'extra' as const, state }))
+			.slice(0, EN_EXTRA_ROUND_SIZE).map((state) => ({ kind: 'extra' as const, state }))
 		: plan.queue;
 	const senseIds = queue.map((item) => item.kind === 'new' ? item.senseId : item.state.senseId);
 	if (!senseIds.length) return { sessionId: null, dueCount: 0, newCount: 0, dueTotal, items: [] as DailyItem[] };
@@ -154,7 +156,8 @@ async function studiedDays(userId: string, from: Date): Promise<Set<string>> {
 	return new Set(rows.map((row) => vnDayKey(row.at)));
 }
 
-export async function getTodayOverview(userId: string, now = new Date()): Promise<TodayOverview> {
+/** Cached per request: the app layout and the page both read it. */
+export const getTodayOverview = cache(async (userId: string, now = new Date()): Promise<TodayOverview> => {
 	const { states, queue, dueTotal, introducedToday, enrolledSets } = await planToday(userId, now);
 	const today = vnDayKey(now);
 	const tomorrowEnd = vnDayStart(shiftVnDay(today, 2));
@@ -194,7 +197,7 @@ export async function getTodayOverview(userId: string, now = new Date()): Promis
 		weeklyGoal: profile?.weeklyDaysGoal ?? EN_WEEKLY_DAYS_DEFAULT,
 		recentLapses: lapsedBundles.map((bundle) => ({ senseId: bundle.sense.id, lemma: bundle.word.lemma, meaningVi: bundle.sense.meaningVi })),
 	};
-}
+});
 
 function acceptedAnswers(bundle: SenseBundle): string[] {
 	const targets = bundle.examples.map((example) => example.target.trim()).filter(Boolean);
@@ -221,33 +224,21 @@ export async function answerToday(
 		return { result: 'near', expected: '', boxBefore: before, boxAfter: before, scheduled: false, nextDueAt: state?.dueAt.toISOString() ?? null };
 	}
 	const responseMs = Math.max(0, Math.min(120_000, Math.trunc(input.responseMs ?? 0)));
-	const next = scheduleMove(state && state.status !== 'new' ? state : null, correct, now);
+	const next = scheduleMove(state, correct, now);
 	const changed = next.scheduled;
 	const nextDue = next.dueAt;
 	await prisma.$transaction(async (tx) => {
 		if (changed) {
-			const long = isLongTerm(next.box);
+			const schedule = { box: next.box, lapses: next.lapses, dueAt: nextDue, lastReviewedAt: now };
 			await tx.enWordState.upsert({
 				where: { userId_senseId: { userId, senseId: input.senseId } },
-				create: { userId, senseId: input.senseId, status: 'practicing', box: next.box, lapses: next.lapses, introducedAt: now, dueAt: nextDue ?? now, lastReviewedAt: now, lastExposureAt: now },
-				update: {
-					status: long ? 'mastered' : 'practicing',
-					box: next.box,
-					lapses: next.lapses,
-					dueAt: nextDue ?? now,
-					lastReviewedAt: now,
-					lastTestedAt: now,
-					lastExposureAt: now,
-					masteredAt: long ? state?.masteredAt ?? now : null,
-					inMistakeBook: next.lapses > (state?.lapses ?? 0),
-					mistakeAddedAt: next.lapses > (state?.lapses ?? 0) ? now : null,
-					...(state?.status === 'new' ? { introducedAt: now } : {}),
-				},
+				create: { userId, senseId: input.senseId, introducedAt: now, ...schedule },
+				update: { ...schedule, ...(before === 0 ? { introducedAt: now } : {}) },
 			});
 		}
 		await tx.enReview.create({ data: { sessionId: session.id, userId, senseId: input.senseId, at: now, prompt: input.prompt ?? 'meaning', correct, responseMs, boxBefore: before, boxAfter: next.box, scheduled: changed } });
 	}, { timeout: EN_TX_TIMEOUT_MS, maxWait: EN_TX_MAX_WAIT_MS });
-	return { result: correct ? 'correct' : 'wrong', expected, boxBefore: before, boxAfter: next.box, scheduled: changed, nextDueAt: nextDue?.toISOString() ?? null };
+	return { result: correct ? 'correct' : 'wrong', expected, boxBefore: before, boxAfter: next.box, scheduled: changed, nextDueAt: nextDue.toISOString() };
 }
 
 export async function finishToday(userId: string, sessionId: string, now = new Date()) {
@@ -261,46 +252,4 @@ export async function finishToday(userId: string, sessionId: string, now = new D
 	}
 	const overview = await getTodayOverview(userId, now);
 	return { ok: true as const, remaining: overview.dueCount + overview.newCount, tomorrowCount: overview.tomorrowCount, longTermCount: overview.longTermCount };
-}
-
-export async function getTodayProgress(userId: string, now = new Date()) {
-	const today = vnDayKey(now);
-	const since = vnDayStart(shiftVnDay(today, -29));
-	const [states, reviews] = await Promise.all([
-		prisma.enWordState.findMany({ where: { userId, status: { not: 'new' }, sense: { status: 'published' } }, select: { senseId: true, box: true, dueAt: true, lapses: true } }),
-		prisma.enReview.findMany({ where: { userId, at: { gte: since } }, select: { at: true, correct: true, boxBefore: true, scheduled: true } }),
-	]);
-	const stages = { learning: 0, remembering: 0, long_term: 0 };
-	for (const state of states) {
-		const stage = stageOf(state.box);
-		if (stage !== 'new') stages[stage] += 1;
-	}
-	const countsByBox = Array.from({ length: 6 }, (_, box) => ({ box, count: states.filter((state) => state.box === box).length }));
-	const dueNext7Days = Array.from({ length: 7 }, (_, offset) => {
-		const start = vnDayStart(shiftVnDay(today, offset));
-		const end = vnDayStart(shiftVnDay(today, offset + 1));
-		return { day: shiftVnDay(today, offset), count: states.filter((state) => (offset === 0 ? state.dueAt < end : state.dueAt >= start && state.dueAt < end)).length };
-	});
-	// Only on-schedule reviews of words already learned measure retention; first sightings and retries do not.
-	const scheduled = reviews.filter((review) => review.scheduled && review.boxBefore > 0);
-	const studied = new Set(reviews.map((review) => vnDayKey(review.at)));
-	const activity = Array.from({ length: 30 }, (_, offset) => {
-		const day = shiftVnDay(today, offset - 29);
-		return { day, count: reviews.filter((review) => vnDayKey(review.at) === day).length };
-	});
-	const difficult = states.filter((state) => state.lapses > 0 && state.box <= 2).sort((a, b) => b.lapses - a.lapses).slice(0, 12);
-	const bundles = await getSenseBundles(difficult.map((state) => state.senseId), true);
-	const lapsesBySense = new Map(difficult.map((state) => [state.senseId, state.lapses]));
-	return {
-		stages,
-		countsByBox,
-		dueNext7Days,
-		longTermCount: stages.long_term,
-		learnedCount: states.length,
-		accuracy30: scheduled.length ? scheduled.filter((review) => review.correct).length / scheduled.length : null,
-		reviews30: reviews.length,
-		daysStudied30: studied.size,
-		activity,
-		difficult: bundles.map((bundle) => ({ senseId: bundle.sense.id, lemma: bundle.word.lemma, ipa: bundle.word.ipa, meaningVi: bundle.sense.meaningVi, lapses: lapsesBySense.get(bundle.sense.id) ?? 0 })),
-	};
 }

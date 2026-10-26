@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { activityByKey, buildTest, chooseDistractors, poolFromBundles, promptHidesAnswer } from '@/lib/english/activities';
+import { activityByKey, chooseDistractors, poolFromBundles } from '@/lib/english/activities';
 import { mulberry32 } from '@/lib/english/activities/rng';
 import type { SenseBundle } from '@/lib/english/senseBundle';
 
@@ -99,40 +99,7 @@ const poolSenses = [
 	sense('offer', 'offer', 'mời'),
 ];
 
-describe('buildTest', () => {
-	it('gives each kept word one recall item before one recognize item, not adjacent', () => {
-		const senses = poolSenses.slice(0, 4);
-		const pool = poolFromBundles(poolSenses, { inTestIds: new Set(senses.map((item) => item.sense.id)) });
-		const built = buildTest({
-			senses,
-			recognizeKinds: ['meaning_choice', 'cloze_choice'],
-			recallKinds: ['recall_type'],
-			pool,
-			rng: mulberry32(4),
-		});
-		const ids = [...new Set(built.items.map((item) => item.senseId))];
-		for (const id of ids) {
-			const pair = built.items.filter((item) => item.senseId === id);
-			expect(pair.map((item) => item.role)).toEqual(['recall', 'recognize']);
-			expect(Math.abs(built.items.indexOf(pair[0]!) - built.items.indexOf(pair[1]!))).toBeGreaterThan(1);
-		}
-		expect(built.items.every(promptHidesAnswer)).toBe(true);
-	});
-
-	it('drops a word that cannot build one of the roles', () => {
-		const quiet = sense('quiet', 'quiet', 'yên', { audio: false, cloze: false });
-		const pool = poolFromBundles([quiet, ...poolSenses]);
-		const built = buildTest({
-			senses: [quiet, poolSenses[2]!, poolSenses[3]!],
-			recognizeKinds: ['meaning_choice'],
-			recallKinds: ['listen_type'],
-			pool,
-			rng: mulberry32(9),
-		});
-		expect(built.items.some((item) => item.senseId === 'quiet')).toBe(false);
-		expect(built.dropped.some((drop) => drop.senseId === 'quiet' && drop.role === 'recall')).toBe(true);
-	});
-
+describe('distractors', () => {
 	it('keeps confusables and family members out of choices and prefers words outside the test', () => {
 		const focus = poolSenses[0]!;
 		const pool = poolFromBundles([...poolSenses, sense('borrower', 'borrower', 'người mượn')], {

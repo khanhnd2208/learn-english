@@ -14,7 +14,6 @@
     "quality": "npm test && npm run lint && npm run typecheck && npm run build",
     "quality:prod": "npm run quality && npm run audit:prod && npm run db:migrate:status",
     "audit:prod": "npm audit --omit=dev --audit-level=high",
-    "db:seed": "npx tsx prisma/seed.ts",
     "db:seed:samples": "tsx scripts/seed-english-sample-sets.ts",
     "db:verify-transfer": "tsx scripts/verify-english-transfer.ts",
     "db:migrate": "npx prisma migrate dev",
@@ -22,9 +21,6 @@
     "db:push": "npx prisma db push",
     "db:studio": "npx prisma studio",
     "postinstall": "prisma generate"
-  },
-  "prisma": {
-    "seed": "npx tsx prisma/seed.ts"
   },
   "dependencies": {
     "@auth/mongodb-adapter": "^3.11.3",

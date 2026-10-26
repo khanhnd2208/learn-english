@@ -2,19 +2,15 @@ import { Prisma } from '@prisma/client';
 import { prisma } from '@/lib/prisma';
 import { AppError } from '@/lib/appError';
 import { lowestCefr } from '@/lib/english/cefr';
-import { EN_HINTS_REQUIRED } from '@/lib/english/constants';
 import { asChunks, asCommonErrors, asContrast, asMistake } from '@/lib/english/senseBundle';
 import {
 	assessEnglishPack,
-	englishPackSchema,
 	type AssessedPack,
-	type EnglishPack,
 	type PackExample,
 	type PackRelation,
 	type PackWord,
 } from '@/lib/english/contentValidation';
 import { lemmaKeyOf } from '@/lib/english/text';
-import { questionsFromContent, type QuestionDraft, type StoredPattern, type StoredWord } from '@/lib/english/questions';
 import { toSenseBundle, type SenseBundle } from '@/lib/english/senseBundle';
 import { audioFileExists } from '@/services/english/enAudioService';
 
@@ -26,26 +22,11 @@ export interface EnglishPackSaveResult {
 
 export interface EnglishPublishResult {
 	publishedSenses: number;
-	publishedPatterns: number;
 	issues: AssessedPack['issues'];
 }
 
 function json(value: unknown): Prisma.InputJsonValue {
 	return value as Prisma.InputJsonValue;
-}
-
-function asSlots(value: unknown): StoredPattern['slots'] {
-	if (!Array.isArray(value)) return [];
-	return value.flatMap((item) => {
-		if (!item || typeof item !== 'object') return [];
-		const row = item as { id?: unknown; labelVi?: unknown; choices?: unknown };
-		if (typeof row.id !== 'string') return [];
-		return [{
-			id: row.id,
-			labelVi: typeof row.labelVi === 'string' ? row.labelVi : '',
-			choices: Array.isArray(row.choices) ? row.choices.filter((choice): choice is string => typeof choice === 'string') : [],
-		}];
-	});
 }
 
 function asInflections(value: unknown): Array<{ form: string; tag: string }> {
@@ -55,16 +36,6 @@ function asInflections(value: unknown): Array<{ form: string; tag: string }> {
 		const row = item as { form?: unknown; tag?: unknown };
 		if (typeof row.form !== 'string') return [];
 		return [{ form: row.form, tag: typeof row.tag === 'string' ? row.tag : '' }];
-	});
-}
-
-function asSlotValues(value: unknown): Array<{ id: string; value: string }> {
-	if (!Array.isArray(value)) return [];
-	return value.flatMap((item) => {
-		if (!item || typeof item !== 'object') return [];
-		const row = item as { id?: unknown; value?: unknown };
-		if (typeof row.id !== 'string' || typeof row.value !== 'string') return [];
-		return [{ id: row.id, value: row.value }];
 	});
 }
 
@@ -221,33 +192,6 @@ async function resolveTargetSenseId(
 	const pos = partOfSpeech.trim().toLowerCase();
 	const matched = senses.filter((sense) => sense.partOfSpeech.trim().toLowerCase() === pos);
 	return matched.length === 1 ? matched[0]?.id ?? null : null;
-}
-
-async function writeQuestions(drafts: QuestionDraft[]) {
-	for (const draft of drafts) {
-		const current = await prisma.enQuestion.findUnique({ where: { key: draft.key }, select: { status: true } });
-		if (current?.status === 'suspended') continue;
-		const exampleId = draft.skill === 'usage' ? draft.exampleKey : null;
-		const patternExampleId = draft.skill === 'pattern' ? draft.exampleKey : null;
-		const data = {
-			kind: draft.kind,
-			skill: draft.skill,
-			stage: draft.stage,
-			senseId: draft.senseKey,
-			patternId: draft.patternKey,
-			exampleId,
-			patternExampleId,
-			prompt: json(draft.prompt),
-			answer: draft.answer,
-			audioPath: draft.audioFile,
-			status: 'published' as const,
-		};
-		await prisma.enQuestion.upsert({
-			where: { key: draft.key },
-			create: { key: draft.key, ...data },
-			update: data,
-		});
-	}
 }
 
 export async function saveEnglishPack(input: unknown): Promise<EnglishPackSaveResult> {
@@ -447,38 +391,6 @@ export async function saveEnglishPack(input: unknown): Promise<EnglishPackSaveRe
 				});
 			}
 		}
-		for (const [index, pattern] of pack.patterns.entries()) {
-			const created = await tx.enPattern.create({
-				data: {
-					purposeVi: pattern.purposeVi.trim(),
-					frame: pattern.frame.trim(),
-					fixedParts: pattern.fixedParts.map((part) => part.trim()).filter(Boolean),
-					slots: json(pattern.slots),
-					pitfallVi: pattern.pitfallVi.trim(),
-					status: 'draft',
-				},
-			});
-			for (const lemma of pattern.senseLemmas) {
-				const senseId = senseIdByLemma.get(lemma.trim().toLowerCase());
-				if (!senseId) continue;
-				await tx.enPatternSense.create({ data: { patternId: created.id, senseId } });
-			}
-			for (const example of pattern.examples) {
-				await tx.enPatternExample.create({
-					data: {
-						patternId: created.id,
-						english: example.english.trim(),
-						meaningVi: example.meaningVi.trim(),
-						slotValues: json(example.slotValues),
-						audioPath: example.audioFile.trim(),
-						status: 'draft',
-					},
-				});
-			}
-			await tx.enSetItem.create({
-				data: { setId: set.id, patternId: created.id, position: pack.words.length + index },
-			});
-		}
 		return set.id;
 	});
 	return { setId, issues: assessment.issues, schemaError: null };
@@ -501,7 +413,6 @@ export async function publishEnglishSet(
 							relations: { orderBy: { sortOrder: 'asc' } },
 						},
 					},
-					pattern: { include: { examples: true } },
 				},
 			},
 		},
@@ -509,19 +420,10 @@ export async function publishEnglishSet(
 	if (!set) throw new AppError('Không tìm thấy bộ học', 404);
 	const issues: AssessedPack['issues'] = [];
 	let publishedSenses = 0;
-	let publishedPatterns = 0;
 
 	for (const item of set.items) {
 		if (item.sense) {
 			const sense = item.sense;
-			if (sense.hints.length !== EN_HINTS_REQUIRED) {
-				issues.push({
-					path: sense.word.lemma,
-					code: 'hint_count',
-					message: `Nghĩa "${sense.word.lemma}" cần đúng ${EN_HINTS_REQUIRED} gợi ý (đang có ${sense.hints.length}).`,
-					blocksGrade: true,
-				});
-			}
 			const names = [sense.word.audioPath, ...sense.examples.map((example) => example.audioPath)];
 			const audioFiles = await existingAudio(names, exists);
 			const assessmentInput = {
@@ -605,7 +507,6 @@ export async function publishEnglishSet(
 						adminCleared: example.role === 'grade' && example.ambiguityNote.length > 0,
 					})),
 				}],
-				patterns: [],
 			};
 			const assessment = assessEnglishPack(assessmentInput);
 			if (assessment.schemaError) {
@@ -614,33 +515,13 @@ export async function publishEnglishSet(
 			}
 			issues.push(...assessment.issues.map((issue) => ({ ...issue, path: `${sense.word.lemma}: ${issue.path}` })));
 			const assessed = assessment.words[0];
-			if (sense.hints.length !== EN_HINTS_REQUIRED || !assessed?.publishable) continue;
-			const stored: StoredWord = {
-				id: sense.id,
-				lemma: sense.word.lemma,
-				ipa: sense.word.ipa,
-				meaningVi: sense.meaningVi,
-				audioFile: sense.word.audioPath,
-				distractorMeanings: sense.distractorMeanings,
-				distractorLemmas: sense.distractorLemmas,
-				examples: sense.examples.map((example) => {
-					const grade = assessed.examples.find((item) => sense.examples[item.index]?.id === example.id)?.gradeEligible === true;
-					return {
-						id: example.id,
-						english: example.english,
-						meaningVi: example.meaningVi,
-						target: example.target,
-						audioFile: example.audioPath,
-						role: grade ? 'grade' as const : 'study' as const,
-						gradeEligible: grade,
-					};
-				}),
-			};
+			if (!assessed?.publishable) continue;
 			await prisma.enSense.update({ where: { id: sense.id }, data: { status: 'published' } });
-			for (const example of stored.examples) {
+			for (const [exampleIndex, example] of sense.examples.entries()) {
+				const grade = assessed.examples.find((item) => item.index === exampleIndex)?.gradeEligible === true;
 				await prisma.enExample.update({
 					where: { id: example.id },
-					data: { role: example.role, status: 'published' },
+					data: { role: grade ? 'grade' : 'study', status: 'published' },
 				});
 			}
 			await prisma.enSenseHint.updateMany({
@@ -662,69 +543,14 @@ export async function publishEnglishSet(
 				where: { id: sense.wordId },
 				data: { status: 'published', cefr: lowestCefr(publishedLevels.map((row) => row.cefr)) },
 			});
-			await prisma.enQuestion.updateMany({
-				where: { senseId: sense.id, status: { not: 'suspended' } },
-				data: { status: 'draft' },
-			});
-			await writeQuestions(questionsFromContent({ words: [stored], patterns: [] }));
 			publishedSenses += 1;
-		}
-		if (item.pattern) {
-			const pattern = item.pattern;
-			const audioFiles = await existingAudio(pattern.examples.map((example) => example.audioPath), exists);
-			const slots = asSlots(pattern.slots);
-			const pack: EnglishPack = englishPackSchema.parse({
-				title: set.title,
-				description: set.description,
-				audioFiles,
-				words: [],
-				patterns: [{
-					purposeVi: pattern.purposeVi,
-					frame: pattern.frame,
-					fixedParts: pattern.fixedParts,
-					slots,
-					pitfallVi: pattern.pitfallVi,
-					senseLemmas: [],
-					examples: pattern.examples.map((example) => ({
-						english: example.english,
-						meaningVi: example.meaningVi,
-						audioFile: example.audioPath,
-						slotValues: asSlotValues(example.slotValues),
-					})),
-				}],
-			});
-			const assessment = assessEnglishPack(pack);
-			issues.push(...assessment.issues);
-			if (!assessment.patterns[0]?.publishable) continue;
-			const stored: StoredPattern = {
-				id: pattern.id,
-				purposeVi: pattern.purposeVi,
-				frame: pattern.frame,
-				fixedParts: pattern.fixedParts,
-				slots,
-				examples: pattern.examples.map((example) => ({
-					id: example.id,
-					english: example.english,
-					meaningVi: example.meaningVi,
-					audioFile: example.audioPath,
-					slotValues: asSlotValues(example.slotValues),
-				})),
-			};
-			await prisma.enPattern.update({ where: { id: pattern.id }, data: { status: 'published' } });
-			await prisma.enPatternExample.updateMany({ where: { patternId: pattern.id }, data: { status: 'published' } });
-			await prisma.enQuestion.updateMany({
-				where: { patternId: pattern.id, status: { not: 'suspended' } },
-				data: { status: 'draft' },
-			});
-			await writeQuestions(questionsFromContent({ words: [], patterns: [stored] }));
-			publishedPatterns += 1;
 		}
 	}
 
-	if (publishedSenses + publishedPatterns > 0) {
+	if (publishedSenses > 0) {
 		await prisma.enSet.update({ where: { id: set.id }, data: { status: 'published' } });
 	}
-	return { publishedSenses, publishedPatterns, issues };
+	return { publishedSenses, issues };
 }
 
 const senseBundleInclude = {

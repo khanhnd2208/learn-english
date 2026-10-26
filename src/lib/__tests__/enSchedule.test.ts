@@ -25,6 +25,14 @@ describe('Leitner schedule', () => {
 		expect(scheduleMove(early, true, now)).toEqual({ box: 3, lapses: 0, dueAt: early.dueAt, scheduled: false });
 	});
 
+	it('does not count a second lapse when a reset word is missed again in the same session', () => {
+		const reset = scheduleMove(state('due', 3, '2026-10-25T17:00:00Z'), false, now);
+		expect(reset).toMatchObject({ box: 1, lapses: 1, scheduled: true });
+		expect(scheduleMove(reset, false, now)).toEqual({ box: 1, lapses: 1, dueAt: reset.dueAt, scheduled: false });
+		const fresh = scheduleMove(null, false, now);
+		expect(scheduleMove(fresh, false, now)).toMatchObject({ box: 1, lapses: 0, scheduled: false });
+	});
+
 	it('makes words due from 00:00 Vietnam time on the due day', () => {
 		expect(dueAt(0, now).toISOString()).toBe('2026-10-25T17:00:00.000Z');
 		expect(dueAt(1, now).toISOString()).toBe('2026-10-26T17:00:00.000Z');

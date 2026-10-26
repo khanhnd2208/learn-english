@@ -7,16 +7,13 @@ import {
 	EN_INFLECTION_TAGS,
 	EN_MAX_COLLOCATIONS,
 	EN_MAX_EXAMPLES_PER_WORD,
-	EN_MAX_PATTERNS_PER_PACK,
 	EN_MAX_WORDS_PER_PACK,
-	EN_PATTERN_MIN_EXAMPLES,
 	EN_TOPICS,
 	EN_USAGE_MIN_GRADE_EXAMPLES,
 } from '@/lib/english/constants';
 import {
 	blankReport,
 	containsWholeWord,
-	fixedPartsInOrder,
 	isFullVietnameseMeaning,
 	lemmaKeyOf,
 	locateTarget,
@@ -30,6 +27,25 @@ const grammarTagSet = new Set<string>(EN_GRAMMAR_TAGS);
 const inflectionTagSet = new Set<string>(EN_INFLECTION_TAGS);
 const SENSE_KEY_RE = /^[a-z0-9' -]+\.[a-z]+\.[a-z0-9_]+$/;
 const IPA_RE = /^\/[^/\n]+\/$/;
+
+/**
+ * Fields learners never see in the daily loop ("Ngừng soạn" in docs/plans/en-minimal-core-plan.md §3.4).
+ * Problems with them are reported as warnings and never block publishing.
+ */
+const OPTIONAL_FIELD_CODES = new Set([
+	'hint_leaks_lemma',
+	'hint_equals_meaning',
+	'hint_order_gap',
+	'hint_too_many',
+	'hint_too_few',
+	'definition_missing',
+	'stress_index_range',
+	'contrast_count',
+	'mistake_same',
+	'common_error_incomplete',
+	'common_error_same',
+	'distractors',
+]);
 
 const exampleSchema = z.object({
 	english: z.string().default(''),
@@ -143,30 +159,6 @@ const familySchema = z.object({
 	members: z.array(familyMemberSchema).default([]),
 });
 
-const patternExampleSchema = z.object({
-	english: z.string().default(''),
-	meaningVi: z.string().default(''),
-	audioFile: z.string().default(''),
-	slotValues: z.array(z.object({
-		id: z.string(),
-		value: z.string(),
-	})).default([]),
-});
-
-const patternSchema = z.object({
-	purposeVi: z.string().default(''),
-	frame: z.string().default(''),
-	fixedParts: z.array(z.string()).default([]),
-	slots: z.array(z.object({
-		id: z.string(),
-		labelVi: z.string().default(''),
-		choices: z.array(z.string()).default([]),
-	})).default([]),
-	pitfallVi: z.string().default(''),
-	senseLemmas: z.array(z.string()).default([]),
-	examples: z.array(patternExampleSchema).max(4).default([]),
-});
-
 export const englishPackSchema = z.object({
 	title: z.string().default(''),
 	description: z.string().default(''),
@@ -174,7 +166,6 @@ export const englishPackSchema = z.object({
 	audioFiles: z.array(z.string()).default([]),
 	families: z.array(familySchema).default([]),
 	words: z.array(wordSchema).max(EN_MAX_WORDS_PER_PACK).default([]),
-	patterns: z.array(patternSchema).max(EN_MAX_PATTERNS_PER_PACK).default([]),
 });
 
 export type EnglishPack = z.infer<typeof englishPackSchema>;
@@ -183,7 +174,6 @@ export type PackExample = PackWord['examples'][number];
 export type PackHint = PackWord['hints'][number];
 export type PackRelation = PackWord['relations'][number];
 export type PackFamily = EnglishPack['families'][number];
-export type PackPattern = EnglishPack['patterns'][number];
 
 export interface ContentIssue {
 	path: string;
@@ -206,18 +196,11 @@ export interface AssessedWord {
 	issues: ContentIssue[];
 }
 
-export interface AssessedPattern {
-	index: number;
-	publishable: boolean;
-	issues: ContentIssue[];
-}
-
 export interface AssessedPack {
 	schemaError: string | null;
 	pack: EnglishPack | null;
 	issues: ContentIssue[];
 	words: AssessedWord[];
-	patterns: AssessedPattern[];
 }
 
 function issue(path: string, code: string, message: string, blocksGrade: boolean): ContentIssue {
@@ -516,6 +499,9 @@ function assessWord(word: PackWord, index: number, pack: EnglishPack, newPack: b
 			true,
 		));
 	}
+	for (const item of issues) {
+		if (OPTIONAL_FIELD_CODES.has(item.code)) item.blocksGrade = false;
+	}
 	const blocking = issues.filter((item) => item.blocksGrade && item.code !== 'usage_examples');
 	return {
 		index,
@@ -526,58 +512,19 @@ function assessWord(word: PackWord, index: number, pack: EnglishPack, newPack: b
 	};
 }
 
-function assessPattern(pattern: PackPattern, index: number, audioFiles: string[]): AssessedPattern {
-	const path = `patterns.${index}`;
-	const issues: ContentIssue[] = [];
-	if (!pattern.purposeVi.trim()) issues.push(issue(path, 'purpose', 'Thiếu mục đích giao tiếp của mẫu câu.', true));
-	if (!pattern.frame.includes('___')) issues.push(issue(path, 'frame', 'Khung mẫu cần có vị trí thay thế ___ .', true));
-	if (pattern.fixedParts.map((part) => part.trim()).filter(Boolean).length < 1) {
-		issues.push(issue(path, 'fixed_parts', 'Cần ít nhất một phần cố định để chấm.', true));
-	}
-	const blanks = pattern.frame.split('___').length - 1;
-	if (pattern.slots.length !== blanks) {
-		issues.push(issue(path, 'slots', 'Số vị trí thay thế phải khớp với số chỗ ___ trong khung.', true));
-	}
-	if (pattern.slots.some((slot) => !slot.id.trim() || !slot.labelVi.trim() || slot.choices.filter(Boolean).length < 1)) {
-		issues.push(issue(path, 'slot_choices', 'Mỗi vị trí thay thế cần nhãn và ít nhất một lựa chọn.', true));
-	}
-	if (pattern.examples.length < EN_PATTERN_MIN_EXAMPLES) {
-		issues.push(issue(path, 'examples', `Mẫu câu cần ít nhất ${EN_PATTERN_MIN_EXAMPLES} ví dụ với bộ thành phần khác nhau.`, true));
-	}
-	pattern.examples.forEach((example, exampleIndex) => {
-		const examplePath = `${path}.examples.${exampleIndex}`;
-		if (!isFullVietnameseMeaning(example.meaningVi, pattern.purposeVi)) {
-			issues.push(issue(examplePath, 'meaning_vi', 'Ví dụ mẫu câu cần nghĩa tiếng Việt đầy đủ.', true));
-		}
-		if (!audioListed(example.audioFile, audioFiles)) {
-			issues.push(issue(examplePath, 'audio', 'Ví dụ mẫu câu cần file audio có trong bảng đối chiếu.', true));
-		}
-		if (!fixedPartsInOrder(example.english, pattern.fixedParts)) {
-			issues.push(issue(examplePath, 'fixed_parts', 'Câu ví dụ phải chứa các phần cố định đúng thứ tự.', true));
-		}
-		const missingSlot = pattern.slots.some((slot) => !example.slotValues.some((value) => value.id === slot.id && value.value.trim()));
-		if (missingSlot) issues.push(issue(examplePath, 'slot_values', 'Ví dụ thiếu giá trị cho vị trí thay thế.', true));
-	});
-	return { index, publishable: issues.length === 0, issues };
-}
-
 export function assessEnglishPack(input: unknown): AssessedPack {
 	const parsed = englishPackSchema.safeParse(input);
 	if (!parsed.success) {
 		const message = parsed.error.issues[0]?.message ?? 'Gói nội dung không đúng cấu trúc.';
-		return { schemaError: message, pack: null, issues: [], words: [], patterns: [] };
+		return { schemaError: message, pack: null, issues: [], words: [] };
 	}
 	if (!parsed.data.title.trim()) {
 		const titleIssue = issue('title', 'title', 'Thiếu tên bộ học.', true);
-		return { schemaError: null, pack: parsed.data, issues: [titleIssue], words: [], patterns: [] };
+		return { schemaError: null, pack: parsed.data, issues: [titleIssue], words: [] };
 	}
 	const newPack = packIsNew(parsed.data);
 	const pack = normalizeEnglishPack(parsed.data);
 	const words = pack.words.map((word, index) => assessWord(word, index, pack, newPack));
-	const patterns = pack.patterns.map((pattern, index) => assessPattern(pattern, index, pack.audioFiles));
-	const issues = [
-		...words.flatMap((word) => word.issues),
-		...patterns.flatMap((pattern) => pattern.issues),
-	];
-	return { schemaError: null, pack, issues, words, patterns };
+	const issues = words.flatMap((word) => word.issues);
+	return { schemaError: null, pack, issues, words };
 }

@@ -210,11 +210,18 @@ Nguyên tắc: **ẩn trước, xoá sau**. Mỗi giai đoạn tự đứng đư
 
 ### Tiến độ triển khai
 
-- Đã có lịch Leitner thuần, migration cộng thêm/backfill, bảng `EnReview`, API và luồng UI “Hôm nay”; nav còn “Hôm nay / Bộ từ / Tiến độ”, các trang `/review` và `/mistakes` redirect về `/`.
-- Trạng thái cũ vẫn được giữ song song trong schema và DB để các luồng Test/Practice/Gamification hiện hữu chưa bị gãy. Chưa xóa Question bank, Pattern, gamification, Test hay các route admin/API tương ứng.
-- Rà soát lần 2 (mục 7) đã sửa xong B1–B7. Có thêm 2 migration: `20261026005000_due_at_day_start` (đổi `dueAt` về 00:00 giờ VN) và `20261026006000_review_scheduled` (thêm cột `EnReview.scheduled`, để độ chính xác không tính các lượt làm lại).
-- UI theo mục 8 đã làm xong: Hôm nay (`TodayHome`), phiên học tập trung (`StudySession`) có tổng kết, Tiến độ, Bộ từ (tiến độ từng bộ; trang bộ từ chỉ còn Danh sách từ + Luyện tự do). `/quests` chuyển hướng về `/`.
-- Còn lại: bỏ các API/màn Test và gamification khỏi code (giai đoạn 2), hạ validator theo trường được giữ, rồi xoá bảng/cột cũ (giai đoạn 3). Giai đoạn 0 (xoá Question bank, Dispute, AudioOpen, Pattern) vẫn chưa chạy vì cần `DROP TABLE` trên DB có dữ liệu.
+- **Giai đoạn 1 xong.** Lịch Leitner thuần (`schedule.ts`), bảng `EnReview`, luồng ôn `StudySession`, B1–B7 ở mục 7 đã sửa.
+- **Tái thiết kế theo yêu cầu giáo viên (2026-10-26).** Người học tự chủ, ba tab:
+  - **Tổng quan** (`/`): 4 nhiệm vụ ngày (Tổng hợp + 3 bài kiểm tra MCQ, Điền từ, Nghe-viết), các bộ đang học, thống kê ngắn.
+  - **Luyện tập** (`/sets`): mỗi bộ có Luyện tập (không chấm, không ghi DB) và Kiểm tra (20 câu, chấm điểm, lưu trong `EnTestAttempt`/`EnTestItem` với `blueprint = { kind, v: 2 }`).
+  - **Tổng hợp** (`/review`): chế độ **duy nhất** đổi lịch ôn. Có vòng "Luyện thêm 20 từ yếu nhất".
+  - Điều này thay quyết định "bỏ Test riêng" ở mục 6.1: bài kiểm tra quay lại nhưng chỉ là nhiệm vụ ngày, không đổi lịch ôn, không chống gian lận.
+  - Luật lịch đổi một điểm: trả lời **sai luôn hạ về hộp 1** kể cả khi chưa đến hạn. Từ đã ở hộp 1 và đang chờ ngày mai thì sai thêm không tính thêm lần quên.
+- **Giai đoạn 0, 2, 3 xong.** Migration `20261026007000_drop_legacy_learning` xoá 15 bảng (Question, AnswerLog, AudioOpen, Dispute, Pattern*, ActivityType, TestBlueprint, TestWordResult, XpEvent, Quest, Reward, DailyNote, PatternProgress), các cột cũ của `EnWordState` (`status`, `inMistakeBook`, …) và các cột gamification của `EnLearnerProfile`. Schema còn 16 model.
+  - Đã xoá `enTestService`, `enPracticeService`, `enAnswerService`, `enActivityService`, `enProgressService`, `gamify/*`, `questions.ts`, các route `/api/test|practice|gamify|dispute|audio-open|mistakes|progress` và tab admin Dạng bài / Cấu trúc Test / Duyệt đáp án.
+  - Validator: các trường "Ngừng soạn" (gợi ý, định nghĩa EN, nghĩa nhiễu, lỗi thường gặp, trọng âm, cặp đối chiếu) chỉ còn là cảnh báo. Xuất bản không còn đòi đúng 3 gợi ý.
+  - Các trường nội dung "Ngừng soạn" vẫn giữ cột trong DB (mục 3.4: "để trường, không bắt buộc"), vì gói nội dung cũ vẫn có và thẻ từ còn hiển thị một phần.
+- Trước khi chạy migration xoá bảng trên DB local đã `pg_dump`. Khi deploy lên server có dữ liệu thật cũng phải `pg_dump` trước.
 
 ## 7. Rà soát lần 2: lỗi trong bản cài đặt đầu của giai đoạn 1
 

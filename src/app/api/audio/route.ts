@@ -5,10 +5,8 @@ import { readEnglishAudio } from '@/services/english/enAudioService';
 export const GET = withAuth(async (request) => {
 	const params = request.nextUrl.searchParams;
 	const file = await readEnglishAudio({
-		questionId: params.get('questionId'),
 		senseId: params.get('senseId'),
 		exampleId: params.get('exampleId'),
-		patternExampleId: params.get('patternExampleId'),
 	});
 	return new NextResponse(new Uint8Array(file.bytes), {
 		headers: {

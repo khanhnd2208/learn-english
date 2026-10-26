@@ -30,20 +30,9 @@ async function readInsideRoot(relativeName: string): Promise<{ bytes: Buffer; ty
 }
 
 export async function readEnglishAudio(query: {
-	questionId?: string | null;
 	senseId?: string | null;
-	patternExampleId?: string | null;
 	exampleId?: string | null;
 }): Promise<{ bytes: Buffer; type: string }> {
-	if (query.questionId) {
-		const question = await prisma.enQuestion.findFirst({
-			where: { id: query.questionId, status: 'published' },
-			select: { audioPath: true },
-		});
-		const file = question ? await readInsideRoot(question.audioPath) : null;
-		if (!file) throw new AppError('Chưa có audio cho câu này', 404);
-		return file;
-	}
 	if (query.senseId) {
 		const sense = await prisma.enSense.findFirst({
 			where: { id: query.senseId, status: 'published' },
@@ -52,15 +41,6 @@ export async function readEnglishAudio(query: {
 		const audioName = sense?.word.audioPath || sense?.word.audioUkPath || sense?.word.audioUsPath || '';
 		const file = sense ? await readInsideRoot(audioName) : null;
 		if (!file) throw new AppError('Chưa có audio cho từ này', 404);
-		return file;
-	}
-	if (query.patternExampleId) {
-		const example = await prisma.enPatternExample.findFirst({
-			where: { id: query.patternExampleId, status: 'published' },
-			select: { audioPath: true },
-		});
-		const file = example ? await readInsideRoot(example.audioPath) : null;
-		if (!file) throw new AppError('Chưa có audio cho mẫu câu', 404);
 		return file;
 	}
 	if (query.exampleId) {

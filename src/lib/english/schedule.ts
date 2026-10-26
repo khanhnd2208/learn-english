@@ -45,12 +45,18 @@ export function scheduleAnswer(state: { box: number; lapses: number } | null, co
 	return { box: nextBox(box, correct), lapses: correct ? lapses : lapses + 1 };
 }
 
-/** Wrong answers always reset to box 1, including early practice in Review. */
+/**
+ * Wrong answers always reset to box 1, including early practice in Review.
+ * A word already back in box 1 and waiting for tomorrow is left alone, so an in-session
+ * retry does not count a second lapse.
+ */
 export function scheduleMove(state: Pick<ScheduledState, 'box' | 'lapses' | 'dueAt'> | null, correct: boolean, now: Date) {
 	const box = state?.box ?? 0;
 	const lapses = state?.lapses ?? 0;
+	const waiting = Boolean(state) && box > 0 && state!.dueAt > now;
+	if (!correct && waiting && box <= 1) return { box, lapses, dueAt: state!.dueAt, scheduled: false };
 	if (!correct) return { box: 1, lapses: lapses + (box > 0 ? 1 : 0), dueAt: dueAt(1, now), scheduled: true };
-	if (state && box > 0 && state.dueAt > now) return { box, lapses, dueAt: state.dueAt, scheduled: false };
+	if (waiting) return { box, lapses, dueAt: state!.dueAt, scheduled: false };
 	const next = scheduleAnswer(state, true);
 	return { ...next, dueAt: dueAt(next.box, now), scheduled: true };
 }
