@@ -4,7 +4,6 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Button from '@/components/ui/Button';
 import { Card, CardContent } from '@/components/ui/Card';
-import EnglishAdminSettings from '@/components/english/EnglishAdminSettings';
 import EnglishAdminQaTools from '@/components/english/EnglishAdminQaTools';
 import type { EnglishPackPreview } from '@/lib/english/packPreview';
 import { sampleEnglishPack } from '@/lib/english/samplePack';
@@ -23,21 +22,14 @@ interface SetRow {
 	learners: number;
 }
 
-interface DisputeRow {
-	id: string;
-	answer: string;
-	expected: string;
-	skill: string;
-}
-
-export default function EnglishAdmin({ sets, disputes, qaEnabled }: { sets: SetRow[]; disputes: DisputeRow[]; qaEnabled: boolean }) {
+export default function EnglishAdmin({ sets, qaEnabled }: { sets: SetRow[]; qaEnabled: boolean }) {
 	const router = useRouter();
 	const [text, setText] = useState('');
 	const [issues, setIssues] = useState<Issue[]>([]);
 	const [preview, setPreview] = useState<EnglishPackPreview | null>(null);
 	const [message, setMessage] = useState('');
 	const [busy, setBusy] = useState(false);
-	const [panel, setPanel] = useState<'content' | 'activities' | 'blueprint' | 'qa'>('content');
+	const [panel, setPanel] = useState<'content' | 'qa'>('content');
 
 	async function send(action: 'preview' | 'save') {
 		setBusy(true);
@@ -59,7 +51,7 @@ export default function EnglishAdmin({ sets, disputes, qaEnabled }: { sets: SetR
 			setPreview(action === 'preview' ? body.data?.preview ?? null : null);
 			setMessage(action === 'save'
 				? `Đã lưu bản nháp${body.data?.setId ? ` ${body.data.setId}` : ''}.`
-				: `Xem trước: ${body.data?.drafts ?? 0} câu có thể đưa vào ôn nếu đủ audio.`);
+				: `Xem trước: ${body.data?.drafts ?? 0} từ đủ điều kiện xuất bản.`);
 			if (action === 'save') router.refresh();
 		} catch (error) {
 			setMessage(error instanceof Error ? error.message : 'JSON không hợp lệ');
@@ -77,31 +69,13 @@ export default function EnglishAdmin({ sets, disputes, qaEnabled }: { sets: SetR
 				headers: { 'Content-Type': 'application/json' },
 				body: JSON.stringify({ setId }),
 			});
-			const body = await response.json() as { ok?: boolean; error?: string; data?: { issues?: Issue[]; publishedSenses?: number; publishedPatterns?: number } };
+			const body = await response.json() as { ok?: boolean; error?: string; data?: { issues?: Issue[]; publishedSenses?: number } };
 			if (!response.ok || !body.ok) throw new Error(body.error ?? 'Không xuất bản được');
 			setIssues(body.data?.issues ?? []);
-			setMessage(`Đã xuất bản ${body.data?.publishedSenses ?? 0} từ và ${body.data?.publishedPatterns ?? 0} mẫu. Câu thiếu audio hoặc còn mơ hồ được giữ lại.`);
+			setMessage(`Đã xuất bản ${body.data?.publishedSenses ?? 0} từ. Từ còn thiếu trường bắt buộc được giữ lại.`);
 			router.refresh();
 		} catch (error) {
 			setMessage(error instanceof Error ? error.message : 'Không xuất bản được');
-		} finally {
-			setBusy(false);
-		}
-	}
-
-	async function resolve(disputeId: string, decision: 'accepted' | 'rejected') {
-		setBusy(true);
-		try {
-			const response = await fetch('/api/admin/disputes', {
-				method: 'POST',
-				headers: { 'Content-Type': 'application/json' },
-				body: JSON.stringify({ disputeId, decision }),
-			});
-			const body = await response.json() as { ok?: boolean; error?: string };
-			if (!response.ok || !body.ok) throw new Error(body.error ?? 'Không duyệt được');
-			router.refresh();
-		} catch (error) {
-			setMessage(error instanceof Error ? error.message : 'Không duyệt được');
 		} finally {
 			setBusy(false);
 		}
@@ -111,15 +85,12 @@ export default function EnglishAdmin({ sets, disputes, qaEnabled }: { sets: SetR
 		<div className="mx-auto max-w-3xl space-y-8 px-4 py-8">
 			<header>
 				<h1 className="text-3xl font-black text-foreground">Nội dung tiếng Anh</h1>
-				<p className="mt-2 text-sm text-muted">Dán JSON do AI tạo. Câu thiếu nghĩa Việt, audio hoặc còn mơ hồ không vào phiên ôn. File audio phải nằm trong thư mục ENGLISH_AUDIO_ROOT, ngoài thư mục release.</p>
+				<p className="mt-2 text-sm text-muted">Dán JSON do AI tạo. Từ thiếu nghĩa Việt hoặc câu ví dụ hợp lệ không được xuất bản. File audio phải nằm trong thư mục ENGLISH_AUDIO_ROOT, ngoài thư mục release.</p>
 			</header>
 			<div className="flex gap-2">
 				<Button type="button" variant={panel === 'content' ? 'primary' : 'secondary'} onClick={() => setPanel('content')}>Nội dung</Button>
-				<Button type="button" variant={panel === 'activities' ? 'primary' : 'secondary'} onClick={() => setPanel('activities')}>Dạng bài</Button>
-				<Button type="button" variant={panel === 'blueprint' ? 'primary' : 'secondary'} onClick={() => setPanel('blueprint')}>Cấu trúc Test</Button>
 				{qaEnabled && <Button type="button" variant={panel === 'qa' ? 'primary' : 'secondary'} onClick={() => setPanel('qa')}>Công cụ test</Button>}
 			</div>
-			{(panel === 'activities' || panel === 'blueprint') && <EnglishAdminSettings panel={panel} />}
 			{panel === 'qa' && <EnglishAdminQaTools sets={sets} />}
 			{panel === 'content' && <>
 			<Card>
@@ -197,22 +168,6 @@ export default function EnglishAdmin({ sets, disputes, qaEnabled }: { sets: SetR
 								<p className="text-xs text-muted">{set.status} · {set.items} mục · {set.learners} người học</p>
 							</div>
 							<Button type="button" variant="secondary" disabled={busy} onClick={() => void publish(set.id)}>Xuất bản</Button>
-						</CardContent>
-					</Card>
-				))}
-			</section>
-			<section className="space-y-3">
-				<h2 className="text-xl font-black">Đáp án đang chờ duyệt</h2>
-				{disputes.length === 0 && <p className="text-sm text-muted">Không có báo cáo chờ.</p>}
-				{disputes.map((dispute) => (
-					<Card key={dispute.id}>
-						<CardContent className="space-y-2">
-							<p>Người học: <span className="font-bold">{dispute.answer}</span></p>
-							<p className="text-sm text-muted">Đáp án mục tiêu: {dispute.expected} · {dispute.skill}</p>
-							<div className="flex gap-2">
-								<Button type="button" disabled={busy} onClick={() => void resolve(dispute.id, 'accepted')}>Chấp nhận</Button>
-								<Button type="button" variant="secondary" disabled={busy} onClick={() => void resolve(dispute.id, 'rejected')}>Không chấp nhận</Button>
-							</div>
 						</CardContent>
 					</Card>
 				))}

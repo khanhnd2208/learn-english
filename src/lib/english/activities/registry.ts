@@ -69,6 +69,7 @@ function meaningChoice(sense: SenseBundle, ctx: ActivityContext): ActivityItem |
 	if (!choices) return null;
 	return base(sense, 'meaning_choice', 'recognize', {
 		kind: 'meaning_choice',
+		senseId: sense.sense.id,
 		lemma: sense.word.lemma,
 		ipa: sense.sense.ipaOverride || sense.word.ipa,
 		choices,
@@ -142,7 +143,7 @@ function spellHinted(sense: SenseBundle): ActivityItem | null {
 function recallType(sense: SenseBundle, ctx: ActivityContext): ActivityItem | null {
 	const cloze = ctx.rng.pick(clozeExamples(sense));
 	const meaning = sense.sense.meaningVi.trim();
-	const useCloze = Boolean(cloze) && (!meaning || ctx.rng.next() < 0.5);
+	const useCloze = ctx.recallPrompt !== 'meaning' && Boolean(cloze) && (!meaning || ctx.rng.next() < 0.5);
 	if (useCloze && cloze) {
 		return base(sense, 'recall_type', 'recall', {
 			kind: 'recall_type',
@@ -157,6 +158,7 @@ function recallType(sense: SenseBundle, ctx: ActivityContext): ActivityItem | nu
 		kind: 'recall_type',
 		mode: 'meaning',
 		meaningVi: meaning,
+		partOfSpeech: sense.sense.partOfSpeech,
 	}, sense.word.lemma, sense.word.forms.filter((form) => normalizeLearnerText(form) !== normalizeLearnerText(sense.word.lemma)));
 }
 

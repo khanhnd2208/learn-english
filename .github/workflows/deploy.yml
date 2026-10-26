@@ -1,0 +1,64 @@
+# Deploy lên VPS qua app-deploy (repo hạ tầng riêng, không public).
+# Tự chạy sau khi workflow Quality xanh trên main; hoặc Run workflow / `vps deploy learn-english`.
+# Bản mới build trong releases/ trong khi bản cũ vẫn chạy; health check lỗi thì tự quay lại.
+#
+# Secrets trong environment "production": VPS_HOST, VPS_SSH_KEY, VPS_KNOWN_HOSTS.
+
+name: Deploy to VPS
+
+on:
+  # Tự deploy sau khi workflow kiểm tra chất lượng xanh trên main.
+  workflow_run:
+    workflows: [Quality]
+    types: [completed]
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: deploy-production
+  cancel-in-progress: false
+
+env:
+  APP_ID: learn-english
+
+jobs:
+  deploy:
+    # Repo public: chỉ deploy commit đã push thẳng lên main của repo này.
+    # Quality cũng chạy cho PR từ fork; không bao giờ deploy bản chạy từ fork.
+    if: >-
+      (github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main') ||
+      (github.event_name == 'workflow_run' &&
+        github.event.workflow_run.conclusion == 'success' &&
+        github.event.workflow_run.event == 'push' &&
+        github.event.workflow_run.head_branch == 'main' &&
+        github.event.workflow_run.head_repository.full_name == github.repository)
+    runs-on: ubuntu-latest
+    environment: production
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.workflow_run.head_sha || github.sha }}
+
+      - name: Configure SSH
+        env:
+          VPS_SSH_KEY: ${{ secrets.VPS_SSH_KEY }}
+          VPS_KNOWN_HOSTS: ${{ secrets.VPS_KNOWN_HOSTS }}
+        run: |
+          set -euo pipefail
+          install -d -m 700 ~/.ssh
+          printf '%s\n' "$VPS_SSH_KEY" > ~/.ssh/deploy_key && chmod 600 ~/.ssh/deploy_key
+          printf '%s\n' "$VPS_KNOWN_HOSTS" > ~/.ssh/known_hosts && chmod 600 ~/.ssh/known_hosts
+
+      - name: Deploy with app-deploy
+        env:
+          VPS_HOST: ${{ secrets.VPS_HOST }}
+        run: |
+          set -euo pipefail
+          sha="$(git rev-parse --short=12 HEAD)"
+          git archive --format=tar.gz HEAD |
+            ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=yes "deploy@${VPS_HOST}" \
+              "/opt/vps/bin/app-deploy ${APP_ID} - ${sha}"

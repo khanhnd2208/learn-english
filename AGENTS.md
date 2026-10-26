@@ -33,9 +33,16 @@ npm run typecheck
 - API responses use helpers in `src/lib/apiUtils.ts`.
 - Read the relevant Next.js 16 guide in `node_modules/next/dist/docs/` before changing framework behavior.
 
+## Git and deploy (standing permission from the owner)
+
+- After a change passes `npm run quality`, commit, push, open or update the PR, merge it, and deploy without asking again.
+- Work on a feature branch; never commit straight to `main`.
+- Ask first only when it is truly needed: destructive data changes on a database with real learner data (DROP, deleting progress), new secrets, domains or DNS, or a failure you cannot fix safely.
+- Back up a database with `pg_dump` before running a destructive migration on it.
+
 <!-- BEGIN:nextjs-agent-rules -->
 
-# This is NOT the Next.js you know
+## This is NOT the Next.js you know
 
 This version has breaking changes — APIs, conventions, and file structure may all differ from your training data. Read the relevant guide in `node_modules/next/dist/docs/` (resolved from this file's directory; in monorepos the `next` package may not be visible from the repo root) before writing any code. Heed deprecation notices.
 

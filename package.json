@@ -14,7 +14,6 @@
     "quality": "npm test && npm run lint && npm run typecheck && npm run build",
     "quality:prod": "npm run quality && npm run audit:prod && npm run db:migrate:status",
     "audit:prod": "npm audit --omit=dev --audit-level=high",
-    "db:seed": "npx tsx prisma/seed.ts",
     "db:seed:samples": "tsx scripts/seed-english-sample-sets.ts",
     "db:verify-transfer": "tsx scripts/verify-english-transfer.ts",
     "db:migrate": "npx prisma migrate dev",
@@ -22,9 +21,6 @@
     "db:push": "npx prisma db push",
     "db:studio": "npx prisma studio",
     "postinstall": "prisma generate"
-  },
-  "prisma": {
-    "seed": "npx tsx prisma/seed.ts"
   },
   "dependencies": {
     "@auth/mongodb-adapter": "^3.11.3",
@@ -36,13 +32,13 @@
     "dotenv-expand": "^13.0.0",
     "exceljs": "4.4.0",
     "mongodb": "^6.21.0",
-    "next": "^16.3.8",
+    "next": "^16.4.3",
     "next-auth": "^5.0.0-beta.32",
     "pg": "^8.20.0",
     "prisma": "^7.10.0",
     "react": "^19.2.4",
     "react-dom": "^19.2.4",
-    "zod": "^4.4.3"
+    "zod": "^4.6.7"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
@@ -51,7 +47,7 @@
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "eslint": "^9.39.2",
-    "eslint-config-next": "16.3.8",
+    "eslint-config-next": "^16.4.3",
     "tailwindcss": "^4",
     "tsx": "^4.20.5",
     "typescript": "^5",

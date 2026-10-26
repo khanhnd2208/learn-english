@@ -1,5 +1,5 @@
 import { notFound, redirect } from 'next/navigation';
-import EnglishSetStudio from '@/components/english/EnglishSetStudio';
+import SetDetail from '@/components/english/SetDetail';
 import { auth } from '@/lib/auth';
 import { AppError } from '@/lib/appError';
 import { getEnglishSetDetail } from '@/services/english/enCatalogService';
@@ -17,5 +17,5 @@ export default async function EnglishSetPage({ params }: { params: Promise<{ set
 		if (error instanceof AppError && error.status === 404) notFound();
 		throw error;
 	}
-	return <EnglishSetStudio detail={detail} />;
+	return <SetDetail detail={detail} />;
 }

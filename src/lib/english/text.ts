@@ -73,19 +73,6 @@ export function splitBlank(english: string): { before: string; after: string } |
 	return { before: parts[0] ?? '', after: parts[1] ?? '' };
 }
 
-export function fixedPartsInOrder(english: string, fixedParts: string[]): boolean {
-	let from = 0;
-	const lower = english.toLowerCase();
-	for (const part of fixedParts) {
-		const needle = part.trim().toLowerCase();
-		if (!needle) return false;
-		const idx = lower.indexOf(needle, from);
-		if (idx < 0) return false;
-		from = idx + needle.length;
-	}
-	return true;
-}
-
 /** Identity key for one English entry. Keeps hyphens and single spaces (phrasal verbs). */
 export function lemmaKeyOf(lemma: string): string {
 	return lemma.trim().toLowerCase().replace(/\s+/g, ' ');

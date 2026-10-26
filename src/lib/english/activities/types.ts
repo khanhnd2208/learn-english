@@ -30,6 +30,7 @@ export interface ActivityContext {
 	rng: Rng;
 	preferOutsideTest?: boolean;
 	allowSyntheticAudio?: boolean;
+	recallPrompt?: 'meaning' | 'any';
 }
 
 export interface ActivityDefinition {
@@ -42,5 +43,3 @@ export interface ActivityDefinition {
 	build(sense: SenseBundle, ctx: ActivityContext): ActivityItem | null;
 	grade?(item: ActivityItem, answer: string): boolean;
 }
-
-export const PRACTICE_PATH: ActivityKey[] = ['meaning_choice', 'cloze_choice', 'spell_hinted', 'recall_type'];

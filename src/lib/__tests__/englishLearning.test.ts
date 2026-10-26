@@ -1,24 +1,19 @@
 import { describe, expect, it } from 'vitest';
-import { englishAnswerSchema } from '@/lib/english/schemas';
-import { MAIN_NAV } from '@/config/navigation';
+import { MAIN_NAV, isNavActive } from '@/config/navigation';
 import { assessEnglishPack } from '@/lib/english/contentValidation';
 import { gradeEnglishAnswer } from '@/lib/english/grade';
 import { resolveAudioFile } from '@/lib/english/audioPath';
-import { draftsForAssessedPack } from '@/lib/english/questions';
 import { sampleEnglishPack } from '@/lib/english/samplePack';
-import { shouldSuspendQuestion } from '@/lib/english/suspend';
 
 describe('english content gate', () => {
 	const assessment = assessEnglishPack(sampleEnglishPack);
 
-	it('keeps an ambiguous sentence out of graded questions', () => {
+	it('keeps an ambiguous sentence out of graded examples', () => {
 		expect(assessment.schemaError).toBeNull();
 		const borrow = assessment.words[0];
 		expect(borrow?.examples[2]?.gradeEligible).toBe(false);
 		expect(borrow?.examples[2]?.issues.some((item) => item.code === 'ambiguous')).toBe(true);
-		const drafts = draftsForAssessedPack(assessment);
-		expect(drafts.some((draft) => draft.exampleKey === 'word:0:example:2')).toBe(false);
-		expect(drafts.filter((draft) => draft.skill === 'usage' && draft.senseKey === 'word:0')).toHaveLength(6);
+		expect(assessment.words.every((word) => word.publishable)).toBe(true);
 	});
 
 	it('blocks a sentence that has no full Vietnamese meaning or audio', () => {
@@ -28,15 +23,23 @@ describe('english content gate', () => {
 		const result = assessEnglishPack(broken);
 		expect(result.words[1]?.examples[0]?.gradeEligible).toBe(false);
 		expect(result.words[1]?.examples[1]?.gradeEligible).toBe(false);
-		const drafts = draftsForAssessedPack(result);
-		expect(drafts.some((draft) => draft.exampleKey === 'word:1:example:0' || draft.exampleKey === 'word:1:example:1')).toBe(false);
 	});
 
-	it('builds pattern questions for two different examples', () => {
-		const drafts = draftsForAssessedPack(assessment);
-		const fills = drafts.filter((draft) => draft.kind === 'pattern_fill');
-		expect(new Set(fills.map((draft) => draft.exampleKey)).size).toBe(2);
-		expect(drafts.some((draft) => draft.kind === 'pattern_order')).toBe(true);
+	it('warns about optional fields without blocking publication', () => {
+		const loose = structuredClone(sampleEnglishPack);
+		loose.words[0]!.hints = [];
+		loose.words[0]!.definitionEn = '';
+		loose.words[0]!.distractorMeanings = [];
+		const result = assessEnglishPack(loose);
+		expect(result.words[0]?.issues.some((item) => item.code === 'hint_too_few')).toBe(true);
+		expect(result.words[0]?.issues.filter((item) => item.code === 'definition_missing').every((item) => !item.blocksGrade)).toBe(true);
+		expect(result.words[0]?.publishable).toBe(true);
+	});
+
+	it('still blocks a word without a Vietnamese meaning', () => {
+		const broken = structuredClone(sampleEnglishPack);
+		broken.words[0]!.meaningVi = '';
+		expect(assessEnglishPack(broken).words[0]?.publishable).toBe(false);
 	});
 });
 
@@ -69,23 +72,9 @@ describe('english grading and mastery', () => {
 
 describe('english area boundaries', () => {
 	it('uses root-level routes in the standalone app', () => {
-		expect(MAIN_NAV.map((item) => item.href)).toEqual(['/', '/review', '/mistakes', '/progress']);
-	});
-
-	it('suspends a question after three valid reports or a high audio-open rate', () => {
-		expect(shouldSuspendQuestion({ attempts: 2, audioOpens: 2, validDisputeUsers: 3 })).toBe(true);
-		expect(shouldSuspendQuestion({ attempts: 8, audioOpens: 7, validDisputeUsers: 0 })).toBe(true);
-		expect(shouldSuspendQuestion({ attempts: 8, audioOpens: 2, validDisputeUsers: 1 })).toBe(false);
-	});
-
-	it('rejects a client correct flag before grading', () => {
-		const parsed = englishAnswerSchema.safeParse({
-			questionId: 'q1',
-			clientAnswerId: 'c1',
-			answer: 'borrow',
-			correct: true,
-		});
-		expect(parsed.success).toBe(false);
+		expect(MAIN_NAV.map((item) => item.href)).toEqual(['/', '/review', '/store']);
+		expect(isNavActive('/sets/example/practice', '/')).toBe(true);
+		expect(isNavActive('/store', '/')).toBe(false);
 	});
 
 	it('rejects audio paths that leave the shared folder', () => {

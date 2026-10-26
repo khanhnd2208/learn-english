@@ -3,7 +3,6 @@ import { withAdmin, apiSuccess, apiError } from '@/lib/apiUtils';
 import { EN_MAX_JSON_BODY_BYTES } from '@/lib/english/constants';
 import { assessEnglishPack } from '@/lib/english/contentValidation';
 import { previewEnglishPack } from '@/lib/english/packPreview';
-import { draftsForAssessedPack } from '@/lib/english/questions';
 import { saveEnglishPack } from '@/services/english/enContentService';
 
 const bodySchema = z.object({
@@ -23,7 +22,7 @@ export const POST = withAdmin(async (request) => {
 		if (assessment.schemaError) return apiError(assessment.schemaError, 400);
 		return apiSuccess({
 			issues: assessment.issues,
-			drafts: draftsForAssessedPack(assessment).length,
+			drafts: assessment.words.filter((word) => word.publishable).length,
 			preview: assessment.pack ? previewEnglishPack(assessment.pack) : null,
 		});
 	}

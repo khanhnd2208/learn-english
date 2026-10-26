@@ -40,41 +40,41 @@ describe('english pack vocabulary rules', () => {
 		expect(codes(result).codes.has('hint_leaks_lemma')).toBe(false);
 	});
 
-	it('blocks a hint that leaks the lemma, an inflection, or a family member', () => {
+	it('warns when a hint leaks the lemma, an inflection, or a family member', () => {
 		for (const text of ['You borrow a pen.', 'She borrowed it.', 'Ask the borrower.']) {
 			const source = pack();
 			source.words[0]!.hints[0]!.textEn = text;
 			const result = assessEnglishPack(source);
-			expect(codes(result).issue('hint_leaks_lemma')?.blocksGrade).toBe(true);
-			expect(result.words[0]?.publishable).toBe(false);
+			expect(codes(result).issue('hint_leaks_lemma')?.blocksGrade).toBe(false);
+			expect(result.words[0]?.publishable).toBe(true);
 		}
 	});
 
-	it('blocks a hint that repeats the Vietnamese meaning and warns on order gaps or too few hints', () => {
+	it('only warns about hints, which are optional content', () => {
 		const same = pack();
 		same.words[0]!.hints[0]!.textVi = 'Mượn';
-		expect(codes(assessEnglishPack(same)).issue('hint_equals_meaning')?.blocksGrade).toBe(true);
+		expect(codes(assessEnglishPack(same)).issue('hint_equals_meaning')?.blocksGrade).toBe(false);
 
 		const gap = pack();
 		gap.words[0]!.hints[0]!.order = 1;
 		gap.words[0]!.hints[1]!.order = 2;
 		gap.words[0]!.hints[2]!.order = 4;
 		const gapped = assessEnglishPack(gap);
-		expect(codes(gapped).issue('hint_order_gap')?.blocksGrade).toBe(true);
-		expect(gapped.words[0]?.publishable).toBe(false);
+		expect(codes(gapped).issue('hint_order_gap')?.blocksGrade).toBe(false);
+		expect(gapped.words[0]?.publishable).toBe(true);
 
 		const few = pack();
 		few.words[0]!.hints = [few.words[0]!.hints[0]!];
 		const short = assessEnglishPack(few);
-		expect(codes(short).issue('hint_too_few')?.blocksGrade).toBe(true);
-		expect(short.words[0]?.publishable).toBe(false);
+		expect(codes(short).issue('hint_too_few')?.blocksGrade).toBe(false);
+		expect(short.words[0]?.publishable).toBe(true);
 
 		const extra = pack();
 		extra.words[0]!.hints.push({ ...extra.words[0]!.hints[0]!, textEn: 'One more clue about giving something back later.', textVi: 'Thêm một manh mối về việc đưa lại sau.' });
-		expect(codes(assessEnglishPack(extra)).issue('hint_too_many')?.blocksGrade).toBe(true);
+		expect(codes(assessEnglishPack(extra)).issue('hint_too_many')?.blocksGrade).toBe(false);
 	});
 
-	it('keeps an old collocation list and rejects blocked distractors, bad chunks, and unequal errors', () => {
+	it('keeps an old collocation list, rejects blocked distractors, and warns on unequal errors', () => {
 		const legacy = pack();
 		legacy.words[0]!.chunks = [];
 		const converted = assessEnglishPack(legacy);
@@ -87,17 +87,17 @@ describe('english pack vocabulary rules', () => {
 
 		const same = pack();
 		same.words[0]!.commonErrors = [{ wrong: 'I happy.', right: 'I happy.', whyVi: 'Giống nhau.' }];
-		expect(codes(assessEnglishPack(same)).issue('common_error_same')?.blocksGrade).toBe(true);
+		expect(codes(assessEnglishPack(same)).issue('common_error_same')?.blocksGrade).toBe(false);
 
 		const contrast = pack();
 		contrast.words[0]!.relations[0]!.contrast = [{ lemma: 'borrow', en: 'I borrow a pen.', vi: 'Tôi mượn bút.' }];
-		expect(codes(assessEnglishPack(contrast)).issue('contrast_count')?.blocksGrade).toBe(true);
+		expect(codes(assessEnglishPack(contrast)).issue('contrast_count')?.blocksGrade).toBe(false);
 	});
 
-	it('requires an English definition and CEFR on a new pack, and only warns on an old pack', () => {
+	it('requires CEFR on a new pack and only warns about a missing English definition', () => {
 		const missing = pack();
 		missing.words[0]!.definitionEn = '';
-		expect(codes(assessEnglishPack(missing)).issue('definition_missing')?.blocksGrade).toBe(true);
+		expect(codes(assessEnglishPack(missing)).issue('definition_missing')?.blocksGrade).toBe(false);
 
 		const mentioned = pack();
 		mentioned.words[0]!.definitionEn = 'to borrow something for a while';
@@ -176,7 +176,7 @@ describe('english pack vocabulary rules', () => {
 		expect(looseResult.words[0]?.publishable).toBe(true);
 	});
 
-	it('warns on IPA, syllables, topics, and blocks a bad stress index or sense key', () => {
+	it('warns on IPA, syllables, topics and stress, and blocks a bad sense key', () => {
 		const ipa = pack();
 		ipa.words[0]!.ipa = 'bɒrəʊ';
 		ipa.words[0]!.ipaUk = '';
@@ -189,8 +189,8 @@ describe('english pack vocabulary rules', () => {
 
 		const stress = pack();
 		stress.words[0]!.stressIndex = 5;
-		expect(codes(assessEnglishPack(stress)).issue('stress_index_range')?.blocksGrade).toBe(true);
-		expect(assessEnglishPack(stress).words[0]?.publishable).toBe(false);
+		expect(codes(assessEnglishPack(stress)).issue('stress_index_range')?.blocksGrade).toBe(false);
+		expect(assessEnglishPack(stress).words[0]?.publishable).toBe(true);
 
 		const key = pack();
 		key.words[0]!.senseKey = 'Borrow';

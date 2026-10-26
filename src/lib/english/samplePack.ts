@@ -27,7 +27,6 @@ export const sampleEnglishPack: EnglishPack = englishPackSchema.parse({
 		'lend.mp3', 'lend-1.mp3', 'lend-2.mp3',
 		'return.mp3', 'return-1.mp3', 'return-2.mp3',
 		'keep.mp3', 'keep-1.mp3', 'keep-2.mp3',
-		'pattern-1.mp3', 'pattern-2.mp3',
 	],
 	families: [
 		{
@@ -232,39 +231,6 @@ export const sampleEnglishPack: EnglishPack = englishPackSchema.parse({
 			examples: [
 				gradeExample('You can ___ this pen.', 'Bạn có thể giữ cây bút này.', 'keep', 'keep-1.mp3', ['borrow', 'take', 'hold', 'use', 'return']),
 				gradeExample('I will ___ the receipt.', 'Tôi sẽ giữ tờ hóa đơn này.', 'keep', 'keep-2.mp3', ['borrow', 'take', 'hold', 'lose', 'return']),
-			],
-		},
-	],
-	patterns: [
-		{
-			purposeVi: 'Nhờ được dùng đồ của người khác',
-			frame: 'Could I ___ your ___?',
-			fixedParts: ['Could I', 'your'],
-			slots: [
-				{ id: 'verb', labelVi: 'động từ', choices: ['borrow', 'use'] },
-				{ id: 'thing', labelVi: 'đồ vật', choices: ['pen', 'charger'] },
-			],
-			pitfallVi: 'Phần Could I và your giữ nguyên. Chỉ thay động từ và đồ vật.',
-			senseLemmas: ['borrow'],
-			examples: [
-				{
-					english: 'Could I borrow your pen?',
-					meaningVi: 'Tôi có thể mượn bút của bạn không?',
-					audioFile: 'pattern-1.mp3',
-					slotValues: [
-						{ id: 'verb', value: 'borrow' },
-						{ id: 'thing', value: 'pen' },
-					],
-				},
-				{
-					english: 'Could I use your charger?',
-					meaningVi: 'Tôi có thể dùng sạc của bạn không?',
-					audioFile: 'pattern-2.mp3',
-					slotValues: [
-						{ id: 'verb', value: 'use' },
-						{ id: 'thing', value: 'charger' },
-					],
-				},
 			],
 		},
 	],

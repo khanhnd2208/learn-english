@@ -18,7 +18,7 @@ CREATE TABLE "EnXpEvent" (
 CREATE UNIQUE INDEX "EnXpEvent_userId_senseId_kind_key" ON "EnXpEvent"("userId", "senseId", "kind");
 CREATE INDEX "EnXpEvent_userId_createdAt_idx" ON "EnXpEvent"("userId", "createdAt");
 ALTER TABLE "EnXpEvent" ADD CONSTRAINT "EnXpEvent_attemptId_fkey" FOREIGN KEY ("attemptId") REFERENCES "EnTestAttempt"("id") ON DELETE CASCADE ON UPDATE CASCADE;
-CREATE INDEX "EnTestWordResult_userId_senseId_createdAt_idx" ON "EnTestWordResult"("userId", "senseId", "createdAt");
+CREATE INDEX IF NOT EXISTS "EnTestWordResult_userId_senseId_createdAt_idx" ON "EnTestWordResult"("userId", "senseId", "createdAt");
 
 CREATE TABLE "EnQuest" (
   "id" TEXT NOT NULL, "userId" TEXT NOT NULL, "kind" "EnQuestKind" NOT NULL, "setId" TEXT,

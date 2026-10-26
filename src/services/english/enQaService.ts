@@ -17,27 +17,31 @@ function oneDayEarlier(value: Date | null): Date | null {
 	return value ? new Date(value.getTime() - DAY_MS) : null;
 }
 
+/** Pretends a day has passed for the admin's own words in a set: due dates, reviews and tests move one day back. */
 export async function shiftEnglishQaDataOneDay(userId: string, setId: string) {
 	const senseIds = await sensesInSet(setId);
-	const [states, practices, attempts] = await Promise.all([
+	const [states, reviews, attempts] = await Promise.all([
 		prisma.enWordState.findMany({ where: { userId, senseId: { in: senseIds } } }),
-		prisma.enPracticeSession.findMany({ where: { userId, setId } }),
+		prisma.enReview.findMany({ where: { userId, senseId: { in: senseIds } }, select: { id: true, at: true } }),
 		prisma.enTestAttempt.findMany({ where: { userId, setId } }),
 	]);
 	await prisma.$transaction([
-		...states.map((state) => prisma.enWordState.update({ where: { id: state.id }, data: { lastExposureAt: oneDayEarlier(state.lastExposureAt), lastTestedAt: oneDayEarlier(state.lastTestedAt), mistakeAddedAt: oneDayEarlier(state.mistakeAddedAt) } })),
-		...practices.map((session) => prisma.enPracticeSession.update({ where: { id: session.id }, data: { startedAt: oneDayEarlier(session.startedAt)!, endedAt: oneDayEarlier(session.endedAt) } })),
+		...states.map((state) => prisma.enWordState.update({
+			where: { id: state.id },
+			data: { dueAt: oneDayEarlier(state.dueAt)!, introducedAt: oneDayEarlier(state.introducedAt)!, lastReviewedAt: oneDayEarlier(state.lastReviewedAt) },
+		})),
+		...reviews.map((review) => prisma.enReview.update({ where: { id: review.id }, data: { at: oneDayEarlier(review.at)! } })),
 		...attempts.map((attempt) => prisma.enTestAttempt.update({ where: { id: attempt.id }, data: { startedAt: oneDayEarlier(attempt.startedAt)!, finishedAt: oneDayEarlier(attempt.finishedAt) } })),
 	]);
-	return { shiftedStates: states.length, shiftedSessions: practices.length + attempts.length };
+	return { shiftedStates: states.length, shiftedReviews: reviews.length, shiftedTests: attempts.length };
 }
 
 export async function resetEnglishQaProgress(userId: string, setId: string) {
 	const senseIds = await sensesInSet(setId);
-	const [states, practices, attempts] = await prisma.$transaction([
+	const [states, reviews, attempts] = await prisma.$transaction([
 		prisma.enWordState.deleteMany({ where: { userId, senseId: { in: senseIds } } }),
-		prisma.enPracticeSession.deleteMany({ where: { userId, setId } }),
+		prisma.enReview.deleteMany({ where: { userId, senseId: { in: senseIds } } }),
 		prisma.enTestAttempt.deleteMany({ where: { userId, setId } }),
 	]);
-	return { deletedStates: states.count, deletedPracticeSessions: practices.count, deletedTestAttempts: attempts.count };
+	return { deletedStates: states.count, deletedReviews: reviews.count, deletedTestAttempts: attempts.count };
 }
