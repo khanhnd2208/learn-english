@@ -15,6 +15,7 @@
     "quality:prod": "npm run quality && npm run audit:prod && npm run db:migrate:status",
     "audit:prod": "npm audit --omit=dev --audit-level=high",
     "db:seed:samples": "tsx scripts/seed-english-sample-sets.ts",
+    "db:import:pack": "tsx scripts/import-english-pack.ts",
     "db:backfill:xp": "tsx scripts/en-backfill-xp.ts",
     "db:verify-transfer": "tsx scripts/verify-english-transfer.ts",
     "db:migrate": "npx prisma migrate dev",
