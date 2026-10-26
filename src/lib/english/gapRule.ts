@@ -10,3 +10,9 @@ export function shiftVnDay(day: string, delta: number): string {
 	const utc = new Date(Date.UTC(year ?? 1970, (month ?? 1) - 1, (date ?? 1) + delta));
 	return utc.toISOString().slice(0, 10);
 }
+
+/** Monday-first Vietnam week containing `day`. */
+export function vnWeekDays(day: string): string[] {
+	const weekday = (new Date(`${day}T00:00:00Z`).getUTCDay() + 6) % 7;
+	return Array.from({ length: 7 }, (_, offset) => shiftVnDay(day, offset - weekday));
+}

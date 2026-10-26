@@ -1,23 +1,29 @@
 import Link from 'next/link';
 import DueForecast from '@/components/english/DueForecast';
 import StageBar from '@/components/english/StageBar';
-import { QUIZ_KINDS, QUIZ_META } from '@/lib/english/quiz';
+import GoalRing from '@/components/english/goals/GoalRing';
+import LevelBar from '@/components/english/goals/LevelBar';
+import QuestItem from '@/components/english/goals/QuestItem';
 import { EN_LEITNER_INTERVALS } from '@/lib/english/constants';
-import { DAILY_TASK_TOTAL, completedDailyTasks, isReviewDone, reviewMinutes } from '@/lib/english/reviewSummary';
+import { isReviewDone, reviewMinutes } from '@/lib/english/reviewSummary';
+import { estimateReviewXp } from '@/lib/english/xp';
 import type { EnglishSetSummary } from '@/services/english/enCatalogService';
 import type { TodayOverview } from '@/services/english/enDailyService';
-import type { DailyTasks } from '@/services/english/enQuizService';
+import type { GoalBoard } from '@/services/english/enGoalService';
 
-export default function HomeDashboard({ overview, sets, tasks, greeting, dateLabel }: {
+export default function HomeDashboard({ overview, sets, board, resetsIn, greeting, dateLabel }: {
 	overview: TodayOverview;
 	sets: EnglishSetSummary[];
-	tasks: DailyTasks;
+	board: GoalBoard;
+	/** Time until the daily quests reset, e.g. "5 giờ". */
+	resetsIn: string;
 	greeting: string;
 	dateLabel: string;
 }) {
 	const enrolled = sets.filter((set) => set.enrolled);
 	const reviewDone = isReviewDone(overview);
-	const completed = completedDailyTasks(overview, tasks);
+	const quizHref = enrolled.length === 1 ? `/sets/${enrolled[0]!.id}/test?type=mcq` : '#your-sets';
+	const questsDone = board.today.quests.filter((quest) => quest.done).length;
 	const studiedThisWeek = overview.week.filter((day) => day.studied).length;
 	const initial = greeting.split(/[\s,]+/).at(-1)?.charAt(0).toLocaleUpperCase('vi') || 'B';
 	const totalWords = enrolled.reduce((sum, set) => sum + set.words, 0);
@@ -31,11 +37,11 @@ export default function HomeDashboard({ overview, sets, tasks, greeting, dateLab
 
 	return <div className="mx-auto max-w-6xl space-y-7 px-4 py-6 sm:px-6 sm:py-10">
 		<header className="flex flex-wrap items-center justify-between gap-3">
-			<div className="flex items-center gap-4">
-				<span aria-hidden="true" className="flex size-14 shrink-0 items-center justify-center rounded-full border-2 border-accent bg-accent-subtle text-2xl font-black text-accent">{initial}</span>
-				<div><h1 className="text-4xl sm:text-5xl">{greeting}</h1><p className="mt-1 text-sm text-muted">{overview.streakDays > 0 ? `🔥 ${overview.streakDays} ngày liên tiếp · ` : ''}Tuần này {studiedThisWeek}/{overview.weeklyGoal} ngày</p></div>
+			<div className="flex min-w-0 items-center gap-4">
+				<span aria-hidden="true" className="relative flex size-14 shrink-0 items-center justify-center rounded-full border-2 border-accent bg-accent-subtle text-2xl font-black text-accent">{initial}<span className="level-badge absolute -right-2 -bottom-1 text-[10px]">{board.level.level}</span></span>
+				<div className="min-w-0"><h1 className="text-4xl sm:text-5xl">{greeting}</h1><p className="mt-1 text-sm text-muted">{overview.streakDays > 0 ? `🔥 ${overview.streakDays} ngày liên tiếp · ` : ''}Tuần này {studiedThisWeek}/{overview.weeklyGoal} ngày</p></div>
 			</div>
-			<p className="text-sm text-muted">{dateLabel}</p>
+			<div className="w-full sm:w-64"><p className="mb-1 text-right text-xs text-muted">{dateLabel}</p><Link href="/quests" className="block rounded-card focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"><LevelBar level={board.level} /></Link></div>
 		</header>
 
 		<section aria-label="Tiến độ của bạn" className="grid grid-cols-2 gap-3 lg:grid-cols-4">
@@ -44,7 +50,7 @@ export default function HomeDashboard({ overview, sets, tasks, greeting, dateLab
 
 		{enrolled.length === 0 ? <section className="mode-card p-7"><h2 className="text-3xl">Bạn chưa có bộ từ nào</h2><p className="mt-2 text-muted">Tải một bộ từ để bắt đầu học và theo dõi từng bước ôn tập.</p><Link className="mt-5 inline-flex min-h-11 items-center rounded-control bg-accent px-5 font-bold text-accent-foreground" href="/store">Mở Cửa hàng →</Link></section> : <>
 			<Link href="/review" className="mode-card flex flex-wrap items-center justify-between gap-4 border-2 border-accent bg-accent-subtle p-6 hover:brightness-[1.02] focus-visible:ring-2 focus-visible:ring-accent">
-				<div><h2 className="text-2xl">{reviewDone ? '✓ Xong hôm nay' : 'Ôn hôm nay'}</h2><p className="mt-1 text-sm">{reviewDone ? 'Bạn đã hoàn thành lượt ôn hôm nay.' : `${overview.dueTotal} từ đến hạn + ${overview.newCount} từ mới · ~${reviewMinutes(overview)} phút`}</p></div>
+				<div><h2 className="text-2xl">{reviewDone ? '✓ Xong hôm nay' : 'Ôn hôm nay'}</h2><p className="mt-1 text-sm">{reviewDone ? 'Bạn đã hoàn thành lượt ôn hôm nay.' : `${overview.dueTotal} từ đến hạn + ${overview.newCount} từ mới · ~${reviewMinutes(overview)} phút`}</p>{!reviewDone && <p className="mt-2"><span className="xp-chip">≈ +{estimateReviewXp(overview.dueCount, overview.newCount)} XP</span></p>}</div>
 				<span className="rounded-control bg-accent px-5 py-3 font-bold text-accent-foreground">{reviewDone ? 'Luyện thêm →' : 'Vào ôn →'}</span>
 			</Link>
 
@@ -60,7 +66,14 @@ export default function HomeDashboard({ overview, sets, tasks, greeting, dateLab
 				</li>)}</ul>
 			</section>
 
-			<div className="grid gap-4 lg:grid-cols-2"><section className="mode-card"><div className="flex items-center justify-between gap-2"><h2 className="text-2xl">Kiểm tra hôm nay</h2><span className={`font-bold tabular-nums ${completed === DAILY_TASK_TOTAL ? 'text-success' : ''}`}>{completed}/{DAILY_TASK_TOTAL}</span></div><ul className="mt-4 space-y-2">{QUIZ_KINDS.map((kind) => { const task = tasks[kind]; return <li key={kind} className="task-row"><span aria-hidden="true" className={task ? 'text-success' : 'text-muted'}>{task ? '✓' : '○'}</span><div className="min-w-0 flex-1"><p className="font-bold">Kiểm tra {QUIZ_META[kind].label}</p><p className="text-sm text-muted">{task ? `${task.passedCount}/${task.wordCount} · ${task.setTitle}` : 'Chưa làm'}</p></div>{!task && <Link href={enrolled.length === 1 ? `/sets/${enrolled[0]!.id}/test?type=${kind}` : '#your-sets'} className="inline-flex min-h-11 items-center font-bold text-accent">{enrolled.length === 1 ? 'Làm ngay →' : 'Chọn bộ ↓'}</Link>}</li>; })}</ul></section>
+			<div className="grid gap-4 lg:grid-cols-2"><section aria-labelledby="today-quests-heading" className="mode-card">
+				<div className="flex items-center gap-4">
+					<GoalRing value={board.today.xp} max={board.today.goal} size={64} label="Mục tiêu ngày"><span className="game-number text-lg tabular-nums">{board.today.xp}</span><span className="text-[9px] text-muted">/{board.today.goal} XP</span></GoalRing>
+					<div className="min-w-0 flex-1"><div className="flex items-center justify-between gap-2"><h2 id="today-quests-heading" className="text-2xl">Nhiệm vụ hôm nay</h2><span className={`font-bold tabular-nums ${questsDone === board.today.quests.length ? 'text-success' : ''}`}>{questsDone}/{board.today.quests.length}</span></div><p className="text-xs text-muted">Làm mới sau {resetsIn}</p></div>
+				</div>
+				<ul className="mt-4 space-y-2">{board.today.quests.map((quest) => <QuestItem key={quest.key} quest={quest} quizHref={quizHref} compact />)}</ul>
+				<Link href="/quests" className="mt-3 inline-flex min-h-11 items-center text-sm font-bold text-accent">Nhiệm vụ tuần & thành tựu →</Link>
+			</section>
 				<section className="mode-card"><h2 className="text-2xl">Lịch ôn 7 ngày tới</h2><div className="mt-5"><DueForecast days={overview.dueNext7Days} height="h-32" /></div></section></div>
 		</>}
 	</div>;

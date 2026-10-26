@@ -4,7 +4,9 @@ import { AppError } from '@/lib/appError';
 import { EN_DAILY_DUE_LIMIT, EN_EXTRA_ROUND_SIZE, EN_NEW_WORDS_DEFAULT, EN_ROUND_REVIEW_LIMIT, EN_TX_MAX_WAIT_MS, EN_TX_TIMEOUT_MS, EN_WEEKLY_DAYS_DEFAULT } from '@/lib/english/constants';
 import { buildDailyQueue, isLongTerm, isNearMiss, scheduleMove, vnDayStart, type ScheduledState } from '@/lib/english/schedule';
 import { gradeEnglishAnswer } from '@/lib/english/grade';
-import { shiftVnDay, vnDayKey } from '@/lib/english/gapRule';
+import { shiftVnDay, vnDayKey, vnWeekDays } from '@/lib/english/gapRule';
+import { streakStats } from '@/lib/english/streak';
+import { reviewXpEvents } from '@/lib/english/xp';
 import { exampleParts, type SenseBundle } from '@/lib/english/senseBundle';
 import { getSenseBundles } from '@/services/english/enContentService';
 
@@ -28,6 +30,8 @@ export type DailyAnswerResult = {
 	/** False when the answer came before the word was due, so the schedule did not move. */
 	scheduled: boolean;
 	nextDueAt: string | null;
+	/** XP this answer earned. */
+	xp: number;
 };
 
 export type TodayOverview = {
@@ -44,6 +48,11 @@ export type TodayOverview = {
 	recentLapses: Array<{ senseId: string; lemma: string; meaningVi: string }>;
 	reviewedToday: number;
 	streakDays: number;
+	longestStreak: number;
+	/** Due words the learner has forgotten before. */
+	lapsedDue: number;
+	/** Words in box 2 or 3, which can reach long-term soon. */
+	rememberingCount: number;
 	dueNext7Days: Array<{ day: string; count: number }>;
 	accuracy30: number | null;
 };
@@ -144,13 +153,6 @@ export async function startToday(userId: string, options: { extra?: boolean } = 
 	};
 }
 
-/** Monday-first Vietnam week containing `now`. */
-function weekDays(now: Date): string[] {
-	const today = vnDayKey(now);
-	const weekday = (new Date(`${today}T00:00:00Z`).getUTCDay() + 6) % 7;
-	return Array.from({ length: 7 }, (_, offset) => shiftVnDay(today, offset - weekday));
-}
-
 async function studiedDays(userId: string, from: Date): Promise<Set<string>> {
 	const rows = await prisma.enReview.findMany({ where: { userId, at: { gte: from } }, select: { at: true } });
 	return new Set(rows.map((row) => vnDayKey(row.at)));
@@ -161,7 +163,7 @@ export const getTodayOverview = cache(async (userId: string, now = new Date()): 
 	const { states, queue, dueTotal, introducedToday, enrolledSets } = await planToday(userId, now);
 	const today = vnDayKey(now);
 	const tomorrowEnd = vnDayStart(shiftVnDay(today, 2));
-	const days = weekDays(now);
+	const days = vnWeekDays(today);
 	const [studied, profile, recentReviews] = await Promise.all([
 		studiedDays(userId, vnDayStart(shiftVnDay(today, -365))),
 		prisma.enLearnerProfile.findUnique({ where: { userId }, select: { weeklyDaysGoal: true } }),
@@ -172,12 +174,14 @@ export const getTodayOverview = cache(async (userId: string, now = new Date()): 
 		.sort((a, b) => b.lapses - a.lapses || (b.lastReviewedAt?.getTime() ?? 0) - (a.lastReviewedAt?.getTime() ?? 0))
 		.slice(0, 6);
 	const lapsedBundles = await getSenseBundles(lapsed.map((state) => state.senseId), true);
-	let streakDays = 0;
-	for (let offset = studied.has(today) ? 0 : -1; studied.has(shiftVnDay(today, offset)); offset -= 1) streakDays += 1;
+	const streak = streakStats(studied, today);
 	const scheduled = recentReviews.filter((row) => row.scheduled && row.boxBefore > 0);
 	return {
 		reviewedToday: recentReviews.filter((row) => vnDayKey(row.at) === today).length,
-		streakDays,
+		streakDays: streak.current,
+		longestStreak: streak.longest,
+		lapsedDue: states.filter((state) => state.lapses > 0 && state.dueAt <= now).length,
+		rememberingCount: states.filter((state) => state.box >= 2 && !isLongTerm(state.box)).length,
 		accuracy30: scheduled.length ? scheduled.filter((row) => row.correct).length / scheduled.length : null,
 		dueNext7Days: Array.from({ length: 7 }, (_, offset) => {
 			const day = shiftVnDay(today, offset);
@@ -221,12 +225,13 @@ export async function answerToday(
 	const state = await prisma.enWordState.findUnique({ where: { userId_senseId: { userId, senseId: input.senseId } } });
 	const before = state?.box ?? 0;
 	if (!correct && !input.giveUp && !input.typoChecked && isNearMiss(input.answer, [expected, ...accepted])) {
-		return { result: 'near', expected: '', boxBefore: before, boxAfter: before, scheduled: false, nextDueAt: state?.dueAt.toISOString() ?? null };
+		return { result: 'near', expected: '', boxBefore: before, boxAfter: before, scheduled: false, nextDueAt: state?.dueAt.toISOString() ?? null, xp: 0 };
 	}
 	const responseMs = Math.max(0, Math.min(120_000, Math.trunc(input.responseMs ?? 0)));
 	const next = scheduleMove(state, correct, now);
 	const changed = next.scheduled;
 	const nextDue = next.dueAt;
+	let xp = 0;
 	await prisma.$transaction(async (tx) => {
 		if (changed) {
 			const schedule = { box: next.box, lapses: next.lapses, dueAt: nextDue, lastReviewedAt: now };
@@ -236,9 +241,18 @@ export async function answerToday(
 				update: { ...schedule, ...(before === 0 ? { introducedAt: now } : {}) },
 			});
 		}
-		await tx.enReview.create({ data: { sessionId: session.id, userId, senseId: input.senseId, at: now, prompt: input.prompt ?? 'meaning', correct, responseMs, boxBefore: before, boxAfter: next.box, scheduled: changed } });
+		const review = await tx.enReview.create({ data: { sessionId: session.id, userId, senseId: input.senseId, at: now, prompt: input.prompt ?? 'meaning', correct, responseMs, boxBefore: before, boxAfter: next.box, scheduled: changed } });
+		const day = vnDayKey(now);
+		const extraToday = !changed && correct
+			? (await tx.enXpEvent.aggregate({ where: { userId, day, kind: 'extra' }, _sum: { xp: true } }))._sum.xp ?? 0
+			: 0;
+		const events = reviewXpEvents(review, extraToday);
+		if (events.length) {
+			const created = await tx.enXpEvent.createManyAndReturn({ data: events.map((event) => ({ ...event, userId, day, at: now })), skipDuplicates: true, select: { xp: true } });
+			xp = created.reduce((sum, row) => sum + row.xp, 0);
+		}
 	}, { timeout: EN_TX_TIMEOUT_MS, maxWait: EN_TX_MAX_WAIT_MS });
-	return { result: correct ? 'correct' : 'wrong', expected, boxBefore: before, boxAfter: next.box, scheduled: changed, nextDueAt: nextDue.toISOString() };
+	return { result: correct ? 'correct' : 'wrong', expected, boxBefore: before, boxAfter: next.box, scheduled: changed, nextDueAt: nextDue.toISOString(), xp };
 }
 
 export async function finishToday(userId: string, sessionId: string, now = new Date()) {

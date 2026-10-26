@@ -7,6 +7,7 @@ import { EN_QUIZ_MAX_ITEMS } from '@/lib/english/constants';
 import { pickQuizSenses, quizItemFor, isQuizKind, type QuizKind } from '@/lib/english/quiz';
 import { vnDayKey, shiftVnDay } from '@/lib/english/gapRule';
 import { vnDayStart } from '@/lib/english/schedule';
+import { quizXpEvent } from '@/lib/english/xp';
 import { getSenseBundles } from '@/services/english/enContentService';
 
 /** Graded quizzes are stored as EnTestAttempt rows whose blueprint is `{ kind, v: 2 }`. */
@@ -134,12 +135,20 @@ export async function answerQuiz(userId: string, attemptId: string, position: nu
 export async function finishQuiz(userId: string, attemptId: string, now = new Date()) {
 	const attempt = await findQuiz(userId, attemptId);
 	const passedCount = attempt.items.filter((item) => item.correct).length;
+	let xp = 0;
 	if (attempt.status === 'in_progress') {
-		await prisma.enTestAttempt.update({ where: { id: attempt.id }, data: { status: 'finished', finishedAt: now, passedCount } });
+		const day = vnDayKey(now);
+		const event = quizXpEvent(quizBlueprint(attempt.blueprint).kind ?? 'quiz', day, passedCount, attempt.wordCount);
+		await prisma.$transaction(async (tx) => {
+			await tx.enTestAttempt.update({ where: { id: attempt.id }, data: { status: 'finished', finishedAt: now, passedCount } });
+			if (event) xp = (await tx.enXpEvent.createMany({ data: [{ ...event, userId, day, at: now }], skipDuplicates: true })).count ? event.xp : 0;
+		});
 	}
 	return {
 		attemptId,
 		passedCount,
+		/** XP this submission earned: only the first quiz of each kind on a day pays. */
+		xp,
 		wordCount: attempt.wordCount,
 		items: [...attempt.items].sort((a, b) => a.position - b.position).map((item) => ({
 			position: item.position,

@@ -369,10 +369,57 @@ model EnTestAttempt {
 }
 
 model EnLearnerProfile {
-  userId         String   @id
-  weeklyDaysGoal Int      @default(4)
-  createdAt      DateTime @default(now())
-  updatedAt      DateTime @updatedAt
+  userId            String    @id
+  weeklyDaysGoal    Int       @default(4)
+  /// Daily XP target. A change shows up in the next daily quest board.
+  dailyXpGoal       Int       @default(40)
+  /// Null until the learner picks a daily goal; drives the one-time goal picker.
+  dailyGoalChosenAt DateTime?
+  /// Highest level the learner has been congratulated for.
+  seenLevel         Int       @default(0)
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+}
+
+/// XP ledger. Every source has a stable key, so a repeated answer, retake or replay never pays twice.
+model EnXpEvent {
+  id        String   @id @default(cuid())
+  userId    String
+  sourceKey String
+  /// review | new | longterm | extra | quiz | quest | goal | chest | achievement
+  kind      String
+  xp        Int
+  /// Vietnam calendar day, YYYY-MM-DD.
+  day       String
+  at        DateTime @default(now())
+
+  @@unique([userId, sourceKey])
+  @@index([userId, day])
+  @@index([userId, kind])
+}
+
+/// Quests fixed for one day or week, so targets do not move while the learner works on them.
+model EnQuestBoard {
+  userId    String
+  /// daily | weekly
+  period    String
+  /// Day key, or the Monday day key for a week.
+  periodKey String
+  /// Array of { key, target, xp }.
+  quests    Json
+  createdAt DateTime @default(now())
+
+  @@id([userId, period, periodKey])
+}
+
+model EnAchievement {
+  userId     String
+  /// Achievement id plus tier, e.g. memory_vault_2.
+  key        String
+  unlockedAt DateTime  @default(now())
+  seenAt     DateTime?
+
+  @@id([userId, key])
 }
 
 model EnTestItem {

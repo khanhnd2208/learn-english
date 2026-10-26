@@ -20,7 +20,7 @@ const globalForPrisma = globalThis as unknown as { _prisma?: PrismaClient };
 function reusableClient(client: PrismaClient | undefined): PrismaClient | undefined {
 	if (!client) return undefined;
 	const delegates = client as unknown as Record<string, unknown>;
-	if ('cnExampleDispute' in delegates && 'cnSetEnrollment' in delegates) return client;
+	if ('enXpEvent' in delegates && 'enQuestBoard' in delegates) return client;
 	void client.$disconnect();
 	return undefined;
 }
