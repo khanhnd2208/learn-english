@@ -1,0 +1,1158 @@
+{
+  "title": "Ăn uống (mẫu 10 từ)",
+  "description": "Bộ mẫu để thử Đọc, Luyện, Kiểm tra: gọi món, nấu ăn, khen ngon.",
+  "packVersion": 2,
+  "audioFiles": [
+    "cook.mp3",
+    "cook-1.mp3",
+    "cook-2.mp3",
+    "cook-3.mp3",
+    "order.mp3",
+    "order-1.mp3",
+    "order-2.mp3",
+    "order-3.mp3",
+    "delicious.mp3",
+    "delicious-1.mp3",
+    "delicious-2.mp3",
+    "delicious-3.mp3",
+    "spicy.mp3",
+    "spicy-1.mp3",
+    "spicy-2.mp3",
+    "spicy-3.mp3",
+    "hungry.mp3",
+    "hungry-1.mp3",
+    "hungry-2.mp3",
+    "hungry-3.mp3",
+    "thirsty.mp3",
+    "thirsty-1.mp3",
+    "thirsty-2.mp3",
+    "thirsty-3.mp3",
+    "fresh.mp3",
+    "fresh-1.mp3",
+    "fresh-2.mp3",
+    "fresh-3.mp3",
+    "bake.mp3",
+    "bake-1.mp3",
+    "bake-2.mp3",
+    "bake-3.mp3",
+    "boil.mp3",
+    "boil-1.mp3",
+    "boil-2.mp3",
+    "boil-3.mp3",
+    "taste.mp3",
+    "taste-1.mp3",
+    "taste-2.mp3",
+    "taste-3.mp3"
+  ],
+  "words": [
+    {
+      "lemma": "cook",
+      "senseKey": "cook.v.prepare_food",
+      "partOfSpeech": "verb",
+      "ipa": "/kʊk/",
+      "ipaUk": "/kʊk/",
+      "ipaUs": "/kʊk/",
+      "stress": "cook",
+      "cefr": "a1",
+      "topics": [
+        "food",
+        "home"
+      ],
+      "forms": [
+        "cook",
+        "cooks",
+        "cooked",
+        "cooking"
+      ],
+      "meaningVi": "nấu ăn",
+      "definitionEn": "to prepare food by heating it",
+      "definitionEnSimple": "to make food hot and ready to eat",
+      "chunks": [
+        {
+          "text": "cook dinner",
+          "vi": "nấu bữa tối"
+        },
+        {
+          "text": "cook for + người",
+          "vi": "nấu cho ai"
+        }
+      ],
+      "commonErrors": [
+        {
+          "wrong": "My mom is a great cooker.",
+          "right": "My mom is a great cook.",
+          "whyVi": "Người nấu ăn là cook. Cooker là cái bếp hoặc nồi."
+        }
+      ],
+      "audioFile": "cook.mp3",
+      "hints": [
+        {
+          "order": 1,
+          "kind": "context",
+          "textEn": "This happens in the kitchen when the stove is on.",
+          "textVi": "Việc này xảy ra trong bếp khi bếp đang bật."
+        },
+        {
+          "order": 2,
+          "kind": "function",
+          "textEn": "It turns raw food into a warm meal.",
+          "textVi": "Nó biến đồ sống thành bữa ăn nóng."
+        },
+        {
+          "order": 3,
+          "kind": "association",
+          "textEn": "Without this, you could only eat bread and fruit.",
+          "textVi": "Thiếu việc này, bạn chỉ ăn được bánh mì và trái cây."
+        }
+      ],
+      "relations": [],
+      "examples": [
+        {
+          "english": "Dad will ___ the fish in a pan tonight.",
+          "meaningVi": "Tối nay bố sẽ nấu cá trong chảo.",
+          "target": "cook",
+          "audioFile": "cook-1.mp3",
+          "alternativesTried": [
+            "eat",
+            "buy",
+            "order",
+            "wash",
+            "cut"
+          ],
+          "stillPlausible": [],
+          "cefr": "a1",
+          "origin": "authored"
+        },
+        {
+          "english": "I do not ___ much because my kitchen is very small.",
+          "meaningVi": "Tôi ít nấu ăn vì bếp nhà tôi rất nhỏ.",
+          "target": "cook",
+          "audioFile": "cook-2.mp3",
+          "alternativesTried": [
+            "sleep",
+            "travel",
+            "wash",
+            "order",
+            "sell"
+          ],
+          "stillPlausible": [],
+          "cefr": "a1",
+          "origin": "authored"
+        },
+        {
+          "english": "She cooked dinner for her parents on Sunday.",
+          "meaningVi": "Chủ nhật cô ấy nấu bữa tối cho bố mẹ.",
+          "target": "cooked",
+          "audioFile": "cook-3.mp3",
+          "alternativesTried": [],
+          "stillPlausible": [],
+          "cefr": "a1",
+          "origin": "authored"
+        }
+      ]
+    },
+    {
+      "lemma": "order",
+      "senseKey": "order.v.ask_for_food",
+      "partOfSpeech": "verb",
+      "ipa": "/ˈɔːdə/",
+      "ipaUk": "/ˈɔːdə/",
+      "ipaUs": "/ˈɔːdə/",
+      "stress": "order",
+      "cefr": "a2",
+      "topics": [
+        "food",
+        "shopping"
+      ],
+      "forms": [
+        "order",
+        "orders",
+        "ordered",
+        "ordering"
+      ],
+      "meaningVi": "gọi món",
+      "definitionEn": "to ask a restaurant to bring you food or drink",
+      "definitionEnSimple": "to ask for food at a restaurant",
+      "chunks": [
+        {
+          "text": "order a drink",
+          "vi": "gọi một đồ uống"
+        },
+        {
+          "text": "order online",
+          "vi": "đặt hàng online"
+        }
+      ],
+      "commonErrors": [
+        {
+          "wrong": "I want to call a coffee.",
+          "right": "I want to order a coffee.",
+          "whyVi": "Gọi món trong tiếng Anh là order, không phải call."
+        }
+      ],
+      "audioFile": "order.mp3",
+      "hints": [
+        {
+          "order": 1,
+          "kind": "context",
+          "textEn": "A waiter stands next to your table with a small notebook.",
+          "textVi": "Một anh phục vụ đứng cạnh bàn với cuốn sổ nhỏ."
+        },
+        {
+          "order": 2,
+          "kind": "function",
+          "textEn": "You say what you want to eat or drink.",
+          "textVi": "Bạn nói mình muốn ăn hoặc uống gì."
+        },
+        {
+          "order": 3,
+          "kind": "association",
+          "textEn": "It comes right after you read the menu.",
+          "textVi": "Việc này đến ngay sau khi bạn đọc thực đơn."
+        }
+      ],
+      "relations": [
+        {
+          "kind": "confusable",
+          "lemma": "cook",
+          "confusableType": "meaning",
+          "noteVi": "order là gọi món ở quán. cook là tự nấu.",
+          "contrast": [
+            {
+              "lemma": "order",
+              "en": "I order soup at the restaurant.",
+              "vi": "Tôi gọi súp ở nhà hàng."
+            },
+            {
+              "lemma": "cook",
+              "en": "I cook soup at home.",
+              "vi": "Tôi nấu súp ở nhà."
+            }
+          ],
+          "mistake": {
+            "wrong": "I order dinner at home with rice.",
+            "right": "I cook dinner at home with rice."
+          }
+        }
+      ],
+      "examples": [
+        {
+          "english": "Are you ready to ___, or do you need more time?",
+          "meaningVi": "Anh chị gọi món được chưa, hay cần thêm thời gian?",
+          "target": "order",
+          "audioFile": "order-1.mp3",
+          "alternativesTried": [
+            "sit",
+            "pay",
+            "leave",
+            "cook",
+            "wait"
+          ],
+          "stillPlausible": [],
+          "cefr": "a2",
+          "origin": "authored"
+        },
+        {
+          "english": "Let us ___ two bowls of noodles and some tea.",
+          "meaningVi": "Mình gọi hai tô mì và một ít trà nhé.",
+          "target": "order",
+          "audioFile": "order-2.mp3",
+          "alternativesTried": [
+            "eat",
+            "sell",
+            "wash",
+            "cook",
+            "carry"
+          ],
+          "stillPlausible": [],
+          "cefr": "a2",
+          "origin": "authored"
+        },
+        {
+          "english": "He ordered a coffee and a small cake.",
+          "meaningVi": "Anh ấy gọi một ly cà phê và một cái bánh nhỏ.",
+          "target": "ordered",
+          "audioFile": "order-3.mp3",
+          "alternativesTried": [],
+          "stillPlausible": [],
+          "cefr": "a2",
+          "origin": "authored"
+        }
+      ]
+    },
+    {
+      "lemma": "delicious",
+      "senseKey": "delicious.adj.tasty",
+      "partOfSpeech": "adjective",
+      "ipa": "/dɪˈlɪʃəs/",
+      "ipaUk": "/dɪˈlɪʃəs/",
+      "ipaUs": "/dɪˈlɪʃəs/",
+      "stress": "delicious",
+      "cefr": "a2",
+      "topics": [
+        "food"
+      ],
+      "forms": [
+        "delicious"
+      ],
+      "meaningVi": "ngon",
+      "definitionEn": "having a very good taste or smell",
+      "definitionEnSimple": "tasting very good",
+      "chunks": [
+        {
+          "text": "taste delicious",
+          "vi": "có vị ngon"
+        },
+        {
+          "text": "a delicious meal",
+          "vi": "một bữa ăn ngon"
+        }
+      ],
+      "commonErrors": [
+        {
+          "wrong": "This soup is very delicious.",
+          "right": "This soup is delicious.",
+          "whyVi": "Delicious đã có nghĩa là rất ngon, nên ít khi thêm very."
+        }
+      ],
+      "audioFile": "delicious.mp3",
+      "hints": [
+        {
+          "order": 1,
+          "kind": "category",
+          "textEn": "It is a word you say about food.",
+          "textVi": "Đây là từ bạn dùng để nói về đồ ăn."
+        },
+        {
+          "order": 2,
+          "kind": "context",
+          "textEn": "People say it after the first bite.",
+          "textVi": "Người ta nói nó sau miếng ăn đầu tiên."
+        },
+        {
+          "order": 3,
+          "kind": "association",
+          "textEn": "It is what a cook is happy to hear.",
+          "textVi": "Đây là lời mà người nấu ăn rất vui khi nghe."
+        }
+      ],
+      "relations": [],
+      "examples": [
+        {
+          "english": "Grandma's spring rolls are so ___ that I always eat ten.",
+          "meaningVi": "Nem bà làm ngon đến mức lần nào tôi cũng ăn mười cái.",
+          "target": "delicious",
+          "audioFile": "delicious-1.mp3",
+          "alternativesTried": [
+            "small",
+            "cold",
+            "hungry",
+            "heavy",
+            "cheap"
+          ],
+          "stillPlausible": [],
+          "cefr": "a2",
+          "origin": "authored"
+        },
+        {
+          "english": "This soup smells ___. Can you give me the recipe?",
+          "meaningVi": "Món súp này thơm ngon quá. Cho mình xin công thức nhé?",
+          "target": "delicious",
+          "audioFile": "delicious-2.mp3",
+          "alternativesTried": [
+            "sad",
+            "busy",
+            "loud",
+            "tired",
+            "quiet"
+          ],
+          "stillPlausible": [],
+          "cefr": "a2",
+          "origin": "authored"
+        },
+        {
+          "english": "We had a delicious lunch near the river.",
+          "meaningVi": "Chúng tôi có một bữa trưa ngon gần bờ sông.",
+          "target": "delicious",
+          "audioFile": "delicious-3.mp3",
+          "alternativesTried": [],
+          "stillPlausible": [],
+          "cefr": "a2",
+          "origin": "authored"
+        }
+      ]
+    },
+    {
+      "lemma": "spicy",
+      "senseKey": "spicy.adj.hot_taste",
+      "partOfSpeech": "adjective",
+      "ipa": "/ˈspaɪsi/",
+      "ipaUk": "/ˈspaɪsi/",
+      "ipaUs": "/ˈspaɪsi/",
+      "stress": "spicy",
+      "cefr": "a2",
+      "topics": [
+        "food"
+      ],
+      "forms": [
+        "spicy",
+        "spicier",
+        "spiciest"
+      ],
+      "meaningVi": "cay",
+      "definitionEn": "having a strong hot taste from chili or pepper",
+      "definitionEnSimple": "with a hot taste from chili",
+      "chunks": [
+        {
+          "text": "too spicy",
+          "vi": "cay quá"
+        },
+        {
+          "text": "spicy food",
+          "vi": "đồ ăn cay"
+        }
+      ],
+      "commonErrors": [],
+      "audioFile": "spicy.mp3",
+      "hints": [
+        {
+          "order": 1,
+          "kind": "category",
+          "textEn": "It describes a kind of taste.",
+          "textVi": "Từ này mô tả một loại vị."
+        },
+        {
+          "order": 2,
+          "kind": "function",
+          "textEn": "It makes your mouth burn and your eyes wet.",
+          "textVi": "Nó làm miệng bạn bỏng rát và mắt chảy nước."
+        },
+        {
+          "order": 3,
+          "kind": "association",
+          "textEn": "Small red peppers are full of it.",
+          "textVi": "Những quả ớt đỏ nhỏ chứa đầy vị này."
+        }
+      ],
+      "relations": [],
+      "examples": [
+        {
+          "english": "This noodle soup is too ___ for me. My mouth is on fire!",
+          "meaningVi": "Món bún này cay quá với tôi. Miệng như bốc lửa!",
+          "target": "spicy",
+          "audioFile": "spicy-1.mp3",
+          "alternativesTried": [
+            "sweet",
+            "cold",
+            "heavy",
+            "quiet",
+            "old"
+          ],
+          "stillPlausible": [],
+          "cefr": "a2",
+          "origin": "authored"
+        },
+        {
+          "english": "Do you like ___ food, or should I ask for no chili?",
+          "meaningVi": "Bạn ăn cay được không, hay mình dặn không cho ớt?",
+          "target": "spicy",
+          "audioFile": "spicy-2.mp3",
+          "alternativesTried": [
+            "quiet",
+            "broken",
+            "cheap",
+            "tall",
+            "empty"
+          ],
+          "stillPlausible": [],
+          "cefr": "a2",
+          "origin": "authored"
+        },
+        {
+          "english": "The curry was spicy, so I drank a lot of water.",
+          "meaningVi": "Món cà ri cay nên tôi uống rất nhiều nước.",
+          "target": "spicy",
+          "audioFile": "spicy-3.mp3",
+          "alternativesTried": [],
+          "stillPlausible": [],
+          "cefr": "a2",
+          "origin": "authored"
+        }
+      ]
+    },
+    {
+      "lemma": "hungry",
+      "senseKey": "hungry.adj.want_food",
+      "partOfSpeech": "adjective",
+      "ipa": "/ˈhʌŋɡri/",
+      "ipaUk": "/ˈhʌŋɡri/",
+      "ipaUs": "/ˈhʌŋɡri/",
+      "stress": "hungry",
+      "cefr": "a1",
+      "topics": [
+        "food",
+        "feelings"
+      ],
+      "forms": [
+        "hungry",
+        "hungrier",
+        "hungriest"
+      ],
+      "meaningVi": "đói",
+      "definitionEn": "wanting or needing to eat",
+      "definitionEnSimple": "needing food",
+      "chunks": [
+        {
+          "text": "get hungry",
+          "vi": "bắt đầu thấy đói"
+        },
+        {
+          "text": "so hungry",
+          "vi": "đói lắm"
+        }
+      ],
+      "commonErrors": [
+        {
+          "wrong": "I hungry.",
+          "right": "I am hungry.",
+          "whyVi": "Tính từ cần am, is hoặc are đứng trước."
+        }
+      ],
+      "audioFile": "hungry.mp3",
+      "hints": [
+        {
+          "order": 1,
+          "kind": "category",
+          "textEn": "It is a feeling in your body, not in your mind.",
+          "textVi": "Đây là cảm giác trong cơ thể, không phải trong đầu."
+        },
+        {
+          "order": 2,
+          "kind": "context",
+          "textEn": "It knocks on your door around eleven thirty every morning.",
+          "textVi": "Nó gõ cửa bạn khoảng mười một giờ rưỡi mỗi sáng."
+        },
+        {
+          "order": 3,
+          "kind": "association",
+          "textEn": "Your stomach makes loud noises when you feel it.",
+          "textVi": "Bụng bạn kêu to khi bạn cảm thấy điều này."
+        }
+      ],
+      "relations": [
+        {
+          "kind": "confusable",
+          "lemma": "angry",
+          "confusableType": "spelling",
+          "noteVi": "hungry là đói. angry là giận. Hai từ chỉ khác chữ đầu nên rất dễ đọc nhầm.",
+          "contrast": [
+            {
+              "lemma": "hungry",
+              "en": "I am hungry. Let us eat!",
+              "vi": "Tôi đói rồi. Ăn thôi!"
+            },
+            {
+              "lemma": "angry",
+              "en": "I am angry. Leave me alone!",
+              "vi": "Tôi đang giận. Để tôi yên!"
+            }
+          ],
+          "mistake": null
+        }
+      ],
+      "examples": [
+        {
+          "english": "I skipped breakfast this morning, so I am really ___ now.",
+          "meaningVi": "Sáng nay tôi bỏ bữa sáng nên giờ đói lắm.",
+          "target": "hungry",
+          "audioFile": "hungry-1.mp3",
+          "alternativesTried": [
+            "happy",
+            "tall",
+            "busy",
+            "angry",
+            "ready"
+          ],
+          "stillPlausible": [],
+          "cefr": "a1",
+          "origin": "authored"
+        },
+        {
+          "english": "Are you ___? I can make some rice for you.",
+          "meaningVi": "Bạn đói không? Mình nấu ít cơm cho bạn nhé.",
+          "target": "hungry",
+          "audioFile": "hungry-2.mp3",
+          "alternativesTried": [
+            "rich",
+            "late",
+            "noisy",
+            "lucky",
+            "early"
+          ],
+          "stillPlausible": [],
+          "cefr": "a1",
+          "origin": "authored"
+        },
+        {
+          "english": "The baby is crying because she is hungry.",
+          "meaningVi": "Em bé khóc vì bé đang đói.",
+          "target": "hungry",
+          "audioFile": "hungry-3.mp3",
+          "alternativesTried": [],
+          "stillPlausible": [],
+          "cefr": "a1",
+          "origin": "authored"
+        }
+      ]
+    },
+    {
+      "lemma": "thirsty",
+      "senseKey": "thirsty.adj.want_drink",
+      "partOfSpeech": "adjective",
+      "ipa": "/ˈθɜːsti/",
+      "ipaUk": "/ˈθɜːsti/",
+      "ipaUs": "/ˈθɜːsti/",
+      "stress": "thirsty",
+      "cefr": "a2",
+      "topics": [
+        "food",
+        "feelings"
+      ],
+      "forms": [
+        "thirsty",
+        "thirstier",
+        "thirstiest"
+      ],
+      "meaningVi": "khát",
+      "definitionEn": "wanting or needing to drink",
+      "definitionEnSimple": "needing water",
+      "chunks": [
+        {
+          "text": "feel thirsty",
+          "vi": "thấy khát"
+        },
+        {
+          "text": "get thirsty",
+          "vi": "bắt đầu khát"
+        }
+      ],
+      "commonErrors": [],
+      "audioFile": "thirsty.mp3",
+      "hints": [
+        {
+          "order": 1,
+          "kind": "category",
+          "textEn": "It is a feeling in your body.",
+          "textVi": "Đây là cảm giác trong cơ thể."
+        },
+        {
+          "order": 2,
+          "kind": "context",
+          "textEn": "You feel it after running in the sun for an hour.",
+          "textVi": "Bạn cảm thấy nó sau khi chạy dưới nắng một giờ."
+        },
+        {
+          "order": 3,
+          "kind": "association",
+          "textEn": "A cold glass of water is the answer.",
+          "textVi": "Một ly nước lạnh là lời giải."
+        }
+      ],
+      "relations": [
+        {
+          "kind": "confusable",
+          "lemma": "hungry",
+          "confusableType": "meaning",
+          "noteVi": "thirsty là khát nước. hungry là đói bụng.",
+          "contrast": [
+            {
+              "lemma": "thirsty",
+              "en": "I am thirsty. I need water.",
+              "vi": "Tôi khát. Tôi cần nước."
+            },
+            {
+              "lemma": "hungry",
+              "en": "I am hungry. I need rice.",
+              "vi": "Tôi đói. Tôi cần cơm."
+            }
+          ],
+          "mistake": null
+        }
+      ],
+      "examples": [
+        {
+          "english": "After the football match, all the boys were very ___.",
+          "meaningVi": "Sau trận bóng, các cậu bé đều rất khát.",
+          "target": "thirsty",
+          "audioFile": "thirsty-1.mp3",
+          "alternativesTried": [
+            "proud",
+            "sleepy",
+            "polite",
+            "angry",
+            "famous"
+          ],
+          "stillPlausible": [],
+          "cefr": "a2",
+          "origin": "authored"
+        },
+        {
+          "english": "I am so ___ that I could drink a whole bottle of water.",
+          "meaningVi": "Tôi khát đến mức uống hết cả chai nước được.",
+          "target": "thirsty",
+          "audioFile": "thirsty-2.mp3",
+          "alternativesTried": [
+            "clean",
+            "close",
+            "young",
+            "weak",
+            "right"
+          ],
+          "stillPlausible": [],
+          "cefr": "a2",
+          "origin": "authored"
+        },
+        {
+          "english": "Are you thirsty? There is cold tea in the fridge.",
+          "meaningVi": "Bạn khát không? Trong tủ lạnh có trà lạnh.",
+          "target": "thirsty",
+          "audioFile": "thirsty-3.mp3",
+          "alternativesTried": [],
+          "stillPlausible": [],
+          "cefr": "a2",
+          "origin": "authored"
+        }
+      ]
+    },
+    {
+      "lemma": "fresh",
+      "senseKey": "fresh.adj.not_old",
+      "partOfSpeech": "adjective",
+      "ipa": "/freʃ/",
+      "ipaUk": "/freʃ/",
+      "ipaUs": "/freʃ/",
+      "stress": "fresh",
+      "cefr": "a2",
+      "topics": [
+        "food",
+        "shopping"
+      ],
+      "forms": [
+        "fresh",
+        "fresher",
+        "freshest"
+      ],
+      "meaningVi": "tươi",
+      "definitionEn": "recently made, picked, or caught and not yet old",
+      "definitionEnSimple": "new and not old",
+      "chunks": [
+        {
+          "text": "fresh fish",
+          "vi": "cá tươi"
+        },
+        {
+          "text": "fresh air",
+          "vi": "không khí trong lành"
+        }
+      ],
+      "commonErrors": [
+        {
+          "wrong": "This fish is not new.",
+          "right": "This fish is not fresh.",
+          "whyVi": "Đồ ăn còn tươi là fresh, không dùng new."
+        }
+      ],
+      "audioFile": "fresh.mp3",
+      "hints": [
+        {
+          "order": 1,
+          "kind": "category",
+          "textEn": "It describes food or air.",
+          "textVi": "Từ này mô tả đồ ăn hoặc không khí."
+        },
+        {
+          "order": 2,
+          "kind": "context",
+          "textEn": "A seller at the market says it about fish caught this morning.",
+          "textVi": "Người bán ở chợ nói điều này về cá bắt sáng nay."
+        },
+        {
+          "order": 3,
+          "kind": "association",
+          "textEn": "The opposite is food that smells bad.",
+          "textVi": "Điều ngược lại là đồ ăn có mùi hôi."
+        }
+      ],
+      "relations": [],
+      "examples": [
+        {
+          "english": "Do not buy that fish. It is not ___ at all.",
+          "meaningVi": "Đừng mua con cá đó. Nó không tươi chút nào.",
+          "target": "fresh",
+          "audioFile": "fresh-1.mp3",
+          "alternativesTried": [
+            "cheap",
+            "quiet",
+            "sweet",
+            "noisy",
+            "angry"
+          ],
+          "stillPlausible": [],
+          "cefr": "a2",
+          "origin": "authored"
+        },
+        {
+          "english": "I like to eat ___ fruit every morning.",
+          "meaningVi": "Tôi thích ăn trái cây tươi mỗi sáng.",
+          "target": "fresh",
+          "audioFile": "fresh-2.mp3",
+          "alternativesTried": [
+            "empty",
+            "broken",
+            "heavy",
+            "rude",
+            "blind"
+          ],
+          "stillPlausible": [],
+          "cefr": "a2",
+          "origin": "authored"
+        },
+        {
+          "english": "Open the window and let some fresh air in.",
+          "meaningVi": "Mở cửa sổ ra cho không khí trong lành vào.",
+          "target": "fresh",
+          "audioFile": "fresh-3.mp3",
+          "alternativesTried": [],
+          "stillPlausible": [],
+          "cefr": "a2",
+          "origin": "authored"
+        }
+      ]
+    },
+    {
+      "lemma": "bake",
+      "senseKey": "bake.v.cook_in_oven",
+      "partOfSpeech": "verb",
+      "ipa": "/beɪk/",
+      "ipaUk": "/beɪk/",
+      "ipaUs": "/beɪk/",
+      "stress": "bake",
+      "cefr": "b1",
+      "topics": [
+        "food",
+        "home"
+      ],
+      "forms": [
+        "bake",
+        "bakes",
+        "baked",
+        "baking"
+      ],
+      "meaningVi": "nướng bánh",
+      "definitionEn": "to cook food such as bread or cake in an oven",
+      "definitionEnSimple": "to make bread or cake in an oven",
+      "chunks": [
+        {
+          "text": "bake a cake",
+          "vi": "nướng một cái bánh"
+        },
+        {
+          "text": "bake bread",
+          "vi": "nướng bánh mì"
+        }
+      ],
+      "commonErrors": [],
+      "audioFile": "bake.mp3",
+      "hints": [
+        {
+          "order": 1,
+          "kind": "context",
+          "textEn": "The whole house smells sweet when you do this on a Sunday.",
+          "textVi": "Cả nhà thơm ngọt khi bạn làm việc này vào Chủ nhật."
+        },
+        {
+          "order": 2,
+          "kind": "function",
+          "textEn": "It uses dry heat inside a closed metal box.",
+          "textVi": "Nó dùng nhiệt khô bên trong một cái hộp kim loại kín."
+        },
+        {
+          "order": 3,
+          "kind": "association",
+          "textEn": "Cakes, bread, and cookies all go through it.",
+          "textVi": "Bánh kem, bánh mì và bánh quy đều trải qua việc này."
+        }
+      ],
+      "relations": [],
+      "examples": [
+        {
+          "english": "My sister loves to ___ a chocolate cake for my birthday.",
+          "meaningVi": "Em gái tôi thích nướng bánh sô-cô-la cho sinh nhật tôi.",
+          "target": "bake",
+          "audioFile": "bake-1.mp3",
+          "alternativesTried": [
+            "read",
+            "buy",
+            "sing",
+            "wash",
+            "draw"
+          ],
+          "stillPlausible": [],
+          "cefr": "b1",
+          "origin": "authored"
+        },
+        {
+          "english": "You need an oven if you want to ___ bread at home.",
+          "meaningVi": "Bạn cần lò nướng nếu muốn nướng bánh mì ở nhà.",
+          "target": "bake",
+          "audioFile": "bake-2.mp3",
+          "alternativesTried": [
+            "catch",
+            "paint",
+            "ride",
+            "wear",
+            "drive"
+          ],
+          "stillPlausible": [],
+          "cefr": "b1",
+          "origin": "authored"
+        },
+        {
+          "english": "She baked fifty small cakes for the school party.",
+          "meaningVi": "Cô ấy nướng năm mươi cái bánh nhỏ cho buổi tiệc ở trường.",
+          "target": "baked",
+          "audioFile": "bake-3.mp3",
+          "alternativesTried": [],
+          "stillPlausible": [],
+          "cefr": "b1",
+          "origin": "authored"
+        }
+      ]
+    },
+    {
+      "lemma": "boil",
+      "senseKey": "boil.v.heat_water",
+      "partOfSpeech": "verb",
+      "ipa": "/bɔɪl/",
+      "ipaUk": "/bɔɪl/",
+      "ipaUs": "/bɔɪl/",
+      "stress": "boil",
+      "cefr": "a2",
+      "topics": [
+        "food",
+        "home"
+      ],
+      "forms": [
+        "boil",
+        "boils",
+        "boiled",
+        "boiling"
+      ],
+      "meaningVi": "đun sôi, luộc",
+      "definitionEn": "to heat water until it bubbles, or to cook food in bubbling water",
+      "definitionEnSimple": "to heat water until it bubbles",
+      "chunks": [
+        {
+          "text": "boil water",
+          "vi": "đun nước sôi"
+        },
+        {
+          "text": "boil an egg",
+          "vi": "luộc một quả trứng"
+        }
+      ],
+      "commonErrors": [],
+      "audioFile": "boil.mp3",
+      "hints": [
+        {
+          "order": 1,
+          "kind": "context",
+          "textEn": "You wait for big bubbles before you add the noodles.",
+          "textVi": "Bạn đợi bong bóng lớn rồi mới cho mì vào."
+        },
+        {
+          "order": 2,
+          "kind": "function",
+          "textEn": "It needs water and a hot stove.",
+          "textVi": "Việc này cần nước và bếp nóng."
+        },
+        {
+          "order": 3,
+          "kind": "association",
+          "textEn": "Tea and eggs both start with it.",
+          "textVi": "Trà và trứng đều bắt đầu từ việc này."
+        }
+      ],
+      "relations": [
+        {
+          "kind": "confusable",
+          "lemma": "bake",
+          "confusableType": "meaning",
+          "noteVi": "boil là nấu trong nước. bake là nướng trong lò.",
+          "contrast": [
+            {
+              "lemma": "boil",
+              "en": "I boil the eggs in water.",
+              "vi": "Tôi luộc trứng trong nước."
+            },
+            {
+              "lemma": "bake",
+              "en": "I bake the cake in the oven.",
+              "vi": "Tôi nướng bánh trong lò."
+            }
+          ],
+          "mistake": null
+        }
+      ],
+      "examples": [
+        {
+          "english": "Please ___ some water so we can make tea.",
+          "meaningVi": "Làm ơn đun sôi ít nước để mình pha trà.",
+          "target": "boil",
+          "audioFile": "boil-1.mp3",
+          "alternativesTried": [
+            "lose",
+            "carry",
+            "paint",
+            "build",
+            "steal"
+          ],
+          "stillPlausible": [],
+          "cefr": "a2",
+          "origin": "authored"
+        },
+        {
+          "english": "You should ___ the eggs for ten minutes.",
+          "meaningVi": "Bạn nên luộc trứng trong mười phút.",
+          "target": "boil",
+          "audioFile": "boil-2.mp3",
+          "alternativesTried": [
+            "fly",
+            "sing",
+            "wear",
+            "climb",
+            "repair"
+          ],
+          "stillPlausible": [],
+          "cefr": "a2",
+          "origin": "authored"
+        },
+        {
+          "english": "The water is boiling, so you can add the rice now.",
+          "meaningVi": "Nước đang sôi rồi nên bạn có thể cho gạo vào.",
+          "target": "boiling",
+          "audioFile": "boil-3.mp3",
+          "alternativesTried": [],
+          "stillPlausible": [],
+          "cefr": "a2",
+          "origin": "authored"
+        }
+      ]
+    },
+    {
+      "lemma": "taste",
+      "senseKey": "taste.v.try_flavor",
+      "partOfSpeech": "verb",
+      "ipa": "/teɪst/",
+      "ipaUk": "/teɪst/",
+      "ipaUs": "/teɪst/",
+      "stress": "taste",
+      "cefr": "a2",
+      "topics": [
+        "food"
+      ],
+      "forms": [
+        "taste",
+        "tastes",
+        "tasted",
+        "tasting"
+      ],
+      "meaningVi": "nếm, có vị",
+      "definitionEn": "to have a particular flavor, or to try a small amount of food",
+      "definitionEnSimple": "to try the flavor of food",
+      "chunks": [
+        {
+          "text": "taste good",
+          "vi": "có vị ngon"
+        },
+        {
+          "text": "taste the soup",
+          "vi": "nếm thử món súp"
+        }
+      ],
+      "commonErrors": [
+        {
+          "wrong": "This soup is tasting good.",
+          "right": "This soup tastes good.",
+          "whyVi": "Với nghĩa có vị, taste thường dùng ở thì đơn: tastes good."
+        }
+      ],
+      "audioFile": "taste.mp3",
+      "hints": [
+        {
+          "order": 1,
+          "kind": "context",
+          "textEn": "A chef puts a little spoon in her mouth before serving the soup.",
+          "textVi": "Một đầu bếp đưa chiếc thìa nhỏ vào miệng trước khi dọn súp."
+        },
+        {
+          "order": 2,
+          "kind": "function",
+          "textEn": "You use your tongue to find out what food is like.",
+          "textVi": "Bạn dùng lưỡi để biết đồ ăn thế nào."
+        },
+        {
+          "order": 3,
+          "kind": "association",
+          "textEn": "Sweet, sour, and salty are what you find out.",
+          "textVi": "Ngọt, chua và mặn là những gì bạn tìm ra."
+        }
+      ],
+      "relations": [],
+      "examples": [
+        {
+          "english": "Can I ___ the soup before we put it on the table?",
+          "meaningVi": "Mình nếm món súp trước khi dọn lên bàn được không?",
+          "target": "taste",
+          "audioFile": "taste-1.mp3",
+          "alternativesTried": [
+            "sell",
+            "wear",
+            "lose",
+            "paint",
+            "carry"
+          ],
+          "stillPlausible": [],
+          "cefr": "a2",
+          "origin": "authored"
+        },
+        {
+          "english": "This coffee does not ___ sweet enough for me.",
+          "meaningVi": "Ly cà phê này không đủ ngọt với tôi.",
+          "target": "taste",
+          "audioFile": "taste-2.mp3",
+          "alternativesTried": [
+            "sleep",
+            "drive",
+            "build",
+            "jump",
+            "walk"
+          ],
+          "stillPlausible": [],
+          "cefr": "a2",
+          "origin": "authored"
+        },
+        {
+          "english": "The soup tasted a little salty.",
+          "meaningVi": "Món súp có vị hơi mặn.",
+          "target": "tasted",
+          "audioFile": "taste-3.mp3",
+          "alternativesTried": [],
+          "stillPlausible": [],
+          "cefr": "a2",
+          "origin": "authored"
+        }
+      ]
+    }
+  ]
+}

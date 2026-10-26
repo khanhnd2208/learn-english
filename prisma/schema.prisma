@@ -1,0 +1,595 @@
+// Learn English — standalone vocabulary app (PostgreSQL)
+// userId references MongoDB User._id via NextAuth
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum EnContentStatus {
+  draft
+  published
+  suspended
+}
+
+enum EnAnswerSkill {
+  meaning
+  sound
+  usage
+  pattern
+}
+
+enum EnWordStatus {
+  new
+  practicing
+  mastered
+}
+
+enum EnRunMode {
+  set
+  mistakes
+  review
+}
+
+enum EnTestStatus {
+  in_progress
+  finished
+  abandoned
+}
+
+enum EnQuestionKind {
+  meaning_choice
+  meaning_confusable
+  listen_choice
+  listen_type
+  spell_type
+  usage_fill
+  pattern_order
+  pattern_fill
+}
+
+enum EnGradeResult {
+  target_correct
+  alternate_plausible
+  wrong
+  pending_review
+  skipped
+}
+
+enum EnExampleRole {
+  study
+  grade
+}
+
+enum EnCefr {
+  pre_a1
+  a1
+  a2
+  b1
+  b2
+  c1
+  c2
+}
+
+enum EnEntryType {
+  word
+  phrasal_verb
+  idiom
+  fixed_phrase
+}
+
+enum EnRegister {
+  neutral
+  formal
+  informal
+  slang
+  literary
+  technical
+  old_fashioned
+  offensive
+}
+
+enum EnRegion {
+  both
+  uk
+  us
+}
+
+enum EnContentOrigin {
+  authored
+  ai_generated
+  corpus
+}
+
+enum EnHintKind {
+  category
+  function
+  context
+  association
+  contrast
+  morphology
+}
+
+enum EnRelationKind {
+  synonym
+  antonym
+  broader
+  narrower
+  confusable
+}
+
+enum EnConfusableType {
+  spelling
+  sound
+  meaning
+  false_friend
+  grammar
+  collocation
+}
+
+enum EnFamilyKind {
+  derivation
+  root
+}
+
+model EnWord {
+  id            String          @id @default(cuid())
+  lemma         String
+  ipa           String          @default("")
+  stress        String          @default("")
+  partOfSpeech  String          @default("")
+  forms         String[]        @default([])
+  audioPath     String          @default("")
+  status        EnContentStatus @default(draft)
+  createdAt     DateTime        @default(now())
+  updatedAt     DateTime        @updatedAt
+  lemmaKey      String          @unique
+  entryType     EnEntryType     @default(word)
+  ipaUk         String          @default("")
+  ipaUs         String          @default("")
+  syllables     String[]        @default([])
+  stressIndex   Int?
+  inflections   Json            @default("[]")
+  frequencyRank Int?
+  cefr          EnCefr?
+  audioUkPath   String          @default("")
+  audioUsPath   String          @default("")
+  senses        EnSense[]
+  familyLinks   EnWordFamilyMember[]
+
+  @@index([status])
+  @@index([lemma])
+  @@index([cefr])
+  @@index([frequencyRank])
+}
+
+model EnSense {
+  id                   String            @id @default(cuid())
+  wordId               String
+  meaningVi            String
+  partOfSpeech         String            @default("")
+  pitfallVi            String            @default("")
+  chunks               Json              @default("[]")
+  commonErrors         Json              @default("[]")
+  distractorMeanings   String[]          @default([])
+  distractorLemmas     String[]          @default([])
+  isPrimary            Boolean           @default(true)
+  status               EnContentStatus   @default(draft)
+  createdAt            DateTime          @default(now())
+  updatedAt            DateTime          @updatedAt
+  senseKey             String?           @unique
+  definitionEn         String            @default("")
+  definitionEnSimple   String            @default("")
+  cefr                 EnCefr?
+  register             EnRegister        @default(neutral)
+  region               EnRegion          @default(both)
+  topics               String[]          @default([])
+  grammarTags          String[]          @default([])
+  grammarNoteVi        String            @default("")
+  ipaOverride          String            @default("")
+  stressIndexOverride  Int?
+  imagePath            String            @default("")
+  imageAlt             String            @default("")
+  sortOrder            Int               @default(0)
+  word                 EnWord            @relation(fields: [wordId], references: [id], onDelete: Cascade)
+  examples             EnExample[]
+  questions            EnQuestion[]
+  patternLinks         EnPatternSense[]
+  wordStates           EnWordState[]
+  setItems             EnSetItem[]
+  hints                EnSenseHint[]
+  relations            EnSenseRelation[] @relation("SenseRelationFrom")
+  relatedFrom          EnSenseRelation[] @relation("SenseRelationTo")
+
+  @@index([wordId])
+  @@index([status])
+  @@index([cefr])
+}
+
+model EnExample {
+  id            String          @id @default(cuid())
+  senseId       String
+  english       String
+  meaningVi     String          @default("")
+  target        String
+  audioPath     String          @default("")
+  role          EnExampleRole   @default(study)
+  alternatives  String[]        @default([])
+  ambiguityNote String          @default("")
+  status        EnContentStatus @default(draft)
+  createdAt     DateTime        @default(now())
+  updatedAt     DateTime        @updatedAt
+  targetStart   Int?
+  targetLength  Int?
+  targetTag     String          @default("")
+  cefr          EnCefr?
+  origin        EnContentOrigin @default(authored)
+  sourceNote    String          @default("")
+  sortOrder     Int             @default(0)
+  sense         EnSense         @relation(fields: [senseId], references: [id], onDelete: Cascade)
+  questions     EnQuestion[]
+
+  @@index([senseId, status, role])
+}
+
+model EnSenseHint {
+  id        String          @id @default(cuid())
+  senseId   String
+  order     Int
+  kind      EnHintKind
+  textEn    String
+  textVi    String          @default("")
+  cefr      EnCefr?
+  status    EnContentStatus @default(draft)
+  createdAt DateTime        @default(now())
+  updatedAt DateTime        @updatedAt
+  sense     EnSense         @relation(fields: [senseId], references: [id], onDelete: Cascade)
+
+  @@unique([senseId, order])
+  @@index([senseId, status])
+}
+
+model EnSenseRelation {
+  id             String            @id @default(cuid())
+  senseId        String
+  kind           EnRelationKind
+  lemma          String
+  targetSenseId  String?
+  confusableType EnConfusableType?
+  noteVi         String            @default("")
+  contrast       Json              @default("[]")
+  mistake        Json?
+  sortOrder      Int               @default(0)
+  createdAt      DateTime          @default(now())
+  sense          EnSense           @relation("SenseRelationFrom", fields: [senseId], references: [id], onDelete: Cascade)
+  targetSense    EnSense?          @relation("SenseRelationTo", fields: [targetSenseId], references: [id], onDelete: SetNull)
+
+  @@unique([senseId, kind, lemma])
+  @@index([targetSenseId])
+}
+
+model EnWordFamily {
+  id         String          @id @default(cuid())
+  key        String          @unique
+  kind       EnFamilyKind
+  root       String
+  meaningVi  String          @default("")
+  meaningEn  String          @default("")
+  originNote String          @default("")
+  status     EnContentStatus @default(draft)
+  createdAt  DateTime        @default(now())
+  updatedAt  DateTime        @updatedAt
+  members    EnWordFamilyMember[]
+}
+
+model EnWordFamilyMember {
+  id           String       @id @default(cuid())
+  familyId     String
+  lemma        String
+  wordId       String?
+  partOfSpeech String       @default("")
+  affixNote    String       @default("")
+  meaningVi    String       @default("")
+  sortOrder    Int          @default(0)
+  family       EnWordFamily @relation(fields: [familyId], references: [id], onDelete: Cascade)
+  word         EnWord?      @relation(fields: [wordId], references: [id], onDelete: SetNull)
+
+  @@unique([familyId, lemma])
+  @@index([wordId])
+}
+
+model EnPattern {
+  id         String          @id @default(cuid())
+  purposeVi  String
+  frame      String
+  fixedParts String[]        @default([])
+  slots      Json            @default("[]")
+  pitfallVi  String          @default("")
+  status     EnContentStatus @default(draft)
+  createdAt  DateTime        @default(now())
+  updatedAt  DateTime        @updatedAt
+  examples   EnPatternExample[]
+  questions  EnQuestion[]
+  senses     EnPatternSense[]
+  progress   EnPatternProgress[]
+  setItems   EnSetItem[]
+
+  @@index([status])
+}
+
+model EnPatternExample {
+  id         String          @id @default(cuid())
+  patternId  String
+  english    String
+  meaningVi  String          @default("")
+  slotValues Json            @default("[]")
+  audioPath  String          @default("")
+  status     EnContentStatus @default(draft)
+  createdAt  DateTime        @default(now())
+  pattern    EnPattern       @relation(fields: [patternId], references: [id], onDelete: Cascade)
+  questions  EnQuestion[]
+
+  @@index([patternId, status])
+}
+
+model EnPatternSense {
+  id        String    @id @default(cuid())
+  patternId String
+  senseId   String
+  pattern   EnPattern @relation(fields: [patternId], references: [id], onDelete: Cascade)
+  sense     EnSense   @relation(fields: [senseId], references: [id], onDelete: Cascade)
+
+  @@unique([patternId, senseId])
+  @@index([senseId])
+}
+
+model EnQuestion {
+  id               String          @id @default(cuid())
+  key              String          @unique
+  kind             EnQuestionKind
+  skill            EnAnswerSkill
+  stage            String
+  senseId          String?
+  patternId        String?
+  exampleId        String?
+  patternExampleId String?
+  prompt           Json
+  answer           String
+  acceptedAnswers  String[]        @default([])
+  audioPath        String          @default("")
+  status           EnContentStatus @default(draft)
+  createdAt        DateTime        @default(now())
+  updatedAt        DateTime        @updatedAt
+  sense            EnSense?          @relation(fields: [senseId], references: [id], onDelete: Cascade)
+  pattern          EnPattern?        @relation(fields: [patternId], references: [id], onDelete: Cascade)
+  example          EnExample?        @relation(fields: [exampleId], references: [id], onDelete: Cascade)
+  patternExample   EnPatternExample? @relation(fields: [patternExampleId], references: [id], onDelete: Cascade)
+  logs             EnAnswerLog[]
+  disputes         EnDispute[]
+  audioOpens       EnAudioOpen[]
+
+  @@index([status, skill, stage])
+  @@index([senseId])
+  @@index([patternId])
+  @@index([exampleId])
+}
+
+model EnSet {
+  id          String          @id @default(cuid())
+  title       String
+  description String          @default("")
+  status      EnContentStatus @default(draft)
+  sortOrder   Int             @default(0)
+  createdAt   DateTime        @default(now())
+  updatedAt   DateTime        @updatedAt
+  items       EnSetItem[]
+  enrollments EnEnrollment[]
+
+  @@index([status, sortOrder])
+}
+
+model EnSetItem {
+  id        String     @id @default(cuid())
+  setId     String
+  senseId   String?
+  patternId String?
+  position  Int        @default(0)
+  set       EnSet      @relation(fields: [setId], references: [id], onDelete: Cascade)
+  sense     EnSense?   @relation(fields: [senseId], references: [id], onDelete: Cascade)
+  pattern   EnPattern? @relation(fields: [patternId], references: [id], onDelete: Cascade)
+
+  @@index([setId, position])
+  @@index([senseId])
+  @@index([patternId])
+}
+
+model EnEnrollment {
+  id        String   @id @default(cuid())
+  userId    String
+  setId     String
+  createdAt DateTime @default(now())
+  set       EnSet    @relation(fields: [setId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, setId])
+  @@index([userId])
+}
+
+model EnActivityType {
+  key        String   @id
+  label      String
+  role       String
+  inPractice Boolean  @default(true)
+  inTest     Boolean  @default(false)
+  enabled    Boolean  @default(true)
+  sortOrder  Int      @default(0)
+  updatedAt  DateTime @updatedAt
+}
+
+model EnTestBlueprint {
+  id             String   @id @default("default")
+  recognizeKinds String[] @default(["meaning_choice", "listen_choice", "cloze_choice"])
+  recallKinds    String[] @default(["recall_type", "listen_type"])
+  maxWords       Int      @default(30)
+  reviewWords    Int      @default(20)
+  minGapDays     Int      @default(1)
+  updatedAt      DateTime @updatedAt
+}
+
+model EnWordState {
+  id             String       @id @default(cuid())
+  userId         String
+  senseId        String
+  status         EnWordStatus @default(new)
+  lastExposureAt DateTime?
+  lastTestedAt   DateTime?
+  masteredAt     DateTime?
+  inMistakeBook  Boolean      @default(false)
+  mistakeAddedAt DateTime?
+  updatedAt      DateTime     @updatedAt
+  sense          EnSense      @relation(fields: [senseId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, senseId])
+  @@index([userId, inMistakeBook])
+  @@index([userId, lastExposureAt])
+}
+
+model EnPracticeSession {
+  id            String    @id @default(cuid())
+  userId        String
+  mode          EnRunMode
+  setId         String?
+  activityKey   String?
+  senseIds      String[]  @default([])
+  startedAt     DateTime  @default(now())
+  endedAt       DateTime?
+  activeSeconds Int       @default(0)
+
+  @@index([userId, startedAt])
+}
+
+model EnTestAttempt {
+  id          String             @id @default(cuid())
+  userId      String
+  mode        EnRunMode
+  setId       String?
+  blueprint   Json
+  status      EnTestStatus       @default(in_progress)
+  startedAt   DateTime           @default(now())
+  finishedAt  DateTime?
+  wordCount   Int
+  passedCount Int?
+  items       EnTestItem[]
+  words       EnTestWordResult[]
+
+  @@index([userId, startedAt])
+}
+
+model EnTestItem {
+  id          String        @id @default(cuid())
+  attemptId   String
+  senseId     String
+  position    Int
+  role        String
+  activityKey String
+  prompt      Json
+  answerKey   String
+  accepted    String[]      @default([])
+  answer      String?
+  correct     Boolean?
+  responseMs  Int?
+  answeredAt  DateTime?
+  attempt     EnTestAttempt @relation(fields: [attemptId], references: [id], onDelete: Cascade)
+
+  @@unique([attemptId, position])
+  @@index([attemptId, senseId])
+}
+
+model EnTestWordResult {
+  id              String        @id @default(cuid())
+  attemptId       String
+  userId          String
+  senseId         String
+  passed          Boolean
+  counted         Boolean
+  priorExposureAt DateTime?
+  recallMs        Int?
+  createdAt       DateTime      @default(now())
+  attempt         EnTestAttempt @relation(fields: [attemptId], references: [id], onDelete: Cascade)
+
+  @@unique([attemptId, senseId])
+  @@index([userId, senseId, createdAt])
+  @@index([userId, counted, createdAt])
+}
+
+model EnPatternProgress {
+  id             String    @id @default(cuid())
+  userId         String
+  patternId      String
+  intervalIdx    Int       @default(0)
+  dueAt          DateTime  @default(now())
+  state          String    @default("learning")
+  lastReviewedAt DateTime?
+  introducedAt   DateTime?
+  credits        Json      @default("[]")
+  lastExampleId  String?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+  pattern        EnPattern @relation(fields: [patternId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, patternId])
+  @@index([userId, dueAt])
+}
+
+model EnAnswerLog {
+  id             String        @id @default(cuid())
+  userId         String
+  questionId     String
+  senseId        String?
+  patternId      String?
+  exampleId      String?
+  skill          EnAnswerSkill
+  clientAnswerId String
+  answer         String        @default("")
+  result         EnGradeResult
+  audioOpened    Boolean       @default(false)
+  createdAt      DateTime      @default(now())
+  question       EnQuestion    @relation(fields: [questionId], references: [id], onDelete: Restrict)
+
+  @@unique([userId, clientAnswerId])
+  @@index([userId, createdAt(sort: Desc)])
+  @@index([userId, senseId, skill])
+  @@index([userId, patternId])
+  @@index([questionId, createdAt])
+}
+
+model EnAudioOpen {
+  id             String     @id @default(cuid())
+  userId         String
+  questionId     String
+  clientAnswerId String
+  createdAt      DateTime   @default(now())
+  question       EnQuestion @relation(fields: [questionId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, clientAnswerId])
+  @@index([userId, questionId])
+}
+
+model EnDispute {
+  id             String     @id @default(cuid())
+  userId         String
+  questionId     String
+  answer         String
+  clientAnswerId String
+  status         String     @default("pending")
+  resolvedById   String?
+  resolvedAt     DateTime?
+  createdAt      DateTime   @default(now())
+  question       EnQuestion @relation(fields: [questionId], references: [id], onDelete: Restrict)
+
+  @@unique([userId, clientAnswerId])
+  @@index([status, createdAt])
+  @@index([questionId, status])
+}

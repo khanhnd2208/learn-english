@@ -1,0 +1,13 @@
+---
+description: Core stack, layout, and quality commands for Learn English
+alwaysApply: true
+---
+
+# Learn English — core
+
+- Next.js 16 App Router, React 19, strict TypeScript, Tailwind 4, Prisma 7.
+- Learner and admin pages use root-level routes; do not reintroduce `/english` or `/api/english` prefixes.
+- Business logic: `src/services/english/`; pure domain rules: `src/lib/english/`.
+- PostgreSQL contains only `En*` models. MongoDB stores Auth.js users and sessions.
+- Read `AGENTS.md` and relevant `node_modules/next/dist/docs/` guidance before framework changes.
+- Run `npm run quality` before finishing.

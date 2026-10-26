@@ -1,0 +1,66 @@
+{
+  "name": "learn-english",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev --port 3002",
+    "predev": "prisma generate",
+    "build": "next build --webpack",
+    "start": "next start --port 3002",
+    "lint": "eslint",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "typecheck": "next typegen && tsc --noEmit",
+    "quality": "npm test && npm run lint && npm run typecheck && npm run build",
+    "quality:prod": "npm run quality && npm run audit:prod && npm run db:migrate:status",
+    "audit:prod": "npm audit --omit=dev --audit-level=high",
+    "db:seed": "npx tsx prisma/seed.ts",
+    "db:seed:samples": "tsx scripts/seed-english-sample-sets.ts",
+    "db:verify-transfer": "tsx scripts/verify-english-transfer.ts",
+    "db:migrate": "npx prisma migrate dev",
+    "db:migrate:status": "npx prisma migrate status",
+    "db:push": "npx prisma db push",
+    "db:studio": "npx prisma studio",
+    "postinstall": "prisma generate"
+  },
+  "prisma": {
+    "seed": "npx tsx prisma/seed.ts"
+  },
+  "dependencies": {
+    "@auth/mongodb-adapter": "^3.11.3",
+    "@prisma/adapter-pg": "7.7.0",
+    "@prisma/client": "^7.10.0",
+    "@teispace/next-themes": "^3.0.2",
+    "csv-parse": "^7.0.2",
+    "dotenv": "^17.4.2",
+    "dotenv-expand": "^13.0.0",
+    "exceljs": "4.4.0",
+    "mongodb": "^6.21.0",
+    "next": "^16.3.8",
+    "next-auth": "^5.0.0-beta.32",
+    "pg": "^8.20.0",
+    "prisma": "^7.10.0",
+    "react": "^19.2.4",
+    "react-dom": "^19.2.4",
+    "zod": "^4.4.3"
+  },
+  "devDependencies": {
+    "@tailwindcss/postcss": "^4",
+    "@types/node": "^25.2.3",
+    "@types/pg": "^8.20.0",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "eslint": "^9.39.2",
+    "eslint-config-next": "16.3.8",
+    "tailwindcss": "^4",
+    "tsx": "^4.20.5",
+    "typescript": "^5",
+    "vitest": "^4.1.1"
+  },
+  "overrides": {
+    "brace-expansion": "^2.1.4",
+    "deepmerge-ts": "^8.0.2",
+    "mysql2": "^3.24.4",
+    "uuid": "^11.1.1"
+  }
+}

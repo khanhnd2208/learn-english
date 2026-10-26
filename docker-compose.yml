@@ -1,0 +1,60 @@
+services:
+  app:
+    build: .
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+      mongo:
+        condition: service_healthy
+    ports:
+      - "${APP_PORT:-3002}:3002"
+    environment:
+      DATABASE_URL: postgresql://${POSTGRES_USER:-learn_english}:${POSTGRES_PASSWORD:-change-me}@postgres:5432/${POSTGRES_DB:-learn_english}
+      MONGODB_URI: mongodb://${MONGO_ROOT_USERNAME:-learn_english}:${MONGO_ROOT_PASSWORD:-change-me}@mongo:27017/${MONGO_DB:-learn_english_auth}?authSource=admin
+      AUTH_SECRET: ${AUTH_SECRET:?AUTH_SECRET is required}
+      AUTH_TRUST_HOST: "true"
+      NEXTAUTH_URL: ${NEXTAUTH_URL:-http://localhost:3002}
+      ADMIN_EMAILS: ${ADMIN_EMAILS:-}
+      GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID:-}
+      GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET:-}
+      NEXT_PUBLIC_CHINESE_URL: ${NEXT_PUBLIC_CHINESE_URL:-http://localhost:3001}
+      ENGLISH_AUDIO_ROOT: /data/audio
+      PG_POOL_MAX: ${PG_POOL_MAX:-5}
+      PG_IDLE_TIMEOUT_MS: ${PG_IDLE_TIMEOUT_MS:-30000}
+    volumes:
+      - english_audio:/data/audio
+
+  postgres:
+    image: postgres:17-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-learn_english}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-change-me}
+      POSTGRES_DB: ${POSTGRES_DB:-learn_english}
+    volumes:
+      - english_postgres:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+  mongo:
+    image: mongo:8
+    restart: unless-stopped
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_ROOT_USERNAME:-learn_english}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_ROOT_PASSWORD:-change-me}
+    volumes:
+      - english_mongo:/data/db
+    healthcheck:
+      test: ["CMD", "mongosh", "--quiet", "--username", "${MONGO_ROOT_USERNAME:-learn_english}", "--password", "${MONGO_ROOT_PASSWORD:-change-me}", "--authenticationDatabase", "admin", "--eval", "db.adminCommand('ping').ok"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+volumes:
+  english_postgres:
+  english_mongo:
+  english_audio:
