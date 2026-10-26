@@ -1,0 +1,1104 @@
+{
+  "title": "Học tập (mẫu 15 từ)",
+  "description": "15 từ về lớp học, bài tập và quá trình học.",
+  "packVersion": 2,
+  "audioFiles": [
+    "study.mp3",
+    "study-1.mp3",
+    "study-2.mp3",
+    "learn.mp3",
+    "learn-1.mp3",
+    "learn-2.mp3",
+    "read.mp3",
+    "read-1.mp3",
+    "read-2.mp3",
+    "write.mp3",
+    "write-1.mp3",
+    "write-2.mp3",
+    "listen.mp3",
+    "listen-1.mp3",
+    "listen-2.mp3",
+    "explain.mp3",
+    "explain-1.mp3",
+    "explain-2.mp3",
+    "practice.mp3",
+    "practice-1.mp3",
+    "practice-2.mp3",
+    "review.mp3",
+    "review-1.mp3",
+    "review-2.mp3",
+    "remember.mp3",
+    "remember-1.mp3",
+    "remember-2.mp3",
+    "forget.mp3",
+    "forget-1.mp3",
+    "forget-2.mp3",
+    "answer.mp3",
+    "answer-1.mp3",
+    "answer-2.mp3",
+    "ask.mp3",
+    "ask-1.mp3",
+    "ask-2.mp3",
+    "spell.mp3",
+    "spell-1.mp3",
+    "spell-2.mp3",
+    "improve.mp3",
+    "improve-1.mp3",
+    "improve-2.mp3",
+    "prepare.mp3",
+    "prepare-1.mp3",
+    "prepare-2.mp3"
+  ],
+  "words": [
+    {
+      "lemma": "study",
+      "senseKey": "study.v.sample_school",
+      "partOfSpeech": "verb",
+      "ipa": "/ˈstʌdi/",
+      "cefr": "a2",
+      "topics": [
+        "school"
+      ],
+      "forms": [
+        "study"
+      ],
+      "meaningVi": "học",
+      "definitionEn": "to spend time learning a subject",
+      "definitionEnSimple": "to spend time learning a subject",
+      "chunks": [
+        {
+          "text": "study English",
+          "vi": "học"
+        }
+      ],
+      "audioFile": "study.mp3",
+      "hints": [
+        {
+          "kind": "category",
+          "textEn": "This is an everyday action.",
+          "textVi": "Đây là một hành động thường gặp."
+        },
+        {
+          "kind": "context",
+          "textEn": "I ___ English for an hour every evening.",
+          "textVi": "Tôi học tiếng Anh một giờ mỗi tối."
+        },
+        {
+          "kind": "function",
+          "textEn": "to spend time learning a subject",
+          "textVi": "Hãy nghĩ đến tình huống trong câu ví dụ."
+        }
+      ],
+      "examples": [
+        {
+          "english": "I ___ English for an hour every evening.",
+          "meaningVi": "Tôi học tiếng Anh một giờ mỗi tối.",
+          "target": "study",
+          "audioFile": "study-1.mp3",
+          "alternativesTried": [
+            "eat",
+            "play",
+            "draw",
+            "sing",
+            "jump"
+          ],
+          "stillPlausible": []
+        },
+        {
+          "english": "We ___ together before the exam.",
+          "meaningVi": "Chúng tôi học cùng nhau trước kỳ thi.",
+          "target": "study",
+          "audioFile": "study-2.mp3",
+          "alternativesTried": [
+            "eat",
+            "play",
+            "draw",
+            "sing",
+            "jump"
+          ],
+          "stillPlausible": []
+        }
+      ]
+    },
+    {
+      "lemma": "learn",
+      "senseKey": "learn.v.sample_school",
+      "partOfSpeech": "verb",
+      "ipa": "/lɜːn/",
+      "cefr": "a2",
+      "topics": [
+        "school"
+      ],
+      "forms": [
+        "learn"
+      ],
+      "meaningVi": "học được",
+      "definitionEn": "to gain knowledge or a new skill",
+      "definitionEnSimple": "to gain knowledge or a new skill",
+      "chunks": [
+        {
+          "text": "learn a skill",
+          "vi": "học được"
+        }
+      ],
+      "audioFile": "learn.mp3",
+      "hints": [
+        {
+          "kind": "category",
+          "textEn": "This is an everyday action.",
+          "textVi": "Đây là một hành động thường gặp."
+        },
+        {
+          "kind": "context",
+          "textEn": "Children ___ new words by listening.",
+          "textVi": "Trẻ em học từ mới bằng cách lắng nghe."
+        },
+        {
+          "kind": "function",
+          "textEn": "to gain knowledge or a new skill",
+          "textVi": "Hãy nghĩ đến tình huống trong câu ví dụ."
+        }
+      ],
+      "examples": [
+        {
+          "english": "Children ___ new words by listening.",
+          "meaningVi": "Trẻ em học từ mới bằng cách lắng nghe.",
+          "target": "learn",
+          "audioFile": "learn-1.mp3",
+          "alternativesTried": [
+            "eat",
+            "play",
+            "draw",
+            "sing",
+            "jump"
+          ],
+          "stillPlausible": []
+        },
+        {
+          "english": "I want to ___ how to swim.",
+          "meaningVi": "Tôi muốn học cách bơi.",
+          "target": "learn",
+          "audioFile": "learn-2.mp3",
+          "alternativesTried": [
+            "eat",
+            "play",
+            "draw",
+            "sing",
+            "jump"
+          ],
+          "stillPlausible": []
+        }
+      ]
+    },
+    {
+      "lemma": "read",
+      "senseKey": "read.v.sample_school",
+      "partOfSpeech": "verb",
+      "ipa": "/riːd/",
+      "cefr": "a2",
+      "topics": [
+        "school"
+      ],
+      "forms": [
+        "read"
+      ],
+      "meaningVi": "đọc",
+      "definitionEn": "to look at written words and understand them",
+      "definitionEnSimple": "to look at written words and understand them",
+      "chunks": [
+        {
+          "text": "read a book",
+          "vi": "đọc"
+        }
+      ],
+      "audioFile": "read.mp3",
+      "hints": [
+        {
+          "kind": "category",
+          "textEn": "This is an everyday action.",
+          "textVi": "Đây là một hành động thường gặp."
+        },
+        {
+          "kind": "context",
+          "textEn": "Please ___ the first page carefully.",
+          "textVi": "Hãy đọc trang đầu tiên thật kỹ."
+        },
+        {
+          "kind": "function",
+          "textEn": "to look at written words and understand them",
+          "textVi": "Hãy nghĩ đến tình huống trong câu ví dụ."
+        }
+      ],
+      "examples": [
+        {
+          "english": "Please ___ the first page carefully.",
+          "meaningVi": "Hãy đọc trang đầu tiên thật kỹ.",
+          "target": "read",
+          "audioFile": "read-1.mp3",
+          "alternativesTried": [
+            "eat",
+            "play",
+            "draw",
+            "sing",
+            "jump"
+          ],
+          "stillPlausible": []
+        },
+        {
+          "english": "I ___ the news on my phone each morning.",
+          "meaningVi": "Tôi đọc tin tức trên điện thoại mỗi sáng.",
+          "target": "read",
+          "audioFile": "read-2.mp3",
+          "alternativesTried": [
+            "eat",
+            "play",
+            "draw",
+            "sing",
+            "jump"
+          ],
+          "stillPlausible": []
+        }
+      ]
+    },
+    {
+      "lemma": "write",
+      "senseKey": "write.v.sample_school",
+      "partOfSpeech": "verb",
+      "ipa": "/raɪt/",
+      "cefr": "a2",
+      "topics": [
+        "school"
+      ],
+      "forms": [
+        "write"
+      ],
+      "meaningVi": "viết",
+      "definitionEn": "to form words on paper or a screen",
+      "definitionEnSimple": "to form words on paper or a screen",
+      "chunks": [
+        {
+          "text": "write a sentence",
+          "vi": "viết"
+        }
+      ],
+      "audioFile": "write.mp3",
+      "hints": [
+        {
+          "kind": "category",
+          "textEn": "This is an everyday action.",
+          "textVi": "Đây là một hành động thường gặp."
+        },
+        {
+          "kind": "context",
+          "textEn": "Please ___ your name at the top.",
+          "textVi": "Hãy viết tên của bạn ở phía trên."
+        },
+        {
+          "kind": "function",
+          "textEn": "to form words on paper or a screen",
+          "textVi": "Hãy nghĩ đến tình huống trong câu ví dụ."
+        }
+      ],
+      "examples": [
+        {
+          "english": "Please ___ your name at the top.",
+          "meaningVi": "Hãy viết tên của bạn ở phía trên.",
+          "target": "write",
+          "audioFile": "write-1.mp3",
+          "alternativesTried": [
+            "eat",
+            "play",
+            "draw",
+            "sing",
+            "jump"
+          ],
+          "stillPlausible": []
+        },
+        {
+          "english": "I ___ notes during every lesson.",
+          "meaningVi": "Tôi viết ghi chú trong mỗi buổi học.",
+          "target": "write",
+          "audioFile": "write-2.mp3",
+          "alternativesTried": [
+            "eat",
+            "play",
+            "draw",
+            "sing",
+            "jump"
+          ],
+          "stillPlausible": []
+        }
+      ]
+    },
+    {
+      "lemma": "listen",
+      "senseKey": "listen.v.sample_school",
+      "partOfSpeech": "verb",
+      "ipa": "/ˈlɪsən/",
+      "cefr": "a2",
+      "topics": [
+        "school"
+      ],
+      "forms": [
+        "listen"
+      ],
+      "meaningVi": "lắng nghe",
+      "definitionEn": "to pay attention to a sound or a person speaking",
+      "definitionEnSimple": "to pay attention to a sound or a person speaking",
+      "chunks": [
+        {
+          "text": "listen to a teacher",
+          "vi": "lắng nghe"
+        }
+      ],
+      "audioFile": "listen.mp3",
+      "hints": [
+        {
+          "kind": "category",
+          "textEn": "This is an everyday action.",
+          "textVi": "Đây là một hành động thường gặp."
+        },
+        {
+          "kind": "context",
+          "textEn": "Please ___ to the teacher carefully.",
+          "textVi": "Hãy lắng nghe giáo viên thật kỹ."
+        },
+        {
+          "kind": "function",
+          "textEn": "to pay attention to a sound or a person speaking",
+          "textVi": "Hãy nghĩ đến tình huống trong câu ví dụ."
+        }
+      ],
+      "examples": [
+        {
+          "english": "Please ___ to the teacher carefully.",
+          "meaningVi": "Hãy lắng nghe giáo viên thật kỹ.",
+          "target": "listen",
+          "audioFile": "listen-1.mp3",
+          "alternativesTried": [
+            "eat",
+            "play",
+            "draw",
+            "sing",
+            "jump"
+          ],
+          "stillPlausible": []
+        },
+        {
+          "english": "I ___ to English podcasts on the bus.",
+          "meaningVi": "Tôi nghe podcast tiếng Anh trên xe buýt.",
+          "target": "listen",
+          "audioFile": "listen-2.mp3",
+          "alternativesTried": [
+            "eat",
+            "play",
+            "draw",
+            "sing",
+            "jump"
+          ],
+          "stillPlausible": []
+        }
+      ]
+    },
+    {
+      "lemma": "explain",
+      "senseKey": "explain.v.sample_school",
+      "partOfSpeech": "verb",
+      "ipa": "/ɪkˈspleɪn/",
+      "cefr": "a2",
+      "topics": [
+        "school"
+      ],
+      "forms": [
+        "explain"
+      ],
+      "meaningVi": "giải thích",
+      "definitionEn": "to make an idea clear to someone",
+      "definitionEnSimple": "to make an idea clear to someone",
+      "chunks": [
+        {
+          "text": "explain an answer",
+          "vi": "giải thích"
+        }
+      ],
+      "audioFile": "explain.mp3",
+      "hints": [
+        {
+          "kind": "category",
+          "textEn": "This is an everyday action.",
+          "textVi": "Đây là một hành động thường gặp."
+        },
+        {
+          "kind": "context",
+          "textEn": "Can you ___ this rule to me?",
+          "textVi": "Bạn có thể giải thích quy tắc này cho tôi không?"
+        },
+        {
+          "kind": "function",
+          "textEn": "to make an idea clear to someone",
+          "textVi": "Hãy nghĩ đến tình huống trong câu ví dụ."
+        }
+      ],
+      "examples": [
+        {
+          "english": "Can you ___ this rule to me?",
+          "meaningVi": "Bạn có thể giải thích quy tắc này cho tôi không?",
+          "target": "explain",
+          "audioFile": "explain-1.mp3",
+          "alternativesTried": [
+            "eat",
+            "play",
+            "draw",
+            "sing",
+            "jump"
+          ],
+          "stillPlausible": []
+        },
+        {
+          "english": "The teacher will ___ the answer after class.",
+          "meaningVi": "Giáo viên sẽ giải thích đáp án sau giờ học.",
+          "target": "explain",
+          "audioFile": "explain-2.mp3",
+          "alternativesTried": [
+            "eat",
+            "play",
+            "draw",
+            "sing",
+            "jump"
+          ],
+          "stillPlausible": []
+        }
+      ]
+    },
+    {
+      "lemma": "practice",
+      "senseKey": "practice.v.sample_school",
+      "partOfSpeech": "verb",
+      "ipa": "/ˈpræktɪs/",
+      "cefr": "a2",
+      "topics": [
+        "school"
+      ],
+      "forms": [
+        "practice"
+      ],
+      "meaningVi": "luyện tập",
+      "definitionEn": "to do an activity repeatedly to improve",
+      "definitionEnSimple": "to do an activity repeatedly to improve",
+      "chunks": [
+        {
+          "text": "practice speaking",
+          "vi": "luyện tập"
+        }
+      ],
+      "audioFile": "practice.mp3",
+      "hints": [
+        {
+          "kind": "category",
+          "textEn": "This is an everyday action.",
+          "textVi": "Đây là một hành động thường gặp."
+        },
+        {
+          "kind": "context",
+          "textEn": "I ___ speaking English with a friend.",
+          "textVi": "Tôi luyện nói tiếng Anh với một người bạn."
+        },
+        {
+          "kind": "function",
+          "textEn": "to do an activity repeatedly to improve",
+          "textVi": "Hãy nghĩ đến tình huống trong câu ví dụ."
+        }
+      ],
+      "examples": [
+        {
+          "english": "I ___ speaking English with a friend.",
+          "meaningVi": "Tôi luyện nói tiếng Anh với một người bạn.",
+          "target": "practice",
+          "audioFile": "practice-1.mp3",
+          "alternativesTried": [
+            "eat",
+            "play",
+            "draw",
+            "sing",
+            "jump"
+          ],
+          "stillPlausible": []
+        },
+        {
+          "english": "You should ___ every day before the test.",
+          "meaningVi": "Bạn nên luyện tập mỗi ngày trước bài kiểm tra.",
+          "target": "practice",
+          "audioFile": "practice-2.mp3",
+          "alternativesTried": [
+            "eat",
+            "play",
+            "draw",
+            "sing",
+            "jump"
+          ],
+          "stillPlausible": []
+        }
+      ]
+    },
+    {
+      "lemma": "review",
+      "senseKey": "review.v.sample_school",
+      "partOfSpeech": "verb",
+      "ipa": "/rɪˈvjuː/",
+      "cefr": "a2",
+      "topics": [
+        "school"
+      ],
+      "forms": [
+        "review"
+      ],
+      "meaningVi": "ôn tập",
+      "definitionEn": "to look at material again in order to remember it",
+      "definitionEnSimple": "to look at material again in order to remember it",
+      "chunks": [
+        {
+          "text": "review notes",
+          "vi": "ôn tập"
+        }
+      ],
+      "audioFile": "review.mp3",
+      "hints": [
+        {
+          "kind": "category",
+          "textEn": "This is an everyday action.",
+          "textVi": "Đây là một hành động thường gặp."
+        },
+        {
+          "kind": "context",
+          "textEn": "I ___ my notes before the quiz.",
+          "textVi": "Tôi ôn lại ghi chú trước bài kiểm tra ngắn."
+        },
+        {
+          "kind": "function",
+          "textEn": "to look at material again in order to remember it",
+          "textVi": "Hãy nghĩ đến tình huống trong câu ví dụ."
+        }
+      ],
+      "examples": [
+        {
+          "english": "I ___ my notes before the quiz.",
+          "meaningVi": "Tôi ôn lại ghi chú trước bài kiểm tra ngắn.",
+          "target": "review",
+          "audioFile": "review-1.mp3",
+          "alternativesTried": [
+            "eat",
+            "play",
+            "draw",
+            "sing",
+            "jump"
+          ],
+          "stillPlausible": []
+        },
+        {
+          "english": "We ___ old words on Friday.",
+          "meaningVi": "Chúng tôi ôn từ cũ vào thứ Sáu.",
+          "target": "review",
+          "audioFile": "review-2.mp3",
+          "alternativesTried": [
+            "eat",
+            "play",
+            "draw",
+            "sing",
+            "jump"
+          ],
+          "stillPlausible": []
+        }
+      ]
+    },
+    {
+      "lemma": "remember",
+      "senseKey": "remember.v.sample_school",
+      "partOfSpeech": "verb",
+      "ipa": "/rɪˈmembə/",
+      "cefr": "a2",
+      "topics": [
+        "school"
+      ],
+      "forms": [
+        "remember"
+      ],
+      "meaningVi": "nhớ",
+      "definitionEn": "to keep something in your mind",
+      "definitionEnSimple": "to keep something in your mind",
+      "chunks": [
+        {
+          "text": "remember a name",
+          "vi": "nhớ"
+        }
+      ],
+      "audioFile": "remember.mp3",
+      "hints": [
+        {
+          "kind": "category",
+          "textEn": "This is an everyday action.",
+          "textVi": "Đây là một hành động thường gặp."
+        },
+        {
+          "kind": "context",
+          "textEn": "I can ___ her name now.",
+          "textVi": "Bây giờ tôi có thể nhớ tên cô ấy."
+        },
+        {
+          "kind": "function",
+          "textEn": "to keep something in your mind",
+          "textVi": "Hãy nghĩ đến tình huống trong câu ví dụ."
+        }
+      ],
+      "examples": [
+        {
+          "english": "I can ___ her name now.",
+          "meaningVi": "Bây giờ tôi có thể nhớ tên cô ấy.",
+          "target": "remember",
+          "audioFile": "remember-1.mp3",
+          "alternativesTried": [
+            "eat",
+            "play",
+            "draw",
+            "sing",
+            "jump"
+          ],
+          "stillPlausible": []
+        },
+        {
+          "english": "Do you ___ the answer to question three?",
+          "meaningVi": "Bạn có nhớ đáp án câu số ba không?",
+          "target": "remember",
+          "audioFile": "remember-2.mp3",
+          "alternativesTried": [
+            "eat",
+            "play",
+            "draw",
+            "sing",
+            "jump"
+          ],
+          "stillPlausible": []
+        }
+      ]
+    },
+    {
+      "lemma": "forget",
+      "senseKey": "forget.v.sample_school",
+      "partOfSpeech": "verb",
+      "ipa": "/fəˈɡet/",
+      "cefr": "a2",
+      "topics": [
+        "school"
+      ],
+      "forms": [
+        "forget"
+      ],
+      "meaningVi": "quên",
+      "definitionEn": "to fail to remember something",
+      "definitionEnSimple": "to fail to remember something",
+      "chunks": [
+        {
+          "text": "forget a word",
+          "vi": "quên"
+        }
+      ],
+      "audioFile": "forget.mp3",
+      "hints": [
+        {
+          "kind": "category",
+          "textEn": "This is an everyday action.",
+          "textVi": "Đây là một hành động thường gặp."
+        },
+        {
+          "kind": "context",
+          "textEn": "I often ___ new words if I do not use them.",
+          "textVi": "Tôi thường quên từ mới nếu không dùng chúng."
+        },
+        {
+          "kind": "function",
+          "textEn": "to fail to remember something",
+          "textVi": "Hãy nghĩ đến tình huống trong câu ví dụ."
+        }
+      ],
+      "examples": [
+        {
+          "english": "I often ___ new words if I do not use them.",
+          "meaningVi": "Tôi thường quên từ mới nếu không dùng chúng.",
+          "target": "forget",
+          "audioFile": "forget-1.mp3",
+          "alternativesTried": [
+            "eat",
+            "play",
+            "draw",
+            "sing",
+            "jump"
+          ],
+          "stillPlausible": []
+        },
+        {
+          "english": "Do not ___ your notebook tomorrow.",
+          "meaningVi": "Đừng quên vở ghi ngày mai.",
+          "target": "forget",
+          "audioFile": "forget-2.mp3",
+          "alternativesTried": [
+            "eat",
+            "play",
+            "draw",
+            "sing",
+            "jump"
+          ],
+          "stillPlausible": []
+        }
+      ]
+    },
+    {
+      "lemma": "answer",
+      "senseKey": "answer.v.sample_school",
+      "partOfSpeech": "verb",
+      "ipa": "/ˈɑːnsə/",
+      "cefr": "a2",
+      "topics": [
+        "school"
+      ],
+      "forms": [
+        "answer"
+      ],
+      "meaningVi": "trả lời",
+      "definitionEn": "to respond to a question",
+      "definitionEnSimple": "to respond to a question",
+      "chunks": [
+        {
+          "text": "answer a question",
+          "vi": "trả lời"
+        }
+      ],
+      "audioFile": "answer.mp3",
+      "hints": [
+        {
+          "kind": "category",
+          "textEn": "This is an everyday action.",
+          "textVi": "Đây là một hành động thường gặp."
+        },
+        {
+          "kind": "context",
+          "textEn": "Please ___ the last question.",
+          "textVi": "Hãy trả lời câu hỏi cuối cùng."
+        },
+        {
+          "kind": "function",
+          "textEn": "to respond to a question",
+          "textVi": "Hãy nghĩ đến tình huống trong câu ví dụ."
+        }
+      ],
+      "examples": [
+        {
+          "english": "Please ___ the last question.",
+          "meaningVi": "Hãy trả lời câu hỏi cuối cùng.",
+          "target": "answer",
+          "audioFile": "answer-1.mp3",
+          "alternativesTried": [
+            "eat",
+            "play",
+            "draw",
+            "sing",
+            "jump"
+          ],
+          "stillPlausible": []
+        },
+        {
+          "english": "I can ___ this question in English.",
+          "meaningVi": "Tôi có thể trả lời câu hỏi này bằng tiếng Anh.",
+          "target": "answer",
+          "audioFile": "answer-2.mp3",
+          "alternativesTried": [
+            "eat",
+            "play",
+            "draw",
+            "sing",
+            "jump"
+          ],
+          "stillPlausible": []
+        }
+      ]
+    },
+    {
+      "lemma": "ask",
+      "senseKey": "ask.v.sample_school",
+      "partOfSpeech": "verb",
+      "ipa": "/ɑːsk/",
+      "cefr": "a2",
+      "topics": [
+        "school"
+      ],
+      "forms": [
+        "ask"
+      ],
+      "meaningVi": "hỏi",
+      "definitionEn": "to say a question in order to get information",
+      "definitionEnSimple": "to say a question in order to get information",
+      "chunks": [
+        {
+          "text": "ask a question",
+          "vi": "hỏi"
+        }
+      ],
+      "audioFile": "ask.mp3",
+      "hints": [
+        {
+          "kind": "category",
+          "textEn": "This is an everyday action.",
+          "textVi": "Đây là một hành động thường gặp."
+        },
+        {
+          "kind": "context",
+          "textEn": "You can ___ the teacher after class.",
+          "textVi": "Bạn có thể hỏi giáo viên sau giờ học."
+        },
+        {
+          "kind": "function",
+          "textEn": "to say a question in order to get information",
+          "textVi": "Hãy nghĩ đến tình huống trong câu ví dụ."
+        }
+      ],
+      "examples": [
+        {
+          "english": "You can ___ the teacher after class.",
+          "meaningVi": "Bạn có thể hỏi giáo viên sau giờ học.",
+          "target": "ask",
+          "audioFile": "ask-1.mp3",
+          "alternativesTried": [
+            "eat",
+            "play",
+            "draw",
+            "sing",
+            "jump"
+          ],
+          "stillPlausible": []
+        },
+        {
+          "english": "I want to ___ one more question.",
+          "meaningVi": "Tôi muốn hỏi thêm một câu nữa.",
+          "target": "ask",
+          "audioFile": "ask-2.mp3",
+          "alternativesTried": [
+            "eat",
+            "play",
+            "draw",
+            "sing",
+            "jump"
+          ],
+          "stillPlausible": []
+        }
+      ]
+    },
+    {
+      "lemma": "spell",
+      "senseKey": "spell.v.sample_school",
+      "partOfSpeech": "verb",
+      "ipa": "/spel/",
+      "cefr": "a2",
+      "topics": [
+        "school"
+      ],
+      "forms": [
+        "spell"
+      ],
+      "meaningVi": "đánh vần",
+      "definitionEn": "to say or write the letters of a word in order",
+      "definitionEnSimple": "to say or write the letters of a word in order",
+      "chunks": [
+        {
+          "text": "spell a name",
+          "vi": "đánh vần"
+        }
+      ],
+      "audioFile": "spell.mp3",
+      "hints": [
+        {
+          "kind": "category",
+          "textEn": "This is an everyday action.",
+          "textVi": "Đây là một hành động thường gặp."
+        },
+        {
+          "kind": "context",
+          "textEn": "Can you ___ your surname for me?",
+          "textVi": "Bạn có thể đánh vần họ của bạn cho tôi không?"
+        },
+        {
+          "kind": "function",
+          "textEn": "to say or write the letters of a word in order",
+          "textVi": "Hãy nghĩ đến tình huống trong câu ví dụ."
+        }
+      ],
+      "examples": [
+        {
+          "english": "Can you ___ your surname for me?",
+          "meaningVi": "Bạn có thể đánh vần họ của bạn cho tôi không?",
+          "target": "spell",
+          "audioFile": "spell-1.mp3",
+          "alternativesTried": [
+            "eat",
+            "play",
+            "draw",
+            "sing",
+            "jump"
+          ],
+          "stillPlausible": []
+        },
+        {
+          "english": "I can ___ this word without looking.",
+          "meaningVi": "Tôi có thể đánh vần từ này mà không cần nhìn.",
+          "target": "spell",
+          "audioFile": "spell-2.mp3",
+          "alternativesTried": [
+            "eat",
+            "play",
+            "draw",
+            "sing",
+            "jump"
+          ],
+          "stillPlausible": []
+        }
+      ]
+    },
+    {
+      "lemma": "improve",
+      "senseKey": "improve.v.sample_school",
+      "partOfSpeech": "verb",
+      "ipa": "/ɪmˈpruːv/",
+      "cefr": "a2",
+      "topics": [
+        "school"
+      ],
+      "forms": [
+        "improve"
+      ],
+      "meaningVi": "cải thiện",
+      "definitionEn": "to become better or make something better",
+      "definitionEnSimple": "to become better or make something better",
+      "chunks": [
+        {
+          "text": "improve English",
+          "vi": "cải thiện"
+        }
+      ],
+      "audioFile": "improve.mp3",
+      "hints": [
+        {
+          "kind": "category",
+          "textEn": "This is an everyday action.",
+          "textVi": "Đây là một hành động thường gặp."
+        },
+        {
+          "kind": "context",
+          "textEn": "I want to ___ my English this year.",
+          "textVi": "Tôi muốn cải thiện tiếng Anh của mình năm nay."
+        },
+        {
+          "kind": "function",
+          "textEn": "to become better or make something better",
+          "textVi": "Hãy nghĩ đến tình huống trong câu ví dụ."
+        }
+      ],
+      "examples": [
+        {
+          "english": "I want to ___ my English this year.",
+          "meaningVi": "Tôi muốn cải thiện tiếng Anh của mình năm nay.",
+          "target": "improve",
+          "audioFile": "improve-1.mp3",
+          "alternativesTried": [
+            "eat",
+            "play",
+            "draw",
+            "sing",
+            "jump"
+          ],
+          "stillPlausible": []
+        },
+        {
+          "english": "Daily reading can ___ your vocabulary.",
+          "meaningVi": "Đọc hằng ngày có thể cải thiện vốn từ của bạn.",
+          "target": "improve",
+          "audioFile": "improve-2.mp3",
+          "alternativesTried": [
+            "eat",
+            "play",
+            "draw",
+            "sing",
+            "jump"
+          ],
+          "stillPlausible": []
+        }
+      ]
+    },
+    {
+      "lemma": "prepare",
+      "senseKey": "prepare.v.sample_school",
+      "partOfSpeech": "verb",
+      "ipa": "/prɪˈpeə/",
+      "cefr": "a2",
+      "topics": [
+        "school"
+      ],
+      "forms": [
+        "prepare"
+      ],
+      "meaningVi": "chuẩn bị",
+      "definitionEn": "to get ready for something",
+      "definitionEnSimple": "to get ready for something",
+      "chunks": [
+        {
+          "text": "prepare for a test",
+          "vi": "chuẩn bị"
+        }
+      ],
+      "audioFile": "prepare.mp3",
+      "hints": [
+        {
+          "kind": "category",
+          "textEn": "This is an everyday action.",
+          "textVi": "Đây là một hành động thường gặp."
+        },
+        {
+          "kind": "context",
+          "textEn": "I ___ for the test each evening.",
+          "textVi": "Tôi chuẩn bị cho bài kiểm tra mỗi tối."
+        },
+        {
+          "kind": "function",
+          "textEn": "to get ready for something",
+          "textVi": "Hãy nghĩ đến tình huống trong câu ví dụ."
+        }
+      ],
+      "examples": [
+        {
+          "english": "I ___ for the test each evening.",
+          "meaningVi": "Tôi chuẩn bị cho bài kiểm tra mỗi tối.",
+          "target": "prepare",
+          "audioFile": "prepare-1.mp3",
+          "alternativesTried": [
+            "eat",
+            "play",
+            "draw",
+            "sing",
+            "jump"
+          ],
+          "stillPlausible": []
+        },
+        {
+          "english": "We ___ our books before the lesson.",
+          "meaningVi": "Chúng tôi chuẩn bị sách trước buổi học.",
+          "target": "prepare",
+          "audioFile": "prepare-2.mp3",
+          "alternativesTried": [
+            "eat",
+            "play",
+            "draw",
+            "sing",
+            "jump"
+          ],
+          "stillPlausible": []
+        }
+      ]
+    }
+  ]
+}

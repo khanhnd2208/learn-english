@@ -1,10 +1,10 @@
 #!/usr/bin/env npx tsx
 /**
- * Seed two published English sample sets into the local database.
+ * Seed published English sample sets into the configured database.
  *
  * The JSON packs contain placeholder audio names for validation. After publish,
  * the seed clears them so Practice uses browser TTS and Test omits audio items.
- * Run: npm run db:seed:english-samples
+ * Run: npm run db:seed:samples
  */
 import { readFile } from 'node:fs/promises';
 import { resolve } from 'node:path';
@@ -17,6 +17,9 @@ expand(config({ path: resolve(process.cwd(), '.env') }));
 const SAMPLE_FILES = [
 	'docs/testing/english-sample-packs/travel.json',
 	'docs/testing/english-sample-packs/food.json',
+	'docs/testing/english-sample-packs/school-15.json',
+	'docs/testing/english-sample-packs/work-15.json',
+	'docs/testing/english-sample-packs/daily-life-15.json',
 ] as const;
 
 async function main() {
@@ -31,8 +34,9 @@ async function main() {
 			if (assessment.schemaError || !assessment.pack) {
 				throw new Error(`${relativePath}: ${assessment.schemaError ?? 'Gói dữ liệu không hợp lệ'}`);
 			}
-			if (assessment.pack.words.length !== 10) {
-				throw new Error(`${relativePath}: cần đúng 10 từ, hiện có ${assessment.pack.words.length}`);
+			const expectedCount = relativePath.endsWith('-15.json') ? 15 : 10;
+			if (assessment.pack.words.length !== expectedCount) {
+				throw new Error(`${relativePath}: cần đúng ${expectedCount} từ, hiện có ${assessment.pack.words.length}`);
 			}
 			const blockedWords = assessment.words.filter((word) => !word.publishable);
 			if (blockedWords.length > 0) {
@@ -47,8 +51,8 @@ async function main() {
 			let setId: string;
 			if (existing) {
 				const wordCount = existing.items.filter((item) => item.senseId).length;
-				if (wordCount !== 10) {
-					throw new Error(`Bộ "${existing.title}" đã tồn tại nhưng có ${wordCount}/10 từ; không tự ghi đè dữ liệu local.`);
+				if (wordCount !== expectedCount) {
+					throw new Error(`Bộ "${existing.title}" đã tồn tại nhưng có ${wordCount}/${expectedCount} từ; không tự ghi đè dữ liệu hiện có.`);
 				}
 				setId = existing.id;
 			} else {
@@ -67,14 +71,14 @@ async function main() {
 			}
 
 			const published = existing?.status === 'published'
-				? { publishedSenses: 10, publishedPatterns: 0, issues: [] }
+				? { publishedSenses: expectedCount, issues: [] }
 				: await publishEnglishSet(setId, async () => true);
-			if (published.publishedSenses !== 10) {
+			if (published.publishedSenses !== expectedCount) {
 				const details = published.issues
 					.filter((issue) => issue.blocksGrade)
 					.map((issue) => `${issue.path} [${issue.code}]: ${issue.message}`)
 					.join('\n');
-				throw new Error(`Bộ "${assessment.pack.title}" chỉ xuất bản được ${published.publishedSenses}/10 từ.\n${details}`);
+				throw new Error(`Bộ "${assessment.pack.title}" chỉ xuất bản được ${published.publishedSenses}/${expectedCount} từ.\n${details}`);
 			}
 			const seededItems = await prisma.enSetItem.findMany({ where: { setId }, select: { senseId: true } });
 			const seededSenseIds = seededItems.flatMap((item) => item.senseId ? [item.senseId] : []);
@@ -83,7 +87,7 @@ async function main() {
 				prisma.enWord.updateMany({ where: { id: { in: seededWords.map((word) => word.wordId) } }, data: { audioPath: '', audioUkPath: '', audioUsPath: '' } }),
 				prisma.enExample.updateMany({ where: { senseId: { in: seededSenseIds } }, data: { audioPath: '' } }),
 			]);
-			console.log(`  ✅ ${assessment.pack.title}: 10 từ`);
+			console.log(`  ✅ ${assessment.pack.title}: ${expectedCount} từ`);
 		}
 	} finally {
 		await prisma.$disconnect();
