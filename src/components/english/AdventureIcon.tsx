@@ -29,7 +29,7 @@ const tones: Record<string, string> = {
 
 export function AdventureIcon({ name, size = 24, className = '', framed = false, ...props }: SVGProps<SVGSVGElement> & { name: IconName; size?: number; framed?: boolean }) {
 	const icon = <svg aria-hidden="true" viewBox="0 0 24 24" width={size} height={size} fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" className={className} {...props}>{paths[name]}</svg>;
-	return framed ? <span className={`adventure-icon ${tones[name]}`} aria-hidden="true">{icon}</span> : icon;
+	return framed ? <span className={`adventure-icon inline-flex shrink-0 items-center justify-center ${tones[name]}`} aria-hidden="true">{icon}</span> : icon;
 }
 
 export function AdventureLandscape() {

@@ -509,3 +509,36 @@ input:focus-visible, textarea:focus-visible, select:focus-visible { outline-colo
 .segment-progress>span { height:7px; flex:1; border-radius:3px; background:var(--surface-dim); }
 .segment-progress>span[data-done="true"] { background:var(--accent); }
 .dark .choice-btn[data-state="wrong"] { background:color-mix(in srgb,var(--error) 20%,var(--surface)); }
+
+/* Goals: level badge, XP pop, quest states. In a layer so size and spacing utilities can override them. */
+@layer components {
+	.level-badge {
+		display: inline-flex; align-items: center; justify-content: center;
+		min-width: 2.25rem; padding: 1px 6px;
+		border: 2px solid #41354e; border-radius: 6px;
+		background: var(--gold); color: #2b2233;
+		font-family: var(--font-pixel, inherit); font-size: .75rem; font-weight: 900; line-height: 1.2;
+		box-shadow: 0 2px 0 #a8792a;
+	}
+	.dark .level-badge { border-color: #d7c3e4; box-shadow: 0 2px 0 #6e5124; }
+	.quest-card { border: 2px solid var(--border); border-radius: 12px; background: var(--surface); }
+	.quest-card[data-done="true"] { border-color: color-mix(in srgb, var(--success) 55%, var(--border)); background: var(--success-subtle); }
+	.xp-chip { display: inline-flex; align-items: center; gap: 2px; border-radius: 999px; padding: 1px 8px; font-size: .75rem; font-weight: 800; background: color-mix(in srgb, var(--gold) 26%, var(--surface)); color: var(--foreground); white-space: nowrap; }
+}
+@keyframes xp-pop {
+	0% { transform: translateY(6px) scale(.9); opacity: 0; }
+	20% { transform: translateY(0) scale(1.08); opacity: 1; }
+	80% { transform: translateY(-6px); opacity: 1; }
+	100% { transform: translateY(-14px); opacity: 0; }
+}
+.animate-xp-pop { animation: xp-pop 1.2s ease-out forwards; }
+@keyframes badge-pop {
+	0% { transform: scale(.6) rotate(-8deg); opacity: 0; }
+	60% { transform: scale(1.1) rotate(3deg); opacity: 1; }
+	100% { transform: scale(1) rotate(0); }
+}
+.animate-badge-pop { animation: badge-pop 480ms steps(6, end) both; }
+@media (prefers-reduced-motion: reduce) {
+	.animate-xp-pop { animation-duration: 1ms; animation-delay: 900ms; }
+	.animate-badge-pop { animation: none; }
+}

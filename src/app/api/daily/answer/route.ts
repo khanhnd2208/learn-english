@@ -1,6 +1,7 @@
 import { z } from 'zod';
 import { withAuth, apiSuccess, apiError } from '@/lib/apiUtils';
 import { answerToday } from '@/services/english/enDailyService';
+import { safeSettle } from '@/services/english/enGoalService';
 
 const bodySchema = z.object({
 	sessionId: z.string().min(1),
@@ -15,5 +16,7 @@ const bodySchema = z.object({
 export const POST = withAuth(async (request, user) => {
 	const parsed = bodySchema.safeParse(await request.json().catch(() => null));
 	if (!parsed.success) return apiError('Câu trả lời không hợp lệ', 400);
-	return apiSuccess(await answerToday(user.id, parsed.data));
+	const result = await answerToday(user.id, parsed.data);
+	if (result.result === 'near') return apiSuccess({ ...result, reward: null });
+	return apiSuccess({ ...result, reward: await safeSettle(user.id, result.xp) });
 });

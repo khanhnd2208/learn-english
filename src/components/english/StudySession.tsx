@@ -1,19 +1,23 @@
 'use client';
 
+import Link from 'next/link';
 import { useCallback, useEffect, useRef, useState, type FormEvent } from 'react';
 import Button from '@/components/ui/Button';
 import MaterialIcon from '@/components/ui/MaterialIcon';
+import { useToast } from '@/components/ui/Toast';
 import EnglishAudioButton from '@/components/english/EnglishAudioButton';
 import { englishPost } from '@/components/english/englishApi';
 import { exampleParts, type BundleExample, type SenseBundle } from '@/lib/english/senseBundle';
 import { intervalDays, isLongTerm } from '@/lib/english/schedule';
 import type { DailyAnswerResult, DailyItem } from '@/services/english/enDailyService';
+import type { GoalReward } from '@/services/english/enGoalService';
 
 type Started = { sessionId: string | null; dueCount: number; newCount: number; dueTotal: number; items: DailyItem[] };
 type Step = { key: string; item: DailyItem; mode: 'intro' | 'recall'; retry: boolean };
 type Feedback = { result: 'correct' | 'wrong'; typed: string; boxBefore: number; boxAfter: number; scheduled: boolean };
 type Outcome = { item: DailyItem; correct: boolean; boxBefore: number; boxAfter: number };
-type Finished = { remaining: number; tomorrowCount: number; longTermCount: number };
+type Finished = { remaining: number; tomorrowCount: number; longTermCount: number; reward?: GoalReward | null };
+type Answered = DailyAnswerResult & { reward?: GoalReward | null };
 
 /** Steps another card waits before a new word's first recall, so recall is not just copying. */
 const NEW_WORD_GAP = 3;
@@ -85,6 +89,9 @@ export default function StudySession({ onClose, extra = false }: { onClose: (stu
 	const [error, setError] = useState('');
 	const [outcomes, setOutcomes] = useState<Outcome[]>([]);
 	const [finished, setFinished] = useState<Finished | null>(null);
+	const [sessionXp, setSessionXp] = useState(0);
+	const [xpPop, setXpPop] = useState<{ id: number; xp: number } | null>(null);
+	const { toast } = useToast();
 	const answeredAny = useRef(false);
 	const shownAt = useRef(0);
 	const advanceTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -113,6 +120,17 @@ export default function StudySession({ onClose, extra = false }: { onClose: (stu
 		goTo(0);
 		setPhase('study');
 	}, [goTo]);
+
+	/** XP pop next to the progress bar, plus a toast for each quest or badge just earned. */
+	const reward = useCallback((earned: GoalReward | null | undefined) => {
+		if (!earned) return;
+		if (earned.xp > 0) {
+			setSessionXp((current) => current + earned.xp);
+			setXpPop({ id: Date.now(), xp: earned.xp });
+		}
+		for (const quest of earned.quests) toast(`✓ ${quest.title} · +${quest.xp} XP`, 'success');
+		for (const badge of earned.achievements) toast(`🏆 Thành tựu: ${badge.title}${badge.tierName ? ` · ${badge.tierName}` : ''}`, 'success');
+	}, [toast]);
 
 	const fail = useCallback((cause: unknown) => {
 		setError(cause instanceof Error ? cause.message : 'Không tải được bài học hôm nay.');
@@ -150,11 +168,13 @@ export default function StudySession({ onClose, extra = false }: { onClose: (stu
 		if (!sessionId) return;
 		setPhase('summary');
 		try {
-			setFinished(await englishPost<Finished>('/api/daily/finish', { sessionId }));
+			const result = await englishPost<Finished>('/api/daily/finish', { sessionId });
+			setFinished(result);
+			reward(result.reward);
 		} catch {
 			setFinished({ remaining: 0, tomorrowCount: 0, longTermCount: 0 });
 		}
-	}, [sessionId]);
+	}, [reward, sessionId]);
 
 	const next = useCallback(() => {
 		if (advanceTimer.current) clearTimeout(advanceTimer.current);
@@ -192,7 +212,7 @@ export default function StudySession({ onClose, extra = false }: { onClose: (stu
 		setBusy(true);
 		setError('');
 		try {
-			const result = await englishPost<DailyAnswerResult>('/api/daily/answer', {
+			const result = await englishPost<Answered>('/api/daily/answer', {
 				sessionId,
 				senseId: step.item.senseId,
 				answer: giveUp ? '' : answer,
@@ -208,6 +228,7 @@ export default function StudySession({ onClose, extra = false }: { onClose: (stu
 				return;
 			}
 			answeredAny.current = true;
+			reward(result.reward);
 			const correct = result.result === 'correct';
 			setFeedback({ result: result.result, typed: giveUp ? '' : answer.trim(), boxBefore: result.boxBefore, boxAfter: result.boxAfter, scheduled: result.scheduled });
 			if (!step.retry) setOutcomes((current) => current.some((outcome) => outcome.item.senseId === step.item.senseId) ? current : [...current, { item: step.item, correct, boxBefore: result.boxBefore, boxAfter: result.boxAfter }]);
@@ -239,7 +260,11 @@ export default function StudySession({ onClose, extra = false }: { onClose: (stu
 				<div className="h-2 flex-1 overflow-hidden rounded-full bg-accent-subtle" role="progressbar" aria-valuemin={0} aria-valuemax={total} aria-valuenow={done}>
 					<div className="h-full rounded-full bg-accent transition-all duration-500 ease-out" style={{ width: `${total ? (done / total) * 100 : 0}%` }} />
 				</div>
-				<span className="min-w-12 text-right text-xs font-bold tabular-nums text-muted">{Math.min(done + (phase === 'study' ? 1 : 0), total)}/{total}</span>
+				<span className="relative min-w-12 text-right text-xs font-bold tabular-nums text-muted">
+					{Math.min(done + (phase === 'study' ? 1 : 0), total)}/{total}
+					{xpPop && <span key={xpPop.id} aria-hidden="true" className="animate-xp-pop xp-chip pointer-events-none absolute -top-1 right-full mr-2">+{xpPop.xp} XP</span>}
+				</span>
+				<span className="sr-only" aria-live="polite">{sessionXp > 0 ? `Phiên này đã được ${sessionXp} XP` : ''}</span>
 			</div>
 		</div>
 
@@ -311,12 +336,12 @@ export default function StudySession({ onClose, extra = false }: { onClose: (stu
 				{error && <p role="alert" className="text-center text-sm text-error">{error}</p>}
 			</div>}
 
-			{phase === 'summary' && <Summary outcomes={outcomes} finished={finished} onMore={start} onDone={() => onClose(true)} />}
+			{phase === 'summary' && <Summary outcomes={outcomes} finished={finished} sessionXp={sessionXp} onMore={start} onDone={() => onClose(true)} />}
 		</div>
 	</div>;
 }
 
-function Summary({ outcomes, finished, onMore, onDone }: { outcomes: Outcome[]; finished: Finished | null; onMore: () => void; onDone: () => void }) {
+function Summary({ outcomes, finished, sessionXp, onMore, onDone }: { outcomes: Outcome[]; finished: Finished | null; sessionXp: number; onMore: () => void; onDone: () => void }) {
 	const remembered = outcomes.filter((outcome) => outcome.correct).length;
 	const learned = outcomes.filter((outcome) => outcome.item.kind === 'new').length;
 	const promoted = outcomes.filter((outcome) => isLongTerm(outcome.boxAfter) && !isLongTerm(outcome.boxBefore));
@@ -328,6 +353,7 @@ function Summary({ outcomes, finished, onMore, onDone }: { outcomes: Outcome[]; 
 			<span className="mx-auto inline-flex size-16 items-center justify-center rounded-full bg-success-subtle text-success"><MaterialIcon name={more ? 'flag' : 'task_alt'} filled size={34} /></span>
 			<h2 className="text-3xl font-black text-foreground">{more ? 'Xong một vòng' : 'Hoàn thành hôm nay'}</h2>
 			<p className="text-sm text-muted">{finished ? `Ngày mai có ${finished.tomorrowCount} từ đến hạn.` : 'Đang lưu kết quả…'}</p>
+			{sessionXp > 0 && <p className="animate-badge-pop"><span className="xp-chip px-3 py-1 text-base">+{sessionXp} XP</span></p>}
 		</div>
 		<dl className="grid grid-cols-3 gap-3">
 			<div className="rounded-panel border border-border bg-surface p-4 text-center"><dt className="label-caps">Nhớ được</dt><dd className="mt-1 text-3xl font-black tabular-nums">{accuracy === null ? '–' : `${accuracy}%`}</dd><dd className="text-xs text-muted">{remembered}/{outcomes.length} từ, lần đầu</dd></div>
@@ -340,5 +366,6 @@ function Summary({ outcomes, finished, onMore, onDone }: { outcomes: Outcome[]; 
 			{more && <Button size="lg" className="sm:flex-[2]" onClick={onMore}>Học tiếp · {finished?.remaining} từ</Button>}
 			<Button size="lg" variant={more ? 'ghost' : 'primary'} className="sm:flex-1" onClick={onDone}>{more ? 'Để sau' : 'Về trang chủ'}</Button>
 		</div>
+		<p className="text-center"><Link href="/quests" className="inline-flex min-h-11 items-center text-sm font-bold text-accent">Xem nhiệm vụ & mục tiêu ngày →</Link></p>
 	</section>;
 }

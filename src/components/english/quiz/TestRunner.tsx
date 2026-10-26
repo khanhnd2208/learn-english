@@ -9,11 +9,13 @@ import QuestionView, { type PublicQuestion } from '@/components/english/quiz/Que
 import { EN_QUIZ_MAX_ITEMS } from '@/lib/english/constants';
 import { QUIZ_META, type QuizKind } from '@/lib/english/quiz';
 import type { EnglishSetDetail } from '@/services/english/enCatalogService';
+import type { GoalReward } from '@/services/english/enGoalService';
 
 type Started = { attemptId: string; items: PublicQuestion[]; resumed: boolean; wordCount: number };
 type Result = {
 	passedCount: number;
 	wordCount: number;
+	reward?: GoalReward | null;
 	items: Array<{ position: number; senseId: string; answer: string | null; answerKey: string; correct: boolean }>;
 };
 type Phase = 'intro' | 'loading' | 'run' | 'result' | 'error';
@@ -128,7 +130,13 @@ export default function TestRunner({ detail, kind }: { detail: EnglishSetDetail;
 		{phase === 'result' && result && <section className="mode-card text-center">
 			<p className="label-caps">Kết quả</p>
 			<p className="game-number mt-2 text-6xl">{result.passedCount}/{result.wordCount}</p>
-			<p className="mt-2 font-bold text-success">✓ Đã tính nhiệm vụ Kiểm tra {label} hôm nay</p>
+			{result.reward && result.reward.xp > 0
+				? <p className="animate-badge-pop mt-3"><span className="xp-chip px-3 py-1 text-base">+{result.reward.xp} XP</span></p>
+				: result.passedCount > 0 && <p className="mt-2 text-sm text-muted">Bài làm lại trong ngày không cộng thêm XP.</p>}
+			{result.reward && (result.reward.quests.length > 0 || result.reward.achievements.length > 0) && <ul className="mx-auto mt-3 max-w-sm space-y-1 text-left text-sm">
+				{result.reward.quests.map((quest) => <li key={quest.title} className="font-bold text-success">✓ {quest.title} · +{quest.xp} XP</li>)}
+				{result.reward.achievements.map((badge) => <li key={badge.key} className="font-bold">🏆 {badge.title}{badge.tierName ? ` · ${badge.tierName}` : ''}</li>)}
+			</ul>}
 			{missed.length > 0 ? <>
 				<h2 className="mt-7 text-left text-2xl">Câu cần xem lại · {missed.length}</h2>
 				<ul className="mt-3 space-y-2 text-left">{missed.map((item) => <li key={item.position} className="flex items-center gap-3 rounded-control border border-border p-3">
@@ -142,7 +150,7 @@ export default function TestRunner({ detail, kind }: { detail: EnglishSetDetail;
 			<div className="mt-6 flex flex-wrap justify-center gap-3">
 				<button type="button" onClick={() => void start(true)} className="min-h-11 rounded-control bg-accent px-5 font-bold text-accent-foreground">Làm lại</button>
 				<Link href={`/sets/${detail.id}`} className="inline-flex min-h-11 items-center rounded-control border border-border px-5 font-bold">Về bộ từ</Link>
-				<Link href="/" className="inline-flex min-h-11 items-center rounded-control border border-border px-5 font-bold">Tổng quan</Link>
+				<Link href="/quests" className="inline-flex min-h-11 items-center rounded-control border border-border px-5 font-bold">Nhiệm vụ</Link>
 			</div>
 		</section>}
 	</FocusFrame>;
