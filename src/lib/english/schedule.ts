@@ -83,6 +83,16 @@ export function stageOf(box: number | null | undefined): LearningStage {
 	return 'long_term';
 }
 
+export function countStages(boxes: (number | undefined)[]) {
+	const counts = { new: 0, learning: 0, remembering: 0, longTerm: 0 };
+	for (const box of boxes) {
+		const stage = stageOf(box);
+		if (stage === 'long_term') counts.longTerm += 1;
+		else counts[stage] += 1;
+	}
+	return counts;
+}
+
 export function isLongTerm(box: number): boolean {
 	return box >= LONG_TERM_BOX;
 }

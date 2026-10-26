@@ -6,20 +6,15 @@ import Dialog from '@/components/ui/Dialog';
 import EnglishAudioButton from '@/components/english/EnglishAudioButton';
 import EnglishWordCard from '@/components/english/EnglishWordCard';
 import EnrollButton from '@/components/english/EnrollButton';
+import RemoveSetButton from '@/components/english/RemoveSetButton';
 import { QUIZ_KINDS, QUIZ_META } from '@/lib/english/quiz';
-import { isLongTerm, stageOf, type LearningStage } from '@/lib/english/schedule';
+import { isLongTerm, stageOf } from '@/lib/english/schedule';
+import { STAGE_META } from '@/lib/english/stageMeta';
 import type { EnglishSetDetail } from '@/services/english/enCatalogService';
 
 type Filter = 'all' | 'new' | 'weak';
 
 const FILTERS: Array<[Filter, string]> = [['all', 'Tất cả'], ['new', 'Chưa ôn'], ['weak', 'Hay quên']];
-
-const STAGE: Record<LearningStage, { label: string; className: string }> = {
-	new: { label: 'Chưa ôn', className: 'bg-surface-container text-muted' },
-	learning: { label: 'Mới học', className: 'bg-gold/20 text-foreground' },
-	remembering: { label: 'Đang nhớ', className: 'bg-accent-subtle text-accent' },
-	long_term: { label: 'Nhớ lâu', className: 'bg-success-subtle text-success' },
-};
 
 const linkButton = 'flex min-h-11 items-center justify-center rounded-control border border-border px-2 text-center text-sm font-bold hover:border-accent focus-visible:ring-2 focus-visible:ring-accent';
 
@@ -47,7 +42,7 @@ export default function SetDetail({ detail }: { detail: EnglishSetDetail }) {
 			? 'Tối đa 20 câu, chấm điểm và tính nhiệm vụ ngày. Đáp án hiện sau khi nộp.'
 			: 'Không tính điểm, sai thì làm lại ngay. Không đổi lịch ôn.'}</p>
 		{!detail.enrolled
-			? <div className="space-y-2"><p className="text-sm text-muted">Theo học bộ này để mở {test ? 'bài kiểm tra' : 'luyện tập'}.</p><EnrollButton setId={detail.id} enrolled={false} /></div>
+			? <div className="space-y-2"><p className="text-sm text-muted">Tải bộ này để mở {test ? 'bài kiểm tra' : 'luyện tập'}.</p><EnrollButton setId={detail.id} enrolled={false} /></div>
 			: <div className="grid grid-cols-2 gap-2">
 				{QUIZ_KINDS.map((kind) => {
 					const done = test ? detail.dailyTasks[kind] : undefined;
@@ -60,7 +55,7 @@ export default function SetDetail({ detail }: { detail: EnglishSetDetail }) {
 	</section>;
 
 	return <div className="mx-auto max-w-6xl space-y-6 px-4 py-6 sm:px-6 sm:py-10">
-		<Link href="/sets" className="inline-flex min-h-11 items-center text-sm font-bold text-accent">← Luyện tập</Link>
+		<Link href={detail.enrolled ? '/' : '/store'} className="inline-flex min-h-11 items-center text-sm font-bold text-accent">← {detail.enrolled ? 'Tổng quan' : 'Cửa hàng'}</Link>
 		<header>
 			<h1 className="text-4xl">{detail.title}</h1>
 			{detail.description && <p className="mt-1 text-sm text-muted">{detail.description}</p>}
@@ -69,6 +64,7 @@ export default function SetDetail({ detail }: { detail: EnglishSetDetail }) {
 				<div className="absolute inset-y-0 left-0 rounded-full bg-success" style={{ width: percent(longTerm) }} />
 			</div>
 			<p className="mt-2 text-sm text-muted">{detail.wordCount} từ · <span className="font-bold text-foreground">{learned}</span> đã vào lịch ôn · <span className="font-bold text-success">{longTerm}</span> nhớ lâu</p>
+			<div className="mt-4">{detail.enrolled ? <RemoveSetButton setId={detail.id} /> : <EnrollButton setId={detail.id} enrolled={false} />}</div>
 		</header>
 
 		<div className="grid gap-4 md:grid-cols-2">{modeCard(false)}{modeCard(true)}</div>
@@ -84,7 +80,7 @@ export default function SetDetail({ detail }: { detail: EnglishSetDetail }) {
 			</div>
 			<ul className="space-y-2">
 				{words.map((word) => {
-					const stage = STAGE[stageOf(word.box)];
+					const stage = STAGE_META[stageOf(word.box)];
 					const audio = Boolean(word.bundle.word.audioPath || word.bundle.word.audioUkPath || word.bundle.word.audioUsPath);
 					return <li key={word.bundle.sense.id} className="word-row">
 						<button type="button" onClick={() => setSelected(word.bundle.sense.id)} className="min-h-11 min-w-0 flex-1 text-left focus-visible:outline-2 focus-visible:outline-accent">

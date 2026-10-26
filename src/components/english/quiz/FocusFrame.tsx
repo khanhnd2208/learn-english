@@ -4,7 +4,7 @@ import { useEffect, type ReactNode } from 'react';
 import { useRouter } from 'next/navigation';
 
 /** Full-screen frame for practice and test runs: exit button, title, segmented progress. */
-export default function FocusFrame({ title, subtitle, progress, total, children, dirty = false, exitHref = '/sets' }: {
+export default function FocusFrame({ title, subtitle, progress, total, children, dirty = false, exitHref = '/' }: {
 	title: string;
 	subtitle: string;
 	progress: number;

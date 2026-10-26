@@ -2,7 +2,7 @@ import { prisma } from '@/lib/prisma';
 import { AppError } from '@/lib/appError';
 import { getDailyTasks, type DailyTasks } from '@/services/english/enQuizService';
 import { getSenseBundles } from '@/services/english/enContentService';
-import { isLongTerm } from '@/lib/english/schedule';
+import { countStages, isLongTerm } from '@/lib/english/schedule';
 import type { QuizKind } from '@/lib/english/quiz';
 import type { SenseBundle } from '@/lib/english/senseBundle';
 
@@ -20,6 +20,8 @@ export interface EnglishSetSummary {
 	learned: number;
 	/** Words recalled after a gap of at least 7 days (box ≥ 4). */
 	longTerm: number;
+	stages: ReturnType<typeof countStages>;
+	dueToday: number;
 }
 
 export interface EnglishSetWord {
@@ -45,6 +47,7 @@ function tasksForSet(daily: DailyTasks, setId: string): SetDailyTasks {
 }
 
 export async function listEnglishSets(userId: string, includeDrafts: boolean): Promise<EnglishSetSummary[]> {
+	const now = new Date();
 	const sets = await prisma.enSet.findMany({
 		where: includeDrafts ? {} : { status: 'published' },
 		orderBy: [{ sortOrder: 'asc' }, { title: 'asc' }],
@@ -60,10 +63,11 @@ export async function listEnglishSets(userId: string, includeDrafts: boolean): P
 	const [states, daily] = await Promise.all([
 		senseIds.length === 0
 			? []
-			: prisma.enWordState.findMany({ where: { userId, senseId: { in: senseIds } }, select: { senseId: true, box: true } }),
+			: prisma.enWordState.findMany({ where: { userId, senseId: { in: senseIds } }, select: { senseId: true, box: true, dueAt: true } }),
 		getDailyTasks(userId),
 	]);
 	const boxOf = new Map(states.map((state) => [state.senseId, state.box]));
+	const stateOf = new Map(states.map((state) => [state.senseId, state]));
 	return sets.map((set) => {
 		const published = set.items.flatMap(visible);
 		return {
@@ -76,6 +80,8 @@ export async function listEnglishSets(userId: string, includeDrafts: boolean): P
 			enrolled: set.enrollments.length > 0,
 			learned: published.filter((id) => (boxOf.get(id) ?? 0) >= 1).length,
 			longTerm: published.filter((id) => isLongTerm(boxOf.get(id) ?? 0)).length,
+			stages: countStages(published.map((id) => boxOf.get(id))),
+			dueToday: published.filter((id) => { const state = stateOf.get(id); return state && state.box >= 1 && state.dueAt <= now; }).length,
 		};
 	});
 }
@@ -88,6 +94,10 @@ export async function enrollEnglishSet(userId: string, setId: string) {
 		create: { userId, setId },
 		update: {},
 	});
+}
+
+export async function unenrollEnglishSet(userId: string, setId: string) {
+	await prisma.enEnrollment.deleteMany({ where: { userId, setId } });
 }
 
 export async function getEnglishSetDetail(userId: string, setId: string, includeDrafts: boolean): Promise<EnglishSetDetail> {

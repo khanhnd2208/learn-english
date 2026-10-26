@@ -223,7 +223,7 @@ export default function StudySession({ onClose, extra = false }: { onClose: (stu
 	useEffect(() => () => { if (advanceTimer.current) clearTimeout(advanceTimer.current); }, []);
 
 	async function close() {
-		if (phase === 'study' && !window.confirm('Thoát phiên Tổng hợp đang làm?')) return;
+		if (phase === 'study' && !window.confirm('Thoát phiên Ôn tập đang làm?')) return;
 		if (phase === 'study' && answeredAny.current && sessionId) await englishPost('/api/daily/finish', { sessionId }).catch(() => undefined);
 		onClose(answeredAny.current);
 	}

@@ -11,8 +11,9 @@ export default async function SetPracticePage({ params, searchParams }: { params
 	const session = await auth();
 	if (!session?.user) redirect('/login');
 	const { setId } = await params;
-	const { type } = await searchParams;
-	if (type !== 'mix' && !isQuizKind(type ?? '')) notFound();
+	const { type: requestedType } = await searchParams;
+	const type = requestedType ?? 'mix';
+	if (type !== 'mix' && !isQuizKind(type)) notFound();
 	let detail;
 	try {
 		detail = await getEnglishSetDetail(session.user.id, setId, session.user.role === 'admin');

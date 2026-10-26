@@ -11,7 +11,7 @@ export async function englishPost<T>(url: string, body: unknown): Promise<T> {
 	return payload.data;
 }
 
-export async function englishSend<T>(url: string, method: 'GET' | 'PATCH', body?: unknown): Promise<T> {
+export async function englishSend<T>(url: string, method: 'GET' | 'PATCH' | 'DELETE', body?: unknown): Promise<T> {
 	const response = await fetch(url, {
 		method,
 		headers: body ? { 'Content-Type': 'application/json' } : undefined,

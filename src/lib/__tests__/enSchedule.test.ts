@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { buildDailyQueue, dueAt, isDue, isNearMiss, nextBox, scheduleAnswer, scheduleMove, stageOf } from '@/lib/english/schedule';
+import { buildDailyQueue, countStages, dueAt, isDue, isNearMiss, nextBox, scheduleAnswer, scheduleMove, stageOf } from '@/lib/english/schedule';
 
 describe('Leitner schedule', () => {
 	const now = new Date('2026-10-26T10:00:00+07:00');
@@ -63,6 +63,8 @@ describe('Leitner schedule', () => {
 
 	it('names learning stages without box jargon', () => {
 		expect([0, 1, 2, 3, 4, 5].map(stageOf)).toEqual(['new', 'learning', 'remembering', 'remembering', 'long_term', 'long_term']);
+		expect(countStages([undefined, 0, 1, 2, 3, 4, 5])).toEqual({ new: 2, learning: 1, remembering: 2, longTerm: 2 });
+		expect(countStages([])).toEqual({ new: 0, learning: 0, remembering: 0, longTerm: 0 });
 	});
 });
 

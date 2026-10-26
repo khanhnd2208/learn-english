@@ -50,10 +50,10 @@ export type TodayOverview = {
 
 const SCHEDULED_SELECT = { id: true, senseId: true, box: true, dueAt: true, lapses: true, introducedAt: true, lastReviewedAt: true } as const;
 
-/** Every word the learner has started, from any set, so unenrolling never orphans a word from review. */
+/** Only scheduled words in a currently downloaded, published set. */
 async function scheduledStates(userId: string): Promise<ScheduledState[]> {
 	return prisma.enWordState.findMany({
-		where: { userId, box: { gt: 0 }, sense: { status: 'published' } },
+		where: { userId, box: { gt: 0 }, sense: { status: 'published', setItems: { some: { set: { status: 'published', enrollments: { some: { userId } } } } } } },
 		select: SCHEDULED_SELECT,
 	});
 }

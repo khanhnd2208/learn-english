@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { MAIN_NAV } from '@/config/navigation';
+import { MAIN_NAV, isNavActive } from '@/config/navigation';
 import { assessEnglishPack } from '@/lib/english/contentValidation';
 import { gradeEnglishAnswer } from '@/lib/english/grade';
 import { resolveAudioFile } from '@/lib/english/audioPath';
@@ -72,7 +72,9 @@ describe('english grading and mastery', () => {
 
 describe('english area boundaries', () => {
 	it('uses root-level routes in the standalone app', () => {
-		expect(MAIN_NAV.map((item) => item.href)).toEqual(['/', '/sets', '/review']);
+		expect(MAIN_NAV.map((item) => item.href)).toEqual(['/', '/review', '/store']);
+		expect(isNavActive('/sets/example/practice', '/')).toBe(true);
+		expect(isNavActive('/store', '/')).toBe(false);
 	});
 
 	it('rejects audio paths that leave the shared folder', () => {

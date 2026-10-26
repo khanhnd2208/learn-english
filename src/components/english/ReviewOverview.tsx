@@ -17,7 +17,7 @@ export default function ReviewOverview({ overview }: { overview: TodayOverview }
 
 	return <div className="mx-auto max-w-5xl space-y-6 px-4 py-6 sm:px-6 sm:py-10">
 		<header>
-			<h1 className="text-4xl sm:text-5xl">Tổng hợp</h1>
+			<h1 className="text-4xl sm:text-5xl">Ôn tập</h1>
 			<p className="mt-2 text-muted">Ôn từ của mọi bộ đang học, đúng lúc sắp quên. Đây là chế độ duy nhất đổi lịch ôn.</p>
 		</header>
 
