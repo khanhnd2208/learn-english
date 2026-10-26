@@ -16,7 +16,7 @@ type Filter = 'all' | 'new' | 'weak';
 
 const FILTERS: Array<[Filter, string]> = [['all', 'Tất cả'], ['new', 'Chưa ôn'], ['weak', 'Hay quên']];
 
-const linkButton = 'flex min-h-11 items-center justify-center rounded-control border border-border px-2 text-center text-sm font-bold hover:border-accent focus-visible:ring-2 focus-visible:ring-accent';
+const linkButton = 'inline-flex min-h-11 items-center justify-center rounded-control border border-border px-3 text-center text-sm font-bold hover:border-accent focus-visible:ring-2 focus-visible:ring-accent';
 
 export default function SetDetail({ detail }: { detail: EnglishSetDetail }) {
 	const [search, setSearch] = useState('');
@@ -36,41 +36,30 @@ export default function SetDetail({ detail }: { detail: EnglishSetDetail }) {
 	const longTerm = detail.words.filter((word) => isLongTerm(word.box)).length;
 	const percent = (count: number) => `${detail.wordCount ? (count / detail.wordCount) * 100 : 0}%`;
 
-	const modeCard = (test: boolean) => <section className="mode-card space-y-3">
-		<h2 className="text-2xl">{test ? 'Kiểm tra' : 'Luyện tập'}</h2>
-		<p className="text-sm text-muted">{test
-			? 'Tối đa 20 câu, chấm điểm và tính nhiệm vụ ngày. Đáp án hiện sau khi nộp.'
-			: 'Không tính điểm, sai thì làm lại ngay. Không đổi lịch ôn.'}</p>
-		{!detail.enrolled
-			? <div className="space-y-2"><p className="text-sm text-muted">Tải bộ này để mở {test ? 'bài kiểm tra' : 'luyện tập'}.</p><EnrollButton setId={detail.id} enrolled={false} /></div>
-			: <div className="grid grid-cols-2 gap-2">
-				{QUIZ_KINDS.map((kind) => {
-					const done = test ? detail.dailyTasks[kind] : undefined;
-					return <Link key={kind} href={`/sets/${detail.id}/${test ? 'test' : 'practice'}?type=${kind}`} className={`${linkButton} ${done ? 'border-success text-success' : ''}`}>
-						{QUIZ_META[kind].label}{done && ` ✓ ${done.passedCount}/${done.wordCount}`}
-					</Link>;
-				})}
-				{!test && <Link href={`/sets/${detail.id}/practice?type=mix`} className={linkButton}>Trộn cả 3</Link>}
-			</div>}
-	</section>;
-
-	return <div className="mx-auto max-w-6xl space-y-6 px-4 py-6 sm:px-6 sm:py-10">
+	return <div className="mx-auto max-w-3xl space-y-5 px-4 py-6 sm:px-6 sm:py-10">
 		<Link href={detail.enrolled ? '/' : '/store'} className="inline-flex min-h-11 items-center text-sm font-bold text-accent">← {detail.enrolled ? 'Tổng quan' : 'Cửa hàng'}</Link>
-		<header>
-			<h1 className="text-4xl">{detail.title}</h1>
-			{detail.description && <p className="mt-1 text-sm text-muted">{detail.description}</p>}
-			<div className="relative mt-3 h-2 overflow-hidden rounded-full bg-surface-container" role="img" aria-label={`${learned} đã ôn, ${longTerm} nhớ lâu trên ${detail.wordCount} từ`}>
+		<header className="mode-card space-y-4">
+			<div><h1 className="text-3xl sm:text-4xl">{detail.title}</h1><p className="mt-1 text-sm text-muted">{learned}/{detail.wordCount} từ đã học{longTerm > 0 ? ` · ${longTerm} nhớ lâu` : ''}</p></div>
+			<div className="relative h-2 overflow-hidden rounded-full bg-surface-container" role="img" aria-label={`${learned} đã ôn, ${longTerm} nhớ lâu trên ${detail.wordCount} từ`}>
 				<div className="absolute inset-y-0 left-0 rounded-full bg-accent/40" style={{ width: percent(learned) }} />
 				<div className="absolute inset-y-0 left-0 rounded-full bg-success" style={{ width: percent(longTerm) }} />
 			</div>
-			<p className="mt-2 text-sm text-muted">{detail.wordCount} từ · <span className="font-bold text-foreground">{learned}</span> đã vào lịch ôn · <span className="font-bold text-success">{longTerm}</span> nhớ lâu</p>
-			<div className="mt-4">{detail.enrolled ? <RemoveSetButton setId={detail.id} /> : <EnrollButton setId={detail.id} enrolled={false} />}</div>
+			{detail.enrolled ? <div className="flex flex-wrap gap-2"><Link href={`/sets/${detail.id}/practice`} className="inline-flex min-h-11 items-center rounded-control bg-accent px-4 text-sm font-bold text-accent-foreground">Luyện tập</Link><Link href={`/sets/${detail.id}/test`} className={linkButton}>Kiểm tra</Link></div> : <EnrollButton setId={detail.id} enrolled={false} />}
 		</header>
 
-		<div className="grid gap-4 md:grid-cols-2">{modeCard(false)}{modeCard(true)}</div>
+		{detail.enrolled && <details className="rounded-panel border border-border bg-surface px-4 py-3">
+			<summary className="cursor-pointer py-1 text-sm font-bold text-accent">Chọn dạng luyện tập hoặc kiểm tra</summary>
+			<div className="mt-3 grid gap-4 border-t border-border pt-4 sm:grid-cols-2">
+				{([false, true] as const).map((test) => <div key={String(test)}><h2 className="mb-2 text-sm font-bold">{test ? 'Kiểm tra' : 'Luyện tập'}</h2><div className="flex flex-wrap gap-2">{QUIZ_KINDS.map((kind) => {
+					const done = test ? detail.dailyTasks[kind] : undefined;
+					return <Link key={kind} href={`/sets/${detail.id}/${test ? 'test' : 'practice'}?type=${kind}`} className={`${linkButton} ${done ? 'border-success text-success' : ''}`}>{QUIZ_META[kind].label}{done && ` ✓ ${done.passedCount}/${done.wordCount}`}</Link>;
+				})}</div></div>)}
+			</div>
+		</details>}
 
-		<section className="space-y-4">
-			<h2 className="text-2xl">Danh sách từ</h2>
+		<section className="space-y-3">
+			<div className="flex items-center justify-between gap-3"><h2 className="text-2xl">Danh sách từ <span className="text-base font-normal text-muted">({words.length})</span></h2>{detail.enrolled && <RemoveSetButton setId={detail.id} />}</div>
+			{detail.description && <details className="text-sm text-muted"><summary className="cursor-pointer font-bold text-accent">Giới thiệu bộ từ</summary><p className="mt-2">{detail.description}</p></details>}
 			<div className="flex flex-wrap gap-2">
 				<input type="search" aria-label="Tìm từ" placeholder="Tìm từ hoặc nghĩa…" value={search} onChange={(event) => setSearch(event.target.value)} className="min-h-11 min-w-48 flex-1 rounded-control border border-border bg-surface px-3 outline-none focus:border-accent" />
 				<div className="flex gap-1 rounded-control border border-border bg-surface p-1" role="group" aria-label="Lọc từ">
@@ -78,7 +67,7 @@ export default function SetDetail({ detail }: { detail: EnglishSetDetail }) {
 				</div>
 				<button type="button" aria-pressed={hideMeaning} onClick={() => setHideMeaning(!hideMeaning)} className="min-h-11 rounded-control border border-border px-3 text-sm font-bold">{hideMeaning ? 'Hiện nghĩa' : 'Che nghĩa'}</button>
 			</div>
-			<ul className="space-y-2">
+			<ul className="max-h-[min(60vh,34rem)] space-y-2 overflow-y-auto pr-1">
 				{words.map((word) => {
 					const stage = STAGE_META[stageOf(word.box)];
 					const audio = Boolean(word.bundle.word.audioPath || word.bundle.word.audioUkPath || word.bundle.word.audioUsPath);
