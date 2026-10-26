@@ -1,15 +1,18 @@
 'use client';
 
 import { useState } from 'react';
+import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import DueForecast from '@/components/english/DueForecast';
+import RemoveSetButton from '@/components/english/RemoveSetButton';
 import StudySession from '@/components/english/StudySession';
 import { EN_DAILY_DUE_LIMIT } from '@/lib/english/constants';
 import { isReviewDone, reviewMinutes } from '@/lib/english/reviewSummary';
 import type { TodayOverview } from '@/services/english/enDailyService';
+import type { EnglishSetSummary } from '@/services/english/enCatalogService';
 
 /** Review tab: the spaced-review round across every enrolled set, plus an optional extra round. */
-export default function ReviewOverview({ overview }: { overview: TodayOverview }) {
+export default function ReviewOverview({ overview, sets }: { overview: TodayOverview; sets: EnglishSetSummary[] }) {
 	const router = useRouter();
 	const [mode, setMode] = useState<'normal' | 'extra' | null>(null);
 	const done = isReviewDone(overview);
@@ -23,7 +26,7 @@ export default function ReviewOverview({ overview }: { overview: TodayOverview }
 
 		<section className="mode-card sm:p-7">
 			{overview.enrolledSets === 0 && overview.learnedCount === 0
-				? <p className="text-muted">Chưa có từ để ôn. Hãy đăng ký một bộ từ trong Luyện tập.</p>
+				? <p className="text-muted">Chưa có từ để ôn. Hãy <Link href="/store" className="font-bold text-accent underline">tải một bộ từ trong Cửa hàng</Link>.</p>
 				: <>
 					<dl className="grid grid-cols-3 gap-3 text-center">
 						<div><dd className="game-number text-4xl">{overview.dueTotal}</dd><dt className="text-xs text-muted">đến hạn</dt></div>
@@ -39,6 +42,14 @@ export default function ReviewOverview({ overview }: { overview: TodayOverview }
 					{done && <p className="mt-4 text-center font-bold text-success">✓ Đã ôn hết từ đến hạn hôm nay. {overview.tomorrowCount > 0 ? `Ngày mai có ${overview.tomorrowCount} từ.` : ''}</p>}
 					{!canExtra && <p className="mt-2 text-center text-xs text-muted">Luyện thêm mở khi bạn có từ đã học nhưng chưa đến hạn.</p>}
 				</>}
+		</section>
+
+		<section className="mode-card">
+			<div className="flex flex-wrap items-center justify-between gap-3"><h2 className="text-2xl">Bộ từ đang ôn ({sets.length})</h2><Link href="/store" className="text-sm font-bold text-accent">Thêm bộ từ →</Link></div>
+			{sets.length > 0 ? <ul className="mt-3 divide-y divide-border">{sets.map((set) => <li key={set.id} className="flex flex-wrap items-center justify-between gap-3 py-3">
+				<div className="min-w-0"><Link href={`/sets/${set.id}`} className="font-bold text-accent hover:underline">{set.title}</Link><p className="text-sm text-muted">{set.learned}/{set.words} từ đã học{set.dueToday > 0 ? ` · ${set.dueToday} đến hạn` : ''}</p></div>
+				<RemoveSetButton setId={set.id} setTitle={set.title} stayOnPage />
+			</li>)}</ul> : <p className="mt-3 text-sm text-muted">Bạn chưa có bộ từ nào trong lịch ôn.</p>}
 		</section>
 
 		<div className="grid gap-4 md:grid-cols-2">
