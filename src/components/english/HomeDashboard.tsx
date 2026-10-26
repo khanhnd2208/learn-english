@@ -50,11 +50,13 @@ export default function HomeDashboard({ overview, sets, tasks, greeting, dateLab
 
 			<section className="mode-card"><h2 className="text-2xl">Lộ trình SRS</h2><p className="mt-1 text-sm text-muted">Mỗi lần ôn đúng, từ tiến lên một bước trong lịch ôn.</p><div className="mt-5"><StageBar stages={stages} legend /></div><p className="mt-4 text-xs text-muted">Chu kỳ ôn: {EN_LEITNER_INTERVALS.slice(1).join(' → ')} ngày.</p></section>
 
-			<section id="your-sets" className="scroll-mt-6 space-y-4"><div className="flex flex-wrap items-end justify-between gap-2"><h2 className="text-3xl">Bộ từ của bạn ({enrolled.length})</h2><Link href="/store" className="font-bold text-accent">Thêm bộ từ →</Link></div>
-				<ul className="grid gap-3 md:grid-cols-2">{enrolled.map((set) => <li key={set.id} className="mode-card flex h-44 min-w-0 flex-col p-4">
-					<div className="min-w-0"><h3 className="line-clamp-1 text-lg font-black" title={set.title}>{set.title}</h3><p className="mt-1 text-sm text-muted">{set.learned}/{set.words} từ đã học{set.dueToday > 0 ? ` · ${set.dueToday} đến hạn` : ''}</p></div>
-					<div className="mt-3"><StageBar stages={set.stages} /></div>
-					<div className="mt-auto flex items-center gap-3"><Link href={`/sets/${set.id}/practice`} className="inline-flex min-h-11 items-center rounded-control bg-accent px-4 text-sm font-bold text-accent-foreground">Luyện tập</Link><Link href={`/sets/${set.id}`} className="inline-flex min-h-11 items-center text-sm font-bold text-accent">Chi tiết →</Link></div>
+			<section id="your-sets" aria-labelledby="your-sets-heading" className="flex h-80 scroll-mt-6 flex-col overflow-hidden rounded-panel border border-border bg-surface">
+				<div className="flex shrink-0 items-center justify-between gap-3 border-b border-border px-4 py-3 sm:px-5"><h2 id="your-sets-heading" className="text-2xl sm:text-3xl">Bộ từ của bạn ({enrolled.length})</h2><Link href="/store" className="shrink-0 text-sm font-bold text-accent">Thêm bộ từ →</Link></div>
+				<ul className="min-h-0 flex-1 overflow-y-auto">{enrolled.map((set) => <li key={set.id} className="border-b border-border last:border-b-0">
+					<Link href={`/sets/${set.id}`} aria-label={`Mở bộ từ ${set.title}`} className="group block px-4 py-3 hover:bg-accent-subtle focus-visible:bg-accent-subtle focus-visible:outline-2 focus-visible:outline-inset focus-visible:outline-accent sm:px-5">
+						<div className="flex items-center gap-3"><div className="min-w-0 flex-1"><h3 className="truncate font-bold" title={set.title}>{set.title}</h3><p className="text-xs text-muted">{set.learned}/{set.words} từ đã học{set.dueToday > 0 ? ` · ${set.dueToday} đến hạn` : ''}</p></div><span aria-hidden="true" className="text-lg text-accent transition-transform group-hover:translate-x-1">→</span></div>
+						<div className="mt-2"><StageBar stages={set.stages} /></div>
+					</Link>
 				</li>)}</ul>
 			</section>
 
