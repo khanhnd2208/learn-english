@@ -10,6 +10,7 @@ export function useSpeech() {
 	const voicesRef = useRef<SpeechSynthesisVoice[]>([]);
 	const utteranceRef = useRef<SpeechSynthesisUtterance | null>(null);
 	const watchdogRef = useRef<number | null>(null);
+	const retryRef = useRef<number | null>(null);
 
 	useEffect(() => {
 		const hasSpeech = typeof window !== 'undefined' && 'speechSynthesis' in window;
@@ -30,11 +31,34 @@ export function useSpeech() {
 		return () => {
 			window.clearTimeout(supportTimer);
 			window.speechSynthesis.removeEventListener('voiceschanged', loadVoices);
-			utteranceRef.current = null;
-			window.speechSynthesis.cancel();
+			if (utteranceRef.current !== null) {
+				window.speechSynthesis.cancel();
+				utteranceRef.current = null;
+			}
 			if (watchdogRef.current !== null) window.clearTimeout(watchdogRef.current);
 			watchdogRef.current = null;
+			if (retryRef.current !== null) window.clearTimeout(retryRef.current);
+			retryRef.current = null;
 		};
+	}, []);
+
+	const prime = useCallback((): boolean => {
+		if (typeof window === 'undefined' || !('speechSynthesis' in window)) return false;
+		try {
+			const utterance = new SpeechSynthesisUtterance('');
+			utterance.volume = 0;
+			utteranceRef.current = utterance;
+			utterance.onend = () => {
+				if (utteranceRef.current === utterance) utteranceRef.current = null;
+			};
+			utterance.onerror = () => {
+				if (utteranceRef.current === utterance) utteranceRef.current = null;
+			};
+			window.speechSynthesis.speak(utterance);
+			return true;
+		} catch {
+			return false;
+		}
 	}, []);
 
 	const speak = useCallback((text: string, lang = 'en-US'): boolean => {
@@ -42,8 +66,11 @@ export function useSpeech() {
 		try {
 			if (watchdogRef.current !== null) window.clearTimeout(watchdogRef.current);
 			watchdogRef.current = null;
+			if (retryRef.current !== null) window.clearTimeout(retryRef.current);
+			retryRef.current = null;
+			const hadQueuedSpeech = window.speechSynthesis.speaking || window.speechSynthesis.pending;
 			utteranceRef.current = null;
-			window.speechSynthesis.cancel();
+			if (hadQueuedSpeech) window.speechSynthesis.cancel();
 			const utterance = new SpeechSynthesisUtterance(text);
 			utteranceRef.current = utterance;
 			utterance.lang = lang;
@@ -51,6 +78,7 @@ export function useSpeech() {
 			utterance.pitch = 1;
 			utterance.volume = 1;
 			const requestedLanguage = lang.split('-')[0]?.toLowerCase();
+			if (voicesRef.current.length === 0) voicesRef.current = window.speechSynthesis.getVoices();
 			const matchingVoice = voicesRef.current.find((voice) => voice.lang.toLowerCase() === lang.toLowerCase())
 				?? voicesRef.current.find((voice) => voice.lang.toLowerCase().startsWith(requestedLanguage ?? ''));
 			if (matchingVoice) utterance.voice = matchingVoice;
@@ -75,15 +103,24 @@ export function useSpeech() {
 				}
 			};
 			setFailed(false);
-			setSpeaking(true);
 			if (window.speechSynthesis.paused) window.speechSynthesis.resume();
 			window.speechSynthesis.speak(utterance);
 			watchdogRef.current = window.setTimeout(() => {
 				if (utteranceRef.current !== utterance) return;
-				setSpeaking(false);
-				utteranceRef.current = null;
+				if (!window.speechSynthesis.speaking) {
+					setFailed(true);
+					setSpeaking(false);
+					utteranceRef.current = null;
+				}
 				watchdogRef.current = null;
-			}, Math.max(5_000, text.length * 400));
+			}, 1_500);
+			if (hadQueuedSpeech) {
+				retryRef.current = window.setTimeout(() => {
+					if (utteranceRef.current !== utterance || window.speechSynthesis.speaking) return;
+					window.speechSynthesis.resume();
+					window.speechSynthesis.speak(utterance);
+				}, 250);
+			}
 			return true;
 		} catch {
 			setFailed(true);
@@ -93,13 +130,17 @@ export function useSpeech() {
 
 	const stop = useCallback(() => {
 		if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
-			utteranceRef.current = null;
-			window.speechSynthesis.cancel();
+			if (utteranceRef.current !== null) {
+				window.speechSynthesis.cancel();
+				utteranceRef.current = null;
+			}
 			if (watchdogRef.current !== null) window.clearTimeout(watchdogRef.current);
 			watchdogRef.current = null;
+			if (retryRef.current !== null) window.clearTimeout(retryRef.current);
+			retryRef.current = null;
 			setSpeaking(false);
 		}
 	}, []);
 
-	return { supported, ready, speaking, failed, speak, stop };
+	return { supported, ready, speaking, failed, speak, stop, prime };
 }

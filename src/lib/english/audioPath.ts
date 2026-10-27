@@ -24,3 +24,24 @@ export function audioContentType(fileName: string): string {
 	if (ext === '.m4a') return 'audio/mp4';
 	return 'audio/mpeg';
 }
+
+export type ByteRange = { start: number; end: number };
+
+/** Parse a single HTTP bytes range against a known file size. */
+export function parseByteRange(header: string | null, size: number): ByteRange | null {
+	if (!header || size <= 0) return null;
+	const match = /^bytes=(\d*)-(\d*)$/.exec(header.trim());
+	if (!match || (!match[1] && !match[2])) return null;
+
+	if (!match[1]) {
+		const suffixLength = Number(match[2]);
+		if (!Number.isInteger(suffixLength) || suffixLength <= 0) return null;
+		return { start: Math.max(0, size - suffixLength), end: size - 1 };
+	}
+
+	const start = Number(match[1]);
+	if (!Number.isInteger(start) || start < 0 || start >= size) return null;
+	const requestedEnd = match[2] ? Number(match[2]) : size - 1;
+	if (!Number.isInteger(requestedEnd) || requestedEnd < start) return null;
+	return { start, end: Math.min(requestedEnd, size - 1) };
+}
