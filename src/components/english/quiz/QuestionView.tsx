@@ -2,8 +2,10 @@
 
 import { useEffect, useRef, useState } from 'react';
 import EnglishAudioButton from '@/components/english/EnglishAudioButton';
+import WordAnswerInput from '@/components/english/WordAnswerInput';
+import { completeAnswer, isAnswerComplete, type AnswerLayout } from '@/lib/english/answerLayout';
 
-export type PublicQuestion = { position: number; activityKey: string; prompt: Record<string, unknown>; answer?: string | null };
+export type PublicQuestion = { position: number; activityKey: string; prompt: Record<string, unknown>; answer?: string | null; layout?: AnswerLayout | null };
 export type QuestionFeedback = { answer: string; correct: boolean; expected: string };
 
 const text = (value: unknown) => (typeof value === 'string' ? value : '');
@@ -82,10 +84,10 @@ export default function QuestionView({ item, onAnswer, disabled = false, feedbac
 					<span className="mr-3 text-muted">{index + 1}.</span>{option}
 				</button>)}
 			</div>
-			: <form onSubmit={(event) => { event.preventDefault(); if (typed.trim()) send(typed); }} className="space-y-3">
-				<input autoFocus value={typed} onChange={(event) => setTyped(event.target.value)} disabled={locked} aria-label="Gõ từ tiếng Anh" autoComplete="off" autoCapitalize="none" autoCorrect="off" spellCheck={false} className="min-h-14 w-full rounded-control border-2 border-border bg-background px-4 text-center text-xl outline-none focus:border-accent" />
+			: <form onSubmit={(event) => { event.preventDefault(); if (item.layout && isAnswerComplete(item.layout, typed)) send(completeAnswer(item.layout, typed)); }} className="space-y-3">
+				{item.layout && <WordAnswerInput autoFocus layout={item.layout} value={typed} onChange={setTyped} disabled={locked} />}
 				{feedback && !feedback.correct && <p className="text-center text-sm">Bạn gõ: <s className="text-error">{feedback.answer || '—'}</s></p>}
-				<button type="submit" disabled={!typed.trim() || locked} className="min-h-11 w-full rounded-control bg-accent px-4 font-bold text-accent-foreground disabled:opacity-50">Trả lời</button>
+				<button type="submit" disabled={!item.layout || !isAnswerComplete(item.layout, typed) || locked} className="min-h-11 w-full rounded-control bg-accent px-4 font-bold text-accent-foreground disabled:opacity-50">Kiểm tra</button>
 			</form>}
 	</div>;
 }

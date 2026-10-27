@@ -3,6 +3,7 @@ import { poolFromBundles, promptHidesAnswer } from '@/lib/english/activities';
 import { mulberry32 } from '@/lib/english/activities/rng';
 import { pickQuizSenses, quizItemFor } from '@/lib/english/quiz';
 import type { SenseBundle } from '@/lib/english/senseBundle';
+import { publicQuizItems } from '@/lib/english/quizPublic';
 
 function bundle(id: number): SenseBundle {
  const lemma = `word${id}`;
@@ -10,6 +11,13 @@ function bundle(id: number): SenseBundle {
 }
 const words = Array.from({ length: 24 }, (_, index) => bundle(index));
 describe('new quiz rules', () => {
+	it('resumes a stored typed item with shape but no answer text', () => {
+		const [item] = publicQuizItems([{ position: 0, activityKey: 'listen_type', prompt: { senseId: 's1' }, answer: null, answerKey: 'ice-cream' }]);
+		expect(item.layout?.letterCount).toBe(8);
+		expect(item.layout?.slots[3]).toEqual({ kind: 'fixed', value: '-' });
+		expect(JSON.stringify(item)).not.toContain('ice-cream');
+		expect(item).not.toHaveProperty('answerKey');
+	});
  it('takes at most 20 words and prioritizes lapsed words', () => {
   const picked = pickQuizSenses(words.map((entry, index) => ({ senseId: entry.sense.id, lapses: index === 23 ? 4 : 0, box: 0 })), 30, mulberry32(1));
   expect(picked).toHaveLength(20);
