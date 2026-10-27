@@ -1,3 +1,4 @@
+import { createHash, timingSafeEqual } from 'node:crypto';
 import { prisma } from '@/lib/prisma';
 import { AppError } from '@/lib/appError';
 import { getDailyTasks, type DailyTasks } from '@/services/english/enQuizService';
@@ -22,6 +23,10 @@ export interface EnglishSetSummary {
 	longTerm: number;
 	stages: ReturnType<typeof countStages>;
 	dueToday: number;
+	locked: boolean;
+	listed?: boolean;
+	accessCode?: string | null;
+	learners?: number;
 }
 
 export interface EnglishSetWord {
@@ -38,6 +43,7 @@ export interface EnglishSetDetail {
 	enrolled: boolean;
 	wordCount: number;
 	words: EnglishSetWord[];
+	locked: boolean;
 }
 
 function tasksForSet(daily: DailyTasks, setId: string): SetDailyTasks {
@@ -46,14 +52,15 @@ function tasksForSet(daily: DailyTasks, setId: string): SetDailyTasks {
 	)));
 }
 
-export async function listEnglishSets(userId: string, includeDrafts: boolean): Promise<EnglishSetSummary[]> {
+export async function listEnglishSets(userId: string, includeDrafts: boolean, opts: { storeOnly?: boolean } = {}): Promise<EnglishSetSummary[]> {
 	const now = new Date();
 	const sets = await prisma.enSet.findMany({
-		where: includeDrafts ? {} : { status: 'published' },
+		where: { ...(includeDrafts ? {} : { status: 'published' }), ...(opts.storeOnly ? { listed: true } : {}) },
 		orderBy: [{ sortOrder: 'asc' }, { title: 'asc' }],
 		include: {
 			items: { select: { senseId: true, sense: { select: { status: true } } } },
 			enrollments: { where: { userId }, select: { id: true } },
+		_count: { select: { enrollments: true } },
 		},
 	});
 	const visible = (item: (typeof sets)[number]['items'][number]) => (
@@ -82,13 +89,28 @@ export async function listEnglishSets(userId: string, includeDrafts: boolean): P
 			longTerm: published.filter((id) => isLongTerm(boxOf.get(id) ?? 0)).length,
 			stages: countStages(published.map((id) => boxOf.get(id))),
 			dueToday: published.filter((id) => { const state = stateOf.get(id); return state && state.box >= 1 && state.dueAt <= now; }).length,
+			locked: set.accessCode != null,
+			...(includeDrafts ? { listed: set.listed, accessCode: set.accessCode, learners: set._count.enrollments } : {}),
 		};
 	});
 }
 
-export async function enrollEnglishSet(userId: string, setId: string) {
+function accessCodeMatches(expected: string, actual: string): boolean {
+	const expectedHash = createHash('sha256').update(expected.trim().toLocaleLowerCase('vi')).digest();
+	const actualHash = createHash('sha256').update(actual.trim().toLocaleLowerCase('vi')).digest();
+	return timingSafeEqual(expectedHash, actualHash);
+}
+
+export async function enrollEnglishSet(userId: string, setId: string, accessCode?: string) {
 	const set = await prisma.enSet.findFirst({ where: { id: setId, status: 'published' } });
 	if (!set) throw new AppError('Bộ học chưa xuất bản', 404);
+	const existing = await prisma.enEnrollment.findUnique({ where: { userId_setId: { userId, setId } } });
+	if (!existing) {
+		if (!set.listed) throw new AppError('Bộ học không còn mở đăng ký', 404);
+		if (set.accessCode != null && (typeof accessCode !== 'string' || !accessCodeMatches(set.accessCode, accessCode))) {
+			throw new AppError('Mật khẩu không đúng', 403, 'ACCESS_CODE');
+		}
+	}
 	await prisma.enEnrollment.upsert({
 		where: { userId_setId: { userId, setId } },
 		create: { userId, setId },
@@ -132,6 +154,7 @@ export async function getEnglishSetDetail(userId: string, setId: string, include
 		title: set.title,
 		description: set.description,
 		enrolled: set.enrollments.length > 0,
+		locked: set.accessCode != null,
 		wordCount: ordered.length,
 		words: ordered.map((bundle) => ({
 			bundle,

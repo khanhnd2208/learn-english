@@ -554,6 +554,45 @@ export async function publishEnglishSet(
 	return { publishedSenses, issues };
 }
 
+export async function updateEnglishSetStore(
+	setId: string,
+	input: { listed?: boolean; accessCode?: string },
+) {
+	const set = await prisma.enSet.findUnique({ where: { id: setId }, select: { id: true } });
+	if (!set) throw new AppError('Không tìm thấy bộ học', 404);
+	return prisma.enSet.update({
+		where: { id: setId },
+		data: {
+			...(input.listed !== undefined ? { listed: input.listed } : {}),
+			...(input.accessCode !== undefined ? { accessCode: input.accessCode.trim() || null } : {}),
+		},
+		select: { id: true, listed: true, accessCode: true },
+	});
+}
+
+export async function deleteEnglishSet(setId: string) {
+	return prisma.$transaction(async (tx) => {
+		const set = await tx.enSet.findUnique({ where: { id: setId }, select: { id: true } });
+		if (!set) throw new AppError('Không tìm thấy bộ học', 404);
+		const [preferences, sessions] = await Promise.all([
+			tx.enReviewPreference.findMany({ where: { selectedSetIds: { has: setId } }, select: { userId: true, selectedSetIds: true } }),
+			tx.enGuidedReviewSession.findMany({ where: { selectedSetIds: { has: setId } }, select: { id: true, selectedSetIds: true } }),
+		]);
+		await Promise.all([
+			...preferences.map((preference) => tx.enReviewPreference.update({
+				where: { userId: preference.userId },
+				data: { selectedSetIds: { set: preference.selectedSetIds.filter((id) => id !== setId) } },
+			})),
+			...sessions.map((session) => tx.enGuidedReviewSession.update({
+				where: { id: session.id },
+				data: { selectedSetIds: { set: session.selectedSetIds.filter((id) => id !== setId) } },
+			})),
+		]);
+		await tx.enSet.delete({ where: { id: setId } });
+		return { deleted: true };
+	});
+}
+
 const senseBundleInclude = {
 	word: {
 		include: {

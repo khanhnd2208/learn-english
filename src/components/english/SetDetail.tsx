@@ -44,7 +44,7 @@ export default function SetDetail({ detail }: { detail: EnglishSetDetail }) {
 				<div className="absolute inset-y-0 left-0 rounded-full bg-accent/40" style={{ width: percent(learned) }} />
 				<div className="absolute inset-y-0 left-0 rounded-full bg-success" style={{ width: percent(longTerm) }} />
 			</div>
-			{detail.enrolled ? <div className="flex flex-wrap gap-2"><Link href={`/sets/${detail.id}/practice`} className="inline-flex min-h-11 items-center rounded-control bg-accent px-4 text-sm font-bold text-accent-foreground">Luyện tập</Link><Link href={`/sets/${detail.id}/test`} className={linkButton}>Kiểm tra</Link></div> : <EnrollButton setId={detail.id} enrolled={false} />}
+			{detail.enrolled ? <div className="flex flex-wrap gap-2"><Link href={`/sets/${detail.id}/practice`} className="inline-flex min-h-11 items-center rounded-control bg-accent px-4 text-sm font-bold text-accent-foreground">Luyện tập</Link><Link href={`/sets/${detail.id}/test`} className={linkButton}>Kiểm tra</Link></div> : <EnrollButton setId={detail.id} enrolled={false} locked={detail.locked} />}
 		</header>
 
 		{detail.enrolled && <details className="rounded-panel border border-border bg-surface px-4 py-3">
