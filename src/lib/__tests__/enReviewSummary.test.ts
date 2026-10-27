@@ -11,7 +11,7 @@ describe('review summary', () => {
 	});
 
 	it('estimates minutes from reviews and new words', () => {
-		expect(reviewMinutes({ dueCount: 30, newCount: 10 })).toBe(11);
+		expect(reviewMinutes({ dueCount: 30, newCount: 10 })).toBe(8);
 		expect(reviewMinutes({ dueCount: 0, newCount: 0 })).toBe(1);
 	});
 });

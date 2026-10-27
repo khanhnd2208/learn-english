@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { buildDailyQueue, countStages, dueAt, isDue, isNearMiss, nextBox, scheduleAnswer, scheduleMove, stageOf } from '@/lib/english/schedule';
+import { buildDailyQueue, countStages, dueAt, intervalChange, isDue, isNearMiss, nextBox, scheduleAnswer, scheduleMove, stageOf } from '@/lib/english/schedule';
 
 describe('Leitner schedule', () => {
 	const now = new Date('2026-10-26T10:00:00+07:00');
@@ -9,28 +9,37 @@ describe('Leitner schedule', () => {
 		expect(nextBox(0, true)).toBe(1);
 		expect(nextBox(3, true)).toBe(4);
 		expect(nextBox(5, true)).toBe(5);
-		expect(nextBox(4, false)).toBe(1);
+		 expect(nextBox(4, false)).toBe(3);
 	});
 
-	it('graduates a first answer to box 1 without counting a lapse', () => {
+	it('places new words at box 2 when known and box 1 when missed', () => {
 		expect(scheduleAnswer(null, false)).toEqual({ box: 1, lapses: 0 });
-		expect(scheduleAnswer({ box: 0, lapses: 0 }, true)).toEqual({ box: 1, lapses: 0 });
-		expect(scheduleAnswer({ box: 3, lapses: 1 }, false)).toEqual({ box: 1, lapses: 2 });
+		expect(scheduleAnswer({ box: 0, lapses: 0 }, true)).toEqual({ box: 2, lapses: 0 });
+		expect(scheduleAnswer({ box: 0, lapses: 0 }, false)).toEqual({ box: 1, lapses: 0 });
+		expect(scheduleAnswer({ box: 3, lapses: 1 }, false)).toEqual({ box: 2, lapses: 2 });
 		expect(scheduleAnswer({ box: 3, lapses: 1 }, true)).toEqual({ box: 4, lapses: 1 });
 	});
 
-	it('resets an early wrong answer but leaves an early correct answer alone', () => {
+	it('does not move a word before its due date', () => {
 		const early = state('early', 3, '2026-11-10T00:00:00Z');
-		expect(scheduleMove(early, false, now)).toEqual({ box: 1, lapses: 1, dueAt: dueAt(1, now), scheduled: true });
+		expect(scheduleMove(early, false, now)).toEqual({ box: 3, lapses: 0, dueAt: early.dueAt, scheduled: false });
 		expect(scheduleMove(early, true, now)).toEqual({ box: 3, lapses: 0, dueAt: early.dueAt, scheduled: false });
 	});
 
-	it('does not count a second lapse when a reset word is missed again in the same session', () => {
-		const reset = scheduleMove(state('due', 3, '2026-10-25T17:00:00Z'), false, now);
-		expect(reset).toMatchObject({ box: 1, lapses: 1, scheduled: true });
-		expect(scheduleMove(reset, false, now)).toEqual({ box: 1, lapses: 1, dueAt: reset.dueAt, scheduled: false });
-		const fresh = scheduleMove(null, false, now);
-		expect(scheduleMove(fresh, false, now)).toMatchObject({ box: 1, lapses: 0, scheduled: false });
+	it('moves due words down one level and new words onto a schedule', () => {
+		const reset = scheduleMove(state('due', 4, '2026-10-25T17:00:00Z'), false, now);
+		expect(reset).toMatchObject({ box: 3, lapses: 1, scheduled: true });
+		expect(scheduleMove(reset, false, now)).toMatchObject({ box: 3, lapses: 1, scheduled: false });
+		const freshWrong = scheduleMove(null, false, now);
+		expect(freshWrong).toMatchObject({ box: 1, lapses: 0, scheduled: true });
+		const freshCorrect = scheduleMove(null, true, now);
+		expect(freshCorrect).toMatchObject({ box: 2, lapses: 0, scheduled: true });
+	});
+
+	it('describes interval changes for the UI', () => {
+		expect(intervalChange(3, 4)).toEqual({ fromDays: 7, toDays: 21, direction: 'up' });
+		expect(intervalChange(4, 3)).toEqual({ fromDays: 21, toDays: 7, direction: 'down' });
+		expect(intervalChange(1, 1)).toEqual({ fromDays: 1, toDays: 1, direction: 'same' });
 	});
 
 	it('makes words due from 00:00 Vietnam time on the due day', () => {

@@ -30,35 +30,39 @@ export type LearningStage = 'new' | 'learning' | 'remembering' | 'long_term';
 const LONG_TERM_BOX = 4;
 
 export function nextBox(box: number, correct: boolean): number {
-	if (!correct) return 1;
+	if (!correct) return Math.max(1, Math.max(0, box) - 1);
 	return Math.min(EN_LEITNER_INTERVALS.length - 1, Math.max(0, box) + 1);
 }
 
 /**
  * Box after a scheduled answer. A word in box 0 has never been recalled on a schedule,
- * so its first answer always graduates it to box 1 and never counts as a lapse.
+ * so a correct first answer starts at box 2 (the learner already knew it) and
+ * never counts as a lapse.
  */
 export function scheduleAnswer(state: { box: number; lapses: number } | null, correct: boolean): { box: number; lapses: number } {
 	const box = state?.box ?? 0;
 	const lapses = state?.lapses ?? 0;
-	if (box <= 0) return { box: 1, lapses };
+	if (box <= 0) return { box: correct ? 2 : 1, lapses };
 	return { box: nextBox(box, correct), lapses: correct ? lapses : lapses + 1 };
 }
 
 /**
- * Wrong answers always reset to box 1, including early practice in Review.
- * A word already back in box 1 and waiting for tomorrow is left alone, so an in-session
- * retry does not count a second lapse.
+ * Answers before a word is due are ignored, which protects against stale or duplicate
+ * requests. Due words and new words always move to a new schedule.
  */
 export function scheduleMove(state: Pick<ScheduledState, 'box' | 'lapses' | 'dueAt'> | null, correct: boolean, now: Date) {
 	const box = state?.box ?? 0;
 	const lapses = state?.lapses ?? 0;
 	const waiting = Boolean(state) && box > 0 && state!.dueAt > now;
-	if (!correct && waiting && box <= 1) return { box, lapses, dueAt: state!.dueAt, scheduled: false };
-	if (!correct) return { box: 1, lapses: lapses + (box > 0 ? 1 : 0), dueAt: dueAt(1, now), scheduled: true };
 	if (waiting) return { box, lapses, dueAt: state!.dueAt, scheduled: false };
-	const next = scheduleAnswer(state, true);
+	const next = scheduleAnswer(state, correct);
 	return { ...next, dueAt: dueAt(next.box, now), scheduled: true };
+}
+
+export function intervalChange(boxBefore: number, boxAfter: number): { fromDays: number; toDays: number; direction: 'up' | 'down' | 'same' } {
+	const fromDays = intervalDays(boxBefore);
+	const toDays = intervalDays(boxAfter);
+	return { fromDays, toDays, direction: toDays > fromDays ? 'up' : toDays < fromDays ? 'down' : 'same' };
 }
 
 /** Start of the due day in Vietnam, so a word due "tomorrow" is available from 00:00 local time. */

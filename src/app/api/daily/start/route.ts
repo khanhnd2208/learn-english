@@ -2,10 +2,10 @@ import { z } from 'zod';
 import { withAuth, apiSuccess, apiError } from '@/lib/apiUtils';
 import { startToday } from '@/services/english/enDailyService';
 
-const bodySchema = z.object({ extra: z.boolean().optional() }).strict();
+const bodySchema = z.object({}).strict();
 
 export const POST = withAuth(async (request, user) => {
 	const parsed = bodySchema.safeParse(await request.json().catch(() => ({})));
 	if (!parsed.success) return apiError('Yêu cầu không hợp lệ', 400);
-	return apiSuccess(await startToday(user.id, parsed.data));
+	return apiSuccess(await startToday(user.id));
 });

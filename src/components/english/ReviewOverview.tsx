@@ -53,7 +53,7 @@ export default function ReviewOverview({ overview, guided: initial }: { overview
 	}
 
 	return <div className="mx-auto max-w-5xl space-y-6 px-4 py-6 sm:px-6 sm:py-10">
-		<header><h1 className="text-4xl sm:text-5xl">Ôn tập</h1><p className="mt-2 text-muted">Chọn bộ từ, học tối đa 5 từ mỗi chặng rồi luyện ngay.</p></header>
+		<header><h1 className="text-4xl sm:text-5xl">Ôn tập</h1><p className="mt-2 text-muted">Luyện tập tự do — không ảnh hưởng lịch SRS.</p></header>
 
 		<section className="mode-card border-2 border-accent sm:p-7">
 			<div className="flex flex-wrap items-start justify-between gap-3"><div><h2 className="text-2xl">Chọn bộ từ để ôn</h2><p className="mt-1 text-sm text-muted">Bỏ chọn chỉ loại bộ khỏi phiên ôn; không gỡ bộ và không xóa tiến độ.</p></div><Link href="/store" className="text-sm font-bold text-accent">Thêm bộ từ →</Link></div>
