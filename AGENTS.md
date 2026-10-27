@@ -11,7 +11,7 @@
 
 | Domain | Entry points |
 |---|---|
-| Content and import | `src/services/english/enContentService.ts`, `src/lib/english/contentValidation.ts` |
+| Content and import | `src/services/english/enContentService.ts`, `src/lib/english/contentValidation.ts`, AI prompt `docs/content/ai-pack-prompt.md` |
 | Practice | `src/services/english/enPracticeService.ts`, `src/lib/english/activities/` |
 | Tests and mastery | `src/services/english/enTestService.ts`, `src/lib/english/wordState.ts` |
 | Progress and mistakes | `src/services/english/enProgressService.ts`, `src/services/english/enCatalogService.ts` |

@@ -85,7 +85,7 @@ export default function EnglishAdmin({ sets, qaEnabled }: { sets: SetRow[]; qaEn
 		<div className="mx-auto max-w-3xl space-y-8 px-4 py-8">
 			<header>
 				<h1 className="text-3xl font-black text-foreground">Nội dung tiếng Anh</h1>
-				<p className="mt-2 text-sm text-muted">Dán JSON do AI tạo. Từ thiếu nghĩa Việt hoặc câu ví dụ hợp lệ không được xuất bản. File audio phải nằm trong thư mục ENGLISH_AUDIO_ROOT, ngoài thư mục release.</p>
+				<p className="mt-2 text-sm text-muted">Dán JSON do AI tạo theo prompt ở docs/content/ai-pack-prompt.md. Từ thiếu nghĩa Việt hoặc câu ví dụ hợp lệ không được xuất bản. File audio phải nằm trong thư mục ENGLISH_AUDIO_ROOT, ngoài thư mục release.</p>
 			</header>
 			<div className="flex gap-2">
 				<Button type="button" variant={panel === 'content' ? 'primary' : 'secondary'} onClick={() => setPanel('content')}>Nội dung</Button>
