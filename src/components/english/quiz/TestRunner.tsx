@@ -103,7 +103,13 @@ export default function TestRunner({ detail, kind }: { detail: EnglishSetDetail;
 	}
 
 	const answered = started?.items.filter((item) => item.answer !== null).length ?? 0;
-	const lemmaOf = (senseId: string) => detail.words.find((word) => word.bundle.sense.id === senseId)?.bundle.word.lemma ?? '';
+	const bundleOf = (senseId: string) => detail.words.find((word) => word.bundle.sense.id === senseId)?.bundle;
+	const lemmaOf = (senseId: string) => bundleOf(senseId)?.word.lemma ?? '';
+	const recordedAudioOf = (senseId: string) => {
+		const word = bundleOf(senseId)?.word;
+		return Boolean(word && [word.audioPath, word.audioUkPath, word.audioUsPath].some((path) => path.trim()));
+	};
+	const currentSenseId = started?.items[pos] && typeof started.items[pos].prompt.senseId === 'string' ? started.items[pos].prompt.senseId : '';
 	const missed = result?.items.filter((item) => !item.correct) ?? [];
 
 	return <FocusFrame title={detail.title} subtitle={`Kiểm tra · ${label}`} progress={phase === 'result' ? started?.wordCount ?? 0 : answered} total={started?.wordCount ?? EN_QUIZ_MAX_ITEMS} dirty={phase === 'run'} exitHref={`/sets/${detail.id}`}>
@@ -123,7 +129,14 @@ export default function TestRunner({ detail, kind }: { detail: EnglishSetDetail;
 
 		{phase === 'run' && started?.items[pos] && <div className="space-y-4">
 			<p className="text-sm text-muted">Câu {answered + 1}/{started.wordCount}</p>
-			<QuestionView key={`${pos}-${retry}`} item={started.items[pos]} onAnswer={(value) => void answer(value)} disabled={busy} />
+			<QuestionView
+				key={`${pos}-${retry}`}
+				item={started.items[pos]}
+				onAnswer={(value) => void answer(value)}
+				disabled={busy}
+				audioText={lemmaOf(currentSenseId)}
+				recordedAudioAvailable={recordedAudioOf(currentSenseId)}
+			/>
 			<div className="flex justify-end">
 				<button type="button" disabled={busy} onClick={() => void answer('')} className="min-h-11 rounded-control border border-border px-4 font-bold">Bỏ qua</button>
 			</div>
@@ -147,7 +160,7 @@ export default function TestRunner({ detail, kind }: { detail: EnglishSetDetail;
 						<p className="font-bold">{lemmaOf(item.senseId)}</p>
 						<p className="text-sm">Bạn trả lời: <s className="text-error">{item.answer || 'Bỏ qua'}</s> · Đáp án: <span className="font-bold text-success">{item.answerKey}</span></p>
 					</div>
-					<EnglishAudioButton compact senseId={item.senseId} lemma={lemmaOf(item.senseId)} recordedAudioAvailable />
+					<EnglishAudioButton compact senseId={item.senseId} lemma={lemmaOf(item.senseId)} recordedAudioAvailable={recordedAudioOf(item.senseId)} />
 				</li>)}</ul>
 			</> : <p className="mt-6 text-lg">Không sai câu nào. Tuyệt vời!</p>}
 			<div className="mt-6 flex flex-wrap justify-center gap-3">

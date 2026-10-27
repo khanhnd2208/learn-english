@@ -30,15 +30,19 @@ export function useSpeech() {
 		return () => {
 			window.clearTimeout(supportTimer);
 			window.speechSynthesis.removeEventListener('voiceschanged', loadVoices);
-			window.speechSynthesis.cancel();
-			if (watchdogRef.current) window.clearTimeout(watchdogRef.current);
 			utteranceRef.current = null;
+			window.speechSynthesis.cancel();
+			if (watchdogRef.current !== null) window.clearTimeout(watchdogRef.current);
+			watchdogRef.current = null;
 		};
 	}, []);
 
 	const speak = useCallback((text: string, lang = 'en-US'): boolean => {
 		if (typeof window === 'undefined' || !('speechSynthesis' in window) || !text.trim()) return false;
 		try {
+			if (watchdogRef.current !== null) window.clearTimeout(watchdogRef.current);
+			watchdogRef.current = null;
+			utteranceRef.current = null;
 			window.speechSynthesis.cancel();
 			const utterance = new SpeechSynthesisUtterance(text);
 			utteranceRef.current = utterance;
@@ -50,14 +54,20 @@ export function useSpeech() {
 			const matchingVoice = voicesRef.current.find((voice) => voice.lang.toLowerCase() === lang.toLowerCase())
 				?? voicesRef.current.find((voice) => voice.lang.toLowerCase().startsWith(requestedLanguage ?? ''));
 			if (matchingVoice) utterance.voice = matchingVoice;
-			utterance.onstart = () => setSpeaking(true);
+			utterance.onstart = () => {
+				if (utteranceRef.current === utterance) setSpeaking(true);
+			};
 			utterance.onend = () => {
-				if (watchdogRef.current) window.clearTimeout(watchdogRef.current);
+				if (utteranceRef.current !== utterance) return;
+				if (watchdogRef.current !== null) window.clearTimeout(watchdogRef.current);
+				watchdogRef.current = null;
 				setSpeaking(false);
 				utteranceRef.current = null;
 			};
 			utterance.onerror = (event) => {
-				if (watchdogRef.current) window.clearTimeout(watchdogRef.current);
+				if (utteranceRef.current !== utterance) return;
+				if (watchdogRef.current !== null) window.clearTimeout(watchdogRef.current);
+				watchdogRef.current = null;
 				setSpeaking(false);
 				utteranceRef.current = null;
 				if (event.error !== 'interrupted' && event.error !== 'canceled') {
@@ -69,8 +79,10 @@ export function useSpeech() {
 			if (window.speechSynthesis.paused) window.speechSynthesis.resume();
 			window.speechSynthesis.speak(utterance);
 			watchdogRef.current = window.setTimeout(() => {
+				if (utteranceRef.current !== utterance) return;
 				setSpeaking(false);
 				utteranceRef.current = null;
+				watchdogRef.current = null;
 			}, Math.max(5_000, text.length * 400));
 			return true;
 		} catch {
@@ -81,10 +93,11 @@ export function useSpeech() {
 
 	const stop = useCallback(() => {
 		if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
-			window.speechSynthesis.cancel();
-			if (watchdogRef.current) window.clearTimeout(watchdogRef.current);
-			setSpeaking(false);
 			utteranceRef.current = null;
+			window.speechSynthesis.cancel();
+			if (watchdogRef.current !== null) window.clearTimeout(watchdogRef.current);
+			watchdogRef.current = null;
+			setSpeaking(false);
 		}
 	}, []);
 
