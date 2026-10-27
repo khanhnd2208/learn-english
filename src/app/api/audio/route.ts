@@ -3,12 +3,12 @@ import { withAuth } from '@/lib/apiUtils';
 import { parseByteRange } from '@/lib/english/audioPath';
 import { readEnglishAudio } from '@/services/english/enAudioService';
 
-export const GET = withAuth(async (request) => {
+export const GET = withAuth(async (request, user) => {
 	const params = request.nextUrl.searchParams;
 	const file = await readEnglishAudio({
 		senseId: params.get('senseId'),
 		exampleId: params.get('exampleId'),
-	});
+	}, { userId: user.id, admin: user.role === 'admin' });
 	const rangeHeader = request.headers.get('range');
 	const range = parseByteRange(rangeHeader, file.bytes.length);
 	const headers = new Headers({

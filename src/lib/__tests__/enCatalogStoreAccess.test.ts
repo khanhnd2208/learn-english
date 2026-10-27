@@ -11,20 +11,23 @@ const mocks = vi.hoisted(() => ({
 	preferenceUpdate: vi.fn(),
 	sessionFindMany: vi.fn(),
 	sessionUpdate: vi.fn(),
+	wordStateFindMany: vi.fn(),
+	getSenseBundles: vi.fn(),
 }));
 
 vi.mock('@/lib/prisma', () => ({ prisma: {
 	enSet: { findFirst: mocks.setFindFirst, findUnique: mocks.setFindUnique, delete: mocks.setDelete },
 	enEnrollment: { findUnique: mocks.enrollmentFindUnique, upsert: mocks.enrollmentUpsert },
+	enWordState: { findMany: mocks.wordStateFindMany },
 	$transaction: mocks.transaction,
 } }));
 vi.mock('@/services/english/enQuizService', () => ({ getDailyTasks: vi.fn().mockResolvedValue({}) }));
 vi.mock('@/services/english/enContentService', async (importOriginal) => ({
 	...(await importOriginal<typeof import('@/services/english/enContentService')>()),
-	getSenseBundles: vi.fn(),
+	getSenseBundles: mocks.getSenseBundles,
 }));
 
-import { enrollEnglishSet } from '@/services/english/enCatalogService';
+import { enrollEnglishSet, getEnglishSetDetail } from '@/services/english/enCatalogService';
 import { deleteEnglishSet as deleteStoreSet } from '@/services/english/enContentService';
 
 describe('English store access', () => {
@@ -82,5 +85,38 @@ describe('English store access', () => {
 		expect(mocks.preferenceUpdate).toHaveBeenCalledWith(expect.objectContaining({ data: { selectedSetIds: { set: ['set-2'] } } }));
 		expect(mocks.sessionUpdate).toHaveBeenCalledWith(expect.objectContaining({ data: { selectedSetIds: { set: [] } } }));
 		expect(mocks.setDelete).toHaveBeenCalledWith({ where: { id: 'set-1' } });
+	});
+
+	describe('set detail', () => {
+		const ids = Array.from({ length: 8 }, (_, index) => `sense-${index}`);
+		const setRow = (overrides: Record<string, unknown>) => ({ id: 'set-1', title: 'Set', description: '', status: 'published', listed: true, accessCode: null, items: ids.map((senseId) => ({ senseId })), enrollments: [], ...overrides });
+
+		beforeEach(() => {
+			mocks.wordStateFindMany.mockResolvedValue([]);
+			mocks.getSenseBundles.mockImplementation(async (senseIds: string[]) => senseIds.map((id) => ({ sense: { id } })));
+		});
+
+		it('shows only sample words of a locked set before unlocking', async () => {
+			mocks.setFindFirst.mockResolvedValue(setRow({ accessCode: 'code' }));
+			const detail = await getEnglishSetDetail('user-1', 'set-1', false);
+			expect(detail).toMatchObject({ previewOnly: true, wordCount: 8 });
+			expect(detail.words).toHaveLength(5);
+		});
+
+		it('shows every word of a locked set to a learner who has it and to admins', async () => {
+			mocks.setFindFirst.mockResolvedValue(setRow({ accessCode: 'code', enrollments: [{ id: 'enrollment-1' }] }));
+			expect((await getEnglishSetDetail('user-1', 'set-1', false)).words).toHaveLength(8);
+			mocks.setFindFirst.mockResolvedValue(setRow({ accessCode: 'code' }));
+			const admin = await getEnglishSetDetail('admin-1', 'set-1', true);
+			expect(admin.previewOnly).toBe(false);
+			expect(admin.words).toHaveLength(8);
+		});
+
+		it('hides an unlisted set from learners who do not have it', async () => {
+			mocks.setFindFirst.mockResolvedValue(setRow({ listed: false }));
+			await expect(getEnglishSetDetail('user-1', 'set-1', false)).rejects.toMatchObject({ status: 404 });
+			mocks.setFindFirst.mockResolvedValue(setRow({ listed: false, enrollments: [{ id: 'enrollment-1' }] }));
+			expect((await getEnglishSetDetail('user-1', 'set-1', false)).words).toHaveLength(8);
+		});
 	});
 });

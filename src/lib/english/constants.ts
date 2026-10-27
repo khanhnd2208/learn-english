@@ -7,6 +7,8 @@ export const EN_LEITNER_INTERVALS = [0, 1, 3, 7, 21, 60] as const;
 export const EN_USAGE_MIN_GRADE_EXAMPLES = 2;
 export const EN_QUIZ_MAX_ITEMS = 20;
 export const EN_GUIDED_CHUNK_SIZE = 5;
+/** Words a learner can preview in a password-protected set before unlocking it. */
+export const EN_LOCKED_PREVIEW_WORDS = 5;
 export const EN_MAX_JSON_BODY_BYTES = 4 * 1024 * 1024;
 export const EN_ALTERNATIVES_REQUIRED = 5;
 export const EN_MAX_WORDS_PER_PACK = 500;

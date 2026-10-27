@@ -45,6 +45,7 @@ export default function SetDetail({ detail }: { detail: EnglishSetDetail }) {
 				<div className="absolute inset-y-0 left-0 rounded-full bg-success" style={{ width: percent(longTerm) }} />
 			</div>
 			{detail.enrolled ? <div className="flex flex-wrap gap-2"><Link href={`/sets/${detail.id}/practice`} className="inline-flex min-h-11 items-center rounded-control bg-accent px-4 text-sm font-bold text-accent-foreground">Luyện tập</Link><Link href={`/sets/${detail.id}/test`} className={linkButton}>Kiểm tra</Link></div> : <EnrollButton setId={detail.id} enrolled={false} locked={detail.locked} />}
+			{detail.previewOnly && <p className="flex items-start gap-2 rounded-panel border border-warning/30 bg-warning/5 px-3 py-2 text-sm text-foreground-secondary"><span aria-hidden="true">🔒</span><span>Đang xem <strong className="tabular-nums">{detail.words.length}/{detail.wordCount}</strong> từ mẫu. Nhập mật khẩu để tải cả bộ.</span></p>}
 		</header>
 
 		{detail.enrolled && <details className="rounded-panel border border-border bg-surface px-4 py-3">
@@ -58,13 +59,13 @@ export default function SetDetail({ detail }: { detail: EnglishSetDetail }) {
 		</details>}
 
 		<section className="space-y-3">
-			<div className="flex items-center justify-between gap-3"><h2 className="text-2xl">Danh sách từ <span className="text-base font-normal text-muted">({words.length})</span></h2>{detail.enrolled && <RemoveSetButton setId={detail.id} setTitle={detail.title} />}</div>
+			<div className="flex items-center justify-between gap-3"><h2 className="text-2xl">Danh sách từ <span className="text-base font-normal text-muted">({words.length})</span></h2>{detail.enrolled && <RemoveSetButton setId={detail.id} setTitle={detail.title} locked={detail.locked} listed={detail.listed} />}</div>
 			{detail.description && <details className="text-sm text-muted"><summary className="cursor-pointer font-bold text-accent">Giới thiệu bộ từ</summary><p className="mt-2">{detail.description}</p></details>}
 			<div className="flex flex-wrap gap-2">
 				<input type="search" aria-label="Tìm từ" placeholder="Tìm từ hoặc nghĩa…" value={search} onChange={(event) => setSearch(event.target.value)} className="min-h-11 min-w-48 flex-1 rounded-control border border-border bg-surface px-3 outline-none focus:border-accent" />
-				<div className="flex gap-1 rounded-control border border-border bg-surface p-1" role="group" aria-label="Lọc từ">
+				{detail.enrolled && <div className="flex gap-1 rounded-control border border-border bg-surface p-1" role="group" aria-label="Lọc từ">
 					{FILTERS.map(([value, label]) => <button key={value} type="button" aria-pressed={filter === value} onClick={() => setFilter(value)} className={`min-h-9 rounded-control px-3 text-sm font-bold ${filter === value ? 'bg-accent text-accent-foreground' : 'text-muted hover:text-foreground'}`}>{label}</button>)}
-				</div>
+				</div>}
 				<button type="button" aria-pressed={hideMeaning} onClick={() => setHideMeaning(!hideMeaning)} className="min-h-11 rounded-control border border-border px-3 text-sm font-bold">{hideMeaning ? 'Hiện nghĩa' : 'Che nghĩa'}</button>
 			</div>
 			<ul className="max-h-[min(60vh,34rem)] space-y-2 overflow-y-auto pr-1">

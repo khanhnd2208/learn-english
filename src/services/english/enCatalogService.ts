@@ -3,6 +3,7 @@ import { prisma } from '@/lib/prisma';
 import { AppError } from '@/lib/appError';
 import { getDailyTasks, type DailyTasks } from '@/services/english/enQuizService';
 import { getSenseBundles } from '@/services/english/enContentService';
+import { EN_LOCKED_PREVIEW_WORDS } from '@/lib/english/constants';
 import { countStages, isLongTerm } from '@/lib/english/schedule';
 import type { QuizKind } from '@/lib/english/quiz';
 import type { SenseBundle } from '@/lib/english/senseBundle';
@@ -24,7 +25,8 @@ export interface EnglishSetSummary {
 	stages: ReturnType<typeof countStages>;
 	dueToday: number;
 	locked: boolean;
-	listed?: boolean;
+	/** False once an admin hides the set from the store; learners who have it keep studying. */
+	listed: boolean;
 	accessCode?: string | null;
 	learners?: number;
 }
@@ -44,6 +46,9 @@ export interface EnglishSetDetail {
 	wordCount: number;
 	words: EnglishSetWord[];
 	locked: boolean;
+	listed: boolean;
+	/** A locked set seen before unlocking shows only the first few words. */
+	previewOnly: boolean;
 }
 
 function tasksForSet(daily: DailyTasks, setId: string): SetDailyTasks {
@@ -90,7 +95,8 @@ export async function listEnglishSets(userId: string, includeDrafts: boolean, op
 			stages: countStages(published.map((id) => boxOf.get(id))),
 			dueToday: published.filter((id) => { const state = stateOf.get(id); return state && state.box >= 1 && state.dueAt <= now; }).length,
 			locked: set.accessCode != null,
-			...(includeDrafts ? { listed: set.listed, accessCode: set.accessCode, learners: set._count.enrollments } : {}),
+			listed: set.listed,
+			...(includeDrafts ? { accessCode: set.accessCode, learners: set._count.enrollments } : {}),
 		};
 	});
 }
@@ -131,8 +137,15 @@ export async function getEnglishSetDetail(userId: string, setId: string, include
 		},
 	});
 	if (!set) throw new AppError('Không tìm thấy bộ học', 404);
-	const senseIds = set.items.flatMap((item) => (item.senseId ? [item.senseId] : []));
-	const bundles = await getSenseBundles(senseIds, !includeDrafts);
+	const enrolled = set.enrollments.length > 0;
+	// Admins see everything. A hidden set stays open only to learners who already have it.
+	if (!includeDrafts && !enrolled && !set.listed) throw new AppError('Không tìm thấy bộ học', 404);
+	const previewOnly = !includeDrafts && !enrolled && set.accessCode != null;
+	const allSenseIds = set.items.flatMap((item) => (item.senseId ? [item.senseId] : []));
+	const bundles = await getSenseBundles(allSenseIds, !includeDrafts);
+	const visibleIds = new Set(bundles.map((bundle) => bundle.sense.id));
+	const wordCount = allSenseIds.filter((id) => visibleIds.has(id)).length;
+	const senseIds = previewOnly ? allSenseIds.filter((id) => visibleIds.has(id)).slice(0, EN_LOCKED_PREVIEW_WORDS) : allSenseIds;
 	const bundleById = new Map(bundles.map((bundle) => [bundle.sense.id, bundle]));
 	const ordered = senseIds.flatMap((id) => {
 		const bundle = bundleById.get(id);
@@ -153,9 +166,11 @@ export async function getEnglishSetDetail(userId: string, setId: string, include
 		id: set.id,
 		title: set.title,
 		description: set.description,
-		enrolled: set.enrollments.length > 0,
+		enrolled,
 		locked: set.accessCode != null,
-		wordCount: ordered.length,
+		listed: set.listed,
+		previewOnly,
+		wordCount,
 		words: ordered.map((bundle) => ({
 			bundle,
 			box: bySense.get(bundle.sense.id)?.box ?? 0,
