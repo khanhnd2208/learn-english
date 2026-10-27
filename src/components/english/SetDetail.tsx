@@ -58,7 +58,7 @@ export default function SetDetail({ detail }: { detail: EnglishSetDetail }) {
 		</details>}
 
 		<section className="space-y-3">
-			<div className="flex items-center justify-between gap-3"><h2 className="text-2xl">Danh sách từ <span className="text-base font-normal text-muted">({words.length})</span></h2>{detail.enrolled && <RemoveSetButton setId={detail.id} />}</div>
+			<div className="flex items-center justify-between gap-3"><h2 className="text-2xl">Danh sách từ <span className="text-base font-normal text-muted">({words.length})</span></h2>{detail.enrolled && <RemoveSetButton setId={detail.id} setTitle={detail.title} />}</div>
 			{detail.description && <details className="text-sm text-muted"><summary className="cursor-pointer font-bold text-accent">Giới thiệu bộ từ</summary><p className="mt-2">{detail.description}</p></details>}
 			<div className="flex flex-wrap gap-2">
 				<input type="search" aria-label="Tìm từ" placeholder="Tìm từ hoặc nghĩa…" value={search} onChange={(event) => setSearch(event.target.value)} className="min-h-11 min-w-48 flex-1 rounded-control border border-border bg-surface px-3 outline-none focus:border-accent" />

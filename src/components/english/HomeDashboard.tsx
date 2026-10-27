@@ -4,6 +4,7 @@ import StageBar from '@/components/english/StageBar';
 import GoalRing from '@/components/english/goals/GoalRing';
 import LevelBar from '@/components/english/goals/LevelBar';
 import QuestItem from '@/components/english/goals/QuestItem';
+import RemoveSetButton from '@/components/english/RemoveSetButton';
 import { EN_LEITNER_INTERVALS } from '@/lib/english/constants';
 import { isReviewDone, reviewMinutes } from '@/lib/english/reviewSummary';
 import { estimateReviewXp } from '@/lib/english/xp';
@@ -58,11 +59,12 @@ export default function HomeDashboard({ overview, sets, board, resetsIn, greetin
 
 			<section id="your-sets" aria-labelledby="your-sets-heading" className="flex h-80 scroll-mt-6 flex-col overflow-hidden rounded-panel border border-border bg-surface">
 				<div className="flex shrink-0 items-center justify-between gap-3 border-b border-border px-4 py-3 sm:px-5"><h2 id="your-sets-heading" className="text-2xl sm:text-3xl">Bộ từ của bạn ({enrolled.length})</h2><Link href="/store" className="shrink-0 text-sm font-bold text-accent">Thêm bộ từ →</Link></div>
-				<ul className="min-h-0 flex-1 overflow-y-auto">{enrolled.map((set) => <li key={set.id} className="border-b border-border last:border-b-0">
-					<Link href={`/sets/${set.id}`} aria-label={`Mở bộ từ ${set.title}`} className="group block px-4 py-3 hover:bg-accent-subtle focus-visible:bg-accent-subtle focus-visible:outline-2 focus-visible:outline-inset focus-visible:outline-accent sm:px-5">
+				<ul className="min-h-0 flex-1 overflow-y-auto">{enrolled.map((set) => <li key={set.id} className="flex items-center border-b border-border last:border-b-0 hover:bg-accent-subtle focus-within:bg-accent-subtle">
+					<Link href={`/sets/${set.id}`} aria-label={`Mở bộ từ ${set.title}`} className="group min-w-0 flex-1 px-4 py-3 focus-visible:outline-2 focus-visible:outline-inset focus-visible:outline-accent sm:pl-5 sm:pr-3">
 						<div className="flex items-center gap-3"><div className="min-w-0 flex-1"><h3 className="truncate font-bold" title={set.title}>{set.title}</h3><p className="text-xs text-muted">{set.learned}/{set.words} từ đã học{set.dueToday > 0 ? ` · ${set.dueToday} đến hạn` : ''}</p></div><span aria-hidden="true" className="text-lg text-accent transition-transform group-hover:translate-x-1">→</span></div>
 						<div className="mt-2"><StageBar stages={set.stages} /></div>
 					</Link>
+					<div className="shrink-0 pr-4 sm:pr-5"><RemoveSetButton setId={set.id} setTitle={set.title} stayOnPage compact /></div>
 				</li>)}</ul>
 			</section>
 
