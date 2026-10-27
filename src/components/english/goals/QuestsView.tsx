@@ -24,7 +24,7 @@ function goalMessage(xp: number, goal: number): string {
 	if (xp >= goal) return 'Đã đạt mục tiêu hôm nay. Phần còn lại là thưởng thêm!';
 	if (xp === 0) return 'Một lượt ôn ngắn là đủ để bắt đầu.';
 	const left = goal - xp;
-	return left <= 10 ? `Còn ${left} XP, chỉ vài câu nữa thôi.` : `Còn ${left} XP, khoảng ${Math.max(1, Math.ceil(left / (XP.reviewCorrect * 6)))} phút ôn.`;
+	return left <= 100 ? `Còn ${left} XP, chỉ vài câu nữa thôi.` : `Còn ${left} XP, khoảng ${Math.max(1, Math.ceil(left / (XP.review * 6)))} phút ôn.`;
 }
 
 export default function QuestsView({ board, quizHref, dayResetsIn, weekResetsIn, initialTab }: {
@@ -71,7 +71,7 @@ export default function QuestsView({ board, quizHref, dayResetsIn, weekResetsIn,
 						<h2 className="text-2xl">Mục tiêu ngày</h2>
 						<p className="text-sm">{goalMessage(board.today.xp, board.today.goal)}</p>
 						<button type="button" onClick={() => setGoalOpen(true)} className="inline-flex min-h-11 items-center gap-1 rounded-control border border-border px-3 text-sm font-bold hover:border-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent">Mức: {goalLabel(board.dailyGoalXp)} ▾</button>
-						{board.dailyGoalXp !== board.today.goal && <p className="text-xs text-muted">Mức mới ({board.dailyGoalXp} XP) áp dụng từ ngày mai.</p>}
+						
 					</div>
 				</section>
 				<section aria-labelledby="daily-heading">

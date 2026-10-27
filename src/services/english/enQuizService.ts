@@ -7,7 +7,7 @@ import { EN_QUIZ_MAX_ITEMS } from '@/lib/english/constants';
 import { pickQuizSenses, quizItemFor, isQuizKind, type QuizKind } from '@/lib/english/quiz';
 import { vnDayKey, shiftVnDay } from '@/lib/english/gapRule';
 import { vnDayStart } from '@/lib/english/schedule';
-import { quizXpEvent } from '@/lib/english/xp';
+import { pacedCorrectCount, quizXpEvent } from '@/lib/english/xp';
 import { getSenseBundles } from '@/services/english/enContentService';
 import { publicQuizItems } from '@/lib/english/quizPublic';
 
@@ -127,7 +127,9 @@ export async function finishQuiz(userId: string, attemptId: string, now = new Da
 	let xp = 0;
 	if (attempt.status === 'in_progress') {
 		const day = vnDayKey(now);
-		const event = quizXpEvent(quizBlueprint(attempt.blueprint).kind ?? 'quiz', day, passedCount, attempt.wordCount);
+		// Only correct answers that came at least the minimum gap after the previous one earn XP.
+			const pacedPassed = pacedCorrectCount(attempt.items.map((item) => ({ at: item.answeredAt, correct: item.correct })), attempt.startedAt);
+			const event = quizXpEvent(quizBlueprint(attempt.blueprint).kind ?? 'quiz', day, pacedPassed, attempt.wordCount);
 		await prisma.$transaction(async (tx) => {
 			await tx.enTestAttempt.update({ where: { id: attempt.id }, data: { status: 'finished', finishedAt: now, passedCount } });
 			if (event) xp = (await tx.enXpEvent.createMany({ data: [{ ...event, userId, day, at: now }], skipDuplicates: true })).count ? event.xp : 0;

@@ -51,7 +51,7 @@ export const ACHIEVEMENTS: AchievementDef[] = [
 export const TIER_NAMES = ['Đồng', 'Bạc', 'Vàng', 'Kim cương'] as const;
 
 /** XP for reaching each tier: bronze, silver, gold, diamond. */
-const TIER_XP = [20, 50, 100, 100] as const;
+const TIER_XP = [200, 500, 1000, 1000] as const;
 
 export function achievementKey(id: string, tier: number): string {
 	return `${id}_${tier + 1}`;

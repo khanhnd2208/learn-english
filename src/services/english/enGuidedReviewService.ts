@@ -6,7 +6,7 @@ import { EN_GUIDED_CHUNK_SIZE } from '@/lib/english/constants';
 import { buildGuidedQuestions, buildRetryQuestion, weightedOrder, type ReviewHistory } from '@/lib/english/guidedReview';
 import { vnDayKey } from '@/lib/english/gapRule';
 import { vnDayStart } from '@/lib/english/schedule';
-import { XP } from '@/lib/english/xp';
+import { pacedEnough, XP } from '@/lib/english/xp';
 import { getSenseBundles } from '@/services/english/enContentService';
 
 type QuestionRow = {
@@ -236,16 +236,21 @@ export async function answerGuidedReview(userId: string, sessionId: string, ques
 	const correct = answer.trim() !== '' && Boolean(activityByKey(question.activityKey)?.grade?.(item, answer));
 	let xp = 0;
 	let persisted = false;
+	const now = new Date();
 	await prisma.$transaction(async (tx) => {
-		const saved = await tx.enGuidedReviewQuestion.updateMany({ where: { id: question.id, answer: null }, data: { answer, correct, responseMs: Math.max(0, Math.min(120_000, Math.trunc(responseMs))), answeredAt: new Date() } });
+		// Spacing is judged by server time against the previous answer of this session, never by the client's responseMs.
+		const last = await tx.enGuidedReviewQuestion.findFirst({ where: { sessionId: session.id, answeredAt: { not: null } }, orderBy: { answeredAt: 'desc' }, select: { answeredAt: true } });
+		const paced = pacedEnough(last?.answeredAt ?? session.startedAt, now);
+		const saved = await tx.enGuidedReviewQuestion.updateMany({ where: { id: question.id, answer: null }, data: { answer, correct, responseMs: Math.max(0, Math.min(120_000, Math.trunc(responseMs))), answeredAt: now } });
 		if (!saved.count) return;
 		persisted = true;
-		if (question.kind === 'main' && correct) {
-			const day = vnDayKey(new Date());
+		if (question.kind === 'main' && correct && paced) {
+			const day = vnDayKey(now);
+			// Review and extra SRS rounds share one daily cap, both stored as kind `extra`.
 			const earned = await tx.enXpEvent.aggregate({ where: { userId, day, kind: 'extra' }, _sum: { xp: true } });
-			if ((earned._sum.xp ?? 0) < XP.extraDailyCap) {
-				const created = await tx.enXpEvent.createMany({ data: [{ userId, day, at: new Date(), sourceKey: `guided:${question.id}`, kind: 'extra', xp: XP.extra }], skipDuplicates: true });
-				if (created.count) xp = XP.extra;
+			if ((earned._sum.xp ?? 0) + XP.review <= XP.reviewDailyCap) {
+				const created = await tx.enXpEvent.createMany({ data: [{ userId, day, at: now, sourceKey: `guided:${question.id}`, kind: 'extra', xp: XP.review }], skipDuplicates: true });
+				if (created.count) xp = XP.review;
 			}
 		}
 		const [remaining, total] = await Promise.all([

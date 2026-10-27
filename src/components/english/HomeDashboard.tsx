@@ -4,6 +4,7 @@ import StageBar from '@/components/english/StageBar';
 import GoalRing from '@/components/english/goals/GoalRing';
 import LevelBar from '@/components/english/goals/LevelBar';
 import QuestItem from '@/components/english/goals/QuestItem';
+import SrsTodayCard from '@/components/english/SrsTodayCard';
 import RemoveSetButton from '@/components/english/RemoveSetButton';
 import { EN_LEITNER_INTERVALS } from '@/lib/english/constants';
 import type { EnglishSetSummary } from '@/services/english/enCatalogService';
@@ -47,6 +48,8 @@ export default function HomeDashboard({ overview, sets, board, resetsIn, greetin
 		</section>
 
 		{enrolled.length === 0 ? <section className="mode-card p-7"><h2 className="text-3xl">Bạn chưa có bộ từ nào</h2><p className="mt-2 text-muted">Tải một bộ từ để bắt đầu học và theo dõi từng bước ôn tập.</p><Link className="mt-5 inline-flex min-h-11 items-center rounded-control bg-accent px-5 font-bold text-accent-foreground" href="/store">Mở Cửa hàng →</Link></section> : <>
+			<SrsTodayCard overview={overview} />
+
 			<Link href="/review" className="mode-card flex flex-wrap items-center justify-between gap-4 border-2 border-accent bg-accent-subtle p-6 hover:brightness-[1.02] focus-visible:ring-2 focus-visible:ring-accent">
 				<div><h2 className="text-2xl">Luyện từ vựng</h2><p className="mt-1 text-sm">Mỗi chặng học 5 từ rồi luyện 5 câu · hôm nay đã luyện {overview.practicedToday} câu</p><p className="mt-2 text-xs text-muted">Phiên luyện không thay đổi lịch nhớ lâu.</p></div>
 				<span className="rounded-control bg-accent px-5 py-3 font-bold text-accent-foreground">Vào luyện →</span>

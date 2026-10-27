@@ -5,8 +5,8 @@ import { EN_WEEKLY_DAYS_DEFAULT } from '@/lib/english/constants';
 import { shiftVnDay, vnDayKey, vnWeekDays } from '@/lib/english/gapRule';
 import { vnDayStart } from '@/lib/english/schedule';
 import { isQuizKind } from '@/lib/english/quiz';
-import { periodMetrics, type QuizRow, type XpRow } from '@/lib/english/goalMetrics';
-import { parseQuests, pickDailyQuests, topUpQuests, questProgress, QUEST_META, weeklyQuests, type Quest, type QuestContext, type QuestMetrics } from '@/lib/english/quests';
+import { periodMetrics, quizKindsOn, type QuizRow, type XpRow } from '@/lib/english/goalMetrics';
+import { dailyQuests, parseQuests, topUpQuests, questProgress, QUEST_META, weeklyQuests, type Quest, type QuestAction, type QuestContext, type QuestMetrics } from '@/lib/english/quests';
 import { achievementStatus, newlyEarned, nearestAchievements, parseAchievementKey, describeAchievement, TIER_NAMES, type LifetimeMetrics } from '@/lib/english/achievements';
 import { DAILY_GOAL_DEFAULT, goalTierIndex, isDailyGoalXp, levelFromXp, XP, type LevelInfo, type XpKind } from '@/lib/english/xp';
 import { getTodayOverview, type TodayOverview } from '@/services/english/enDailyService';
@@ -15,7 +15,7 @@ export type GoalQuest = Quest & {
 	title: string;
 	hint: string;
 	icon: (typeof QUEST_META)[keyof typeof QUEST_META]['icon'];
-	action: 'review' | 'quiz';
+	action: QuestAction;
 	current: number;
 	done: boolean;
 };
@@ -67,6 +67,11 @@ function questSourceKey(period: 'daily' | 'weekly', periodKey: string, key: stri
 	return `quest:${period}:${periodKey}:${key}`;
 }
 
+/** Kept as the old daily-goal quest key so rewards paid before the XP rework are not paid twice. */
+function goalSourceKey(day: string): string {
+	return questSourceKey('daily', day, 'daily_goal');
+}
+
 function chestSourceKey(weekStart: string): string {
 	return `chest:${weekStart}`;
 }
@@ -77,7 +82,7 @@ async function ensureBoard(userId: string, period: 'daily' | 'weekly', periodKey
 	if (existing) {
 		const quests = parseQuests(existing.quests);
 		const topped = topUpQuests(quests, build());
-		if (topped.length > quests.length) await prisma.enQuestBoard.update({ where, data: { quests: topped } });
+		if (JSON.stringify(topped) !== JSON.stringify(quests)) await prisma.enQuestBoard.update({ where, data: { quests: topped } });
 		return topped;
 	}
 	const quests = build();
@@ -90,15 +95,9 @@ async function ensureBoard(userId: string, period: 'daily' | 'weekly', periodKey
 function questContext(overview: TodayOverview, dailyGoalXp: number, weeklyDaysGoal: number): QuestContext {
 	return {
 		tier: goalTierIndex(dailyGoalXp),
-		dailyGoalXp,
 		weeklyDaysGoal,
-		learnedCount: overview.learnedCount,
-		newAvailable: overview.newCount,
-		dueTotal: overview.dueTotal,
-		lapsedDue: overview.lapsedDue,
+		srsAvailable: overview.dueTotal + overview.newCount,
 		enrolledSets: overview.enrolledSets,
-		rememberingCount: overview.rememberingCount,
-		practiceAvailable: overview.practiceAvailable,
 	};
 }
 
@@ -114,13 +113,16 @@ async function loadState(userId: string, now: Date) {
 	const dailyGoalXp = profile?.dailyXpGoal ?? DAILY_GOAL_DEFAULT;
 	const weeklyDaysGoal = profile?.weeklyDaysGoal ?? EN_WEEKLY_DAYS_DEFAULT;
 	const ctx = questContext(overview, dailyGoalXp, weeklyDaysGoal);
-	const [daily, weekly, reviews, guidedReviews, xpRows, attempts, total, wordStates, kindCounts, legacySessionsFinished, guidedSessionsFinished, achievements] = await Promise.all([
-		ensureBoard(userId, 'daily', today, () => pickDailyQuests(`${userId}:${today}`, ctx)),
+	const weekFrom = vnDayStart(weekStart);
+	const [daily, weekly, reviews, guidedReviews, xpRows, weekAttempts, allAttempts, total, wordStates, kindCounts, legacySessionsFinished, guidedSessionsFinished, achievements] = await Promise.all([
+		ensureBoard(userId, 'daily', today, () => dailyQuests(ctx)),
 		ensureBoard(userId, 'weekly', weekStart, () => weeklyQuests(ctx)),
-		prisma.enReview.findMany({ where: { userId, at: { gte: vnDayStart(weekStart) } }, select: { sessionId: true, senseId: true, at: true, correct: true, scheduled: true, boxBefore: true, boxAfter: true } }),
-		prisma.enGuidedReviewQuestion.findMany({ where: { kind: 'main', answeredAt: { gte: vnDayStart(weekStart) }, session: { userId } }, select: { sessionId: true, senseId: true, answeredAt: true, correct: true } }),
+		prisma.enReview.findMany({ where: { userId, at: { gte: weekFrom } }, select: { at: true, scheduled: true } }),
+		prisma.enGuidedReviewQuestion.findMany({ where: { kind: 'main', answeredAt: { gte: weekFrom }, session: { userId } }, select: { answeredAt: true, correct: true } }),
 		prisma.enXpEvent.findMany({ where: { userId, day: { gte: weekStart } }, select: { day: true, xp: true, kind: true, sourceKey: true } }),
-		prisma.enTestAttempt.findMany({ where: { userId, mode: 'set', status: 'finished' }, select: { blueprint: true, passedCount: true, wordCount: true, finishedAt: true } }),
+		prisma.enTestAttempt.findMany({ where: { userId, mode: 'set', status: 'finished', finishedAt: { gte: weekFrom } }, select: { blueprint: true, finishedAt: true } }),
+		// Achievements need every finished quiz, but only its score.
+		prisma.enTestAttempt.findMany({ where: { userId, mode: 'set', status: 'finished' }, select: { passedCount: true, wordCount: true } }),
 		prisma.enXpEvent.aggregate({ where: { userId }, _sum: { xp: true } }),
 		prisma.enWordState.findMany({ where: { userId, box: { gt: 0 } }, select: { senseId: true, box: true, lapses: true } }),
 		prisma.enXpEvent.groupBy({ by: ['kind'], where: { userId, kind: { in: ['goal', 'chest'] } }, _count: { _all: true } }),
@@ -128,13 +130,12 @@ async function loadState(userId: string, now: Date) {
 		prisma.enGuidedReviewSession.count({ where: { userId, endedAt: { not: null } } }),
 		prisma.enAchievement.findMany({ where: { userId }, select: { key: true, seenAt: true } }),
 	]);
-	const guidedRows = guidedReviews.flatMap((row) => row.answeredAt ? [{ sessionId: row.sessionId, senseId: row.senseId, at: row.answeredAt, correct: row.correct === true, scheduled: false, boxBefore: 1, boxAfter: 1, practice: true }] : []);
-	const quizzes: QuizRow[] = attempts.flatMap((attempt) => {
+	const guidedRows = guidedReviews.flatMap((row) => row.answeredAt ? [{ answeredAt: row.answeredAt, correct: row.correct === true }] : []);
+	const quizzes: QuizRow[] = weekAttempts.flatMap((attempt) => {
 		const kind = (attempt.blueprint as { kind?: string } | null)?.kind;
-		return kind && isQuizKind(kind) && attempt.finishedAt ? [{ kind, passedCount: attempt.passedCount ?? 0, wordCount: attempt.wordCount, finishedAt: attempt.finishedAt }] : [];
+		return kind && isQuizKind(kind) && attempt.finishedAt ? [{ kind, passedCount: 0, wordCount: 0, finishedAt: attempt.finishedAt }] : [];
 	});
-	const lapsedSenses = new Set(wordStates.filter((state) => state.lapses > 0).map((state) => state.senseId));
-	const base = { reviews: [...reviews, ...guidedRows], xp: xpRows as XpRow[], quizzes, lapsedSenses, dueRemaining: overview.dueTotal };
+	const base = { reviews, guided: guidedRows, xp: xpRows as XpRow[], quizzes };
 	const kindCount = (kind: string) => kindCounts.find((row) => row.kind === kind)?._count._all ?? 0;
 	const dayMetrics = periodMetrics({ ...base, days: new Set([today]) });
 	const lifetime: LifetimeMetrics = {
@@ -143,11 +144,11 @@ async function loadState(userId: string, now: Date) {
 		longestStreak: overview.longestStreak,
 		goalDays: kindCount('goal'),
 		chests: kindCount('chest'),
-		perfectQuizzes: quizzes.filter((quiz) => quiz.wordCount > 0 && quiz.passedCount === quiz.wordCount).length,
+		perfectQuizzes: allAttempts.filter((quiz) => quiz.wordCount > 0 && quiz.passedCount === quiz.wordCount).length,
 		revived: wordStates.filter((state) => state.lapses > 0 && state.box >= 3).length,
 		sessionsFinished: legacySessionsFinished + guidedSessionsFinished,
 		enrolledSets: overview.enrolledSets,
-		quizKindsToday: dayMetrics.quizKinds,
+		quizKindsToday: quizKindsOn(quizzes, new Set([today])),
 	};
 	return {
 		today,
@@ -174,7 +175,7 @@ type GoalState = Awaited<ReturnType<typeof loadState>>;
  * Quest, chest and achievement rewards that are due but not paid yet. Rewards add XP, which can
  * finish the XP quests in turn, so this repeats on in-memory metrics until nothing new is earned.
  */
-export function pendingRewards(state: Pick<GoalState, 'today' | 'weekStart' | 'daily' | 'weekly' | 'dayMetrics' | 'weekMetrics' | 'claimed' | 'lifetime' | 'achievements'>) {
+export function pendingRewards(state: Pick<GoalState, 'today' | 'weekStart' | 'dailyGoalXp' | 'daily' | 'weekly' | 'dayMetrics' | 'weekMetrics' | 'claimed' | 'lifetime' | 'achievements'>) {
 	const day: QuestMetrics = { ...state.dayMetrics };
 	const week: QuestMetrics = { ...state.weekMetrics };
 	const lifetime: LifetimeMetrics = { ...state.lifetime };
@@ -193,18 +194,20 @@ export function pendingRewards(state: Pick<GoalState, 'today' | 'weekStart' | 'd
 		const before = xp.length;
 		for (const quest of state.daily) {
 			const sourceKey = questSourceKey('daily', state.today, quest.key);
-			if (claimed.has(sourceKey) || !questProgress(quest, day).done) continue;
-			const isGoal = quest.key === 'daily_goal';
-			pay({ sourceKey, kind: isGoal ? 'goal' : 'quest', xp: quest.xp });
+			// A quest with nothing to do is done but pays nothing.
+			if (quest.target <= 0 || quest.xp <= 0 || claimed.has(sourceKey) || !questProgress(quest, day).done) continue;
+			pay({ sourceKey, kind: 'quest', xp: quest.xp });
 			quests.push({ title: QUEST_META[quest.key].title(quest.target), xp: quest.xp });
-			if (isGoal) {
-				week.goalDays += 1;
-				lifetime.goalDays += 1;
-			}
+		}
+		const goalKey = goalSourceKey(state.today);
+		if (!claimed.has(goalKey) && day.xp >= state.dailyGoalXp) {
+			pay({ sourceKey: goalKey, kind: 'goal', xp: XP.dailyGoal });
+			quests.push({ title: `Đạt mục tiêu ngày ${state.dailyGoalXp} XP`, xp: XP.dailyGoal });
+			lifetime.goalDays += 1;
 		}
 		for (const quest of state.weekly) {
 			const sourceKey = questSourceKey('weekly', state.weekStart, quest.key);
-			if (claimed.has(sourceKey) || !questProgress(quest, week).done) continue;
+			if (quest.target <= 0 || claimed.has(sourceKey) || !questProgress(quest, week).done) continue;
 			pay({ sourceKey, kind: 'quest', xp: quest.xp });
 			quests.push({ title: QUEST_META[quest.key].title(quest.target), xp: quest.xp });
 		}
@@ -256,7 +259,6 @@ function questView(quest: Quest, metrics: QuestMetrics): GoalQuest {
 function boardView(state: GoalState): GoalBoard {
 	const unlocked = new Set(state.achievements.map((row) => row.key));
 	const statuses = achievementStatus(state.lifetime, unlocked);
-	const goal = state.daily.find((quest) => quest.key === 'daily_goal')?.target ?? state.dailyGoalXp;
 	const goalDays = new Set(state.xpRows.filter((row) => row.kind === 'goal').map((row) => row.day));
 	const studiedDays = new Set(state.overview.week.filter((entry) => entry.studied).map((entry) => entry.day));
 	return {
@@ -269,7 +271,7 @@ function boardView(state: GoalState): GoalBoard {
 		today: {
 			day: state.today,
 			xp: state.dayMetrics.xp,
-			goal,
+			goal: state.dailyGoalXp,
 			quests: state.daily.map((quest) => questView(quest, state.dayMetrics)),
 			resetsAt: vnDayStart(shiftVnDay(state.today, 1)).toISOString(),
 		},

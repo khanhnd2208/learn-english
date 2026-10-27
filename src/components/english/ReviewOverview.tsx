@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import DueForecast from '@/components/english/DueForecast';
+import SrsTodayCard from '@/components/english/SrsTodayCard';
 import GuidedReviewSession, { type GuidedSession } from '@/components/english/GuidedReviewSession';
 import { englishPost } from '@/components/english/englishApi';
 import type { TodayOverview } from '@/services/english/enDailyService';
@@ -83,7 +84,9 @@ export default function ReviewOverview({ overview, guided: initial }: { overview
 	}
 
 	return <div className="mx-auto max-w-5xl space-y-6 px-4 py-6 sm:px-6 sm:py-10">
-		<header><h1 className="text-4xl sm:text-5xl">Ôn tập</h1><p className="mt-2 text-muted">Mỗi chặng: xem kỹ tối đa 5 từ, rồi luyện một câu cho từng từ. Kết quả ở đây không thay đổi lịch nhớ lâu.</p></header>
+		<header><h1 className="text-4xl sm:text-5xl">Ôn tập</h1><p className="mt-2 text-muted">Mỗi chặng: xem kỹ tối đa 5 từ, rồi luyện một câu cho từng từ. Mỗi câu đúng +10 XP, tối đa 300 XP mỗi ngày. Kết quả ở đây không thay đổi lịch nhớ lâu.</p></header>
+
+		<SrsTodayCard overview={overview} />
 
 		<section className="mode-card border-2 border-accent sm:p-7">
 			<dl className="grid grid-cols-3 gap-3 text-center">

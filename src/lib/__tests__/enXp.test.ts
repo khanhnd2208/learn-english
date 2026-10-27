@@ -1,56 +1,87 @@
 import { describe, expect, it } from 'vitest';
-import { goalTierIndex, levelFromXp, quizXpEvent, reviewXpEvents, xpForLevel, XP } from '@/lib/english/xp';
+import { DAILY_GOAL_DEFAULT, goalTierIndex, levelFromXp, pacedCorrectCount, pacedEnough, quizXpEvent, reviewXpEvents, xpForLevel, XP } from '@/lib/english/xp';
 import { currentStreak, streakStats } from '@/lib/english/streak';
 
 const review = { id: 'r1', senseId: 's1', correct: true, scheduled: true, boxBefore: 2, boxAfter: 3 };
 
-describe('review XP', () => {
-	it('pays 2 for a right answer and still 1 for an honest miss', () => {
-		expect(reviewXpEvents(review, 0)).toEqual([{ sourceKey: 'review:r1', kind: 'review', xp: 2 }]);
-		expect(reviewXpEvents({ ...review, correct: false, boxAfter: 1 }, 0)).toEqual([{ sourceKey: 'review:r1', kind: 'review', xp: 1 }]);
+describe('SRS XP', () => {
+	it('pays 20 for a right answer on schedule and nothing for a miss', () => {
+		expect(reviewXpEvents(review, 0, true)).toEqual([{ sourceKey: 'review:r1', kind: 'review', xp: 20 }]);
+		expect(reviewXpEvents({ ...review, correct: false, boxAfter: 1 }, 0, true)).toEqual([]);
 	});
 
-	it('adds a once-per-word bonus for a new word and for reaching long-term', () => {
-		expect(reviewXpEvents({ ...review, boxBefore: 0, boxAfter: 1 }, 0).map((event) => event.sourceKey)).toEqual(['review:r1', 'new:s1']);
-		expect(reviewXpEvents({ ...review, boxBefore: 3, boxAfter: 4 }, 0)).toContainEqual({ sourceKey: 'longterm:s1', kind: 'longterm', xp: XP.longTerm });
-		expect(reviewXpEvents({ ...review, boxBefore: 4, boxAfter: 5 }, 0).some((event) => event.kind === 'longterm')).toBe(false);
+	it('pays no separate bonus for a new word but 100 for reaching long-term', () => {
+		expect(reviewXpEvents({ ...review, boxBefore: 0, boxAfter: 1 }, 0, true).map((event) => event.sourceKey)).toEqual(['review:r1']);
+		expect(reviewXpEvents({ ...review, boxBefore: 3, boxAfter: 4 }, 0, true)).toContainEqual({ sourceKey: 'longterm:s1', kind: 'longterm', xp: 100 });
+		expect(reviewXpEvents({ ...review, boxBefore: 4, boxAfter: 5 }, 0, true).some((event) => event.kind === 'longterm')).toBe(false);
 	});
 
-	it('pays unscheduled answers 1 XP when right, up to the daily cap', () => {
+	it('pays nothing when the answer came too fast', () => {
+		expect(reviewXpEvents({ ...review, boxBefore: 3, boxAfter: 4 }, 0, false)).toEqual([]);
+		expect(reviewXpEvents({ ...review, scheduled: false }, 0, false)).toEqual([]);
+	});
+
+	it('pays unscheduled answers 10 XP when right, up to the shared 300 XP cap', () => {
 		const extra = { ...review, scheduled: false };
-		expect(reviewXpEvents(extra, 0)).toEqual([{ sourceKey: 'extra:r1', kind: 'extra', xp: 1 }]);
-		expect(reviewXpEvents(extra, XP.extraDailyCap)).toEqual([]);
-		expect(reviewXpEvents({ ...extra, correct: false }, 0)).toEqual([]);
+		expect(reviewXpEvents(extra, 0, true)).toEqual([{ sourceKey: 'extra:r1', kind: 'extra', xp: 10 }]);
+		expect(reviewXpEvents(extra, XP.reviewDailyCap - 10, true)).toHaveLength(1);
+		expect(reviewXpEvents(extra, XP.reviewDailyCap, true)).toEqual([]);
+		expect(reviewXpEvents({ ...extra, correct: false }, 0, true)).toEqual([]);
+	});
+});
+
+describe('pacing', () => {
+	const at = (seconds: number) => new Date(2026, 9, 26, 8, 0, seconds);
+
+	it('needs at least 3 seconds between answers', () => {
+		expect(pacedEnough(at(0), at(2))).toBe(false);
+		expect(pacedEnough(at(0), at(3))).toBe(true);
+	});
+
+	it('counts only paced correct answers, measuring the first from the start', () => {
+		const answers = [
+			{ at: at(2), correct: true },
+			{ at: at(6), correct: true },
+			{ at: at(7), correct: true },
+			{ at: at(11), correct: false },
+			{ at: at(15), correct: true },
+			{ at: null, correct: true },
+		];
+		// 2s after start is too fast, 6 ok, 7 too fast, 11 wrong, 15 ok.
+		expect(pacedCorrectCount(answers, at(0))).toBe(2);
+		expect(pacedCorrectCount([...answers].reverse(), at(0))).toBe(2);
 	});
 });
 
 describe('quiz XP', () => {
-	it('pays per passed item plus a bonus at 80%, keyed by kind and day', () => {
-		expect(quizXpEvent('mcq', '2026-10-26', 16, 20)).toEqual({ sourceKey: 'quiz:mcq:2026-10-26', kind: 'quiz', xp: 21 });
-		expect(quizXpEvent('fill', '2026-10-26', 10, 20)?.xp).toBe(10);
+	it('pays 10 per paced correct item plus 50 at 80%, keyed by kind and day', () => {
+		expect(quizXpEvent('mcq', '2026-10-26', 16, 20)).toEqual({ sourceKey: 'quiz:mcq:2026-10-26', kind: 'quiz', xp: 210 });
+		expect(quizXpEvent('fill', '2026-10-26', 10, 20)?.xp).toBe(100);
 		expect(quizXpEvent('fill', '2026-10-26', 0, 20)).toBeNull();
 	});
 });
 
 describe('levels', () => {
-	it('needs 100, 150, 200 … XP per level', () => {
-		expect(xpForLevel(1)).toBe(100);
-		expect(xpForLevel(3)).toBe(200);
-		expect(levelFromXp(0)).toMatchObject({ level: 1, intoLevel: 0, toNext: 100, title: 'Tân binh' });
-		expect(levelFromXp(249)).toMatchObject({ level: 2, intoLevel: 149, toNext: 1 });
-		expect(levelFromXp(250)).toMatchObject({ level: 3, intoLevel: 0 });
+	it('needs 800, 1400, 2000 … XP per level', () => {
+		expect(xpForLevel(1)).toBe(800);
+		expect(xpForLevel(3)).toBe(2000);
+		expect(levelFromXp(0)).toMatchObject({ level: 1, intoLevel: 0, toNext: 800, title: 'Tân binh' });
+		expect(levelFromXp(2199)).toMatchObject({ level: 2, intoLevel: 1399, toNext: 1 });
+		expect(levelFromXp(2200)).toMatchObject({ level: 3, intoLevel: 0 });
 	});
 
 	it('changes title every five levels', () => {
 		let total = 0;
 		for (let level = 1; level < 6; level += 1) total += xpForLevel(level);
+		expect(total).toBe(10000);
 		expect(levelFromXp(total)).toMatchObject({ level: 6, title: 'Lữ khách' });
 	});
 
 	it('maps a stored goal to the nearest tier', () => {
-		expect(goalTierIndex(20)).toBe(0);
-		expect(goalTierIndex(40)).toBe(1);
-		expect(goalTierIndex(100)).toBe(3);
+		expect(goalTierIndex(200)).toBe(0);
+		expect(goalTierIndex(400)).toBe(1);
+		expect(goalTierIndex(1000)).toBe(3);
+		expect(goalTierIndex(DAILY_GOAL_DEFAULT)).toBe(1);
 	});
 });
 
