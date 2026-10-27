@@ -5,7 +5,9 @@ import {
 	EN_GRAMMAR_TAGS,
 	EN_HINTS_REQUIRED,
 	EN_INFLECTION_TAGS,
+	EN_MAX_CHUNKS,
 	EN_MAX_COLLOCATIONS,
+	EN_MAX_COMMON_ERRORS,
 	EN_MAX_EXAMPLES_PER_WORD,
 	EN_MAX_WORDS_PER_PACK,
 	EN_TOPICS,
@@ -130,8 +132,8 @@ const wordSchema = z.object({
 	grammarNoteVi: z.string().default(''),
 	ipaOverride: z.string().default(''),
 	collocations: z.array(z.string()).max(EN_MAX_COLLOCATIONS).default([]),
-	chunks: z.array(chunkSchema).max(EN_MAX_COLLOCATIONS).default([]),
-	commonErrors: z.array(commonErrorSchema).max(5).default([]),
+	chunks: z.array(chunkSchema).max(EN_MAX_CHUNKS).default([]),
+	commonErrors: z.array(commonErrorSchema).max(EN_MAX_COMMON_ERRORS).default([]),
 	pitfallVi: z.string().default(''),
 	audioFile: z.string().default(''),
 	imageFile: z.string().default(''),
@@ -470,7 +472,7 @@ function assessWord(word: PackWord, index: number, pack: EnglishPack, newPack: b
 	}
 	assessHints(word, path, familyLemmas, newPack, issues);
 	if (word.chunks.map((chunk) => chunk.text.trim()).filter(Boolean).length < 1) {
-		issues.push(issue(path, 'collocation', 'Cần 1–6 cách nói.', true));
+		issues.push(issue(path, 'collocation', 'Cần ít nhất 1 cách nói.', true));
 	}
 	const forbiddenDistractors = new Set([
 		...familyLemmas.map((lemma) => lemmaKeyOf(lemma)),

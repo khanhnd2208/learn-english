@@ -1,3 +1,4 @@
+import { readFileSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
 import { assessEnglishPack, type EnglishPack } from '@/lib/english/contentValidation';
 import { sampleEnglishPack } from '@/lib/english/samplePack';
@@ -209,5 +210,30 @@ describe('english pack vocabulary rules', () => {
 		const source = pack();
 		source.words[0]!.collocations = ['a', 'b', 'c', 'd', 'e', 'f', 'g'];
 		expect(assessEnglishPack(source).schemaError).toBeTruthy();
+	});
+
+	it('accepts long chunk and common error lists but still needs one chunk', () => {
+		const long = pack();
+		long.words[0]!.chunks = Array.from({ length: 12 }, (_, index) => ({ text: `borrow thing ${index}`, vi: 'mượn đồ' }));
+		long.words[0]!.commonErrors = Array.from({ length: 8 }, (_, index) => ({ wrong: `I borrow you ${index}.`, right: `I lend you ${index}.`, whyVi: 'lend là cho mượn.' }));
+		const result = assessEnglishPack(long);
+		expect(result.schemaError).toBeNull();
+		expect(codes(result).word?.publishable).toBe(true);
+
+		const empty = pack();
+		empty.words[0]!.chunks = [];
+		empty.words[0]!.collocations = [];
+		expect(codes(assessEnglishPack(empty)).issue('collocation')?.message).toBe('Cần ít nhất 1 cách nói.');
+	});
+});
+
+describe('AI pack prompt example', () => {
+	it('stays publishable with two graded examples', () => {
+		const doc = readFileSync('docs/content/ai-pack-prompt.md', 'utf8');
+		const json = doc.match(/```json\n([\s\S]*?)\n```/)?.[1];
+		const result = assessEnglishPack(JSON.parse(json ?? ''));
+		expect(result.schemaError).toBeNull();
+		expect(codes(result, 'belonging').word?.publishable).toBe(true);
+		expect(codes(result, 'belonging').word?.gradeExampleCount).toBeGreaterThanOrEqual(2);
 	});
 });

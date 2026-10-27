@@ -13,6 +13,9 @@ export const EN_MAX_JSON_BODY_BYTES = 4 * 1024 * 1024;
 export const EN_ALTERNATIVES_REQUIRED = 5;
 export const EN_MAX_WORDS_PER_PACK = 500;
 export const EN_MAX_COLLOCATIONS = 6;
+/** Safety caps only: the authoring prompt asks for every common chunk and learner mistake. */
+export const EN_MAX_CHUNKS = 40;
+export const EN_MAX_COMMON_ERRORS = 20;
 export const EN_MAX_EXAMPLES_PER_WORD = 8;
 export const EN_HINTS_REQUIRED = 3;
 export const EN_TX_TIMEOUT_MS = 30_000;

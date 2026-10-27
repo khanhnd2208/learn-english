@@ -40,7 +40,12 @@ export default function EnglishWordCard({ bundle }: { bundle: SenseBundle }) {
 							{chunk.vi && <p className="text-muted">{chunk.vi}</p>}
 						</li>
 					))}
-					{bundle.sense.chunks.length === 0 && bundle.sense.pitfallVi && <li className="text-muted">{bundle.sense.pitfallVi}</li>}
+					{bundle.sense.grammarNoteVi && <li className="text-foreground-secondary">{bundle.sense.grammarNoteVi}</li>}
+					{bundle.sense.chunks.length === 0 && !bundle.sense.grammarNoteVi && <li className="text-muted">Chưa có cách nói.</li>}
+				</ul>
+			)}
+			{tab === 'Phân biệt' && (
+				<ul className="space-y-3 text-sm">
 					{bundle.sense.commonErrors.map((error) => (
 						<li key={error.wrong} className="rounded-control bg-surface-container p-3">
 							<p className="text-error">{error.wrong}</p>
@@ -48,13 +53,7 @@ export default function EnglishWordCard({ bundle }: { bundle: SenseBundle }) {
 							<p className="text-muted">{error.whyVi}</p>
 						</li>
 					))}
-					{bundle.sense.chunks.length === 0 && bundle.sense.commonErrors.length === 0 && bundle.sense.pitfallVi === '' && (
-						<p className="text-sm text-muted">Chưa có cách nói.</p>
-					)}
-				</ul>
-			)}
-			{tab === 'Phân biệt' && (
-				<ul className="space-y-3 text-sm">
+					{bundle.sense.pitfallVi && <li className="text-foreground-secondary">{bundle.sense.pitfallVi}</li>}
 					{contrasts.map((relation) => (
 						<li key={relation.id} className="space-y-1">
 							<p className="font-bold">{relation.lemma}</p>
@@ -65,7 +64,9 @@ export default function EnglishWordCard({ bundle }: { bundle: SenseBundle }) {
 							{relation.mistake && <p className="text-foreground-secondary">{relation.mistake.wrong} → {relation.mistake.right}</p>}
 						</li>
 					))}
-					{contrasts.length === 0 && <li className="text-muted">Không có cặp dễ nhầm.</li>}
+					{bundle.sense.commonErrors.length === 0 && !bundle.sense.pitfallVi && contrasts.length === 0 && (
+						<li className="text-muted">Chưa có lỗi hay gặp.</li>
+					)}
 				</ul>
 			)}
 			{tab === 'Ví dụ' && (
