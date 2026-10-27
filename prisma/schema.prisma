@@ -303,6 +303,59 @@ model EnEnrollment {
   @@index([userId])
 }
 
+model EnReviewPreference {
+  userId         String   @id
+  selectedSetIds String[] @default([])
+  initializedAt  DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+}
+
+model EnGuidedReviewSession {
+  id                    String                   @id @default(cuid())
+  userId                String
+  activeKey             String?                  @unique
+  selectedSetIds        String[]                 @default([])
+  poolSenseIds          String[]                 @default([])
+  remainingSenseIds     String[]                 @default([])
+  currentChunkSenseIds  String[]                 @default([])
+  chunkNumber           Int                      @default(1)
+  phase                 String                   @default("study")
+  studyPosition         Int                      @default(0)
+  questionPosition      Int                      @default(0)
+  startedAt             DateTime                 @default(now())
+  updatedAt             DateTime                 @updatedAt
+  endedAt               DateTime?
+  activeSeconds         Int                      @default(0)
+  questions             EnGuidedReviewQuestion[]
+
+  @@index([userId, startedAt])
+}
+
+model EnGuidedReviewQuestion {
+  id          String                @id @default(cuid())
+  sessionId   String
+  chunkNumber Int
+  kind        String                @default("main")
+  position    Int
+  senseId     String
+  role        String
+  activityKey String
+  prompt      Json
+  answerKey   String
+  accepted    String[]              @default([])
+  layout      Json?
+  answer      String?
+  correct     Boolean?
+  responseMs  Int?
+  answeredAt  DateTime?
+  session     EnGuidedReviewSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+
+  @@unique([sessionId, chunkNumber, kind, position])
+  @@unique([sessionId, chunkNumber, kind, senseId])
+  @@index([sessionId, chunkNumber, kind])
+  @@index([sessionId, senseId])
+}
+
 model EnWordState {
   id             String    @id @default(cuid())
   userId         String

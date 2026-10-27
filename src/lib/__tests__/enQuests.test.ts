@@ -3,7 +3,7 @@ import { dailyCandidates, emptyMetrics, parseQuests, pickDailyQuests, questProgr
 import { bestCombo, periodMetrics } from '@/lib/english/goalMetrics';
 import { achievementStatus, newlyEarned, nearestAchievements, type LifetimeMetrics } from '@/lib/english/achievements';
 
-const ctx: QuestContext = { tier: 1, dailyGoalXp: 40, weeklyDaysGoal: 4, learnedCount: 30, newAvailable: 10, dueTotal: 20, lapsedDue: 4, enrolledSets: 2, rememberingCount: 6 };
+const ctx: QuestContext = { tier: 1, dailyGoalXp: 40, weeklyDaysGoal: 4, learnedCount: 30, newAvailable: 10, dueTotal: 20, lapsedDue: 4, enrolledSets: 2, rememberingCount: 6, practiceAvailable: 20 };
 
 describe('daily quests', () => {
 	it('always starts with the daily goal and picks the same quests for the same seed', () => {
@@ -22,10 +22,10 @@ describe('daily quests', () => {
 	});
 
 	it('only offers quests that can be finished today', () => {
-		const keys = dailyCandidates({ ...ctx, newAvailable: 0, dueTotal: 0, lapsedDue: 0, enrolledSets: 0 }).map((quest) => quest.key);
+		const keys = dailyCandidates({ ...ctx, practiceAvailable: 0, newAvailable: 0, dueTotal: 0, lapsedDue: 0, enrolledSets: 0 }).map((quest) => quest.key);
 		expect(keys).toEqual([]);
-		expect(pickDailyQuests('seed', { ...ctx, newAvailable: 0, dueTotal: 0, lapsedDue: 0, enrolledSets: 0 })).toHaveLength(1);
-		const capped = dailyCandidates({ ...ctx, newAvailable: 2 }).find((quest) => quest.key === 'new_words');
+		expect(pickDailyQuests('seed', { ...ctx, practiceAvailable: 0, newAvailable: 0, dueTotal: 0, lapsedDue: 0, enrolledSets: 0 })).toHaveLength(1);
+		const capped = dailyCandidates({ ...ctx, practiceAvailable: 2 }).find((quest) => quest.key === 'correct_reviews');
 		expect(capped?.target).toBe(2);
 	});
 
@@ -39,7 +39,7 @@ describe('daily quests', () => {
 
 describe('weekly quests', () => {
 	it('uses the weekly days goal and falls back when nothing can reach long-term', () => {
-		expect(weeklyQuests(ctx).map((quest) => [quest.key, quest.target])).toEqual([['week_days', 4], ['week_xp', 160], ['week_longterm', 5]]);
+		expect(weeklyQuests(ctx).map((quest) => [quest.key, quest.target])).toEqual([['week_days', 4], ['week_xp', 160], ['week_goal_days', 3]]);
 		expect(weeklyQuests({ ...ctx, rememberingCount: 0 })[2]).toMatchObject({ key: 'week_goal_days', target: 3 });
 	});
 });

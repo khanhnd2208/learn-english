@@ -13,11 +13,11 @@ export type QuestIcon = 'target' | 'star' | 'sprout' | 'flag' | 'shield' | 'spar
 
 export const QUEST_META: Record<QuestKey, { title: (target: number) => string; hint: string; icon: QuestIcon; action: QuestAction }> = {
 	daily_goal: { title: (n) => `Đạt mục tiêu ngày ${n} XP`, hint: 'Mỗi câu ôn đúng +2 XP, từ mới +2 XP.', icon: 'target', action: 'review' },
-	correct_reviews: { title: (n) => `Trả lời đúng ${n} từ ôn`, hint: 'Tính các câu ôn đúng lịch trong Ôn tập.', icon: 'star', action: 'review' },
+	correct_reviews: { title: (n) => `Trả lời đúng ${n} câu luyện`, hint: 'Tính câu chính trả lời đúng trong Ôn tập.', icon: 'star', action: 'review' },
 	new_words: { title: (n) => `Học ${n} từ mới`, hint: 'Từ mới xuất hiện trong lượt Ôn hôm nay.', icon: 'sprout', action: 'review' },
 	clear_due: { title: (n) => `Ôn hết ${n} từ đến hạn`, hint: 'Giữ đúng lịch ôn giúp nhớ lâu hơn.', icon: 'flag', action: 'review' },
 	rescue: { title: (n) => `Nhớ lại ${n} từ từng quên`, hint: 'Từ bạn từng trả lời sai, nay nhớ lại được.', icon: 'shield', action: 'review' },
-	combo: { title: (n) => `Đúng ${n} câu liên tiếp`, hint: 'Trong cùng một phiên Ôn tập.', icon: 'spark', action: 'review' },
+	combo: { title: (n) => `Đúng ${n} câu liên tiếp`, hint: 'Tính các câu chính trong cùng một phiên Ôn tập.', icon: 'spark', action: 'review' },
 	quiz_any: { title: () => 'Đạt ≥ 70% một bài kiểm tra', hint: 'Bất kỳ dạng kiểm tra, bộ từ nào.', icon: 'sword', action: 'quiz' },
 	quiz_kinds: { title: (n) => n > 1 ? `Làm ${n} dạng kiểm tra khác nhau` : 'Làm 1 bài kiểm tra', hint: 'Trắc nghiệm, điền từ, nghe.', icon: 'trophy', action: 'quiz' },
 	week_days: { title: (n) => `Học đủ ${n} ngày trong tuần`, hint: 'Không cần ngày nào cũng học: nghỉ có kế hoạch vẫn ổn.', icon: 'mountain', action: 'review' },
@@ -50,6 +50,7 @@ export type QuestContext = {
 	enrolledSets: number;
 	/** Words in box 2 or higher, which can reach long-term within a week. */
 	rememberingCount: number;
+	practiceAvailable?: number;
 };
 
 function tierTarget(key: keyof typeof TIER_TARGETS, tier: number): number {
@@ -83,13 +84,10 @@ function seededOrder<T>(values: T[], seed: number): T[] {
 
 /** Quests the learner can actually finish today, with targets scaled to their tier. */
 export function dailyCandidates(ctx: QuestContext): Quest[] {
-	const reviewable = ctx.dueTotal + ctx.newAvailable;
+	const reviewable = ctx.practiceAvailable ?? (ctx.dueTotal + ctx.newAvailable);
 	const quests: Quest[] = [];
 	const add = (key: DailyQuestKey, target: number) => { if (target > 0) quests.push({ key, target, xp: XP.dailyQuest }); };
-	if (ctx.learnedCount > 0 && ctx.dueTotal > 0) add('correct_reviews', Math.min(tierTarget('correct_reviews', ctx.tier), ctx.dueTotal));
-	if (ctx.newAvailable > 0) add('new_words', Math.min(tierTarget('new_words', ctx.tier), ctx.newAvailable));
-	if (ctx.dueTotal > 0) add('clear_due', ctx.dueTotal);
-	if (ctx.lapsedDue > 0) add('rescue', Math.min(tierTarget('rescue', ctx.tier), ctx.lapsedDue));
+	if (reviewable > 0) add('correct_reviews', Math.min(tierTarget('correct_reviews', ctx.tier), reviewable));
 	if (reviewable >= 5) add('combo', Math.min(tierTarget('combo', ctx.tier), reviewable));
 	if (ctx.enrolledSets > 0) {
 		add('quiz_any', 1);
@@ -114,9 +112,7 @@ export function weeklyQuests(ctx: QuestContext): Quest[] {
 	return [
 		{ key: 'week_days', target: Math.max(1, Math.min(7, ctx.weeklyDaysGoal)), xp: XP.weeklyQuest },
 		{ key: 'week_xp', target: ctx.dailyGoalXp * 4, xp: XP.weeklyQuest },
-		ctx.rememberingCount > 0
-			? { key: 'week_longterm', target: Math.min(tierTarget('week_longterm', ctx.tier), ctx.rememberingCount), xp: XP.weeklyQuest }
-			: { key: 'week_goal_days', target: 3, xp: XP.weeklyQuest },
+		{ key: 'week_goal_days', target: 3, xp: XP.weeklyQuest },
 	];
 }
 

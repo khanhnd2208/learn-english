@@ -49,6 +49,8 @@ export type TodayOverview = {
 	weeklyGoal: number;
 	recentLapses: Array<{ senseId: string; lemma: string; meaningVi: string }>;
 	reviewedToday: number;
+	practicedToday: number;
+	practiceAvailable: number;
 	streakDays: number;
 	longestStreak: number;
 	/** Due words the learner has forgotten before. */
@@ -156,8 +158,11 @@ export async function startToday(userId: string, options: { extra?: boolean } = 
 }
 
 async function studiedDays(userId: string, from: Date): Promise<Set<string>> {
-	const rows = await prisma.enReview.findMany({ where: { userId, at: { gte: from } }, select: { at: true } });
-	return new Set(rows.map((row) => vnDayKey(row.at)));
+	const [rows, guided] = await Promise.all([
+		prisma.enReview.findMany({ where: { userId, at: { gte: from } }, select: { at: true } }),
+		prisma.enGuidedReviewQuestion.findMany({ where: { kind: 'main', answeredAt: { gte: from }, session: { userId } }, select: { answeredAt: true } }),
+	]);
+	return new Set([...rows.map((row) => vnDayKey(row.at)), ...guided.flatMap((row) => row.answeredAt ? [vnDayKey(row.answeredAt)] : [])]);
 }
 
 /** Cached per request: the app layout and the page both read it. */
@@ -166,10 +171,12 @@ export const getTodayOverview = cache(async (userId: string, now = new Date()): 
 	const today = vnDayKey(now);
 	const tomorrowEnd = vnDayStart(shiftVnDay(today, 2));
 	const days = vnWeekDays(today);
-	const [studied, profile, recentReviews] = await Promise.all([
+	const [studied, profile, recentReviews, guidedToday, practiceItems] = await Promise.all([
 		studiedDays(userId, vnDayStart(shiftVnDay(today, -365))),
 		prisma.enLearnerProfile.findUnique({ where: { userId }, select: { weeklyDaysGoal: true } }),
 		prisma.enReview.findMany({ where: { userId, at: { gte: vnDayStart(shiftVnDay(today, -29)) } }, select: { at: true, correct: true, scheduled: true, boxBefore: true } }),
+		prisma.enGuidedReviewQuestion.count({ where: { kind: 'main', answeredAt: { gte: vnDayStart(today) }, session: { userId } } }),
+		prisma.enSetItem.findMany({ where: { set: { status: 'published', enrollments: { some: { userId } } }, sense: { status: 'published' } }, select: { senseId: true } }),
 	]);
 	const lapsed = states
 		.filter((state) => state.lapses > 0 && state.box <= 2)
@@ -180,6 +187,8 @@ export const getTodayOverview = cache(async (userId: string, now = new Date()): 
 	const scheduled = recentReviews.filter((row) => row.scheduled && row.boxBefore > 0);
 	return {
 		reviewedToday: recentReviews.filter((row) => vnDayKey(row.at) === today).length,
+		practicedToday: guidedToday,
+		practiceAvailable: new Set(practiceItems.flatMap((item) => item.senseId ? [item.senseId] : [])).size,
 		streakDays: streak.current,
 		longestStreak: streak.longest,
 		lapsedDue: states.filter((state) => state.lapses > 0 && state.dueAt <= now).length,

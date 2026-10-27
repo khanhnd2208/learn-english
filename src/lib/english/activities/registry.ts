@@ -83,6 +83,7 @@ function listenChoice(sense: SenseBundle, ctx: ActivityContext): ActivityItem | 
 	return base(sense, 'listen_choice', 'recognize', {
 		kind: 'listen_choice',
 		senseId: sense.sense.id,
+		lemma: sense.word.lemma,
 		choices,
 	}, sense.sense.meaningVi);
 }

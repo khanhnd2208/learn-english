@@ -8,6 +8,7 @@ export const EN_USAGE_MIN_GRADE_EXAMPLES = 2;
 export const EN_QUIZ_MAX_ITEMS = 20;
 /** Words in a Review "extra" round, picked from words that are not due yet. */
 export const EN_EXTRA_ROUND_SIZE = 20;
+export const EN_GUIDED_CHUNK_SIZE = 5;
 export const EN_MAX_JSON_BODY_BYTES = 4 * 1024 * 1024;
 export const EN_ALTERNATIVES_REQUIRED = 5;
 export const EN_MAX_WORDS_PER_PACK = 500;
