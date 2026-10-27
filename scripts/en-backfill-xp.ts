@@ -31,7 +31,7 @@ async function main() {
 	for (const review of reviews) {
 		const day = vnDayKey(review.at);
 		const capKey = `${review.userId}:${day}`;
-		for (const event of reviewXpEvents(review, extraByUserDay.get(capKey) ?? 0)) {
+		for (const event of reviewXpEvents(review, extraByUserDay.get(capKey) ?? 0, true)) {
 			if (event.kind === 'extra') extraByUserDay.set(capKey, (extraByUserDay.get(capKey) ?? 0) + event.xp);
 			rows.push({ ...event, userId: review.userId, day, at: review.at });
 		}

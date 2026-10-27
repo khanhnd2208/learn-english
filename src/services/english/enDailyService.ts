@@ -6,7 +6,7 @@ import { buildDailyQueue, isLongTerm, isNearMiss, scheduleMove, vnDayStart, type
 import { gradeEnglishAnswer } from '@/lib/english/grade';
 import { shiftVnDay, vnDayKey, vnWeekDays } from '@/lib/english/gapRule';
 import { streakStats } from '@/lib/english/streak';
-import { reviewXpEvents } from '@/lib/english/xp';
+import { pacedEnough, reviewXpEvents } from '@/lib/english/xp';
 import { exampleParts, type SenseBundle } from '@/lib/english/senseBundle';
 import { getSenseBundles } from '@/services/english/enContentService';
 import { answerLayout, type AnswerLayout } from '@/lib/english/answerLayout';
@@ -252,12 +252,14 @@ export async function answerToday(
 				update: { ...schedule, ...(before === 0 ? { introducedAt: now } : {}) },
 			});
 		}
-		const review = await tx.enReview.create({ data: { sessionId: session.id, userId, senseId: input.senseId, at: now, prompt: input.prompt ?? 'meaning', correct, responseMs, boxBefore: before, boxAfter: next.box, scheduled: changed } });
+		const last = await tx.enReview.findFirst({ where: { sessionId: session.id }, orderBy: { at: 'desc' }, select: { at: true } });
+			const paced = pacedEnough(last?.at ?? session.startedAt, now);
+			const review = await tx.enReview.create({ data: { sessionId: session.id, userId, senseId: input.senseId, at: now, prompt: input.prompt ?? 'meaning', correct, responseMs, boxBefore: before, boxAfter: next.box, scheduled: changed } });
 		const day = vnDayKey(now);
 		const extraToday = !changed && correct
 			? (await tx.enXpEvent.aggregate({ where: { userId, day, kind: 'extra' }, _sum: { xp: true } }))._sum.xp ?? 0
 			: 0;
-		const events = reviewXpEvents(review, extraToday);
+		const events = reviewXpEvents(review, extraToday, paced);
 		if (events.length) {
 			const created = await tx.enXpEvent.createManyAndReturn({ data: events.map((event) => ({ ...event, userId, day, at: now })), skipDuplicates: true, select: { xp: true } });
 			xp = created.reduce((sum, row) => sum + row.xp, 0);

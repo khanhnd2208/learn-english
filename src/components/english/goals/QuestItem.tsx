@@ -3,7 +3,7 @@ import { AdventureIcon } from '@/components/english/AdventureIcon';
 import type { GoalQuest } from '@/services/english/enGoalService';
 
 export function questHref(quest: Pick<GoalQuest, 'action'>, quizHref: string): string {
-	return quest.action === 'quiz' ? quizHref : '/review';
+	return quest.action === 'quiz' ? quizHref : quest.action === 'srs' ? '/#srs' : '/review';
 }
 
 /** One quest: icon, title, progress bar, reward and a link to where it gets done. */
@@ -17,7 +17,7 @@ export default function QuestItem({ quest, quizHref, compact = false }: { quest:
 		<div className="min-w-0 flex-1">
 			<div className="flex items-start justify-between gap-2">
 				<p className={`font-bold ${quest.done ? 'text-foreground-secondary' : ''}`}>{quest.title}</p>
-				<span className="xp-chip">{quest.done ? '✓ ' : '+'}{quest.xp} XP</span>
+				{quest.xp > 0 && <span className="xp-chip">{quest.done ? '✓ ' : '+'}{quest.xp} XP</span>}
 			</div>
 			{!compact && !quest.done && <p className="mt-0.5 text-xs text-muted">{quest.hint}</p>}
 			<div className="mt-2 flex items-center gap-2">

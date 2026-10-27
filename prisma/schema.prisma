@@ -425,7 +425,7 @@ model EnLearnerProfile {
   userId            String    @id
   weeklyDaysGoal    Int       @default(4)
   /// Daily XP target. A change shows up in the next daily quest board.
-  dailyXpGoal       Int       @default(40)
+  dailyXpGoal       Int       @default(400)
   /// Null until the learner picks a daily goal; drives the one-time goal picker.
   dailyGoalChosenAt DateTime?
   /// Highest level the learner has been congratulated for.
@@ -439,7 +439,7 @@ model EnXpEvent {
   id        String   @id @default(cuid())
   userId    String
   sourceKey String
-  /// review | new | longterm | extra | quiz | quest | goal | chest | achievement
+  /// review | new (legacy) | longterm | extra | quiz | quest | goal | chest | achievement
   kind      String
   xp        Int
   /// Vietnam calendar day, YYYY-MM-DD.

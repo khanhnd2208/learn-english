@@ -3,6 +3,32 @@
 > Kế hoạch để duyệt trước khi triển khai. Liên quan: `docs/plans/en-practice-test-plan.md`.
 > Bản này **thay quyết định D5** của spec cũ ("Không có XP, bảng xếp hạng, chuỗi ngày") bằng **D5'** ở mục 0.
 
+
+## Cập nhật 2026-10-27: XP ×10 và quest cố định
+
+Mục này **thay** các luật XP, level và quest ở bên dưới. Đang chạy trong `src/lib/english/xp.ts` và `quests.ts`.
+
+| Nguồn | XP |
+|---|---|
+| SRS, câu đúng đúng lịch | +20 |
+| Lên Nhớ lâu (hộp 4) | +100 |
+| SRS ngoài lịch (`extra`), câu đúng | +10 |
+| Ôn tập (guided, câu `main`), câu đúng | +10 |
+| Câu sai, "Không biết" | 0 |
+| Kiểm tra | +10 mỗi câu đúng, thêm +50 nếu ≥ 80% (lần nộp đầu mỗi dạng mỗi ngày) |
+| Quest ngày / quest tuần / rương tuần | +100 / +400 / +500 |
+| Đạt mục tiêu ngày | +100 |
+| Thành tựu | `TIER_XP` × 10 (200 / 500 / 1000 / 1000) |
+
+- **Trần**: Ôn tập và SRS `extra` chung 300 XP mỗi ngày (cùng `kind = 'extra'`).
+- **Chống spam**: một câu chỉ có XP khi cách câu trả lời trước trong cùng phiên ≥ 3 giây theo giờ server (`pacedEnough`); câu đầu tính từ lúc phiên bắt đầu. Không dùng `responseMs` của client. Với bài kiểm tra, chỉ câu đúng đủ nhịp độ được tính XP (`pacedCorrectCount`).
+- **Mục tiêu ngày**: 200 / 400 / 700 / 1000 XP, mặc định 400. Đổi có hiệu lực ngay cho thanh XP; số lượng quest hôm nay giữ nguyên đến ngày mai.
+- **Level**: `xpForLevel(n) = 800 + 600·(n−1)`; danh hiệu đổi mỗi 5 level.
+- **Quest ngày cố định**: `srs_words` (10 / 20 / 30 / 40 từ), `review_correct` (10 / 20 / 30 / 30 câu), `quiz_done` (1 bài). Đích SRS co theo số từ đến hạn + từ mới. Quest không có việc để làm có đích 0, tính là xong và không trả XP.
+- **Quest tuần**: `week_days` (ngày học), `week_srs` (5 × đích SRS ngày), `week_review` (5 × đích Ôn tập ngày). Xong cả ba thì mở rương.
+- **Di chuyển dữ liệu**: migration `20261027010000_xp_scale_x10` nhân 10 mọi `EnXpEvent.xp` và `dailyXpGoal` cũ, xoá `EnQuestBoard` để dựng lại theo luật mới.
+- SRS (`StudySession`, `/api/daily/*`) được gắn lại bằng thẻ "SRS hôm nay" ở Tổng quan và trang Ôn tập.
+
 ## 0. Mục tiêu và quyết định gốc
 
 Người học tự lái lộ trình. Hệ thống phản hồi theo kiểu trò chơi (nhân vật, chỉ số, cấp, quest, phần thưởng) để **củng cố hành vi học tốt**. Không có hành vi gian lận hay cày điểm nào được lợi hơn việc học thật.
