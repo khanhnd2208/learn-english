@@ -175,7 +175,7 @@ export async function saveGuidedReviewSelection(userId: string, setIds: string[]
 
 export async function startGuidedReview(userId: string, setIds: string[]) {
 	const active = await prisma.enGuidedReviewSession.findUnique({ where: { activeKey: userId } });
-	if (active) return serializeSession(userId, active.id);
+	if (active) await abandonGuidedReview(userId, active.id);
 	const { selected, senses } = await selectedSenseIds(userId, setIds);
 	const order = weightedOrder(senses, await histories(userId, senses), randomRng());
 	const chunk = order.slice(0, EN_GUIDED_CHUNK_SIZE);
@@ -315,4 +315,16 @@ export async function finishGuidedReview(userId: string, sessionId: string) {
 		await prisma.enGuidedReviewSession.update({ where: { id: session.id }, data: { activeKey: null, phase: 'finished', endedAt: new Date(), activeSeconds: Math.ceil((sums._sum.responseMs ?? 0) / 1000) } });
 	}
 	return { ok: true as const };
+}
+
+export async function abandonGuidedReview(userId: string, sessionId: string) {
+	const session = await prisma.enGuidedReviewSession.findFirst({ where: { id: sessionId, userId } });
+	if (!session) throw new AppError('Không tìm thấy phiên ôn tập', 404);
+	if (session.endedAt) return { ok: true as const };
+	const answered = await prisma.enGuidedReviewQuestion.count({ where: { sessionId: session.id, answer: { not: null } } });
+	if (answered === 0) {
+		await prisma.enGuidedReviewSession.delete({ where: { id: session.id } });
+		return { ok: true as const };
+	}
+	return finishGuidedReview(userId, sessionId);
 }

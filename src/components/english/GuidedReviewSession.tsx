@@ -125,6 +125,19 @@ export default function GuidedReviewSession({ initial, onClose }: { initial: Gui
 		}
 	}
 
+	async function abandon() {
+		if (busy) return;
+		setBusy(true);
+		setError('');
+		try {
+			await englishPost('/api/review', { action: 'abandon', sessionId: session.id });
+			onClose(false);
+		} catch (cause) {
+			setError(cause instanceof Error ? cause.message : 'Không thể thoát phiên.');
+			setBusy(false);
+		}
+	}
+
 	const word = session.words[viewedWord];
 	const questionWord = shownQuestion ? session.words.find((entry) => entry.sense.id === shownQuestion.senseId) : null;
 
@@ -132,7 +145,7 @@ export default function GuidedReviewSession({ initial, onClose }: { initial: Gui
 		<div className="mx-auto flex min-h-full max-w-3xl flex-col px-4 py-4 sm:px-6 sm:py-7">
 			<header className="flex items-center justify-between gap-3 border-b border-border pb-3">
 				<div><p className="text-xs font-bold uppercase tracking-wide text-accent">Chặng {session.chunkNumber}</p><p className="font-bold">{session.phase === 'study' ? `Học từ ${viewedWord + 1}/${session.words.length}` : session.phase === 'summary' ? 'Kết quả chặng' : `${session.phase === 'retry' ? 'Luyện lại' : 'Luyện tập'} · câu ${Math.min(session.questionPosition + 1, session.questions.length)}/${session.questions.length}`}</p></div>
-				<button type="button" onClick={() => onClose(false)} className="min-h-11 rounded-control border border-border px-4 font-bold">Đóng</button>
+				<button type="button" disabled={busy} onClick={() => void abandon()} className="min-h-11 rounded-control border border-border px-4 font-bold disabled:opacity-50">Thoát</button>
 			</header>
 
 			<main className="flex flex-1 flex-col justify-center py-5">

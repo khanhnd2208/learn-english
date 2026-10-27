@@ -14,8 +14,8 @@ const mocks = vi.hoisted(() => {
 			$transaction: vi.fn(async (run: (client: typeof tx) => Promise<unknown>) => run(tx)),
 			enPracticeSession: { findFirst: vi.fn() },
 			enWordState: { findUnique: vi.fn() },
-			enGuidedReviewSession: { findFirst: vi.fn(), findUnique: vi.fn() },
-			enGuidedReviewQuestion: { findFirst: vi.fn(), findMany: vi.fn(), findUnique: vi.fn() },
+			enGuidedReviewSession: { findFirst: vi.fn(), findUnique: vi.fn(), delete: vi.fn(), update: vi.fn() },
+			enGuidedReviewQuestion: { findFirst: vi.fn(), findMany: vi.fn(), findUnique: vi.fn(), count: vi.fn(), aggregate: vi.fn() },
 		},
 		bundles: vi.fn(),
 	};
@@ -29,7 +29,7 @@ vi.mock('@/lib/english/activities', async (importOriginal) => ({
 }));
 
 import { answerToday } from '@/services/english/enDailyService';
-import { answerGuidedReview } from '@/services/english/enGuidedReviewService';
+import { abandonGuidedReview, answerGuidedReview } from '@/services/english/enGuidedReviewService';
 
 const startedAt = new Date('2026-10-26T08:00:00+07:00');
 const after = (seconds: number) => new Date(startedAt.getTime() + seconds * 1000);
@@ -110,5 +110,31 @@ describe('Review pacing and cap', () => {
 		expect((await answerGuidedReview('u1', 'g1', 'q1', 'apple', 100)).xp).toBe(0);
 		mocks.tx.enXpEvent.aggregate.mockResolvedValue({ _sum: { xp: 290 } });
 		expect((await answerGuidedReview('u1', 'g1', 'q1', 'apple', 100)).xp).toBe(10);
+	});
+});
+
+describe('Guided review abandonment', () => {
+	const active = { id: 'g-abandon', userId: 'u1', endedAt: null };
+	beforeEach(() => vi.clearAllMocks());
+
+	it('deletes an untouched session', async () => {
+		mocks.prisma.enGuidedReviewSession.findFirst.mockResolvedValue(active);
+		mocks.prisma.enGuidedReviewQuestion.count.mockResolvedValue(0);
+
+		await abandonGuidedReview('u1', active.id);
+
+		expect(mocks.prisma.enGuidedReviewSession.delete).toHaveBeenCalledWith({ where: { id: active.id } });
+		expect(mocks.prisma.enGuidedReviewSession.update).not.toHaveBeenCalled();
+	});
+
+	it('finishes a session after at least one answer', async () => {
+		mocks.prisma.enGuidedReviewSession.findFirst.mockResolvedValue(active);
+		mocks.prisma.enGuidedReviewQuestion.count.mockResolvedValue(1);
+		mocks.prisma.enGuidedReviewQuestion.aggregate.mockResolvedValue({ _sum: { responseMs: 4_000 } });
+
+		await abandonGuidedReview('u1', active.id);
+
+		expect(mocks.prisma.enGuidedReviewSession.update).toHaveBeenCalledWith(expect.objectContaining({ where: { id: active.id }, data: expect.objectContaining({ phase: 'finished', activeKey: null }) }));
+		expect(mocks.prisma.enGuidedReviewSession.delete).not.toHaveBeenCalled();
 	});
 });

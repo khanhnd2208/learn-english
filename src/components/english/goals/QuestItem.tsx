@@ -7,8 +7,15 @@ export function questHref(quest: Pick<GoalQuest, 'action'>, quizHref: string): s
 }
 
 /** One quest: icon, title, progress bar, reward and a link to where it gets done. */
-export default function QuestItem({ quest, quizHref, compact = false }: { quest: GoalQuest; quizHref: string; compact?: boolean }) {
+export default function QuestItem({ quest, quizHref, compact = false, dense = false }: { quest: GoalQuest; quizHref: string; compact?: boolean; dense?: boolean }) {
 	const percent = quest.target > 0 ? Math.round((quest.current / quest.target) * 100) : 0;
+	if (dense) return <li className="flex min-w-0 items-center gap-2 border-b border-border py-2 last:border-b-0" data-done={quest.done}>
+		<span className="shrink-0"><AdventureIcon name={quest.icon} size={18} framed /></span>
+		<span className={`min-w-0 flex-1 truncate text-sm font-bold ${quest.done ? 'text-foreground-secondary' : ''}`}>{quest.title}</span>
+		<span className="shrink-0 text-xs font-bold tabular-nums text-muted">{quest.current}/{quest.target}</span>
+		{quest.xp > 0 && <span className="shrink-0 text-xs font-bold text-accent">+{quest.xp}</span>}
+		{!quest.done && <QuestLink quest={quest} quizHref={quizHref} />}
+	</li>;
 	return <li className={`quest-card flex items-center gap-3 ${compact ? 'p-3' : 'p-4'}`} data-done={quest.done}>
 		<span className="relative shrink-0">
 			<AdventureIcon name={quest.icon} size={compact ? 20 : 24} framed />
