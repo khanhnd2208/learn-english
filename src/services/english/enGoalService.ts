@@ -98,6 +98,7 @@ function questContext(overview: TodayOverview, dailyGoalXp: number, weeklyDaysGo
 		lapsedDue: overview.lapsedDue,
 		enrolledSets: overview.enrolledSets,
 		rememberingCount: overview.rememberingCount,
+		practiceAvailable: overview.practiceAvailable,
 	};
 }
 
@@ -113,24 +114,27 @@ async function loadState(userId: string, now: Date) {
 	const dailyGoalXp = profile?.dailyXpGoal ?? DAILY_GOAL_DEFAULT;
 	const weeklyDaysGoal = profile?.weeklyDaysGoal ?? EN_WEEKLY_DAYS_DEFAULT;
 	const ctx = questContext(overview, dailyGoalXp, weeklyDaysGoal);
-	const [daily, weekly, reviews, xpRows, attempts, total, wordStates, kindCounts, sessionsFinished, achievements] = await Promise.all([
+	const [daily, weekly, reviews, guidedReviews, xpRows, attempts, total, wordStates, kindCounts, legacySessionsFinished, guidedSessionsFinished, achievements] = await Promise.all([
 		ensureBoard(userId, 'daily', today, () => pickDailyQuests(`${userId}:${today}`, ctx)),
 		ensureBoard(userId, 'weekly', weekStart, () => weeklyQuests(ctx)),
 		prisma.enReview.findMany({ where: { userId, at: { gte: vnDayStart(weekStart) } }, select: { sessionId: true, senseId: true, at: true, correct: true, scheduled: true, boxBefore: true, boxAfter: true } }),
+		prisma.enGuidedReviewQuestion.findMany({ where: { kind: 'main', answeredAt: { gte: vnDayStart(weekStart) }, session: { userId } }, select: { sessionId: true, senseId: true, answeredAt: true, correct: true } }),
 		prisma.enXpEvent.findMany({ where: { userId, day: { gte: weekStart } }, select: { day: true, xp: true, kind: true, sourceKey: true } }),
 		prisma.enTestAttempt.findMany({ where: { userId, mode: 'set', status: 'finished' }, select: { blueprint: true, passedCount: true, wordCount: true, finishedAt: true } }),
 		prisma.enXpEvent.aggregate({ where: { userId }, _sum: { xp: true } }),
 		prisma.enWordState.findMany({ where: { userId, box: { gt: 0 } }, select: { senseId: true, box: true, lapses: true } }),
 		prisma.enXpEvent.groupBy({ by: ['kind'], where: { userId, kind: { in: ['goal', 'chest'] } }, _count: { _all: true } }),
 		prisma.enPracticeSession.count({ where: { userId, mode: 'review', endedAt: { not: null } } }),
+		prisma.enGuidedReviewSession.count({ where: { userId, endedAt: { not: null } } }),
 		prisma.enAchievement.findMany({ where: { userId }, select: { key: true, seenAt: true } }),
 	]);
+	const guidedRows = guidedReviews.flatMap((row) => row.answeredAt ? [{ sessionId: row.sessionId, senseId: row.senseId, at: row.answeredAt, correct: row.correct === true, scheduled: false, boxBefore: 1, boxAfter: 1, practice: true }] : []);
 	const quizzes: QuizRow[] = attempts.flatMap((attempt) => {
 		const kind = (attempt.blueprint as { kind?: string } | null)?.kind;
 		return kind && isQuizKind(kind) && attempt.finishedAt ? [{ kind, passedCount: attempt.passedCount ?? 0, wordCount: attempt.wordCount, finishedAt: attempt.finishedAt }] : [];
 	});
 	const lapsedSenses = new Set(wordStates.filter((state) => state.lapses > 0).map((state) => state.senseId));
-	const base = { reviews, xp: xpRows as XpRow[], quizzes, lapsedSenses, dueRemaining: overview.dueTotal };
+	const base = { reviews: [...reviews, ...guidedRows], xp: xpRows as XpRow[], quizzes, lapsedSenses, dueRemaining: overview.dueTotal };
 	const kindCount = (kind: string) => kindCounts.find((row) => row.kind === kind)?._count._all ?? 0;
 	const dayMetrics = periodMetrics({ ...base, days: new Set([today]) });
 	const lifetime: LifetimeMetrics = {
@@ -141,7 +145,7 @@ async function loadState(userId: string, now: Date) {
 		chests: kindCount('chest'),
 		perfectQuizzes: quizzes.filter((quiz) => quiz.wordCount > 0 && quiz.passedCount === quiz.wordCount).length,
 		revived: wordStates.filter((state) => state.lapses > 0 && state.box >= 3).length,
-		sessionsFinished,
+		sessionsFinished: legacySessionsFinished + guidedSessionsFinished,
 		enrolledSets: overview.enrolledSets,
 		quizKindsToday: dayMetrics.quizKinds,
 	};

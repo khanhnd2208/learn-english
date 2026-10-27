@@ -6,8 +6,6 @@ import LevelBar from '@/components/english/goals/LevelBar';
 import QuestItem from '@/components/english/goals/QuestItem';
 import RemoveSetButton from '@/components/english/RemoveSetButton';
 import { EN_LEITNER_INTERVALS } from '@/lib/english/constants';
-import { isReviewDone, reviewMinutes } from '@/lib/english/reviewSummary';
-import { estimateReviewXp } from '@/lib/english/xp';
 import type { EnglishSetSummary } from '@/services/english/enCatalogService';
 import type { TodayOverview } from '@/services/english/enDailyService';
 import type { GoalBoard } from '@/services/english/enGoalService';
@@ -22,7 +20,6 @@ export default function HomeDashboard({ overview, sets, board, resetsIn, greetin
 	dateLabel: string;
 }) {
 	const enrolled = sets.filter((set) => set.enrolled);
-	const reviewDone = isReviewDone(overview);
 	const quizHref = enrolled.length === 1 ? `/sets/${enrolled[0]!.id}/test?type=mcq` : '#your-sets';
 	const questsDone = board.today.quests.filter((quest) => quest.done).length;
 	const studiedThisWeek = overview.week.filter((day) => day.studied).length;
@@ -51,11 +48,11 @@ export default function HomeDashboard({ overview, sets, board, resetsIn, greetin
 
 		{enrolled.length === 0 ? <section className="mode-card p-7"><h2 className="text-3xl">Bạn chưa có bộ từ nào</h2><p className="mt-2 text-muted">Tải một bộ từ để bắt đầu học và theo dõi từng bước ôn tập.</p><Link className="mt-5 inline-flex min-h-11 items-center rounded-control bg-accent px-5 font-bold text-accent-foreground" href="/store">Mở Cửa hàng →</Link></section> : <>
 			<Link href="/review" className="mode-card flex flex-wrap items-center justify-between gap-4 border-2 border-accent bg-accent-subtle p-6 hover:brightness-[1.02] focus-visible:ring-2 focus-visible:ring-accent">
-				<div><h2 className="text-2xl">{reviewDone ? '✓ Xong hôm nay' : 'Ôn hôm nay'}</h2><p className="mt-1 text-sm">{reviewDone ? 'Bạn đã hoàn thành lượt ôn hôm nay.' : `${overview.dueTotal} từ đến hạn + ${overview.newCount} từ mới · ~${reviewMinutes(overview)} phút`}</p>{!reviewDone && <p className="mt-2"><span className="xp-chip">≈ +{estimateReviewXp(overview.dueCount, overview.newCount)} XP</span></p>}</div>
-				<span className="rounded-control bg-accent px-5 py-3 font-bold text-accent-foreground">{reviewDone ? 'Luyện thêm →' : 'Vào ôn →'}</span>
+				<div><h2 className="text-2xl">Luyện từ vựng</h2><p className="mt-1 text-sm">Mỗi chặng học 5 từ rồi luyện 5 câu · hôm nay đã luyện {overview.practicedToday} câu</p><p className="mt-2 text-xs text-muted">Phiên luyện không thay đổi lịch nhớ lâu.</p></div>
+				<span className="rounded-control bg-accent px-5 py-3 font-bold text-accent-foreground">Vào luyện →</span>
 			</Link>
 
-			<section className="mode-card"><h2 className="text-2xl">Lộ trình SRS</h2><p className="mt-1 text-sm text-muted">Mỗi lần ôn đúng, từ tiến lên một bước trong lịch ôn.</p><div className="mt-5"><StageBar stages={stages} legend /></div><p className="mt-4 text-xs text-muted">Chu kỳ ôn: {EN_LEITNER_INTERVALS.slice(1).join(' → ')} ngày.</p></section>
+			<section className="mode-card"><h2 className="text-2xl">Lộ trình nhớ lâu</h2><p className="mt-1 text-sm text-muted">Dữ liệu lịch cũ được giữ nguyên để theo dõi riêng với hoạt động luyện có hướng dẫn.</p><div className="mt-5"><StageBar stages={stages} legend /></div><p className="mt-4 text-xs text-muted">Chu kỳ đang lưu: {EN_LEITNER_INTERVALS.slice(1).join(' → ')} ngày.</p></section>
 
 			<section id="your-sets" aria-labelledby="your-sets-heading" className="flex h-80 scroll-mt-6 flex-col overflow-hidden rounded-panel border border-border bg-surface">
 				<div className="flex shrink-0 items-center justify-between gap-3 border-b border-border px-4 py-3 sm:px-5"><h2 id="your-sets-heading" className="text-2xl sm:text-3xl">Bộ từ của bạn ({enrolled.length})</h2><Link href="/store" className="shrink-0 text-sm font-bold text-accent">Thêm bộ từ →</Link></div>

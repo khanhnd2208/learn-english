@@ -2,13 +2,14 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { getTodayOverview } from '@/services/english/enDailyService';
 
 const mocks = vi.hoisted(() => ({
-	states: vi.fn(), enrollments: vi.fn(), items: vi.fn(), reviews: vi.fn(), profile: vi.fn(), bundles: vi.fn(),
+	states: vi.fn(), enrollments: vi.fn(), items: vi.fn(), reviews: vi.fn(), guidedReviews: vi.fn(), guidedCount: vi.fn(), profile: vi.fn(), bundles: vi.fn(),
 }));
 vi.mock('@/lib/prisma', () => ({ prisma: {
 	enWordState: { findMany: mocks.states },
 	enEnrollment: { findMany: mocks.enrollments },
 	enSetItem: { findMany: mocks.items },
 	enReview: { findMany: mocks.reviews },
+	enGuidedReviewQuestion: { findMany: mocks.guidedReviews, count: mocks.guidedCount },
 	enLearnerProfile: { findUnique: mocks.profile },
 } }));
 vi.mock('@/services/english/enContentService', () => ({ getSenseBundles: mocks.bundles }));
@@ -20,6 +21,8 @@ describe('daily review enrollment filter', () => {
 	beforeEach(() => {
 		vi.clearAllMocks();
 		mocks.reviews.mockResolvedValue([]);
+		mocks.guidedReviews.mockResolvedValue([]);
+		mocks.guidedCount.mockResolvedValue(0);
 		mocks.profile.mockResolvedValue(null);
 		mocks.items.mockResolvedValue([]);
 		mocks.bundles.mockResolvedValue([]);

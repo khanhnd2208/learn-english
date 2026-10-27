@@ -32,6 +32,12 @@ function Prompt({ item, audioText, recordedAudioAvailable }: {
 			<p className="mt-3 text-sm text-muted">Nghe và gõ lại từ tiếng Anh</p>
 		</>;
 	}
+	if (item.activityKey === 'listen_choice') {
+		return <>
+			<div className="flex justify-center"><EnglishAudioButton key={item.position} compact senseId={audio.senseId} lemma={audio.lemma} recordedAudioAvailable={audio.recordedAudioAvailable} /></div>
+			<p className="mt-3 text-sm text-muted">Nghe và chọn nghĩa đúng</p>
+		</>;
+	}
 	if (item.activityKey === 'cloze_choice') {
 		return <>
 			<p className="text-sm text-muted">Chọn từ còn thiếu</p>
@@ -45,6 +51,13 @@ function Prompt({ item, audioText, recordedAudioAvailable }: {
 			<p role="heading" aria-level={2} className="mt-3 text-4xl font-black">{text(prompt.lemma)}</p>
 			{text(prompt.ipa) && <p className="mt-1 font-mono text-sm text-muted">{text(prompt.ipa)}</p>}
 			<div className="mt-3 flex justify-center"><EnglishAudioButton compact senseId={audio.senseId} lemma={audio.lemma} recordedAudioAvailable={audio.recordedAudioAvailable} /></div>
+		</>;
+	}
+	if (item.activityKey === 'spell_hinted') {
+		return <>
+			<p className="text-sm text-muted">Gõ từ tiếng Anh có nghĩa là</p>
+			<p role="heading" aria-level={2} className="mt-3 text-3xl font-black">{text(prompt.meaningVi)}</p>
+			<p className="mt-2 text-sm text-muted">Bắt đầu bằng “{text(prompt.firstLetter)}” · {typeof prompt.letterCount === 'number' ? prompt.letterCount : ''} chữ cái</p>
 		</>;
 	}
 	return <>
@@ -73,7 +86,7 @@ export default function QuestionView({
 	const [typed, setTyped] = useState('');
 	const submitted = useRef(false);
 	const choices = Array.isArray(item.prompt.choices) ? item.prompt.choices.filter((value): value is string => typeof value === 'string') : [];
-	const isChoice = item.activityKey === 'meaning_choice' || item.activityKey === 'cloze_choice';
+	const isChoice = item.activityKey === 'meaning_choice' || item.activityKey === 'cloze_choice' || item.activityKey === 'listen_choice';
 	const locked = disabled || Boolean(feedback);
 
 	function send(answer: string) {

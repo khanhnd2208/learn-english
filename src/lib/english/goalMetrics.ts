@@ -2,7 +2,7 @@ import { vnDayKey } from '@/lib/english/gapRule';
 import { emptyMetrics, type QuestMetrics } from '@/lib/english/quests';
 import { isLongTerm } from '@/lib/english/schedule';
 
-export type ReviewRow = { sessionId: string; senseId: string; at: Date; correct: boolean; scheduled: boolean; boxBefore: number; boxAfter: number };
+export type ReviewRow = { sessionId: string; senseId: string; at: Date; correct: boolean; scheduled: boolean; boxBefore: number; boxAfter: number; practice?: boolean };
 export type XpRow = { day: string; xp: number; kind: string; sourceKey: string };
 export type QuizRow = { kind: string; passedCount: number; wordCount: number; finishedAt: Date };
 
@@ -34,7 +34,7 @@ export function periodMetrics(input: {
 	const reviews = input.reviews.filter((review) => input.days.has(vnDayKey(review.at)));
 	const scheduled = reviews.filter((review) => review.scheduled);
 	const distinct = (rows: ReviewRow[]) => new Set(rows.map((row) => row.senseId)).size;
-	metrics.correctReviews = scheduled.filter((review) => review.correct && review.boxBefore > 0).length;
+	metrics.correctReviews = reviews.filter((review) => review.correct && (review.practice || (review.scheduled && review.boxBefore > 0))).length;
 	metrics.newWords = distinct(scheduled.filter((review) => review.boxBefore === 0));
 	metrics.rescued = distinct(scheduled.filter((review) => review.correct && review.boxBefore > 0 && input.lapsedSenses.has(review.senseId)));
 	metrics.longTermGained = distinct(scheduled.filter((review) => !isLongTerm(review.boxBefore) && isLongTerm(review.boxAfter)));
