@@ -3,10 +3,12 @@
 import Link from 'next/link';
 import { useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import ConfirmExitDialog from '@/components/english/ConfirmExitDialog';
 import GuidedReviewSession, { type GuidedSession } from '@/components/english/GuidedReviewSession';
 import StudySession from '@/components/english/StudySession';
 import { englishPost } from '@/components/english/englishApi';
-import { isReviewDone, reviewMinutes } from '@/lib/english/reviewSummary';
+import { EN_GUIDED_CHUNK_SIZE } from '@/lib/english/constants';
+import { dueRoundLabel, isReviewDone, reviewMinutes } from '@/lib/english/reviewSummary';
 import type { TodayOverview } from '@/services/english/enDailyService';
 
 export type GuidedReviewOverview = {
@@ -17,11 +19,19 @@ export type GuidedReviewOverview = {
 	activeSessionId: string | null;
 };
 
+const solidButton = 'min-h-12 w-full rounded-control bg-accent px-5 font-bold text-accent-foreground disabled:opacity-50';
+const outlineButton = 'min-h-12 w-full rounded-control border-2 border-accent bg-surface px-5 font-bold text-accent disabled:opacity-50';
+
+function StepBadge({ step, recommended }: { step: number; recommended: boolean }) {
+	return <span className={`rounded-full px-2.5 py-1 text-xs font-bold ${recommended ? 'bg-accent text-accent-foreground' : 'bg-surface-container text-muted'}`}>Bước {step}{recommended ? ' · Làm trước' : ''}</span>;
+}
+
 export default function ReviewOverview({ overview, guided: initial }: { overview: TodayOverview; guided: GuidedReviewOverview }) {
 	const router = useRouter();
 	const [guided, setGuided] = useState(initial);
 	const [session, setSession] = useState<GuidedSession | null>(null);
 	const [srsOpen, setSrsOpen] = useState(false);
+	const [confirmRestart, setConfirmRestart] = useState(false);
 	const [search, setSearch] = useState('');
 	const [busy, setBusy] = useState(false);
 	const [error, setError] = useState('');
@@ -31,6 +41,11 @@ export default function ReviewOverview({ overview, guided: initial }: { overview
 	const allSelected = allSetIds.length > 0 && allSetIds.every((id) => selected.has(id));
 	const srsDone = isReviewDone(overview);
 	const srsTotal = overview.dueCount + overview.newCount;
+	const minutes = reviewMinutes(overview);
+	const noSets = guided.sets.length === 0;
+	// Scheduled review keeps old words from slipping, so it comes first whenever something is waiting.
+	const srsFirst = !srsDone && srsTotal > 0;
+	const heading = noSets ? 'Tải bộ từ để bắt đầu' : srsFirst ? `Bước 1: Ôn theo lịch (${srsTotal} từ)` : srsDone ? '✓ Đã ôn theo lịch. Học & luyện thêm nhé' : 'Học & luyện hôm nay';
 
 	async function saveSelection(setIds: string[]) {
 		setBusy(true);
@@ -45,6 +60,7 @@ export default function ReviewOverview({ overview, guided: initial }: { overview
 	}
 
 	async function start() {
+		setConfirmRestart(false);
 		setBusy(true);
 		setError('');
 		try {
@@ -58,57 +74,71 @@ export default function ReviewOverview({ overview, guided: initial }: { overview
 		}
 	}
 
-	return <div className="mx-auto flex h-[calc(100dvh-10rem)] max-w-5xl flex-col px-4 py-3 sm:h-auto sm:px-6 sm:py-8">
-		<header className="mb-2 shrink-0 sm:mb-5"><h1 className="text-3xl sm:text-4xl">Hôm nay học gì?</h1></header>
+	async function resume() {
+		if (!guided.activeSessionId) return;
+		setBusy(true);
+		setError('');
+		try {
+			setSession(await englishPost<GuidedSession>('/api/review', { action: 'open', sessionId: guided.activeSessionId }));
+		} catch (cause) {
+			setGuided((current) => ({ ...current, activeSessionId: null }));
+			setError(cause instanceof Error ? cause.message : 'Phiên cũ không còn, hãy bắt đầu phiên mới.');
+		} finally {
+			setBusy(false);
+		}
+	}
 
-		<div className="grid min-h-0 flex-1 grid-rows-[minmax(0,1.25fr)_minmax(0,0.75fr)] gap-3 sm:grid-cols-2 sm:grid-rows-1 sm:gap-5">
-			<section aria-labelledby="guided-review-heading" className="mode-card relative flex min-h-0 flex-col overflow-hidden border-2 border-accent p-3 sm:p-6">
-				<div aria-hidden="true" className="pointer-events-none absolute -right-8 -top-8 size-28 rounded-full bg-accent-subtle opacity-70" />
-				<div className="relative flex items-start gap-3">
-					<span aria-hidden="true" className="flex size-11 shrink-0 items-center justify-center rounded-card border-2 border-accent bg-accent-subtle text-2xl shadow-sm">📖</span>
-					<div><h2 id="guided-review-heading" className="text-2xl">Ôn tập</h2><p className="mt-0.5 text-sm text-muted">Luyện tự do, không ảnh hưởng lịch SRS</p></div>
-				</div>
+	const srsCard = <section key="srs" aria-labelledby="srs-review-heading" className={`mode-card relative flex flex-col overflow-hidden p-4 sm:p-6 ${srsFirst ? 'border-2 border-accent' : 'border border-border'}`}>
+		<div className="relative flex items-start gap-3">
+			<span aria-hidden="true" className="flex size-11 shrink-0 items-center justify-center rounded-card border-2 border-accent bg-accent-subtle text-2xl shadow-sm">🧠</span>
+			<div className="min-w-0 flex-1"><div className="flex flex-wrap items-center gap-2"><h2 id="srs-review-heading" className="text-2xl">Ôn theo lịch</h2><StepBadge step={1} recommended={srsFirst} /></div><p className="mt-0.5 text-sm text-muted">SRS: hỏi lại từ đúng lúc sắp quên. Đúng → hẹn xa hơn, sai → hẹn sớm lại.</p></div>
+		</div>
+		<div className="relative my-4 flex flex-1 items-center">
+			{srsDone ? <p className="text-lg font-bold text-success">✓ Xong hôm nay · mai có <span className="tabular-nums">{overview.tomorrowCount}</span> từ</p> : srsTotal === 0 ? <p className="text-sm text-muted">Chưa có từ để ôn. Tải một bộ từ ở Cửa hàng trước.</p> : <div>
+				<p className="text-xl font-bold">{dueRoundLabel(overview)}{overview.newCount > 0 && <> · <span className="tabular-nums">{overview.newCount}</span> mới</>}</p>
+				{overview.newCount > 0 && <p className="mt-1 text-sm text-foreground-secondary">Từ mới được hỏi lần đầu: sai là bình thường.</p>}
+				{minutes > 0 && <p className="mt-2 inline-flex items-center gap-1.5 rounded-full bg-accent-subtle px-3 py-1 text-sm font-bold text-accent"><span aria-hidden="true">⏱</span>~{minutes} phút</p>}
+			</div>}
+		</div>
+		{!srsDone && <button type="button" disabled={srsTotal === 0} onClick={() => setSrsOpen(true)} className={`relative mt-auto ${srsFirst ? solidButton : outlineButton}`}>Bắt đầu ôn theo lịch <span aria-hidden="true">→</span></button>}
+	</section>;
 
-				{guided.sets.length > 0 ? <div className="relative mt-3 flex min-h-0 flex-1 flex-col sm:mt-4">
-					{guided.sets.length > 8 && <input value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Tìm bộ từ…" aria-label="Tìm bộ từ" className="mb-2 min-h-10 w-full rounded-control border border-border bg-background px-3 text-sm" />}
-					<div className="max-h-24 overflow-y-auto pr-1 sm:max-h-32" aria-label="Chọn bộ từ để ôn">
-						<div className="flex flex-wrap gap-2">
-							<button type="button" aria-pressed={allSelected} disabled={busy} onClick={() => void saveSelection(allSelected ? [] : allSetIds)} className={`min-h-9 rounded-full border px-3 text-sm font-bold disabled:opacity-40 ${allSelected ? 'border-accent bg-accent-subtle text-accent' : 'border-border bg-surface hover:border-accent'}`}>{allSelected ? '✓ ' : ''}Tất cả</button>
-							{filtered.map((set) => {
-								const active = selected.has(set.id);
-								return <button key={set.id} type="button" aria-pressed={active} disabled={busy} onClick={() => void saveSelection(active ? guided.selectedSetIds.filter((id) => id !== set.id) : [...guided.selectedSetIds, set.id])} title={`${set.title} · ${set.words} từ`} className={`min-h-9 max-w-full truncate rounded-full border px-3 text-sm font-bold disabled:opacity-40 ${active ? 'border-accent bg-accent-subtle text-accent' : 'border-border bg-surface hover:border-accent'}`}>{active ? '✓ ' : ''}{set.title}</button>;
-							})}
-						</div>
-					</div>
-					{filtered.length === 0 && <p className="mt-2 text-sm text-muted">Không tìm thấy bộ từ phù hợp.</p>}
-					<div className="mt-2 flex items-center justify-between gap-3 text-sm"><p className="font-bold text-foreground-secondary"><span className="tabular-nums">{guided.selectedSetIds.length}</span> bộ · <span className="tabular-nums">{guided.uniqueWords}</span> từ</p><Link href="/store" className="shrink-0 font-bold text-accent hover:underline">Thêm bộ từ →</Link></div>
-				</div> : <div className="relative mt-5 flex flex-1 items-center rounded-card border border-dashed border-border bg-surface-secondary p-4"><Link href="/store" className="font-bold text-accent hover:underline">Tải bộ từ ở Cửa hàng →</Link></div>}
-
-				<div className="relative mt-3 sm:mt-4">
-					<button type="button" disabled={busy || guided.uniqueWords === 0} onClick={() => void start()} className="min-h-12 w-full rounded-control bg-accent px-5 font-bold text-accent-foreground disabled:opacity-50">Bắt đầu ôn <span aria-hidden="true">→</span></button>
-					{error && <p role="alert" className="mt-2 text-sm text-error">{error}</p>}
-				</div>
-			</section>
-
-			<section aria-labelledby="srs-review-heading" className="mode-card relative flex min-h-0 flex-col overflow-hidden border-2 border-accent p-3 sm:p-6">
-				<div aria-hidden="true" className="pointer-events-none absolute -right-8 -top-8 size-28 rounded-full bg-accent-subtle opacity-70" />
-				<div className="relative flex items-start gap-3">
-					<span aria-hidden="true" className="flex size-11 shrink-0 items-center justify-center rounded-card border-2 border-accent bg-accent-subtle text-2xl shadow-sm">🧠</span>
-					<div><h2 id="srs-review-heading" className="text-2xl">Kiểm tra SRS</h2><p className="mt-0.5 text-sm text-muted">Ôn đúng lúc để nhớ lâu hơn</p></div>
-				</div>
-
-				<div className="relative my-3 flex min-h-0 flex-1 items-center sm:my-7">
-					{srsDone ? <p className="text-lg font-bold text-success">✓ Xong hôm nay · mai có <span className="tabular-nums">{overview.tomorrowCount}</span> từ</p> : <div>
-						<p className="text-xl font-bold"><span className="tabular-nums">{overview.dueCount}</span> đến hạn · <span className="tabular-nums">{overview.newCount}</span> mới</p>
-						<p className="mt-2 inline-flex items-center gap-1.5 rounded-full bg-accent-subtle px-3 py-1 text-sm font-bold text-accent"><span aria-hidden="true">⏱</span>~{reviewMinutes(overview)} phút</p>
-					</div>}
-				</div>
-
-				{!srsDone && <button type="button" disabled={srsTotal === 0} onClick={() => setSrsOpen(true)} className="relative mt-auto min-h-12 w-full rounded-control bg-accent px-5 font-bold text-accent-foreground disabled:opacity-50">Bắt đầu kiểm tra <span aria-hidden="true">→</span></button>}
-			</section>
+	const guidedCard = <section key="guided" aria-labelledby="guided-review-heading" className={`mode-card relative flex flex-col overflow-hidden p-4 sm:p-6 ${srsFirst ? 'border border-border' : 'border-2 border-accent'}`}>
+		<div className="relative flex items-start gap-3">
+			<span aria-hidden="true" className="flex size-11 shrink-0 items-center justify-center rounded-card border-2 border-accent bg-accent-subtle text-2xl shadow-sm">📖</span>
+			<div className="min-w-0 flex-1"><div className="flex flex-wrap items-center gap-2"><h2 id="guided-review-heading" className="text-2xl">Học & luyện</h2><StepBadge step={2} recommended={!srsFirst && !noSets} /></div><p className="mt-0.5 text-sm text-muted">Xem thẻ {EN_GUIDED_CHUNK_SIZE} từ rồi luyện ngay. Không đổi lịch ôn.</p></div>
 		</div>
 
+		{guided.activeSessionId && !noSets && <div className="relative mt-3 flex flex-wrap items-center justify-between gap-2 rounded-card border border-accent/40 bg-accent-subtle px-3 py-2 text-sm"><span className="font-bold">Bạn có phiên đang dở</span><button type="button" disabled={busy} onClick={() => void resume()} className="min-h-10 rounded-control bg-accent px-4 font-bold text-accent-foreground disabled:opacity-50">Tiếp tục →</button></div>}
+
+		{!noSets ? <div className="relative mt-3 flex flex-col sm:mt-4">
+			<p className="mb-2 text-xs font-bold text-muted">Chọn bộ để luyện. Bỏ chọn không gỡ bộ và không xoá tiến độ.</p>
+			{guided.sets.length > 8 && <input value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Tìm bộ từ…" aria-label="Tìm bộ từ" className="mb-2 min-h-10 w-full rounded-control border border-border bg-background px-3 text-sm" />}
+			<div className="max-h-32 overflow-y-auto pr-1" aria-label="Chọn bộ từ để ôn">
+				<div className="flex flex-wrap gap-2">
+					<button type="button" aria-pressed={allSelected} disabled={busy} onClick={() => void saveSelection(allSelected ? [] : allSetIds)} className={`min-h-9 rounded-full border px-3 text-sm font-bold disabled:opacity-40 ${allSelected ? 'border-accent bg-accent-subtle text-accent' : 'border-border bg-surface hover:border-accent'}`}>{allSelected ? '✓ ' : ''}Tất cả</button>
+					{filtered.map((set) => {
+						const active = selected.has(set.id);
+						return <button key={set.id} type="button" aria-pressed={active} disabled={busy} onClick={() => void saveSelection(active ? guided.selectedSetIds.filter((id) => id !== set.id) : [...guided.selectedSetIds, set.id])} title={`${set.title} · ${set.words} từ`} className={`min-h-9 max-w-full truncate rounded-full border px-3 text-sm font-bold disabled:opacity-40 ${active ? 'border-accent bg-accent-subtle text-accent' : 'border-border bg-surface hover:border-accent'}`}>{active ? '✓ ' : ''}{set.title}</button>;
+					})}
+				</div>
+			</div>
+			{filtered.length === 0 && <p className="mt-2 text-sm text-muted">Không tìm thấy bộ từ phù hợp.</p>}
+			<div className="mt-2 flex items-center justify-between gap-3 text-sm"><p className="font-bold text-foreground-secondary"><span className="tabular-nums">{guided.selectedSetIds.length}</span> bộ · <span className="tabular-nums">{guided.uniqueWords}</span> từ{guided.practicedToday > 0 && <> · hôm nay đã luyện <span className="tabular-nums">{guided.practicedToday}</span> câu</>}</p><Link href="/store" className="shrink-0 font-bold text-accent hover:underline">Thêm bộ từ →</Link></div>
+		</div> : <div className="relative mt-5 flex items-center rounded-card border border-dashed border-border bg-surface-secondary p-4"><Link href="/store" className="font-bold text-accent hover:underline">Tải bộ từ ở Cửa hàng →</Link></div>}
+
+		<div className="relative mt-4">
+			<button type="button" disabled={busy || guided.uniqueWords === 0} onClick={() => guided.activeSessionId ? setConfirmRestart(true) : void start()} className={srsFirst || guided.activeSessionId ? outlineButton : solidButton}>{guided.activeSessionId ? 'Bắt đầu phiên mới' : 'Bắt đầu học & luyện'} <span aria-hidden="true">→</span></button>
+			{error && <p role="alert" className="mt-2 text-sm text-error">{error}</p>}
+		</div>
+	</section>;
+
+	return <div className="mx-auto max-w-5xl px-4 py-4 sm:px-6 sm:py-8">
+		<header className="mb-4 sm:mb-5"><h1 className="text-3xl sm:text-4xl">{heading}</h1><p className="mt-1 text-sm text-muted">Ôn theo lịch giữ từ cũ khỏi quên. Học & luyện để xem thẻ và luyện thêm bất cứ lúc nào.</p></header>
+		<div className="grid gap-4 sm:grid-cols-2 sm:gap-5">{srsCard}{guidedCard}</div>
+
 		{srsOpen && <StudySession onClose={(studied) => { setSrsOpen(false); if (studied) router.refresh(); }} />}
-		{session && <GuidedReviewSession initial={session} onClose={(finished) => { setSession(null); if (finished) router.refresh(); }} />}
+		{session && <GuidedReviewSession initial={session} onClose={(finished) => { setGuided((current) => ({ ...current, activeSessionId: finished ? null : session.id })); setSession(null); router.refresh(); }} />}
+		<ConfirmExitDialog open={confirmRestart} busy={busy} title="Bắt đầu phiên mới?" description="Phiên đang dở sẽ kết thúc. Các câu bạn đã trả lời vẫn được giữ." stayLabel="Huỷ" leaveLabel="Bắt đầu mới" onStay={() => setConfirmRestart(false)} onLeave={() => void start()} />
 	</div>;
 }

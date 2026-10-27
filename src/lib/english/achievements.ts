@@ -17,7 +17,7 @@ export const ACHIEVEMENT_GROUPS: Record<AchievementGroup, string> = {
 	memory: 'Ghi nhớ',
 	vocab: 'Vốn từ',
 	habit: 'Kiên trì',
-	quiz: 'Kiểm tra',
+	quiz: 'Bài kiểm tra',
 	mistakes: 'Lỗi sai',
 	start: 'Khởi đầu',
 };
@@ -43,9 +43,9 @@ export const ACHIEVEMENTS: AchievementDef[] = [
 	{ id: 'perfect_week', title: 'Tuần hoàn hảo', description: 'Mở {n} rương tuần', group: 'habit', icon: 'trophy', metric: 'chests', tiers: [1, 4, 12, 52] },
 	{ id: 'perfect_score', title: 'Điểm tuyệt đối', description: '{n} bài kiểm tra đúng 100%', group: 'quiz', icon: 'sword', metric: 'perfectQuizzes', tiers: [1, 10, 50] },
 	{ id: 'revival', title: 'Hồi sinh', description: '{n} từ từng quên đã lên lại hộp 3', group: 'mistakes', icon: 'shield', metric: 'revived', tiers: [10, 50, 200] },
-	{ id: 'first_step', title: 'Bước đầu tiên', description: 'Hoàn thành phiên Ôn tập đầu tiên', group: 'start', icon: 'flag', metric: 'sessionsFinished', tiers: [1] },
+	{ id: 'first_step', title: 'Bước đầu tiên', description: 'Hoàn thành phiên học đầu tiên', group: 'start', icon: 'flag', metric: 'sessionsFinished', tiers: [1] },
 	{ id: 'collector', title: 'Người sưu tầm', description: 'Theo học {n} bộ từ', group: 'start', icon: 'map', metric: 'enrolledSets', tiers: [3] },
-	{ id: 'triple', title: 'Đủ bộ ba', description: 'Làm đủ {n} dạng kiểm tra trong một ngày', group: 'start', icon: 'star', metric: 'quizKindsToday', tiers: [3] },
+	{ id: 'triple', title: 'Đủ bộ ba', description: 'Làm đủ {n} dạng bài kiểm tra trong một ngày', group: 'start', icon: 'star', metric: 'quizKindsToday', tiers: [3] },
 ];
 
 export const TIER_NAMES = ['Đồng', 'Bạc', 'Vàng', 'Kim cương'] as const;

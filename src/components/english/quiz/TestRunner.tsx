@@ -112,11 +112,11 @@ export default function TestRunner({ detail, kind }: { detail: EnglishSetDetail;
 	const currentSenseId = started?.items[pos] && typeof started.items[pos].prompt.senseId === 'string' ? started.items[pos].prompt.senseId : '';
 	const missed = result?.items.filter((item) => !item.correct) ?? [];
 
-	return <FocusFrame title={detail.title} subtitle={`Kiểm tra · ${label}`} progress={phase === 'result' ? started?.wordCount ?? 0 : answered} total={started?.wordCount ?? EN_QUIZ_MAX_ITEMS} dirty={phase === 'run'} exitHref={`/sets/${detail.id}`}>
+	return <FocusFrame title={detail.title} subtitle={`Bài kiểm tra · ${label}`} progress={phase === 'result' ? started?.wordCount ?? 0 : answered} total={started?.wordCount ?? EN_QUIZ_MAX_ITEMS} dirty={phase === 'run'} exitHref={`/sets/${detail.id}`}>
 		{phase === 'loading' && <div className="h-64 animate-pulse rounded-panel bg-surface-container" aria-busy="true" aria-label="Đang tải bài kiểm tra" />}
 
 		{phase === 'intro' && <section className="mode-card text-center">
-			<h1 className="text-4xl">Kiểm tra {label}</h1>
+			<h1 className="text-4xl">Bài kiểm tra {label}</h1>
 			<p className="mt-3">Tối đa {EN_QUIZ_MAX_ITEMS} câu · khoảng 5 phút · {QUIZ_META[kind].hint.toLowerCase()}</p>
 			<p className="mt-2 text-sm text-muted">Đáp án chỉ hiện sau khi nộp bài. Câu bỏ qua tính là sai. Tải lại trang vẫn làm tiếp được.</p>
 			<button type="button" autoFocus onClick={() => void start()} className="mt-6 min-h-11 rounded-control bg-accent px-6 font-bold text-accent-foreground">Bắt đầu</button>

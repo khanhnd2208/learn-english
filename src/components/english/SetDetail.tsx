@@ -44,14 +44,14 @@ export default function SetDetail({ detail }: { detail: EnglishSetDetail }) {
 				<div className="absolute inset-y-0 left-0 rounded-full bg-accent/40" style={{ width: percent(learned) }} />
 				<div className="absolute inset-y-0 left-0 rounded-full bg-success" style={{ width: percent(longTerm) }} />
 			</div>
-			{detail.enrolled ? <div className="flex flex-wrap gap-2"><Link href={`/sets/${detail.id}/practice`} className="inline-flex min-h-11 items-center rounded-control bg-accent px-4 text-sm font-bold text-accent-foreground">Luyện tập</Link><Link href={`/sets/${detail.id}/test`} className={linkButton}>Kiểm tra</Link></div> : <EnrollButton setId={detail.id} enrolled={false} locked={detail.locked} />}
+			{detail.enrolled ? <div className="flex flex-wrap gap-2"><Link href={`/sets/${detail.id}/practice`} className="inline-flex min-h-11 items-center rounded-control bg-accent px-4 text-sm font-bold text-accent-foreground">Luyện tập</Link><Link href={`/sets/${detail.id}/test`} className={linkButton}>Bài kiểm tra</Link></div> : <EnrollButton setId={detail.id} enrolled={false} locked={detail.locked} />}
 			{detail.previewOnly && <p className="flex items-start gap-2 rounded-panel border border-warning/30 bg-warning/5 px-3 py-2 text-sm text-foreground-secondary"><span aria-hidden="true">🔒</span><span>Đang xem <strong className="tabular-nums">{detail.words.length}/{detail.wordCount}</strong> từ mẫu. Nhập mật khẩu để tải cả bộ.</span></p>}
 		</header>
 
 		{detail.enrolled && <details className="rounded-panel border border-border bg-surface px-4 py-3">
-			<summary className="cursor-pointer py-1 text-sm font-bold text-accent">Chọn dạng luyện tập hoặc kiểm tra</summary>
+			<summary className="cursor-pointer py-1 text-sm font-bold text-accent">Chọn dạng luyện tập hoặc bài kiểm tra</summary>
 			<div className="mt-3 grid gap-4 border-t border-border pt-4 sm:grid-cols-2">
-				{([false, true] as const).map((test) => <div key={String(test)}><h2 className="mb-2 text-sm font-bold">{test ? 'Kiểm tra' : 'Luyện tập'}</h2><div className="flex flex-wrap gap-2">{QUIZ_KINDS.map((kind) => {
+				{([false, true] as const).map((test) => <div key={String(test)}><h2 className="mb-2 text-sm font-bold">{test ? 'Bài kiểm tra' : 'Luyện tập'}</h2><div className="flex flex-wrap gap-2">{QUIZ_KINDS.map((kind) => {
 					const done = test ? detail.dailyTasks[kind] : undefined;
 					return <Link key={kind} href={`/sets/${detail.id}/${test ? 'test' : 'practice'}?type=${kind}`} className={`${linkButton} ${done ? 'border-success text-success' : ''}`}>{QUIZ_META[kind].label}{done && ` ✓ ${done.passedCount}/${done.wordCount}`}</Link>;
 				})}</div></div>)}
