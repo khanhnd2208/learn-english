@@ -4,8 +4,9 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Dialog from '@/components/ui/Dialog';
 import Button from '@/components/ui/Button';
+import MaterialIcon from '@/components/ui/MaterialIcon';
 
-export default function RemoveSetButton({ setId, setTitle, stayOnPage = false }: { setId: string; setTitle?: string; stayOnPage?: boolean }) {
+export default function RemoveSetButton({ setId, setTitle, stayOnPage = false, compact = false }: { setId: string; setTitle?: string; stayOnPage?: boolean; compact?: boolean }) {
 	const router = useRouter();
 	const [open, setOpen] = useState(false);
 	const [pending, setPending] = useState(false);
@@ -29,10 +30,18 @@ export default function RemoveSetButton({ setId, setTitle, stayOnPage = false }:
 	}
 
 	return <>
-		<button type="button" onClick={() => setOpen(true)} className="min-h-11 rounded-control border border-border px-4 text-sm font-bold text-muted hover:border-error hover:text-error">{stayOnPage ? 'Gỡ khỏi ôn' : 'Gỡ bộ'}</button>
+		<button
+			type="button"
+			onClick={() => setOpen(true)}
+			aria-label={setTitle ? `Gỡ bộ từ ${setTitle}` : 'Gỡ bộ từ'}
+			className={`inline-flex min-h-11 items-center justify-center gap-1 rounded-control border border-border text-sm font-bold text-muted hover:border-error hover:text-error focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-error ${compact ? 'min-w-11 px-2 sm:px-3' : 'px-4'}`}
+		>
+			{compact && <MaterialIcon name="delete" size={18} />}
+			<span className={compact ? 'hidden sm:inline' : ''}>Gỡ bộ</span>
+		</button>
 		<Dialog open={open} onClose={() => !pending && setOpen(false)} title={setTitle ? `Gỡ “${setTitle}” khỏi ôn tập?` : 'Gỡ bộ khỏi danh sách?'} description="Bộ từ sẽ không còn trong lịch ôn. Tiến độ được giữ để bạn tải lại sau.">
 			{error && <p className="mb-3 text-sm text-error">{error}</p>}
-			<div className="flex justify-end gap-2"><button type="button" className="min-h-11 px-4 font-bold" onClick={() => setOpen(false)} disabled={pending}>Huỷ</button><Button type="button" onClick={() => void remove()} disabled={pending}>Gỡ bộ</Button></div>
+			<div className="flex justify-end gap-2"><button type="button" className="min-h-11 px-4 font-bold" onClick={() => setOpen(false)} disabled={pending}>Huỷ</button><Button type="button" variant="destructive" onClick={() => void remove()} loading={pending}>Gỡ bộ</Button></div>
 		</Dialog>
 	</>;
 }
