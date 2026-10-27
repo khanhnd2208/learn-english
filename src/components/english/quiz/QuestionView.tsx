@@ -10,12 +10,25 @@ export type QuestionFeedback = { answer: string; correct: boolean; expected: str
 
 const text = (value: unknown) => (typeof value === 'string' ? value : '');
 
-function Prompt({ item }: { item: PublicQuestion }) {
+export function questionAudio(item: PublicQuestion, audioText = '', recordedAudioAvailable?: boolean) {
 	const prompt = item.prompt;
-	const senseId = text(prompt.senseId);
+	return {
+		senseId: text(prompt.senseId),
+		lemma: audioText || text(prompt.lemma),
+		recordedAudioAvailable: recordedAudioAvailable ?? prompt.recordedAudioAvailable === true,
+	};
+}
+
+function Prompt({ item, audioText, recordedAudioAvailable }: {
+	item: PublicQuestion;
+	audioText?: string;
+	recordedAudioAvailable?: boolean;
+}) {
+	const prompt = item.prompt;
+	const audio = questionAudio(item, audioText, recordedAudioAvailable);
 	if (item.activityKey === 'listen_type') {
 		return <>
-			<div className="flex justify-center"><EnglishAudioButton key={item.position} compact autoPlay senseId={senseId} recordedAudioAvailable /></div>
+			<div className="flex justify-center"><EnglishAudioButton key={item.position} compact autoPlay senseId={audio.senseId} lemma={audio.lemma} recordedAudioAvailable={audio.recordedAudioAvailable} /></div>
 			<p className="mt-3 text-sm text-muted">Nghe và gõ lại từ tiếng Anh</p>
 		</>;
 	}
@@ -31,7 +44,7 @@ function Prompt({ item }: { item: PublicQuestion }) {
 			<p className="text-sm text-muted">Chọn nghĩa đúng</p>
 			<p role="heading" aria-level={2} className="mt-3 text-4xl font-black">{text(prompt.lemma)}</p>
 			{text(prompt.ipa) && <p className="mt-1 font-mono text-sm text-muted">{text(prompt.ipa)}</p>}
-			<div className="mt-3 flex justify-center"><EnglishAudioButton compact senseId={senseId} lemma={text(prompt.lemma)} recordedAudioAvailable /></div>
+			<div className="mt-3 flex justify-center"><EnglishAudioButton compact senseId={audio.senseId} lemma={audio.lemma} recordedAudioAvailable={audio.recordedAudioAvailable} /></div>
 		</>;
 	}
 	return <>
@@ -42,11 +55,20 @@ function Prompt({ item }: { item: PublicQuestion }) {
 }
 
 /** One question of any quiz kind, shared by ungraded practice and graded tests. */
-export default function QuestionView({ item, onAnswer, disabled = false, feedback }: {
+export default function QuestionView({
+	item,
+	onAnswer,
+	disabled = false,
+	feedback,
+	audioText = '',
+	recordedAudioAvailable,
+}: {
 	item: PublicQuestion;
 	onAnswer: (answer: string) => void;
 	disabled?: boolean;
 	feedback?: QuestionFeedback | null;
+	audioText?: string;
+	recordedAudioAvailable?: boolean;
 }) {
 	const [typed, setTyped] = useState('');
 	const submitted = useRef(false);
@@ -77,7 +99,7 @@ export default function QuestionView({ item, onAnswer, disabled = false, feedbac
 	};
 
 	return <div className="space-y-6 rounded-panel border border-border bg-surface p-5 sm:p-8">
-		<div className="text-center"><Prompt item={item} /></div>
+		<div className="text-center"><Prompt item={item} audioText={audioText} recordedAudioAvailable={recordedAudioAvailable} /></div>
 		{isChoice
 			? <div className="grid gap-2">
 				{choices.map((option, index) => <button key={option} type="button" disabled={locked} onClick={() => send(option)} className="choice-btn" data-state={stateOf(option)}>

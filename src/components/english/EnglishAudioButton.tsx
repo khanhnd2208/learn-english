@@ -9,7 +9,7 @@ export default function EnglishAudioButton({
 	senseId,
 	lemma = '',
 	allowTts = true,
-	recordedAudioAvailable = true,
+	recordedAudioAvailable = false,
 	autoPlay = false,
 	compact = false,
 }: {
@@ -28,7 +28,15 @@ export default function EnglishAudioButton({
 	const [useTtsFallback, setUseTtsFallback] = useState(!recordedAudioAvailable);
 	const autoPlayed = useRef(false);
 
-	useEffect(() => () => { audio.current?.pause(); stop(); }, [stop]);
+	useEffect(() => () => {
+		if (audio.current) {
+			audio.current.onplay = null;
+			audio.current.onended = null;
+			audio.current.onerror = null;
+			audio.current.pause();
+		}
+		stop();
+	}, [stop]);
 
 	function play() {
 		if (speaking || playing) { audio.current?.pause(); stop(); setPlaying(false); return; }
@@ -37,17 +45,24 @@ export default function EnglishAudioButton({
 			if (!(allowTts && lemma && speak(lemma, 'en-US'))) setFailed(true);
 			return;
 		}
+		audio.current?.pause();
 		const element = new Audio(`/api/audio?senseId=${encodeURIComponent(senseId)}`);
 		audio.current = element;
 		element.preload = 'auto';
 		element.onplay = () => setPlaying(true);
-		element.onended = () => setPlaying(false);
-		element.onerror = () => {
+		element.onended = () => {
+			if (audio.current === element) setPlaying(false);
+		};
+		let fallbackStarted = false;
+		const fallback = () => {
+			if (fallbackStarted || audio.current !== element) return;
+			fallbackStarted = true;
 			setPlaying(false);
 			setUseTtsFallback(allowTts && Boolean(lemma));
 			if (!(allowTts && lemma && speak(lemma, 'en-US'))) setFailed(true);
 		};
-		void element.play().catch(() => element.onerror?.(new Event('error')));
+		element.onerror = fallback;
+		void element.play().catch(fallback);
 	}
 
 	useEffect(() => {

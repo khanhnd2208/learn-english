@@ -90,7 +90,14 @@ export default function PracticeRunner({ detail, kind }: { detail: EnglishSetDet
 
 	return <FocusFrame title={detail.title} subtitle={`Luyện tập · ${label}`} progress={Math.min(seen.length, detail.words.length)} total={Math.max(1, detail.words.length)} dirty={Boolean(step)} exitHref={`/sets/${detail.id}`}>
 		{step && item && <div key={`${run}-${index}`} className="space-y-4">
-			<QuestionView item={{ position: index, activityKey: item.activityKey, prompt: item.prompt, layout: answerLayout(item.answerKey) }} onAnswer={answer} feedback={feedback} disabled={Boolean(feedback)} />
+			<QuestionView
+				item={{ position: index, activityKey: item.activityKey, prompt: item.prompt, layout: answerLayout(item.answerKey) }}
+				onAnswer={answer}
+				feedback={feedback}
+				disabled={Boolean(feedback)}
+				audioText={bundle?.word.lemma}
+				recordedAudioAvailable={Boolean(bundle && [bundle.word.audioPath, bundle.word.audioUkPath, bundle.word.audioUsPath].some((path) => path.trim()))}
+			/>
 			{feedback && <div role="status" className={`rounded-panel p-4 ${feedback.correct ? 'bg-success-subtle text-success' : 'border-2 border-error bg-surface'}`}>
 				<p className="font-bold">{feedback.correct ? 'Chính xác!' : `Đáp án: ${feedback.expected}`}</p>
 				{!feedback.correct && bundle && <>
