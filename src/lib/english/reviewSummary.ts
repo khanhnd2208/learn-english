@@ -1,6 +1,6 @@
-/** Rough minutes for a Review round: about 10 s per review and 35 s per new word. */
+/** SRS questions are short checks, averaging about 12 seconds each. */
 export function reviewMinutes(overview: { dueCount: number; newCount: number }): number {
-	return Math.max(1, Math.round((overview.dueCount * 10 + overview.newCount * 35) / 60));
+	return Math.max(1, Math.round(((overview.dueCount + overview.newCount) * 12) / 60));
 }
 
 type ReviewCounts = { dueTotal: number; newCount: number; enrolledSets: number; learnedCount: number };

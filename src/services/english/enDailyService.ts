@@ -1,8 +1,8 @@
 import { cache } from 'react';
 import { prisma } from '@/lib/prisma';
 import { AppError } from '@/lib/appError';
-import { EN_DAILY_DUE_LIMIT, EN_EXTRA_ROUND_SIZE, EN_NEW_WORDS_DEFAULT, EN_ROUND_REVIEW_LIMIT, EN_TX_MAX_WAIT_MS, EN_TX_TIMEOUT_MS, EN_WEEKLY_DAYS_DEFAULT } from '@/lib/english/constants';
-import { buildDailyQueue, isLongTerm, isNearMiss, scheduleMove, vnDayStart, type ScheduledState } from '@/lib/english/schedule';
+import { EN_DAILY_DUE_LIMIT, EN_NEW_WORDS_DEFAULT, EN_ROUND_REVIEW_LIMIT, EN_TX_MAX_WAIT_MS, EN_TX_TIMEOUT_MS, EN_WEEKLY_DAYS_DEFAULT } from '@/lib/english/constants';
+import { buildDailyQueue, intervalChange, isLongTerm, isNearMiss, scheduleMove, vnDayStart, type ScheduledState } from '@/lib/english/schedule';
 import { gradeEnglishAnswer } from '@/lib/english/grade';
 import { shiftVnDay, vnDayKey, vnWeekDays } from '@/lib/english/gapRule';
 import { streakStats } from '@/lib/english/streak';
@@ -17,7 +17,7 @@ export type DailyCloze = { before: string; after: string; meaningVi: string; lay
 
 export type DailyItem = {
 	senseId: string;
-	kind: 'review' | 'new' | 'extra';
+	kind: 'review' | 'new';
 	prompt: DailyPrompt;
 	cloze: DailyCloze | null;
 	layout: AnswerLayout;
@@ -32,6 +32,8 @@ export type DailyAnswerResult = {
 	/** False when the answer came before the word was due, so the schedule did not move. */
 	scheduled: boolean;
 	nextDueAt: string | null;
+	fromDays: number;
+	toDays: number;
 	/** XP this answer earned. */
 	xp: number;
 };
@@ -114,8 +116,7 @@ function hasAudio(bundle: SenseBundle): boolean {
 	return Boolean(bundle.word.audioPath || bundle.word.audioUkPath || bundle.word.audioUsPath);
 }
 
-function promptFor(bundle: SenseBundle, kind: 'review' | 'new' | 'extra'): { prompt: DailyPrompt; cloze: DailyCloze | null } {
-	if (kind === 'new') return { prompt: 'meaning', cloze: null };
+function promptFor(bundle: SenseBundle): { prompt: DailyPrompt; cloze: DailyCloze | null } {
 	const clozes = bundle.examples.flatMap((example) => {
 		const parts = exampleParts(example);
 		return parts ? [{ before: parts.before, after: parts.after, meaningVi: example.meaningVi, layout: answerLayout(parts.answer) }] : [];
@@ -127,15 +128,10 @@ function promptFor(bundle: SenseBundle, kind: 'review' | 'new' | 'extra'): { pro
 	return { prompt, cloze: prompt === 'cloze' ? pick(clozes) ?? null : null };
 }
 
-export async function startToday(userId: string, options: { extra?: boolean } = {}, now = new Date()) {
+export async function startToday(userId: string, now = new Date()) {
 	const plan = await planToday(userId, now);
 	const { dueTotal } = plan;
-	// The extra round revisits the weakest words that are not due yet; it never moves them up a box.
-	const queue = options.extra
-		? [...plan.states].filter((state) => state.dueAt > now)
-			.sort((a, b) => a.box - b.box || b.lapses - a.lapses || (a.lastReviewedAt?.getTime() ?? 0) - (b.lastReviewedAt?.getTime() ?? 0))
-			.slice(0, EN_EXTRA_ROUND_SIZE).map((state) => ({ kind: 'extra' as const, state }))
-		: plan.queue;
+	const queue = plan.queue;
 	const senseIds = queue.map((item) => item.kind === 'new' ? item.senseId : item.state.senseId);
 	if (!senseIds.length) return { sessionId: null, dueCount: 0, newCount: 0, dueTotal, items: [] as DailyItem[] };
 	const session = await prisma.enPracticeSession.create({
@@ -146,7 +142,7 @@ export async function startToday(userId: string, options: { extra?: boolean } = 
 	const items = queue.flatMap((item): DailyItem[] => {
 		const senseId = item.kind === 'new' ? item.senseId : item.state.senseId;
 		const bundle = bySense.get(senseId);
-		return bundle ? [{ senseId, kind: item.kind, bundle, layout: answerLayout(bundle.word.lemma), ...promptFor(bundle, item.kind) }] : [];
+		return bundle ? [{ senseId, kind: item.kind, bundle, layout: answerLayout(bundle.word.lemma), ...promptFor(bundle) }] : [];
 	});
 	return {
 		sessionId: session.id,
@@ -236,7 +232,7 @@ export async function answerToday(
 	const state = await prisma.enWordState.findUnique({ where: { userId_senseId: { userId, senseId: input.senseId } } });
 	const before = state?.box ?? 0;
 	if (!correct && !input.giveUp && !input.typoChecked && isNearMiss(input.answer, [expected, ...accepted])) {
-		return { result: 'near', expected: '', boxBefore: before, boxAfter: before, scheduled: false, nextDueAt: state?.dueAt.toISOString() ?? null, xp: 0 };
+		return { result: 'near', expected: '', boxBefore: before, boxAfter: before, scheduled: false, nextDueAt: state?.dueAt.toISOString() ?? null, ...intervalChange(before, before), xp: 0 };
 	}
 	const responseMs = Math.max(0, Math.min(120_000, Math.trunc(input.responseMs ?? 0)));
 	const next = scheduleMove(state, correct, now);
@@ -265,7 +261,7 @@ export async function answerToday(
 			xp = created.reduce((sum, row) => sum + row.xp, 0);
 		}
 	}, { timeout: EN_TX_TIMEOUT_MS, maxWait: EN_TX_MAX_WAIT_MS });
-	return { result: correct ? 'correct' : 'wrong', expected, boxBefore: before, boxAfter: next.box, scheduled: changed, nextDueAt: nextDue.toISOString(), xp };
+	return { result: correct ? 'correct' : 'wrong', expected, boxBefore: before, boxAfter: next.box, scheduled: changed, nextDueAt: nextDue.toISOString(), ...intervalChange(before, next.box), xp };
 }
 
 export async function finishToday(userId: string, sessionId: string, now = new Date()) {
@@ -277,6 +273,16 @@ export async function finishToday(userId: string, sessionId: string, now = new D
 		const measuredSeconds = Math.ceil((responseTime._sum.responseMs ?? 0) / 1000);
 		await prisma.enPracticeSession.update({ where: { id: session.id }, data: { endedAt: now, activeSeconds: Math.min(measuredSeconds, elapsed) } });
 	}
-	const overview = await getTodayOverview(userId, now);
-	return { ok: true as const, remaining: overview.dueCount + overview.newCount, tomorrowCount: overview.tomorrowCount, longTermCount: overview.longTermCount };
+	const [overview, changes] = await Promise.all([
+		getTodayOverview(userId, now),
+		prisma.enReview.findMany({ where: { sessionId: session.id, userId }, select: { boxBefore: true, boxAfter: true } }),
+	]);
+	return {
+		ok: true as const,
+		remaining: overview.dueCount + overview.newCount,
+		tomorrowCount: overview.tomorrowCount,
+		longTermCount: overview.longTermCount,
+		intervalsUp: changes.filter(({ boxBefore, boxAfter }) => intervalChange(boxBefore, boxAfter).direction === 'up').length,
+		intervalsDown: changes.filter(({ boxBefore, boxAfter }) => intervalChange(boxBefore, boxAfter).direction === 'down').length,
+	};
 }
