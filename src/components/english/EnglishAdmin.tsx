@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Button from '@/components/ui/Button';
 import { Card, CardContent } from '@/components/ui/Card';
+import EnglishAdminPromptCard from '@/components/english/EnglishAdminPromptCard';
 import EnglishAdminQaTools from '@/components/english/EnglishAdminQaTools';
 import type { EnglishPackPreview } from '@/lib/english/packPreview';
 import { sampleEnglishPack } from '@/lib/english/samplePack';
@@ -85,7 +86,7 @@ export default function EnglishAdmin({ sets, qaEnabled }: { sets: SetRow[]; qaEn
 		<div className="mx-auto max-w-3xl space-y-8 px-4 py-8">
 			<header>
 				<h1 className="text-3xl font-black text-foreground">Nội dung tiếng Anh</h1>
-				<p className="mt-2 text-sm text-muted">Dán JSON do AI tạo theo prompt ở docs/content/ai-pack-prompt.md. Từ thiếu nghĩa Việt hoặc câu ví dụ hợp lệ không được xuất bản. File audio phải nằm trong thư mục ENGLISH_AUDIO_ROOT, ngoài thư mục release.</p>
+				<p className="mt-2 text-sm text-muted">Tạo prompt ở bước 1, đưa cho AI, rồi dán JSON AI trả về ở bước 2. Từ thiếu nghĩa Việt hoặc câu ví dụ hợp lệ không được xuất bản. File audio phải nằm trong thư mục ENGLISH_AUDIO_ROOT, ngoài thư mục release.</p>
 			</header>
 			<div className="flex gap-2">
 				<Button type="button" variant={panel === 'content' ? 'primary' : 'secondary'} onClick={() => setPanel('content')}>Nội dung</Button>
@@ -93,8 +94,10 @@ export default function EnglishAdmin({ sets, qaEnabled }: { sets: SetRow[]; qaEn
 			</div>
 			{panel === 'qa' && <EnglishAdminQaTools sets={sets} />}
 			{panel === 'content' && <>
+			<EnglishAdminPromptCard />
 			<Card>
 				<CardContent className="space-y-3">
+					<h2 className="text-lg font-black text-foreground">Bước 2 · Dán JSON AI trả về</h2>
 					<textarea
 						aria-label="Gói nội dung JSON"
 						value={text}

@@ -1,5 +1,5 @@
-import { readFileSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
+import { AI_PACK_PROMPT_EXAMPLE, buildAiPackPrompt } from '@/lib/english/aiPackPrompt';
 import { assessEnglishPack, type EnglishPack } from '@/lib/english/contentValidation';
 import { sampleEnglishPack } from '@/lib/english/samplePack';
 import { locateTarget } from '@/lib/english/text';
@@ -227,13 +227,19 @@ describe('english pack vocabulary rules', () => {
 	});
 });
 
-describe('AI pack prompt example', () => {
-	it('stays publishable with two graded examples', () => {
-		const doc = readFileSync('docs/content/ai-pack-prompt.md', 'utf8');
-		const json = doc.match(/```json\n([\s\S]*?)\n```/)?.[1];
-		const result = assessEnglishPack(JSON.parse(json ?? ''));
+describe('AI pack prompt', () => {
+	it('keeps its worked example publishable with two graded examples', () => {
+		const result = assessEnglishPack(AI_PACK_PROMPT_EXAMPLE);
 		expect(result.schemaError).toBeNull();
 		expect(codes(result, 'belonging').word?.publishable).toBe(true);
 		expect(codes(result, 'belonging').word?.gradeExampleCount).toBeGreaterThanOrEqual(2);
+	});
+
+	it('ends with the admin word list and embeds the example as valid JSON', () => {
+		const prompt = buildAiPackPrompt('belonging\ngive up', 'Feelings');
+		expect(prompt.trimEnd().endsWith('belonging\ngive up')).toBe(true);
+		expect(prompt).toContain('Tên bộ (title): Feelings');
+		const json = prompt.match(/```json\n([\s\S]*?)\n```/)?.[1];
+		expect(JSON.parse(json ?? '')).toEqual(AI_PACK_PROMPT_EXAMPLE);
 	});
 });
