@@ -9,26 +9,15 @@ import { vnDayKey, shiftVnDay } from '@/lib/english/gapRule';
 import { vnDayStart } from '@/lib/english/schedule';
 import { quizXpEvent } from '@/lib/english/xp';
 import { getSenseBundles } from '@/services/english/enContentService';
+import { publicQuizItems } from '@/lib/english/quizPublic';
 
 /** Graded quizzes are stored as EnTestAttempt rows whose blueprint is `{ kind, v: 2 }`. */
 const QUIZ_VERSION = 2;
 
 export type DailyTasks = Partial<Record<QuizKind, { passedCount: number; wordCount: number; setId: string; setTitle: string }>>;
 
-type StoredItem = { position: number; activityKey: string; prompt: unknown; answer: string | null };
-
 function quizBlueprint(value: unknown): { kind?: string; v?: number } {
 	return value && typeof value === 'object' ? value as { kind?: string; v?: number } : {};
-}
-
-/** Items as the learner sees them: no answer key or accepted answers. */
-function publicItems(items: StoredItem[]) {
-	return [...items].sort((a, b) => a.position - b.position).map((item) => ({
-		position: item.position,
-		activityKey: item.activityKey,
-		prompt: item.prompt as Record<string, unknown>,
-		answer: item.answer,
-	}));
 }
 
 async function findQuiz(userId: string, attemptId: string) {
@@ -50,7 +39,7 @@ export async function startQuiz(userId: string, setId: string, kind: QuizKind, r
 			const data = quizBlueprint(attempt.blueprint);
 			return data.v === QUIZ_VERSION && data.kind === kind;
 		});
-		if (existing) return { attemptId: existing.id, items: publicItems(existing.items), resumed: true, wordCount: existing.wordCount };
+		if (existing) return { attemptId: existing.id, items: publicQuizItems(existing.items), resumed: true, wordCount: existing.wordCount };
 	}
 	const setItems = await prisma.enSetItem.findMany({
 		where: { setId, sense: { status: 'published' } },
@@ -107,7 +96,7 @@ export async function startQuiz(userId: string, setId: string, kind: QuizKind, r
 		},
 		include: { items: true },
 	});
-	return { attemptId: attempt.id, items: publicItems(attempt.items), resumed: false, wordCount: attempt.wordCount };
+	return { attemptId: attempt.id, items: publicQuizItems(attempt.items), resumed: false, wordCount: attempt.wordCount };
 }
 
 export async function answerQuiz(userId: string, attemptId: string, position: number, answer: string, responseMs: number) {

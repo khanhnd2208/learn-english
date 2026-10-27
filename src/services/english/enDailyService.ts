@@ -9,16 +9,18 @@ import { streakStats } from '@/lib/english/streak';
 import { reviewXpEvents } from '@/lib/english/xp';
 import { exampleParts, type SenseBundle } from '@/lib/english/senseBundle';
 import { getSenseBundles } from '@/services/english/enContentService';
+import { answerLayout, type AnswerLayout } from '@/lib/english/answerLayout';
 
 export type DailyPrompt = 'meaning' | 'cloze' | 'listen';
 
-export type DailyCloze = { before: string; after: string; meaningVi: string };
+export type DailyCloze = { before: string; after: string; meaningVi: string; layout: AnswerLayout };
 
 export type DailyItem = {
 	senseId: string;
 	kind: 'review' | 'new' | 'extra';
 	prompt: DailyPrompt;
 	cloze: DailyCloze | null;
+	layout: AnswerLayout;
 	bundle: SenseBundle;
 };
 
@@ -114,7 +116,7 @@ function promptFor(bundle: SenseBundle, kind: 'review' | 'new' | 'extra'): { pro
 	if (kind === 'new') return { prompt: 'meaning', cloze: null };
 	const clozes = bundle.examples.flatMap((example) => {
 		const parts = exampleParts(example);
-		return parts ? [{ before: parts.before, after: parts.after, meaningVi: example.meaningVi }] : [];
+		return parts ? [{ before: parts.before, after: parts.after, meaningVi: example.meaningVi, layout: answerLayout(parts.answer) }] : [];
 	});
 	const options: DailyPrompt[] = ['meaning'];
 	if (clozes.length) options.push('cloze');
@@ -142,7 +144,7 @@ export async function startToday(userId: string, options: { extra?: boolean } = 
 	const items = queue.flatMap((item): DailyItem[] => {
 		const senseId = item.kind === 'new' ? item.senseId : item.state.senseId;
 		const bundle = bySense.get(senseId);
-		return bundle ? [{ senseId, kind: item.kind, bundle, ...promptFor(bundle, item.kind) }] : [];
+		return bundle ? [{ senseId, kind: item.kind, bundle, layout: answerLayout(bundle.word.lemma), ...promptFor(bundle, item.kind) }] : [];
 	});
 	return {
 		sessionId: session.id,

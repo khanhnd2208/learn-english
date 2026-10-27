@@ -32,6 +32,7 @@ export default function TestRunner({ detail, kind }: { detail: EnglishSetDetail;
 	const [busy, setBusy] = useState(false);
 	const [retry, setRetry] = useState(0);
 	const shownAt = useRef(0);
+	const answering = useRef(false);
 	const storageKey = `quiz:${detail.id}:${kind}`;
 	const label = QUIZ_META[kind].label;
 
@@ -77,7 +78,8 @@ export default function TestRunner({ detail, kind }: { detail: EnglishSetDetail;
 	}, []);
 
 	async function answer(value: string) {
-		if (!started || busy) return;
+		if (!started || busy || answering.current) return;
+		answering.current = true;
 		setBusy(true);
 		setError('');
 		try {
@@ -95,6 +97,7 @@ export default function TestRunner({ detail, kind }: { detail: EnglishSetDetail;
 			setError(message(cause, 'Không lưu được câu trả lời. Hãy thử lại.'));
 			setRetry((value) => value + 1);
 		} finally {
+			answering.current = false;
 			setBusy(false);
 		}
 	}

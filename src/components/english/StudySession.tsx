@@ -6,6 +6,8 @@ import Button from '@/components/ui/Button';
 import MaterialIcon from '@/components/ui/MaterialIcon';
 import { useToast } from '@/components/ui/Toast';
 import EnglishAudioButton from '@/components/english/EnglishAudioButton';
+import WordAnswerInput from '@/components/english/WordAnswerInput';
+import { completeAnswer, isAnswerComplete } from '@/lib/english/answerLayout';
 import { englishPost } from '@/components/english/englishApi';
 import { exampleParts, type BundleExample, type SenseBundle } from '@/lib/english/senseBundle';
 import { intervalDays, isLongTerm } from '@/lib/english/schedule';
@@ -62,12 +64,6 @@ function WordDetails({ bundle, showMeaning = true }: { bundle: SenseBundle; show
 	</div>;
 }
 
-function LetterHint({ lemma }: { lemma: string }) {
-	return <p aria-label={`Gợi ý: bắt đầu bằng ${lemma[0]}, ${lemma.length} ký tự`} className="flex flex-wrap justify-center gap-1 font-mono text-lg font-bold">
-		{[...lemma].map((char, index) => <span key={index} className={`inline-flex h-9 w-7 items-center justify-center rounded-md border ${char === ' ' ? 'border-transparent' : 'border-border bg-surface'}`}>{index === 0 ? char : char === ' ' || char === '-' ? char : ''}</span>)}
-	</p>;
-}
-
 function scheduleNote(feedback: Feedback): string {
 	if (!feedback.scheduled) return 'Lượt làm lại không đổi lịch ôn.';
 	const days = intervalDays(feedback.boxAfter);
@@ -93,6 +89,7 @@ export default function StudySession({ onClose, extra = false }: { onClose: (stu
 	const [xpPop, setXpPop] = useState<{ id: number; xp: number } | null>(null);
 	const { toast } = useToast();
 	const answeredAny = useRef(false);
+	const submitting = useRef(false);
 	const shownAt = useRef(0);
 	const advanceTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 	const inputRef = useRef<HTMLInputElement | null>(null);
@@ -207,15 +204,18 @@ export default function StudySession({ onClose, extra = false }: { onClose: (stu
 
 	async function submit(event?: FormEvent<HTMLFormElement>, giveUp = false) {
 		event?.preventDefault();
-		if (!sessionId || !step || busy || feedback) return;
-		if (!giveUp && !answer.trim()) { inputRef.current?.focus(); return; }
+		if (!sessionId || !step || busy || submitting.current || feedback) return;
+		const layout = step.item.prompt === 'cloze' && step.item.cloze ? step.item.cloze.layout : step.item.layout;
+		if (!giveUp && !isAnswerComplete(layout, answer)) { inputRef.current?.focus(); return; }
+		const submittedAnswer = giveUp ? '' : completeAnswer(layout, answer);
+		submitting.current = true;
 		setBusy(true);
 		setError('');
 		try {
 			const result = await englishPost<Answered>('/api/daily/answer', {
 				sessionId,
 				senseId: step.item.senseId,
-				answer: giveUp ? '' : answer,
+				answer: submittedAnswer,
 				prompt: step.item.prompt,
 				responseMs: Date.now() - shownAt.current,
 				giveUp,
@@ -230,13 +230,14 @@ export default function StudySession({ onClose, extra = false }: { onClose: (stu
 			answeredAny.current = true;
 			reward(result.reward);
 			const correct = result.result === 'correct';
-			setFeedback({ result: result.result, typed: giveUp ? '' : answer.trim(), boxBefore: result.boxBefore, boxAfter: result.boxAfter, scheduled: result.scheduled });
+			setFeedback({ result: result.result, typed: submittedAnswer, boxBefore: result.boxBefore, boxAfter: result.boxAfter, scheduled: result.scheduled });
 			if (!step.retry) setOutcomes((current) => current.some((outcome) => outcome.item.senseId === step.item.senseId) ? current : [...current, { item: step.item, correct, boxBefore: result.boxBefore, boxAfter: result.boxAfter }]);
 			if (!correct && !step.retry) setSteps((current) => [...current, { key: `${step.item.senseId}-retry`, item: step.item, mode: 'recall', retry: true }]);
 			if (correct) advanceTimer.current = setTimeout(next, CORRECT_ADVANCE_MS);
 		} catch (cause) {
 			setError(cause instanceof Error ? cause.message : 'Không ghi nhận được câu trả lời.');
 		} finally {
+			submitting.current = false;
 			setBusy(false);
 		}
 	}
@@ -299,27 +300,12 @@ export default function StudySession({ onClose, extra = false }: { onClose: (stu
 						</>}
 					</div>
 
-					{step.retry && !feedback && <LetterHint lemma={step.item.bundle.word.lemma} />}
-
 					{!feedback ? <form onSubmit={(event) => void submit(event)} className="space-y-3">
-						<input
-							ref={inputRef}
-							autoFocus
-							aria-label="Gõ từ tiếng Anh"
-							autoComplete="off"
-							autoCapitalize="none"
-							autoCorrect="off"
-							spellCheck={false}
-							enterKeyHint="done"
-							placeholder="Gõ từ tiếng Anh…"
-							value={answer}
-							onChange={(event) => { setAnswer(event.target.value); setNearMiss(false); }}
-							className={`h-14 w-full rounded-panel border-2 bg-background px-4 text-center text-2xl font-bold tracking-wide text-foreground outline-none transition placeholder:text-base placeholder:font-normal placeholder:tracking-normal placeholder:text-muted focus:border-accent ${nearMiss ? 'border-warning' : 'border-border'}`}
-						/>
+						<WordAnswerInput inputRef={(node) => { inputRef.current = node; }} autoFocus layout={step.item.prompt === 'cloze' && step.item.cloze ? step.item.cloze.layout : step.item.layout} value={answer} onChange={(value) => { setAnswer(value); setNearMiss(false); }} firstLetter={step.retry ? step.item.bundle.word.lemma[0] : undefined} disabled={busy} />
 						{nearMiss && <p role="status" className="text-center text-sm font-bold text-warning">Gần đúng rồi. Kiểm tra lại chính tả rồi gửi lần nữa.</p>}
 						<div className="flex flex-col-reverse gap-2 sm:flex-row">
 							<Button variant="ghost" size="lg" className="sm:flex-1" disabled={busy} onClick={() => void submit(undefined, true)}>Tôi chưa nhớ</Button>
-							<Button type="submit" size="lg" className="sm:flex-[2]" loading={busy} disabled={!answer.trim()}>Kiểm tra</Button>
+							<Button type="submit" size="lg" className="sm:flex-[2]" loading={busy} disabled={!isAnswerComplete(step.item.prompt === 'cloze' && step.item.cloze ? step.item.cloze.layout : step.item.layout, answer)}>Kiểm tra</Button>
 						</div>
 					</form> : <div role="status" className={`space-y-4 rounded-panel border-2 p-4 ${feedback.result === 'correct' ? 'border-success/40 bg-success-subtle' : 'border-error/30 bg-error/5'}`}>
 						<p className={`flex items-center gap-2 font-black ${feedback.result === 'correct' ? 'text-success' : 'text-error'}`}>
