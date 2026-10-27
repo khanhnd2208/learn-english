@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { dailyQuests, emptyMetrics, parseQuests, questProgress, timeLeftLabel, topUpQuests, weeklyQuests, type QuestContext } from '@/lib/english/quests';
+import { dailyQuests, emptyMetrics, parseQuests, pickQuizSet, quizHrefFor, questProgress, timeLeftLabel, topUpQuests, weeklyQuests, type QuestContext } from '@/lib/english/quests';
 import { periodMetrics } from '@/lib/english/goalMetrics';
 import { achievementStatus, newlyEarned, nearestAchievements, type LifetimeMetrics } from '@/lib/english/achievements';
 
@@ -123,5 +123,19 @@ describe('topping up a board', () => {
 	it('leaves a shown quest alone', () => {
 		const shown = dailyQuests(ctx);
 		expect(topUpQuests(shown, dailyQuests({ ...ctx, tier: 3 }))).toEqual(shown);
+	});
+});
+
+describe('quiz quest target', () => {
+	it('opens the enrolled set with most words due, then most learned', () => {
+		const sets = [
+			{ id: 'a', enrolled: true, dueToday: 0, learned: 9 },
+			{ id: 'b', enrolled: true, dueToday: 3, learned: 1 },
+			{ id: 'c', enrolled: false, dueToday: 9, learned: 9 },
+		];
+		expect(pickQuizSet(sets)).toBe('b');
+		expect(pickQuizSet([{ ...sets[0]! }, { id: 'd', enrolled: true, dueToday: 0, learned: 2 }])).toBe('a');
+		expect(quizHrefFor(sets)).toBe('/sets/b/test?type=mcq');
+		expect(quizHrefFor([])).toBe('/store');
 	});
 });

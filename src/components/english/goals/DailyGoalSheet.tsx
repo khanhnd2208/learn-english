@@ -10,7 +10,7 @@ import { DAILY_GOAL_TIERS } from '@/lib/english/xp';
 
 function tierHint(index: number): string {
 	const { srs, review } = tierQuestTargets(index);
-	return `≈ ${srs} từ SRS + ${review} câu Ôn tập`;
+	return `≈ ${srs} từ ôn theo lịch + ${review} câu học & luyện`;
 }
 
 /** Pick one of four daily XP goals. A change shows up on tomorrow's quest board. */
@@ -45,7 +45,7 @@ export default function DailyGoalSheet({ open, onClose, current, todayGoal, intr
 	const dismiss = () => { if (intro) void save(current); else onClose(); };
 
 	return <Sheet open={open} onClose={dismiss} title={intro ? 'Chọn mục tiêu mỗi ngày' : 'Mục tiêu ngày'}>
-		<p className="text-sm text-muted">{intro ? 'Học đều mỗi ngày quan trọng hơn học nhiều một lúc. Bạn có thể đổi bất cứ lúc nào trong Nhiệm vụ.' : 'Mục tiêu tính bằng XP. SRS đúng +20, Ôn tập đúng +10, từ lên Nhớ lâu +100, câu sai 0 XP.'}</p>
+		<p className="text-sm text-muted">{intro ? 'Học đều mỗi ngày quan trọng hơn học nhiều một lúc. Bạn có thể đổi bất cứ lúc nào trong Nhiệm vụ.' : 'Mục tiêu tính bằng XP. Ôn theo lịch đúng +20, Học & luyện đúng +10, từ lên Nhớ lâu +100, câu sai 0 XP.'}</p>
 		<div role="radiogroup" aria-label="Mức mục tiêu" className="mt-4 space-y-2">
 			{DAILY_GOAL_TIERS.map((tier, index) => {
 				const active = selected === tier.xp;

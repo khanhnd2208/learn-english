@@ -12,12 +12,12 @@ export type QuestAction = 'srs' | 'review' | 'quiz';
 export type QuestIcon = 'target' | 'star' | 'sprout' | 'flag' | 'shield' | 'spark' | 'sword' | 'trophy' | 'mountain' | 'chest';
 
 export const QUEST_META: Record<QuestKey, { title: (target: number) => string; hint: string; icon: QuestIcon; action: QuestAction }> = {
-	srs_words: { title: (n) => n > 0 ? `SRS ${n} từ` : 'Hôm nay không có từ SRS', hint: 'Mỗi câu đúng lịch trả lời đúng +20 XP.', icon: 'sprout', action: 'srs' },
-	review_correct: { title: (n) => n > 0 ? `Ôn tập đúng ${n} câu` : 'Chưa có bộ từ để ôn tập', hint: 'Câu chính đúng trong Ôn tập +10 XP, tối đa 300 XP mỗi ngày.', icon: 'star', action: 'review' },
-	quiz_done: { title: (n) => n > 0 ? 'Làm 1 bài kiểm tra' : 'Chưa có bộ từ để kiểm tra', hint: 'Trắc nghiệm, điền từ hay nghe đều được.', icon: 'sword', action: 'quiz' },
+	srs_words: { title: (n) => n > 0 ? `Ôn theo lịch ${n} từ` : 'Hôm nay không có từ đến hạn', hint: 'Mỗi từ đến hạn trả lời đúng +20 XP.', icon: 'sprout', action: 'srs' },
+	review_correct: { title: (n) => n > 0 ? `Học & luyện đúng ${n} câu` : 'Chưa có bộ từ để học & luyện', hint: 'Câu chính đúng trong Học & luyện +10 XP, tối đa 300 XP mỗi ngày.', icon: 'star', action: 'review' },
+	quiz_done: { title: (n) => n > 0 ? 'Làm 1 bài kiểm tra' : 'Chưa có bộ từ để làm bài kiểm tra', hint: 'Trắc nghiệm, điền từ hay nghe đều được.', icon: 'sword', action: 'quiz' },
 	week_days: { title: (n) => `Học đủ ${n} ngày`, hint: 'Không cần ngày nào cũng học: nghỉ có kế hoạch vẫn ổn.', icon: 'mountain', action: 'srs' },
-	week_srs: { title: (n) => `SRS ${n} từ trong tuần`, hint: 'Cộng dồn từ thứ Hai.', icon: 'chest', action: 'srs' },
-	week_review: { title: (n) => `Ôn tập đúng ${n} câu trong tuần`, hint: 'Cộng dồn từ thứ Hai.', icon: 'trophy', action: 'review' },
+	week_srs: { title: (n) => `Ôn theo lịch ${n} từ trong tuần`, hint: 'Cộng dồn từ thứ Hai.', icon: 'chest', action: 'srs' },
+	week_review: { title: (n) => `Học & luyện đúng ${n} câu trong tuần`, hint: 'Cộng dồn từ thứ Hai.', icon: 'trophy', action: 'review' },
 };
 
 /** Targets per daily-goal tier: light, steady, keen, warrior. */
@@ -123,4 +123,19 @@ export function topUpQuests(current: Quest[], fresh: Quest[]): Quest[] {
 	});
 	const keys = new Set(filled.map((quest) => quest.key));
 	return [...filled, ...fresh.filter((quest) => !keys.has(quest.key))];
+}
+
+/**
+ * The set a "do a quiz" quest should open: the one with the most words due, then the most
+ * words learned, so the learner lands on a real quiz instead of a list to choose from.
+ */
+export function pickQuizSet(sets: Array<{ id: string; enrolled: boolean; dueToday: number; learned: number }>): string | null {
+	const enrolled = sets.filter((set) => set.enrolled);
+	enrolled.sort((a, b) => b.dueToday - a.dueToday || b.learned - a.learned);
+	return enrolled[0]?.id ?? null;
+}
+
+export function quizHrefFor(sets: Array<{ id: string; enrolled: boolean; dueToday: number; learned: number }>): string {
+	const id = pickQuizSet(sets);
+	return id ? `/sets/${id}/test?type=mcq` : '/store';
 }

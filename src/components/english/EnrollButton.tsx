@@ -30,6 +30,7 @@ export default function EnrollButton({ setId, enrolled, locked = false }: { setI
 			router.refresh();
 		} catch (enrollError) {
 			setError(enrollError instanceof Error ? enrollError.message : 'Không tải được bộ từ');
+			if (locked) window.setTimeout(() => inputRef.current?.select(), 0);
 		} finally {
 			setPending(false);
 		}
@@ -47,6 +48,7 @@ export default function EnrollButton({ setId, enrolled, locked = false }: { setI
 			</Button> : <form className="flex flex-wrap gap-2" onSubmit={(event) => { event.preventDefault(); void enroll(); }}>
 				<input ref={inputRef} type="text" aria-label="Mật khẩu bộ từ" placeholder="Nhập mật khẩu" value={accessCode} onChange={(event) => setAccessCode(event.target.value)} disabled={pending} className="min-h-10 min-w-32 flex-1 rounded-control border border-border bg-surface px-3 text-sm outline-none focus:border-accent" />
 				<Button type="submit" disabled={pending || !accessCode.trim()} loading={pending}>Mở khoá</Button>
+				<Button type="button" variant="ghost" disabled={pending} onClick={() => { setUnlocking(false); setAccessCode(''); setError(''); }}>Huỷ</Button>
 			</form>}
 			{error && <p className="text-sm text-error">{error}</p>}
 		</div>

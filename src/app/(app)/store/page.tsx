@@ -20,9 +20,9 @@ export default async function StorePage() {
 			{set.description && <p className="mt-2 line-clamp-2 text-sm text-muted">{set.description}</p>}
 			<div className="mt-auto flex flex-wrap items-center justify-between gap-3 pt-3">
 				<Link href={`/sets/${set.id}`} className="inline-flex min-h-11 items-center font-bold text-accent">{set.enrolled ? 'Mở bộ →' : 'Xem trước →'}</Link>
-				{set.enrolled ? <span className="text-sm font-bold text-success">Đã tải ✓</span> : <EnrollButton setId={set.id} enrolled={false} locked={set.locked} />}
+				{set.enrolled ? <span className="text-sm font-bold text-success">Đã tải ✓</span> : set.status === 'published' ? <EnrollButton setId={set.id} enrolled={false} locked={set.locked} /> : <span className="text-xs font-bold text-muted">Đưa lên cửa hàng để học viên tải</span>}
 			</div>
-			{isAdmin && <StoreAdminControls setId={set.id} title={set.title} status={set.status} listed={set.listed ?? true} accessCode={set.accessCode ?? null} learners={set.learners ?? 0} />}
+			{isAdmin && <StoreAdminControls setId={set.id} title={set.title} status={set.status} listed={set.listed} accessCode={set.accessCode ?? null} learners={set.learners ?? 0} />}
 		</li>)}</ul>}
 	</div>;
 }

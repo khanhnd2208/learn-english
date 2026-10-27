@@ -29,13 +29,22 @@ async function readInsideRoot(relativeName: string): Promise<{ bytes: Buffer; ty
 	}
 }
 
+/** Audio of a word in a downloaded set, or in an open store set (listed, no password). */
+function audibleSense(viewer: { userId: string; admin: boolean }) {
+	if (viewer.admin) return {};
+	return { setItems: { some: { set: { status: 'published' as const, OR: [
+		{ enrollments: { some: { userId: viewer.userId } } },
+		{ listed: true, accessCode: null },
+	] } } } };
+}
+
 export async function readEnglishAudio(query: {
 	senseId?: string | null;
 	exampleId?: string | null;
-}): Promise<{ bytes: Buffer; type: string }> {
+}, viewer: { userId: string; admin: boolean }): Promise<{ bytes: Buffer; type: string }> {
 	if (query.senseId) {
 		const sense = await prisma.enSense.findFirst({
-			where: { id: query.senseId, status: 'published' },
+			where: { id: query.senseId, status: 'published', ...audibleSense(viewer) },
 			include: { word: { select: { audioPath: true, audioUkPath: true, audioUsPath: true } } },
 		});
 		const audioName = sense?.word.audioPath || sense?.word.audioUkPath || sense?.word.audioUsPath || '';
@@ -45,7 +54,7 @@ export async function readEnglishAudio(query: {
 	}
 	if (query.exampleId) {
 		const example = await prisma.enExample.findFirst({
-			where: { id: query.exampleId, status: 'published' },
+			where: { id: query.exampleId, status: 'published', sense: audibleSense(viewer) },
 			select: { audioPath: true },
 		});
 		const file = example ? await readInsideRoot(example.audioPath) : null;
