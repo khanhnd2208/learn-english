@@ -13,7 +13,7 @@ const SAMPLE_FILES = [
 ] as const;
 
 describe('English local sample packs', () => {
-	it.each(SAMPLE_FILES)('%s follows the current schema and contains the expected number of publishable words', (relativePath) => {
+	it.each(SAMPLE_FILES)('%s (v3, upgraded on import) contains the expected number of publishable words', (relativePath) => {
 		const input: unknown = JSON.parse(readFileSync(resolve(process.cwd(), relativePath), 'utf8'));
 		const assessment = assessEnglishPack(input);
 		const expectedCount = relativePath.includes('motivation-leadership') ? assessment.pack!.words.length : relativePath.endsWith('-15.json') ? 15 : 10;

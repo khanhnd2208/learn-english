@@ -11,6 +11,9 @@ export const EN_LOCKED_PREVIEW_WORDS = 5;
 export const EN_MAX_JSON_BODY_BYTES = 4 * 1024 * 1024;
 export const EN_MAX_WORDS_PER_PACK = 500;
 export const EN_MAX_EXAMPLES_PER_WORD = 8;
+/** Hidden quiz sentences per sense, on top of the one example shown on the card. */
+export const EN_QUIZ_EXAMPLES_MIN = 2;
+export const EN_QUIZ_EXAMPLES_MAX = 4;
 export const EN_TX_TIMEOUT_MS = 30_000;
 export const EN_TX_MAX_WAIT_MS = 10_000;
 /** Saving a whole pack (up to EN_MAX_WORDS_PER_PACK words) runs in one transaction. */

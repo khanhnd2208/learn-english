@@ -11,6 +11,7 @@ import SessionSummary from '@/components/english/session/SessionSummary';
 import EnglishAudioButton from '@/components/english/EnglishAudioButton';
 import QuestionView, { type QuestionFeedback } from '@/components/english/quiz/QuestionView';
 import { answerLayout } from '@/lib/english/answerLayout';
+import { cardExampleOf } from '@/lib/english/senseBundle';
 
 export type PracticeKind = QuizKind | 'mix';
 
@@ -39,6 +40,7 @@ export default function PracticeRunner({ detail, kind, seed }: { detail: English
 	const taken = takePracticeStep(queue);
 	const step = taken.current;
 	const bundle = source.bundles.find((entry) => entry.sense.id === step?.senseId);
+	const cardExample = bundle ? cardExampleOf(bundle.examples) : null;
 	const wordIndex = detail.words.findIndex((word) => word.bundle.sense.id === step?.senseId);
 	// Rebuilt per step (index) so a retried word gets freshly shuffled choices.
 	const item: ActivityItem | null = useMemo(
@@ -103,7 +105,7 @@ export default function PracticeRunner({ detail, kind, seed }: { detail: English
 			/>
 			{feedback && <AnswerFeedback correct={feedback.correct}>
 				{!feedback.correct && <p className="font-bold">Đáp án: {feedback.expected}</p>}
-				{bundle && <><div className="flex items-center justify-between gap-2"><p className="text-sm"><span className="font-bold">{bundle.word.lemma}</span> {bundle.word.ipa && <span className="font-mono text-muted">{bundle.word.ipa}</span>} · {bundle.sense.meaningVi}</p><EnglishAudioButton compact senseId={bundle.sense.id} lemma={bundle.word.lemma} recordedAudioAvailable={Boolean(bundle.word.audioPath)} /></div>{bundle.examples[0] && <p className="text-sm text-muted">{bundle.examples[0].english.replace('___', bundle.examples[0].target)}</p>}</>}
+				{bundle && <><div className="flex items-center justify-between gap-2"><p className="text-sm"><span className="font-bold">{bundle.word.lemma}</span> {bundle.word.ipa && <span className="font-mono text-muted">{bundle.word.ipa}</span>} · {bundle.sense.meaningVi}</p><EnglishAudioButton compact senseId={bundle.sense.id} lemma={bundle.word.lemma} recordedAudioAvailable={Boolean(bundle.word.audioPath)} /></div>{cardExample && <p className="text-sm text-muted">{cardExample.english.replace('___', cardExample.target)}</p>}</>}
 				{!feedback.correct && <><p className="text-xs text-muted">Từ này sẽ quay lại sau vài câu.</p><button type="button" autoFocus onClick={advance} className="min-h-11 w-full rounded-control bg-accent px-4 font-bold text-accent-foreground">Tiếp tục ↵</button></>}
 			</AnswerFeedback>}
 		</div>}

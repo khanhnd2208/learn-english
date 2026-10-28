@@ -61,6 +61,8 @@ model EnSense {
   noteVi       String          @default("")
   /// Optional advanced reading: [{ kind, phrase, meaningVi, example }] (see advancedNotes.ts).
   advanced     Json            @default("[]")
+  /// Same-family words: [{ word, partOfSpeech, meaningVi }] (see wordFamily.ts).
+  family       Json            @default("[]")
   status       EnContentStatus @default(draft)
   sortOrder    Int             @default(0)
   createdAt    DateTime        @default(now())
@@ -82,7 +84,7 @@ model EnExample {
   target       String
   targetStart  Int?
   targetLength Int?
-  /// Study examples are displayed; grade examples can be used in cloze questions.
+  /// The first study example is the one shown on the card; grade examples are hidden quiz sentences.
   role         EnExampleRole   @default(study)
   status       EnContentStatus @default(draft)
   sortOrder    Int             @default(0)

@@ -11,7 +11,7 @@ import { useRewardToasts } from '@/components/english/goals/useRewardToasts';
 import { englishPost } from '@/components/english/englishApi';
 import QuestionView, { type PublicQuestion, type QuestionFeedback } from '@/components/english/quiz/QuestionView';
 import { EN_GUIDED_CHUNK_SIZE } from '@/lib/english/constants';
-import type { SenseBundle } from '@/lib/english/senseBundle';
+import { cardExampleOf, type SenseBundle } from '@/lib/english/senseBundle';
 import type { GoalReward } from '@/services/english/enGoalService';
 
 export type GuidedPublicQuestion = PublicQuestion & {
@@ -144,6 +144,7 @@ export default function GuidedReviewSession({ initial, onClose }: { initial: Gui
 
 	const word = session.words[viewedWord];
 	const questionWord = shownQuestion ? session.words.find((entry) => entry.sense.id === shownQuestion.senseId) : null;
+	const questionExample = questionWord ? cardExampleOf(questionWord.examples) : null;
 	const covered = session.poolSize - session.remainingCount;
 	const lapChunks = Math.max(1, Math.ceil(session.poolSize / EN_GUIDED_CHUNK_SIZE));
 	const lapChunk = Math.min(lapChunks, Math.max(1, Math.ceil(covered / EN_GUIDED_CHUNK_SIZE)));
@@ -169,7 +170,7 @@ export default function GuidedReviewSession({ initial, onClose }: { initial: Gui
 					<QuestionView key={shownQuestion.id} item={shownQuestion} disabled={busy} feedback={feedback} onAnswer={(value) => void answer(value)} audioText={questionWord?.word.lemma} recordedAudioAvailable={Boolean(questionWord && (questionWord.word.audioPath))} />
 					{feedback ? <AnswerFeedback correct={feedback.correct}>
 						{!feedback.correct && <p className="font-bold">Đáp án: {feedback.expected}</p>}
-						{questionWord && <><div className="flex items-center justify-between gap-2"><p className="font-bold">{questionWord.word.lemma} <span className="font-normal text-muted">{questionWord.word.ipa}</span></p><EnglishAudioButton compact senseId={questionWord.sense.id} lemma={questionWord.word.lemma} recordedAudioAvailable={Boolean(questionWord.word.audioPath)} /></div><p>{questionWord.sense.meaningVi}</p>{questionWord.examples[0] && <p className="text-sm text-muted">{questionWord.examples[0].english.replace('___', questionWord.examples[0].target)}<br />{questionWord.examples[0].meaningVi}</p>}</>}
+						{questionWord && <><div className="flex items-center justify-between gap-2"><p className="font-bold">{questionWord.word.lemma} <span className="font-normal text-muted">{questionWord.word.ipa}</span></p><EnglishAudioButton compact senseId={questionWord.sense.id} lemma={questionWord.word.lemma} recordedAudioAvailable={Boolean(questionWord.word.audioPath)} /></div><p>{questionWord.sense.meaningVi}</p>{questionExample && <p className="text-sm text-muted">{questionExample.english.replace('___', questionExample.target)}<br />{questionExample.meaningVi}</p>}</>}
 						<button type="button" autoFocus onClick={continueAfterFeedback} className="min-h-11 w-full rounded-control bg-accent px-5 font-bold text-accent-foreground">Tiếp tục →</button>
 					</AnswerFeedback> : <button type="button" disabled={busy} onClick={() => void answer('')} className="min-h-11 w-full rounded-control border border-border px-4 font-bold">Chưa nhớ</button>}
 				</div>}

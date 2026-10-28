@@ -1,7 +1,7 @@
 import type { ActivityContext, ActivityDefinition, ActivityItem, ActivityKey } from '@/lib/english/activities/types';
 import { chooseDistractors } from '@/lib/english/activities/distractors';
 import { gradeEnglishAnswer } from '@/lib/english/grade';
-import { exampleParts, type SenseBundle } from '@/lib/english/senseBundle';
+import { exampleParts, quizExamplesOf, type SenseBundle } from '@/lib/english/senseBundle';
 import { lemmaKeyOf, normalizeLearnerText, uniqueTexts } from '@/lib/english/text';
 
 function hasAudio(sense: SenseBundle): boolean {
@@ -45,8 +45,7 @@ function lemmaOptions(sense: SenseBundle, ctx: ActivityContext): string[] | null
 }
 
 function clozeExamples(sense: SenseBundle) {
-	return sense.examples.flatMap((example) => {
-		if (example.role !== 'grade') return [];
+	return quizExamplesOf(sense.examples).flatMap((example) => {
 		const cloze = exampleParts(example);
 		return cloze ? [{ example, cloze }] : [];
 	});
