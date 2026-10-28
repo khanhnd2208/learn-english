@@ -9,6 +9,8 @@ import { initialPracticeQueue, queueAfterAnswer, takePracticeStep, type Practice
 import FocusFrame from '@/components/english/quiz/FocusFrame';
 import QuestionView, { type QuestionFeedback } from '@/components/english/quiz/QuestionView';
 import { answerLayout } from '@/lib/english/answerLayout';
+import InfoHint from '@/components/ui/InfoHint';
+import { HINTS } from '@/lib/english/hintCopy';
 
 export type PracticeKind = QuizKind | 'mix';
 
@@ -118,10 +120,10 @@ export default function PracticeRunner({ detail, kind }: { detail: EnglishSetDet
 				<p className="label-caps">Từ cần chú ý</p>
 				<ul className="mt-2 divide-y divide-border">{wrong.map((id) => <li key={id} className="py-2"><span className="font-bold">{lemmaOf(id)?.word.lemma}</span> <span className="text-sm text-muted">· {lemmaOf(id)?.sense.meaningVi}</span></li>)}</ul>
 			</div>}
-			<p className="mt-4 text-xs text-muted">Luyện tập không đổi lịch ôn. Muốn tính nhiệm vụ ngày, hãy làm bài kiểm tra.</p>
+			
 			<div className="mt-6 flex flex-wrap justify-center gap-3">
 				<button type="button" onClick={restart} className="min-h-11 rounded-control bg-accent px-5 font-bold text-accent-foreground">Luyện lại</button>
-				<Link href={`/sets/${detail.id}/test?type=${kind === 'mix' ? 'mcq' : kind}`} className="inline-flex min-h-11 items-center rounded-control border border-border px-5 font-bold">Làm bài kiểm tra {kind === 'mix' ? 'MCQ' : label}</Link>
+				<span className="inline-flex items-center gap-2"><Link href={`/sets/${detail.id}/test?type=${kind === 'mix' ? 'mcq' : kind}`} className="inline-flex min-h-11 items-center rounded-control border border-border px-5 font-bold">Làm bài kiểm tra {kind === 'mix' ? 'MCQ' : label}</Link><InfoHint title={HINTS.practice.title}>{HINTS.practice.body}</InfoHint></span>
 			</div>
 		</section>}
 	</FocusFrame>;
