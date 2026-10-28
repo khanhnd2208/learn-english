@@ -12,7 +12,7 @@ import { HINTS } from '@/lib/english/hintCopy';
 
 function tierHint(index: number): string {
 	const { srs, review } = tierQuestTargets(index);
-	return `≈ ${srs} từ ôn theo lịch + ${review} câu học & luyện`;
+	return `≈ ${srs} từ ôn + ${review} câu học thêm`;
 }
 
 /** Pick one of four daily XP goals. A change shows up on tomorrow's quest board. */
