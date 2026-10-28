@@ -2,6 +2,7 @@ import fs from 'fs';
 import { prisma } from '@/lib/prisma';
 import { AppError } from '@/lib/appError';
 import { audioContentType, englishAudioRoot, resolveAudioFile } from '@/lib/english/audioPath';
+import { synthesizeSpeech } from '@/services/english/enTtsService';
 
 export async function audioFileExists(relativeName: string): Promise<boolean> {
 	const root = englishAudioRoot();
@@ -45,19 +46,20 @@ export async function readEnglishAudio(query: {
 	if (query.senseId) {
 		const sense = await prisma.enSense.findFirst({
 			where: { id: query.senseId, status: 'published', ...audibleSense(viewer) },
-			include: { word: { select: { audioPath: true, audioUkPath: true, audioUsPath: true } } },
+			include: { word: { select: { lemma: true, audioPath: true, audioUkPath: true, audioUsPath: true } } },
 		});
 		const audioName = sense?.word.audioPath || sense?.word.audioUkPath || sense?.word.audioUsPath || '';
-		const file = sense ? await readInsideRoot(audioName) : null;
+		// A recorded file wins; otherwise the server speaks the word itself.
+		const file = sense ? await readInsideRoot(audioName) ?? await synthesizeSpeech(sense.word.lemma) : null;
 		if (!file) throw new AppError('Chưa có audio cho từ này', 404);
 		return file;
 	}
 	if (query.exampleId) {
 		const example = await prisma.enExample.findFirst({
 			where: { id: query.exampleId, status: 'published', sense: audibleSense(viewer) },
-			select: { audioPath: true },
+			select: { audioPath: true, english: true },
 		});
-		const file = example ? await readInsideRoot(example.audioPath) : null;
+		const file = example ? await readInsideRoot(example.audioPath) ?? await synthesizeSpeech(example.english) : null;
 		if (!file) throw new AppError('Chưa có audio cho câu ví dụ', 404);
 		return file;
 	}

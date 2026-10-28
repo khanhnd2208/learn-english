@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from 'react';
 import Button from '@/components/ui/Button';
 import MaterialIcon from '@/components/ui/MaterialIcon';
 import { classifyPlayError } from '@/lib/english/audioPlayback';
+import { useServerTts } from '@/lib/useServerTts';
 import { useSpeech } from '@/lib/useSpeech';
 
 const failedAudioSenses = new Set<string>();
@@ -28,12 +29,18 @@ export default function EnglishAudioButton({
 	onUnavailable?: () => void;
 }) {
 	const { supported, ready, speaking, failed: speechFailed, speak, stop, prime } = useSpeech();
+	const serverTts = useServerTts();
 	const audio = useRef<HTMLAudioElement | null>(null);
 	const [playing, setPlaying] = useState(false);
 	const [failed, setFailed] = useState(false);
 	/** The browser blocked playback without a recent tap; the file itself is fine. */
 	const [needsTap, setNeedsTap] = useState(false);
-	const [useTtsFallback, setUseTtsFallback] = useState(!recordedAudioAvailable || failedAudioSenses.has(senseId));
+	/** The audio file for this word failed once; browser speech takes over. */
+	const [fileFailed, setFileFailed] = useState(failedAudioSenses.has(senseId));
+	// A real file plays through the media channel, so it works where browser speech is silent
+	// (iOS silent switch, no English voice installed). Without a recording the server speaks the word.
+	const playFile = !fileFailed && (recordedAudioAvailable || serverTts !== false);
+	const ttsOnly = !playFile;
 	const autoPlayed = useRef(false);
 	const fallbackTimer = useRef<number | null>(null);
 
@@ -53,7 +60,7 @@ export default function EnglishAudioButton({
 		if (speaking || playing) { audio.current?.pause(); stop(); setPlaying(false); return; }
 		setFailed(false);
 		setNeedsTap(false);
-		if (useTtsFallback || !recordedAudioAvailable) {
+		if (ttsOnly) {
 			if (!(allowTts && lemma && speak(lemma, 'en-US'))) setFailed(true);
 			return;
 		}
@@ -83,14 +90,15 @@ export default function EnglishAudioButton({
 			fallbackTimer.current = null;
 			element.pause();
 			setPlaying(false);
-			setUseTtsFallback(allowTts && Boolean(lemma));
+			setFileFailed(allowTts && Boolean(lemma));
 			if (!(allowTts && lemma && speak(lemma, 'en-US'))) setFailed(true);
 		};
 		element.onerror = fallback;
 		fallbackTimer.current = window.setTimeout(() => {
 			if (started || element.ended) return;
 			fallback();
-		}, 4_000);
+		// The first request for a synthesized word waits for the voice to be generated.
+		}, recordedAudioAvailable ? 4_000 : 10_000);
 		void element.play().catch((error: unknown) => {
 			if (classifyPlayError(error) === 'broken') { fallback(); return; }
 			if (audio.current !== element) return;
@@ -103,20 +111,20 @@ export default function EnglishAudioButton({
 
 	useEffect(() => {
 		if (!autoPlay || autoPlayed.current) return;
-		if ((useTtsFallback || !recordedAudioAvailable) && !ready) return;
+		if (!recordedAudioAvailable && serverTts === null) return;
+		if (ttsOnly && !ready) return;
 		const timer = setTimeout(() => {
 			autoPlayed.current = true;
 			play();
 		}, 0);
 		return () => clearTimeout(timer);
 	// eslint-disable-next-line react-hooks/exhaustive-deps -- play once when audio becomes ready
-	}, [autoPlay, ready]);
+	}, [autoPlay, ready, serverTts]);
 
 	const unavailable = failed || speechFailed;
 	const onUnavailableRef = useRef(onUnavailable);
 	useEffect(() => { onUnavailableRef.current = onUnavailable; }, [onUnavailable]);
 	useEffect(() => { if (unavailable) onUnavailableRef.current?.(); }, [unavailable]);
-	const ttsOnly = useTtsFallback || !recordedAudioAvailable;
 	if (compact) {
 		const note = needsTap ? 'Bấm để nghe' : unavailable ? 'Không phát được' : '';
 		const button = <button type="button" onClick={play} disabled={ttsOnly && (!ready || !supported)} aria-label={playing || speaking ? 'Dừng phát âm' : `Nghe phát âm ${lemma}`} title={unavailable ? 'Không phát được — kiểm tra âm lượng/công tắc im lặng' : 'Nghe phát âm'} className={`inline-flex size-11 shrink-0 items-center justify-center rounded-full border border-border bg-surface text-accent transition hover:border-accent hover:bg-accent-subtle focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent disabled:opacity-40 ${playing || speaking || needsTap ? 'border-accent bg-accent-subtle' : ''} ${needsTap ? 'animate-pulse motion-reduce:animate-none' : ''}`}><MaterialIcon name={playing || speaking ? 'graphic_eq' : unavailable && !needsTap ? 'volume_off' : 'volume_up'} size={22} /></button>;

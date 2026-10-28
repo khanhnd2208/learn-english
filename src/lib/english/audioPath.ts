@@ -1,3 +1,4 @@
+import { createHash } from 'crypto';
 import path from 'path';
 
 /** Audio lives outside the release directory. `ENGLISH_AUDIO_ROOT` points at that shared folder. */
@@ -44,4 +45,19 @@ export function parseByteRange(header: string | null, size: number): ByteRange |
 	const requestedEnd = match[2] ? Number(match[2]) : size - 1;
 	if (!Number.isInteger(requestedEnd) || requestedEnd < start) return null;
 	return { start, end: Math.min(requestedEnd, size - 1) };
+}
+
+/** Longest text the server will synthesize; lemmas and short phrases fit easily. */
+export const TTS_MAX_CHARS = 120;
+
+/** Collapse whitespace and drop control characters. Returns '' when there is nothing to say or it is too long. */
+export function normalizeTtsText(text: string): string {
+	const clean = text.replace(/[\u0000-\u001f\u007f]/g, ' ').replace(/\s+/g, ' ').trim();
+	return clean.length > 0 && clean.length <= TTS_MAX_CHARS ? clean : '';
+}
+
+/** Cache file for synthesized speech, keyed by the voice model and the exact text. */
+export function ttsCacheName(text: string, model: string): string {
+	const hash = createHash('sha256').update(`${path.basename(model)}\n${text}`).digest('hex').slice(0, 32);
+	return path.join('tts', `${hash}.wav`);
 }
