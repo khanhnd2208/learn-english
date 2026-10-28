@@ -82,6 +82,17 @@ export function questProgress(quest: Quest, metrics: QuestMetrics): { current: n
 	return { current, done: current >= quest.target };
 }
 
+/** A quest with nothing to do today (no due words, no sets) is idle, not done. */
+export function isIdleQuest(quest: Pick<Quest, 'target'>): boolean {
+	return quest.target === 0;
+}
+
+/** Quests still in play plus the daily XP goal: the "x/y" shown on the note and in the sidebar. */
+export function todayQuestCount(quests: Array<Pick<Quest, 'target'> & { done: boolean }>, xp: number, goal: number): { done: number; total: number } {
+	const active = quests.filter((quest) => !isIdleQuest(quest));
+	return { done: active.filter((quest) => quest.done).length + (xp >= goal ? 1 : 0), total: active.length + 1 };
+}
+
 /** Quest boards are stored as JSON; drop anything that is not a known quest. */
 export function parseQuests(value: unknown): Quest[] {
 	if (!Array.isArray(value)) return [];

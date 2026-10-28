@@ -50,7 +50,7 @@ export type GoalBoard = {
 		chestOpened: boolean;
 		chestXp: number;
 		resetsAt: string;
-		days: Array<{ day: string; studied: boolean; goalMet: boolean; isToday: boolean; isFuture: boolean }>;
+		days: Array<{ day: string; xp: number; studied: boolean; goalMet: boolean; isToday: boolean; isFuture: boolean }>;
 	};
 	achievements: GoalAchievement[];
 	nearest: string[];
@@ -248,6 +248,8 @@ function boardView(state: GoalState): GoalBoard {
 	const statuses = achievementStatus(state.lifetime, unlocked);
 	const goalDays = new Set(state.xpRows.filter((row) => row.kind === 'goal').map((row) => row.day));
 	const studiedDays = new Set(state.overview.week.filter((entry) => entry.studied).map((entry) => entry.day));
+	const dayXp = new Map<string, number>();
+	for (const row of state.xpRows) dayXp.set(row.day, (dayXp.get(row.day) ?? 0) + row.xp);
 	return {
 		level: levelFromXp(state.totalXp),
 		seenLevel: state.profile?.seenLevel ?? 0,
@@ -268,7 +270,7 @@ function boardView(state: GoalState): GoalBoard {
 			chestOpened: state.claimed.has(chestSourceKey(state.weekStart)),
 			chestXp: XP.weeklyChest,
 			resetsAt: vnDayStart(shiftVnDay(state.weekStart, 7)).toISOString(),
-			days: state.weekDays.map((day) => ({ day, studied: studiedDays.has(day), goalMet: goalDays.has(day), isToday: day === state.today, isFuture: day > state.today })),
+			days: state.weekDays.map((day) => ({ day, xp: dayXp.get(day) ?? 0, studied: studiedDays.has(day), goalMet: goalDays.has(day), isToday: day === state.today, isFuture: day > state.today })),
 		},
 		achievements: statuses.map((status) => ({
 			id: status.def.id,

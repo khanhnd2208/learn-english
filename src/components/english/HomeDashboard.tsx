@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import StageBar from '@/components/english/StageBar';
-import QuestItem from '@/components/english/goals/QuestItem';
+import QuestNote from '@/components/english/goals/QuestNote';
 import ProgressStrip from '@/components/english/home/ProgressStrip';
 import TodayHero from '@/components/english/home/TodayHero';
 import type { EnglishSetSummary } from '@/services/english/enCatalogService';
@@ -25,11 +25,10 @@ function SetRow({ set }: { set: EnglishSetSummary }) {
 
 /**
  * "Today" home: one action first, then how the learner is doing, then their sets.
- * On wide screens progress, quests and the 7-day forecast move to a side column.
+ * Today's quests are always pinned beside it; on wide screens they and progress move to a side column.
  */
 export default function HomeDashboard({ overview, sets, board, resetsIn, greeting, dateLabel }: { overview: TodayOverview; sets: EnglishSetSummary[]; board: GoalBoard; resetsIn: string; greeting: string; dateLabel: string }) {
 	const enrolled = sets.filter((set) => set.enrolled).sort((a, b) => b.dueToday - a.dueToday);
-	const questsDone = board.today.quests.filter((quest) => quest.done).length;
 	const stages = enrolled.reduce((sum, set) => ({ new: sum.new + set.stages.new, learning: sum.learning + set.stages.learning, remembering: sum.remembering + set.stages.remembering, longTerm: sum.longTerm + set.stages.longTerm }), { new: 0, learning: 0, remembering: 0, longTerm: 0 });
 	const hasSets = enrolled.length > 0;
 
@@ -39,15 +38,11 @@ export default function HomeDashboard({ overview, sets, board, resetsIn, greetin
 		<div className="grid grid-cols-1 gap-4 lg:grid-cols-3 lg:items-start lg:gap-5">
 			<div className="min-w-0 lg:col-span-2 lg:row-start-1"><TodayHero overview={overview} xp={board.today.xp} goal={board.today.goal} /></div>
 
-			{hasSets && <div className="min-w-0 lg:col-start-3 lg:row-start-1"><ProgressStrip streak={overview.streakDays} longTerm={board.longTermCount} level={board.level} xp={board.today.xp} goal={board.today.goal} stages={stages} /></div>}
+			<div className="min-w-0 lg:col-start-3 lg:row-start-1"><QuestNote board={board} resetsIn={resetsIn} hasSets={hasSets} /></div>
 
-			{hasSets && <section aria-labelledby="today-quests-heading" className="mode-card min-w-0 lg:col-start-3 lg:row-start-2">
-				<div className="flex items-baseline justify-between gap-2"><h2 id="today-quests-heading" className="text-lg">Nhiệm vụ hôm nay</h2><span className={`text-sm font-bold tabular-nums ${questsDone === board.today.quests.length ? 'text-success' : 'text-muted'}`}>{questsDone}/{board.today.quests.length}</span></div>
-				<ul className="mt-2">{board.today.quests.map((quest) => <QuestItem key={quest.key} quest={quest} dense />)}</ul>
-				<p className="mt-2 flex items-center justify-between gap-2 text-xs text-muted"><span>Làm mới sau {resetsIn}</span><Link href="/quests" className="inline-flex min-h-11 items-center text-sm font-bold text-accent">Tất cả →</Link></p>
-			</section>}
+			{hasSets && <div className="min-w-0 lg:col-start-3 lg:row-start-2"><ProgressStrip streak={overview.streakDays} longTerm={board.longTermCount} level={board.level} stages={stages} /></div>}
 
-			{hasSets && <section id="your-sets" aria-labelledby="your-sets-heading" className="min-w-0 overflow-hidden rounded-panel border border-border bg-surface lg:col-span-2 lg:row-span-2 lg:row-start-2">
+			{hasSets && <section id="your-sets" aria-labelledby="your-sets-heading" className="min-w-0 overflow-hidden rounded-panel border border-border bg-surface lg:col-span-2 lg:col-start-1 lg:row-span-2 lg:row-start-2">
 				<div className="flex items-center justify-between gap-3 border-b border-border px-4 py-2"><h2 id="your-sets-heading" className="text-lg">Đang học <span className="text-sm font-normal text-muted">({enrolled.length})</span></h2><Link href="/sets" className="inline-flex min-h-11 shrink-0 items-center text-sm font-bold text-accent">Xem tất cả →</Link></div>
 				<ul>{enrolled.slice(0, SETS_SHOWN).map((set) => <SetRow key={set.id} set={set} />)}</ul>
 

@@ -84,6 +84,10 @@
 	--hero-landscape-opacity: .22;
 	--card-amber-bg: linear-gradient(145deg, #fff2ce, #fffaf0);
 	--card-amber-border: #d6b760;
+	--note-bg: #fff7d9;
+	--note-border: #e6cf86;
+	--note-shadow: #e2c879;
+	--note-tape: rgb(146 112 179 / 28%);
 	--card-lilac-bg: linear-gradient(145deg, #eee5f5, #fcf8ff);
 	--card-lilac-border: #c1abd2;
 	--day-done-bg: #dfe9cf;
@@ -161,6 +165,10 @@
 	--hero-landscape-opacity: .13;
 	--card-amber-bg: linear-gradient(145deg, #49402f, #35313a);
 	--card-amber-border: #897546;
+	--note-bg: #3e3829;
+	--note-border: #6f6040;
+	--note-shadow: #262217;
+	--note-tape: rgb(197 161 227 / 30%);
 	--card-lilac-bg: linear-gradient(145deg, #3b3247, #302d3d);
 	--card-lilac-border: #6c5a7c;
 	--day-done-bg: #43513f;
@@ -468,10 +476,10 @@ input:focus-visible, textarea:focus-visible, select:focus-visible { outline-colo
 .game-hero > .adventure-landscape { opacity: var(--hero-landscape-opacity); filter: saturate(.62) sepia(.16); }
 .game-card-amber { background: var(--card-amber-bg); border-color: var(--card-amber-border); }
 .game-card-lilac { background: var(--card-lilac-bg); border-color: var(--card-lilac-border); }
-.week-day-tile { border: 2px solid var(--border); border-radius: 7px; }
-.week-day-tile.is-done { border-color: var(--day-done-border); background: var(--day-done-bg); color: var(--day-done-fg); box-shadow: 0 3px 0 var(--day-done-shadow); }
-.week-day-tile.is-pending { border-color: var(--day-pending-border); background: var(--day-pending-bg); color: var(--day-pending-fg); }
-.week-day-tile.is-future { border-style: dashed; background: var(--day-future-bg); color: var(--day-future-fg); }
+.quest-note { position: relative; border: 1px solid var(--note-border); border-radius: 6px 6px 22px 6px; background: var(--note-bg); box-shadow: 0 3px 0 var(--note-shadow), 0 8px 18px rgb(65 48 63 / 8%); }
+.quest-note::before { content: ""; position: absolute; top: -9px; left: 50%; width: 76px; height: 18px; transform: translateX(-50%) rotate(-2deg); border-radius: 2px; background: var(--note-tape); }
+.quest-note::after { content: ""; position: absolute; right: -1px; bottom: -1px; width: 22px; height: 22px; border-top-left-radius: 6px; background: linear-gradient(135deg, color-mix(in srgb, var(--note-border) 70%, var(--note-bg)) 50%, var(--background) 50%); }
+.stat-tile { border: 2px solid var(--border); border-radius: 12px; background: var(--surface); box-shadow: 0 3px 0 var(--border); }
 
 @media (max-width: 640px) {
 	.game-hero { min-height: 200px; }
