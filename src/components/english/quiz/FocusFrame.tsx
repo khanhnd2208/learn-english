@@ -1,6 +1,8 @@
 'use client';
 
-import { useEffect, type ReactNode } from 'react';
+import { useEffect, useState, type ReactNode } from 'react';
+import ConfirmExitDialog from '@/components/english/ConfirmExitDialog';
+import SessionHeader from '@/components/english/session/SessionHeader';
 import { useRouter } from 'next/navigation';
 
 /** Full-screen frame for practice and test runs: exit button, title, segmented progress. */
@@ -14,6 +16,7 @@ export default function FocusFrame({ title, subtitle, progress, total, children,
 	exitHref?: string;
 }) {
 	const router = useRouter();
+	const [confirmExit, setConfirmExit] = useState(false);
 
 	useEffect(() => {
 		if (!dirty) return;
@@ -23,23 +26,14 @@ export default function FocusFrame({ title, subtitle, progress, total, children,
 	}, [dirty]);
 
 	function leave() {
-		if (!dirty || window.confirm('Thoát bài đang làm? Câu trả lời của bài kiểm tra đã được lưu, bạn có thể làm tiếp sau.')) router.push(exitHref);
+		if (dirty) setConfirmExit(true);
+		else router.push(exitHref);
 	}
 
 	return <div className="fixed inset-0 z-[90] overflow-y-auto bg-background">
-		<div className="sticky top-0 z-10 border-b border-border bg-surface px-3 py-2">
-			<div className="mx-auto flex max-w-3xl items-center gap-3">
-				<button type="button" onClick={leave} className="min-h-11 rounded-control px-3 font-bold focus-visible:ring-2 focus-visible:ring-accent">✕ Thoát</button>
-				<div className="min-w-0 flex-1">
-					<p className="truncate font-bold">{title}</p>
-					<p className="text-xs text-muted">{subtitle}</p>
-				</div>
-				<p className="font-bold tabular-nums">{Math.min(progress, total)}/{total}</p>
-			</div>
-			<div className="segment-progress mx-auto mt-2 max-w-3xl" role="progressbar" aria-valuemin={0} aria-valuemax={total} aria-valuenow={Math.min(progress, total)}>
-				{Array.from({ length: total }, (_, index) => <span key={index} data-done={index < progress} />)}
-			</div>
-		</div>
+		<SessionHeader label={subtitle} progress={progress} total={total} onExit={leave} />
+		<div className="mx-auto max-w-3xl px-4 pt-4"><p className="truncate font-bold">{title}</p><p className="text-xs text-muted">{subtitle}</p></div>
 		<main className="mx-auto max-w-3xl px-4 py-8">{children}</main>
+		<ConfirmExitDialog open={confirmExit} title="Thoát phiên học?" description={subtitle.startsWith('Luyện tập') ? 'Tiến trình luyện tập trong phiên này sẽ không được lưu.' : 'Các câu đã trả lời được lưu; bạn có thể tiếp tục sau.'} onStay={() => setConfirmExit(false)} onLeave={() => router.push(exitHref)} />
 	</div>;
 }

@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState } from 'react';
 import ConfirmExitDialog from '@/components/english/ConfirmExitDialog';
+import SessionHeader from '@/components/english/session/SessionHeader';
 import EnglishWordCard from '@/components/english/EnglishWordCard';
 import { useRewardToasts } from '@/components/english/goals/useRewardToasts';
 import { englishPost } from '@/components/english/englishApi';
@@ -148,14 +149,9 @@ export default function GuidedReviewSession({ initial, onClose }: { initial: Gui
 	const stepLabel = session.phase === 'study' ? `Xem thẻ ${viewedWord + 1}/${session.words.length}` : session.phase === 'summary' ? 'Kết quả chặng' : `${session.phase === 'retry' ? 'Luyện lại từ sai' : 'Luyện'} · câu ${Math.min(session.questionPosition + 1, session.questions.length)}/${session.questions.length}`;
 
 	return <div role="dialog" aria-modal="true" aria-label="Học thêm" className="fixed inset-0 z-overlay overflow-y-auto bg-background">
+		<SessionHeader label="Học thêm" progress={stepDone} total={stepTotal} onExit={leave} busy={busy} xpPop={xpPop} />
 		<div className="mx-auto flex min-h-full max-w-3xl flex-col px-4 py-4 sm:px-6 sm:py-7">
-			<header className="space-y-2 border-b border-border pb-3">
-				<div className="flex items-center justify-between gap-3">
-					<div className="min-w-0"><p className="text-xs font-bold uppercase tracking-wide text-accent">Chặng {lapChunk}/{lapChunks} · đã đi {covered}/{session.poolSize} từ</p><p className="font-bold">{stepLabel}</p></div>
-					<span className="relative flex shrink-0 items-center gap-2">{xpPop && <span key={xpPop.id} aria-hidden="true" className="animate-xp-pop xp-chip pointer-events-none absolute -top-1 right-full mr-2">+{xpPop.xp} XP</span>}<button type="button" disabled={busy} onClick={leave} className="min-h-11 rounded-control border border-border px-4 font-bold disabled:opacity-50">Thoát</button></span>
-				</div>
-				<div className="h-2 overflow-hidden rounded-full bg-accent-subtle" role="progressbar" aria-label="Tiến độ chặng" aria-valuemin={0} aria-valuemax={stepTotal} aria-valuenow={stepDone}><div className="h-full rounded-full bg-accent transition-all duration-500 motion-reduce:transition-none" style={{ width: `${stepTotal ? (stepDone / stepTotal) * 100 : 0}%` }} /></div>
-			</header>
+			<div className="border-b border-border pb-3"><p className="text-xs font-bold uppercase tracking-wide text-accent">Chặng {lapChunk}/{lapChunks} · đã đi {covered}/{session.poolSize} từ</p><p className="font-bold">{stepLabel}</p></div>
 
 			<main className="flex flex-1 flex-col justify-center py-5">
 				{session.phase === 'study' && word && <div className="mode-card mx-auto w-full max-w-2xl p-5 sm:p-8">
