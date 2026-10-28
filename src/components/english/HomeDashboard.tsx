@@ -1,29 +1,68 @@
 import Link from 'next/link';
 import DueForecast from '@/components/english/DueForecast';
 import StageBar from '@/components/english/StageBar';
-import GoalRing from '@/components/english/goals/GoalRing';
-import LevelBar from '@/components/english/goals/LevelBar';
 import QuestItem from '@/components/english/goals/QuestItem';
-import SrsTodayCard from '@/components/english/SrsTodayCard';
-import RemoveSetButton from '@/components/english/RemoveSetButton';
+import ProgressStrip from '@/components/english/home/ProgressStrip';
+import TodayHero from '@/components/english/home/TodayHero';
 import { quizHrefFor } from '@/lib/english/quests';
 import type { EnglishSetSummary } from '@/services/english/enCatalogService';
 import type { TodayOverview } from '@/services/english/enDailyService';
 import type { GoalBoard } from '@/services/english/enGoalService';
 
+const SETS_SHOWN = 5;
+
+function SetRow({ set }: { set: EnglishSetSummary }) {
+	return <li className="border-b border-border last:border-b-0">
+		<Link href={`/sets/${set.id}`} className="group block px-4 py-3 hover:bg-accent-subtle focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-accent">
+			<span className="flex items-center gap-3">
+				<span className="min-w-0 flex-1 truncate font-bold" title={set.title}>{set.title}</span>
+				{set.dueToday > 0 && <span className="shrink-0 rounded-full bg-accent-subtle px-2 py-0.5 text-xs font-bold text-accent">{set.dueToday} đến hạn</span>}
+				<span className="shrink-0 text-xs tabular-nums text-muted">{set.learned}/{set.words}</span>
+				<span aria-hidden="true" className="text-accent transition-transform group-hover:translate-x-1">→</span>
+			</span>
+			<span className="mt-2 block"><StageBar stages={set.stages} /></span>
+		</Link>
+	</li>;
+}
+
+/**
+ * "Today" home: one action first, then how the learner is doing, then their sets.
+ * On wide screens progress, quests and the 7-day forecast move to a side column.
+ */
 export default function HomeDashboard({ overview, sets, board, resetsIn, greeting, dateLabel }: { overview: TodayOverview; sets: EnglishSetSummary[]; board: GoalBoard; resetsIn: string; greeting: string; dateLabel: string }) {
-	const enrolled = sets.filter((set) => set.enrolled);
+	const enrolled = sets.filter((set) => set.enrolled).sort((a, b) => b.dueToday - a.dueToday);
 	const quizHref = quizHrefFor(sets);
 	const questsDone = board.today.quests.filter((quest) => quest.done).length;
-	const studiedThisWeek = overview.week.filter((day) => day.studied).length;
-	const initial = greeting.split(/[\s,]+/).at(-1)?.charAt(0).toLocaleUpperCase('vi') || 'B';
-	const totalWords = enrolled.reduce((sum, set) => sum + set.words, 0);
-	const learned = enrolled.reduce((sum, set) => sum + set.learned, 0);
 	const stages = enrolled.reduce((sum, set) => ({ new: sum.new + set.stages.new, learning: sum.learning + set.stages.learning, remembering: sum.remembering + set.stages.remembering, longTerm: sum.longTerm + set.stages.longTerm }), { new: 0, learning: 0, remembering: 0, longTerm: 0 });
+	const hasSets = enrolled.length > 0;
 
-	return <div className="mx-auto max-w-6xl space-y-4 px-4 py-5 sm:px-6 sm:py-8">
-		<header className="flex items-center justify-between gap-3"><div className="flex min-w-0 items-center gap-3"><span aria-hidden="true" className="flex size-10 shrink-0 items-center justify-center rounded-full border-2 border-accent bg-accent-subtle text-lg font-black text-accent">{initial}</span><div className="min-w-0"><h1 className="truncate text-2xl">{greeting}</h1><p className="mt-0.5 truncate text-xs text-muted">{dateLabel}</p></div></div><Link href="/quests" className="hidden w-52 shrink-0 rounded-card sm:block"><LevelBar level={board.level} compact /></Link></header>
-		<section aria-label="Tiến độ của bạn" className="grid grid-cols-2 gap-3 sm:grid-cols-4"><div className="mode-card p-3"><p className="text-xs font-bold text-muted">Chuỗi ngày học</p><p className="game-number mt-1 text-2xl tabular-nums">{overview.streakDays > 0 ? `🔥 ${overview.streakDays}` : '0'}</p><p className="text-xs text-muted">Tuần này {studiedThisWeek}/{overview.weeklyGoal} ngày</p></div><div className="mode-card p-3"><p className="text-xs font-bold text-muted">Tổng từ</p><p className="game-number mt-1 text-2xl tabular-nums">{totalWords}</p><p className="text-xs text-muted">{enrolled.length} bộ</p></div><div className="mode-card p-3"><p className="text-xs font-bold text-muted">Đã học</p><p className="game-number mt-1 text-2xl tabular-nums">{learned}/{totalWords || 0}</p><p className="text-xs text-muted">{totalWords ? Math.round((learned / totalWords) * 100) : 0}% đã vào lịch ôn</p></div><a href="#srs" className="mode-card block p-3 hover:border-accent focus-visible:outline-2 focus-visible:outline-accent"><p className="text-xs font-bold text-muted">Đến hạn hôm nay</p><p className="game-number mt-1 text-2xl tabular-nums">{overview.dueTotal}</p><p className="text-xs text-muted">{overview.dueTotal > overview.dueCount ? `lượt này ${overview.dueCount} từ` : overview.dueTotal > 0 ? 'Ôn theo lịch ↓' : 'Không có từ đến hạn'}</p></a></section>
-		{enrolled.length === 0 ? <section className="mode-card p-7"><h2 className="text-3xl">Bạn chưa có bộ từ nào</h2><p className="mt-2 text-muted">Tải một bộ từ để bắt đầu học và theo dõi từng bước ôn tập.</p><Link className="mt-5 inline-flex min-h-11 items-center rounded-control bg-accent px-5 font-bold text-accent-foreground" href="/store">Mở Cửa hàng →</Link></section> : <div className="grid gap-4 lg:grid-cols-3"><div className="space-y-4 lg:col-span-2"><SrsTodayCard overview={overview} compact /><section className="mode-card"><h2 className="text-lg">Mức nhớ của các từ</h2><div className="mt-3"><StageBar stages={stages} legend="compact" /></div></section><section id="your-sets" aria-labelledby="your-sets-heading" className="flex max-h-72 scroll-mt-6 flex-col overflow-hidden rounded-panel border border-border bg-surface"><div className="flex shrink-0 items-center justify-between gap-3 border-b border-border px-4 py-3"><h2 id="your-sets-heading" className="text-lg">Bộ từ của bạn ({enrolled.length})</h2><Link href="/store" className="shrink-0 text-sm font-bold text-accent">Thêm bộ từ →</Link></div><ul className="min-h-0 flex-1 overflow-y-auto">{enrolled.map((set) => <li key={set.id} className="flex items-center border-b border-border last:border-b-0 hover:bg-accent-subtle focus-within:bg-accent-subtle"><Link href={`/sets/${set.id}`} aria-label={`Mở bộ từ ${set.title}`} className="group min-w-0 flex-1 px-4 py-3 focus-visible:outline-2 focus-visible:outline-inset focus-visible:outline-accent"><div className="flex items-center gap-3"><div className="min-w-0 flex-1"><h3 className="truncate font-bold" title={set.title}>{set.title}</h3></div><span className="shrink-0 text-xs text-muted">{set.learned}/{set.words}{set.dueToday > 0 ? ` · ${set.dueToday} đến hạn` : ''}</span><span aria-hidden="true" className="text-lg text-accent transition-transform group-hover:translate-x-1">→</span></div><div className="mt-2"><StageBar stages={set.stages} /></div></Link><div className="shrink-0 pr-4"><RemoveSetButton setId={set.id} setTitle={set.title} stayOnPage compact locked={set.locked} listed={set.listed} /></div></li>)}</ul></section></div><div className="space-y-4"><section aria-labelledby="today-quests-heading" className="mode-card"><div className="flex items-center gap-3"><GoalRing value={board.today.xp} max={board.today.goal} size={48} label="Mục tiêu ngày"><span className="game-number text-sm tabular-nums">{board.today.xp}</span><span className="text-[8px] text-muted">/{board.today.goal}</span></GoalRing><div className="min-w-0 flex-1"><div className="flex items-center justify-between gap-2"><h2 id="today-quests-heading" className="text-lg">Nhiệm vụ hôm nay</h2><span className={`text-sm font-bold tabular-nums ${questsDone === board.today.quests.length ? 'text-success' : ''}`}>{questsDone}/{board.today.quests.length}</span></div><p className="text-xs text-muted">Làm mới sau {resetsIn}</p></div></div><ul className="mt-3">{board.today.quests.map((quest) => <QuestItem key={quest.key} quest={quest} quizHref={quizHref} dense />)}</ul><Link href="/quests" className="mt-3 inline-flex min-h-11 items-center text-sm font-bold text-accent">Tất cả nhiệm vụ →</Link></section><section className="mode-card"><h2 className="text-lg">Lịch 7 ngày</h2><div className="mt-3"><DueForecast days={overview.dueNext7Days} height="h-20" /></div></section></div></div>}
+	return <div className="mx-auto max-w-5xl px-4 py-5 sm:px-6 sm:py-8">
+		<header className="mb-4 sm:mb-6"><h1 className="truncate text-2xl sm:text-3xl">{greeting}</h1><p className="mt-0.5 text-xs text-muted">{dateLabel}</p></header>
+
+		<div className="grid grid-cols-1 gap-4 lg:grid-cols-3 lg:items-start lg:gap-5">
+			<div className="min-w-0 lg:col-span-2 lg:row-start-1"><TodayHero overview={overview} xp={board.today.xp} goal={board.today.goal} /></div>
+
+			{hasSets && <div className="min-w-0 lg:col-start-3 lg:row-start-1"><ProgressStrip streak={overview.streakDays} longTerm={board.longTermCount} level={board.level} xp={board.today.xp} goal={board.today.goal} stages={stages} /></div>}
+
+			{hasSets && <section aria-labelledby="today-quests-heading" className="mode-card min-w-0 lg:col-start-3 lg:row-start-2">
+				<div className="flex items-baseline justify-between gap-2"><h2 id="today-quests-heading" className="text-lg">Nhiệm vụ hôm nay</h2><span className={`text-sm font-bold tabular-nums ${questsDone === board.today.quests.length ? 'text-success' : 'text-muted'}`}>{questsDone}/{board.today.quests.length}</span></div>
+				<ul className="mt-2">{board.today.quests.map((quest) => <QuestItem key={quest.key} quest={quest} quizHref={quizHref} dense />)}</ul>
+				<p className="mt-2 flex items-center justify-between gap-2 text-xs text-muted"><span>Làm mới sau {resetsIn}</span><Link href="/quests" className="inline-flex min-h-11 items-center text-sm font-bold text-accent">Tất cả →</Link></p>
+			</section>}
+
+			{hasSets && <section id="your-sets" aria-labelledby="your-sets-heading" className="min-w-0 overflow-hidden rounded-panel border border-border bg-surface lg:col-span-2 lg:row-span-2 lg:row-start-2">
+				<div className="flex items-center justify-between gap-3 border-b border-border px-4 py-2"><h2 id="your-sets-heading" className="text-lg">Đang học <span className="text-sm font-normal text-muted">({enrolled.length})</span></h2><Link href="/store" className="inline-flex min-h-11 shrink-0 items-center text-sm font-bold text-accent">+ Thêm bộ</Link></div>
+				<ul>{enrolled.slice(0, SETS_SHOWN).map((set) => <SetRow key={set.id} set={set} />)}</ul>
+				{enrolled.length > SETS_SHOWN && <details className="border-t border-border">
+					<summary className="flex min-h-11 cursor-pointer items-center px-4 text-sm font-bold text-accent">Xem thêm {enrolled.length - SETS_SHOWN} bộ</summary>
+					<ul className="border-t border-border">{enrolled.slice(SETS_SHOWN).map((set) => <SetRow key={set.id} set={set} />)}</ul>
+				</details>}
+			</section>}
+
+			{hasSets && <section aria-labelledby="forecast-heading" className="mode-card min-w-0 lg:col-start-3 lg:row-start-3">
+				<h2 id="forecast-heading" className="text-lg">7 ngày tới</h2>
+				<div className="mt-3"><DueForecast days={overview.dueNext7Days} height="h-20" /></div>
+			</section>}
+		</div>
 	</div>;
 }
