@@ -9,6 +9,7 @@ import EnglishAdminPromptCard from '@/components/english/EnglishAdminPromptCard'
 import EnglishAdminQaTools from '@/components/english/EnglishAdminQaTools';
 import type { EnglishPackPreview } from '@/lib/english/packPreview';
 import { sampleEnglishPack } from '@/lib/english/samplePack';
+import { publishEnglishSetRequest, publishSummary } from '@/lib/english/publishClient';
 
 interface Issue {
 	path: string;
@@ -33,7 +34,7 @@ export default function EnglishAdmin({ sets, qaEnabled }: { sets: SetRow[]; qaEn
 	const [busy, setBusy] = useState(false);
 	const [panel, setPanel] = useState<'content' | 'qa'>('content');
 
-	async function send(action: 'preview' | 'save') {
+	async function send(action: 'preview' | 'save', publishAfterSave = false) {
 		setBusy(true);
 		setMessage('');
 		try {
@@ -51,9 +52,12 @@ export default function EnglishAdmin({ sets, qaEnabled }: { sets: SetRow[]; qaEn
 			if (!response.ok || !body.ok) throw new Error(body.error ?? 'Không xử lý được gói nội dung');
 			setIssues(body.data?.issues ?? []);
 			setPreview(action === 'preview' ? body.data?.preview ?? null : null);
-			setMessage(action === 'save'
-				? `Đã lưu bản nháp${body.data?.setId ? ` ${body.data.setId}` : ''}.`
-				: `Xem trước: ${body.data?.drafts ?? 0} từ đủ điều kiện xuất bản.`);
+			if (action === 'preview') setMessage(`Xem trước: ${body.data?.drafts ?? 0} từ đủ điều kiện xuất bản.`);
+			else if (publishAfterSave && body.data?.setId) {
+				setMessage('Đã lưu bản nháp, đang xuất bản…');
+				try { setMessage(`${publishSummary(await publishEnglishSetRequest(body.data.setId))} Bộ đã lên cửa hàng.`); }
+				catch (error) { setMessage(`Đã lưu bản nháp. ${error instanceof Error ? error.message : 'Không xuất bản được'}`); }
+			} else setMessage('Đã lưu bản nháp. Bấm “Xuất bản” ở danh sách bên dưới để đưa lên cửa hàng.');
 			if (action === 'save') router.refresh();
 		} catch (error) {
 			setMessage(error instanceof Error ? error.message : 'JSON không hợp lệ');
@@ -66,15 +70,9 @@ export default function EnglishAdmin({ sets, qaEnabled }: { sets: SetRow[]; qaEn
 		setBusy(true);
 		setMessage('');
 		try {
-			const response = await fetch('/api/admin/publish', {
-				method: 'POST',
-				headers: { 'Content-Type': 'application/json' },
-				body: JSON.stringify({ setId }),
-			});
-			const body = await response.json() as { ok?: boolean; error?: string; data?: { issues?: Issue[]; publishedSenses?: number } };
-			if (!response.ok || !body.ok) throw new Error(body.error ?? 'Không xuất bản được');
-			setIssues(body.data?.issues ?? []);
-			setMessage(`Đã xuất bản ${body.data?.publishedSenses ?? 0} từ. Từ còn thiếu trường bắt buộc được giữ lại.`);
+			const outcome = await publishEnglishSetRequest(setId);
+			setIssues(outcome.issues);
+			setMessage(publishSummary(outcome));
 			router.refresh();
 		} catch (error) {
 			setMessage(error instanceof Error ? error.message : 'Không xuất bản được');
@@ -108,7 +106,8 @@ export default function EnglishAdmin({ sets, qaEnabled }: { sets: SetRow[]; qaEn
 					<div className="flex flex-wrap gap-2">
 						<Button type="button" variant="tertiary" onClick={() => setText(JSON.stringify(sampleEnglishPack, null, 2))}>Điền gói mẫu</Button>
 						<Button type="button" variant="secondary" disabled={busy || !text.trim()} onClick={() => void send('preview')}>Xem trước</Button>
-						<Button type="button" disabled={busy || !text.trim()} onClick={() => void send('save')}>Lưu bản nháp</Button>
+						<Button type="button" variant="secondary" disabled={busy || !text.trim()} onClick={() => void send('save')}>Lưu bản nháp</Button>
+						<Button type="button" disabled={busy || !text.trim()} onClick={() => void send('save', true)}>Lưu &amp; xuất bản</Button>
 					</div>
 					{message && <p className="text-sm text-foreground">{message}</p>}
 					{preview && (
@@ -142,9 +141,9 @@ export default function EnglishAdmin({ sets, qaEnabled }: { sets: SetRow[]; qaEn
 						<CardContent className="flex items-center justify-between gap-3">
 							<div>
 								<p className="font-black">{set.title}</p>
-								<p className="text-xs text-muted">{set.status} · {set.items} mục · {set.learners} người học</p>
+								<p className="text-xs text-muted">{set.status === 'draft' ? 'Bản nháp' : 'Đã xuất bản'} · {set.items} mục · {set.learners} người học</p>
 							</div>
-							<div className="flex flex-wrap justify-end gap-2"><Link href={`/store`} className="inline-flex min-h-10 items-center rounded-control border border-border px-4 text-xs font-bold">Quản lý trên cửa hàng</Link><Button type="button" variant="secondary" disabled={busy} onClick={() => void publish(set.id)}>Xuất bản</Button></div>
+							<div className="flex flex-wrap justify-end gap-2"><Link href={`/store`} className="inline-flex min-h-10 items-center rounded-control border border-border px-4 text-xs font-bold">Quản lý trên cửa hàng</Link><Button type="button" variant="secondary" disabled={busy} onClick={() => void publish(set.id)}>{set.status === 'draft' ? 'Xuất bản' : 'Xuất bản lại'}</Button></div>
 						</CardContent>
 					</Card>
 				))}

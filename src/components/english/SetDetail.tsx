@@ -10,6 +10,7 @@ import { HINTS } from '@/lib/english/hintCopy';
 import EnglishAudioButton from '@/components/english/EnglishAudioButton';
 import EnglishWordCard from '@/components/english/EnglishWordCard';
 import EnrollButton from '@/components/english/EnrollButton';
+import PublishSetButton from '@/components/english/PublishSetButton';
 import RemoveSetButton from '@/components/english/RemoveSetButton';
 import { QUIZ_KINDS, QUIZ_META } from '@/lib/english/quiz';
 import { isLongTerm, stageOf } from '@/lib/english/schedule';
@@ -22,7 +23,7 @@ const FILTERS: Array<[Filter, string]> = [['all', 'Tất cả'], ['new', 'Chưa 
 
 const linkButton = 'inline-flex min-h-11 items-center justify-center rounded-control border border-border px-3 text-center text-sm font-bold hover:border-accent focus-visible:ring-2 focus-visible:ring-accent';
 
-export default function SetDetail({ detail }: { detail: EnglishSetDetail }) {
+export default function SetDetail({ detail, isAdmin = false }: { detail: EnglishSetDetail; isAdmin?: boolean }) {
 	const [search, setSearch] = useState('');
 	const [practiceOpen, setPracticeOpen] = useState(false);
 	const [filter, setFilter] = useState<Filter>('all');
@@ -49,7 +50,7 @@ export default function SetDetail({ detail }: { detail: EnglishSetDetail }) {
 				<div className="absolute inset-y-0 left-0 rounded-full bg-accent/40" style={{ width: percent(learned) }} />
 				<div className="absolute inset-y-0 left-0 rounded-full bg-success" style={{ width: percent(longTerm) }} />
 			</div>
-			{detail.enrolled ? <div className="flex flex-wrap items-center gap-2"><Button size="lg" onClick={() => setPracticeOpen(true)}>Luyện bộ này ▾</Button><InfoHint title={HINTS.practice.title}>{HINTS.practice.body}</InfoHint></div> : <EnrollButton setId={detail.id} enrolled={false} locked={detail.locked} />}
+			{detail.enrolled ? <div className="flex flex-wrap items-center gap-2"><Button size="lg" onClick={() => setPracticeOpen(true)}>Luyện bộ này ▾</Button><InfoHint title={HINTS.practice.title}>{HINTS.practice.body}</InfoHint></div> : detail.status === 'draft' ? <div className="space-y-3 rounded-panel border border-warning/30 bg-warning/5 p-3 text-sm text-foreground-secondary"><p>Bộ này còn là <strong>bản nháp</strong>: học viên chưa thấy và chưa tải được.</p>{isAdmin && <PublishSetButton setId={detail.id} />}</div> : <EnrollButton setId={detail.id} enrolled={false} locked={detail.locked} />}
 			{detail.previewOnly && <p className="flex items-start gap-2 rounded-panel border border-warning/30 bg-warning/5 px-3 py-2 text-sm text-foreground-secondary"><span aria-hidden="true">🔒</span><span>Đang xem <strong className="tabular-nums">{detail.words.length}/{detail.wordCount}</strong> từ mẫu. Nhập mật khẩu để tải cả bộ.</span></p>}
 		</header>
 

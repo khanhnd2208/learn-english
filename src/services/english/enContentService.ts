@@ -10,7 +10,7 @@ import { parseWordFamily } from '@/lib/english/wordFamily';
 import { audioFileExists } from '@/services/english/enAudioService';
 
 export interface EnglishPackSaveResult { setId: string; issues: AssessedPack['issues']; schemaError: string | null }
-export interface EnglishPublishResult { publishedSenses: number; issues: AssessedPack['issues'] }
+export interface EnglishPublishResult { publishedSenses: number; totalSenses: number; status: string; issues: AssessedPack['issues'] }
 
 export async function saveEnglishPack(input: unknown): Promise<EnglishPackSaveResult> {
  const assessment = assessEnglishPack(input);
@@ -62,12 +62,16 @@ export async function publishEnglishSet(setId: string, exists: (file: string) =>
   issues.push(...assessment.issues.map((i) => ({ ...i, path: `${sense.word.lemma}: ${i.path}` })));
   if (!assessment.words[0]?.publishable) continue;
   await prisma.enSense.update({ where: { id: sense.id }, data: { status: 'published' } });
-  for (const [i, example] of ordered.entries()) await prisma.enExample.update({ where: { id: example.id }, data: { role: i > 0 && assessment.words[0].examples[i]?.gradeEligible ? 'grade' : 'study', status: 'published' } });
+  // The card sentence and sound questions go live; a broken question stays a draft so learners never see it.
+  for (const [i, example] of ordered.entries()) {
+   const grade = i > 0 && Boolean(assessment.words[0].examples[i]?.gradeEligible);
+   await prisma.enExample.update({ where: { id: example.id }, data: { role: grade ? 'grade' : 'study', status: i === 0 || grade ? 'published' : 'draft' } });
+  }
   await prisma.enWord.update({ where: { id: sense.wordId }, data: { status: 'published' } });
   publishedSenses++;
  }
  if (publishedSenses) await prisma.enSet.update({ where: { id: set.id }, data: { status: 'published' } });
- return { publishedSenses, issues };
+ return { publishedSenses, totalSenses: set.items.length, status: publishedSenses ? 'published' : set.status, issues };
 }
 
 export async function updateEnglishSetStore(

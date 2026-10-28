@@ -129,7 +129,10 @@ export function assessEnglishPack(input: unknown): AssessedPack {
   if (!count) issues.push(issue(path, 'no_grade_example', 'Không có câu hỏi ẩn dùng để chấm.', false));
   else if (count < EN_QUIZ_EXAMPLES_MIN) issues.push(issue(path, 'quiz_examples_count', `Nên có ít nhất ${EN_QUIZ_EXAMPLES_MIN} câu hỏi ẩn (hiện có ${count}).`, false));
   const all = [...issues, ...examples.flatMap((e) => e.issues)];
-  return { index, publishable: !all.some((i) => i.blocksGrade), gradeExampleCount: count, examples, issues: all };
+  // A broken hidden question is only left out of grading; the word itself publishes when its own
+  // fields and the card sentence are sound.
+  const publishable = ![...issues, ...(examples[0]?.issues ?? [])].some((i) => i.blocksGrade);
+  return { index, publishable, gradeExampleCount: count, examples, issues: all };
  });
  const issues = [...(!pack.title ? [issue('title', 'title', 'Thiếu tên bộ học.')] : []), ...words.flatMap((w) => w.issues)];
  return { schemaError: null, pack, issues, words };
