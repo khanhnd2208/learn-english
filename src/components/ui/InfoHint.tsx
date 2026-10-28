@@ -45,6 +45,7 @@ export default function InfoHint({ title, children, className = '' }: { title: s
 			type="button"
 			popoverTarget={id}
 			aria-label={`Giải thích: ${title}`}
+			aria-describedby={id}
 			className={`relative inline-flex size-5 shrink-0 items-center justify-center rounded-full border border-current/40 align-middle font-sans text-xs leading-none font-bold text-muted normal-case tracking-normal hover:border-accent hover:text-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent after:absolute after:-inset-3 after:content-[''] ${className}`}
 		>i</button>
 		<div ref={bubbleRef} id={id} popover="auto" role="note" className="fixed inset-auto m-0 rounded-card border-2 border-border bg-surface p-3 text-left font-sans text-sm leading-snug font-normal text-foreground normal-case tracking-normal shadow-overlay">

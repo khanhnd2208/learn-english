@@ -30,14 +30,21 @@ export default function Sheet({ open, onClose, title, children, className }: She
 		panelRef.current?.focus();
 
 		const onKey = (e: KeyboardEvent) => {
-			if (e.key === 'Escape') onClose();
+			if (e.key === 'Escape') { onClose(); return; }
+			if (e.key !== 'Tab' || !panelRef.current) return;
+			const focusable = [...panelRef.current.querySelectorAll<HTMLElement>('a[href], button:not(:disabled), input:not(:disabled), select:not(:disabled), textarea:not(:disabled), [tabindex]:not([tabindex="-1"])')].filter((node) => node.getClientRects().length > 0);
+			if (!focusable.length) { e.preventDefault(); panelRef.current.focus(); return; }
+			const first = focusable[0]!; const last = focusable[focusable.length - 1]!;
+			if (e.shiftKey && (document.activeElement === first || document.activeElement === panelRef.current)) { e.preventDefault(); last.focus(); }
+			else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
 		};
 		document.addEventListener('keydown', onKey);
+		const previousOverflow = document.body.style.overflow;
 		document.body.style.overflow = 'hidden';
 
 		return () => {
 			document.removeEventListener('keydown', onKey);
-			document.body.style.overflow = '';
+			document.body.style.overflow = previousOverflow;
 			prev?.focus();
 		};
 	}, [open, onClose, mounted]);

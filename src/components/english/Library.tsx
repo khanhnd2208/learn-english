@@ -1,0 +1,20 @@
+'use client';
+import { useMemo, useState } from 'react';
+import Link from 'next/link';
+import EmptyState from '@/components/ui/EmptyState';
+import EnrollButton from '@/components/english/EnrollButton';
+import StoreAdminControls from '@/components/english/StoreAdminControls';
+import type { EnglishSetSummary } from '@/services/english/enCatalogService';
+
+export default function Library({ sets, isAdmin }: { sets: EnglishSetSummary[]; isAdmin: boolean }) {
+ const [search, setSearch] = useState(''); const [level, setLevel] = useState(''); const [topic, setTopic] = useState('');
+ const levels = [...new Set(sets.flatMap((set) => set.levels))].sort();
+ const topics = [...new Set(sets.flatMap((set) => set.topics))].sort();
+ const filtered = useMemo(() => sets.filter((set) => `${set.title} ${set.description}`.toLocaleLowerCase('vi').includes(search.trim().toLocaleLowerCase('vi')) && (!level || set.levels.includes(level)) && (!topic || set.topics.includes(topic))), [sets, search, level, topic]);
+ return <div className="mx-auto max-w-6xl space-y-4 px-4 py-5 sm:px-6 sm:py-8">
+  <header className="flex flex-wrap items-start justify-between gap-3"><div><h1 className="text-3xl">Thư viện</h1><p className="mt-1 text-sm text-muted">{isAdmin ? 'Bộ nháp và bộ ẩn cũng hiện với quyền quản trị.' : 'Tìm và chọn bộ từ phù hợp với bạn.'}</p></div>{isAdmin && <Link href="/admin" className="inline-flex min-h-11 items-center rounded-control bg-accent px-4 text-sm font-bold text-accent-foreground">+ Thêm bộ</Link>}</header>
+  <div className="flex flex-wrap gap-2"><input type="search" aria-label="Tìm bộ từ" placeholder="Tìm bộ từ…" value={search} onChange={(event) => setSearch(event.target.value)} className="min-h-11 min-w-48 flex-1 rounded-control border border-border bg-surface px-3" />{levels.length > 0 && <select aria-label="Lọc theo trình độ của từ" value={level} onChange={(event) => setLevel(event.target.value)} className="min-h-11 rounded-control border border-border bg-surface px-3"><option value="">Mọi trình độ</option>{levels.map((item) => <option key={item}>{item}</option>)}</select>}{topics.length > 0 && <select aria-label="Lọc theo chủ đề của từ" value={topic} onChange={(event) => setTopic(event.target.value)} className="min-h-11 rounded-control border border-border bg-surface px-3"><option value="">Mọi chủ đề</option>{topics.map((item) => <option key={item}>{item}</option>)}</select>}</div>
+  {(levels.length > 0 || topics.length > 0) && <p className="text-xs text-muted">Trình độ và chủ đề được lấy từ thông tin của các từ trong bộ.</p>}
+  {!filtered.length ? <EmptyState icon="library_books" title={sets.length ? 'Không tìm thấy bộ phù hợp' : 'Chưa có bộ từ'} description={sets.length ? 'Thử từ khóa hoặc bộ lọc khác.' : 'Các bộ từ sẽ xuất hiện khi được xuất bản.'} /> : <ul className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">{filtered.map((set) => <li key={set.id} className="flex flex-col rounded-panel border border-border bg-surface p-4"><div className="flex items-start justify-between gap-3"><h2 className="text-base font-bold">{set.title}</h2><span className="shrink-0 rounded-full bg-surface-container px-2 py-1 text-xs font-bold">{set.words} từ</span></div>{set.description && <p className="mt-2 line-clamp-2 text-sm text-muted">{set.description}</p>}<p className="mt-2 text-xs text-muted">{[...set.levels, ...set.topics].slice(0, 4).join(' · ')}{set.locked ? ' · Cần mật khẩu' : ''}</p><div className="mt-auto flex flex-wrap items-center justify-between gap-3 pt-3"><Link href={`/sets/${set.id}`} className="inline-flex min-h-11 items-center font-bold text-accent">{set.enrolled ? 'Mở bộ →' : 'Xem trước →'}</Link>{set.enrolled ? <span className="text-sm font-bold text-success">Đã tải ✓</span> : set.status === 'published' ? <EnrollButton setId={set.id} enrolled={false} locked={set.locked} /> : <span className="text-xs text-muted">Bản nháp</span>}</div>{isAdmin && <StoreAdminControls setId={set.id} title={set.title} status={set.status} listed={set.listed} accessCode={set.accessCode ?? null} learners={set.learners ?? 0} />}</li>)}</ul>}
+ </div>;
+}

@@ -8,6 +8,7 @@ import { activityByKey, poolFromBundles, randomRng, type ActivityItem } from '@/
 import { initialPracticeQueue, queueAfterAnswer, takePracticeStep, type PracticeStep } from '@/lib/english/practiceLoop';
 import FocusFrame from '@/components/english/quiz/FocusFrame';
 import AnswerFeedback from '@/components/english/session/AnswerFeedback';
+import SessionSummary from '@/components/english/session/SessionSummary';
 import EnglishAudioButton from '@/components/english/EnglishAudioButton';
 import QuestionView, { type QuestionFeedback } from '@/components/english/quiz/QuestionView';
 import { answerLayout } from '@/lib/english/answerLayout';
@@ -112,9 +113,8 @@ export default function PracticeRunner({ detail, kind }: { detail: EnglishSetDet
 			<p>Từ <span className="font-bold">{bundle?.word.lemma}</span> chưa đủ nội dung cho dạng {label}.</p>
 			<button type="button" onClick={() => setQueue(taken.queue)} className="min-h-11 rounded-control bg-accent px-4 font-bold text-accent-foreground">Bỏ qua từ này</button>
 		</div>}
-		{!step && <section className="mode-card text-center">
-			<h1 className="text-4xl">Hoàn thành luyện tập</h1>
-			<p className="mt-3 text-lg"><span className="game-number text-3xl">{firstCorrect}/{seen.length}</span> đúng ngay lần đầu</p>
+		{!step && <SessionSummary title="Hoàn thành luyện tập" correct={firstCorrect} total={seen.length}>
+			<p className="text-center text-sm text-muted">Đúng ngay lần đầu</p>
 			{wrong.length > 0 && <div className="mt-5 text-left">
 				<p className="label-caps">Từ cần chú ý</p>
 				<ul className="mt-2 divide-y divide-border">{wrong.map((id) => <li key={id} className="py-2"><span className="font-bold">{lemmaOf(id)?.word.lemma}</span> <span className="text-sm text-muted">· {lemmaOf(id)?.sense.meaningVi}</span></li>)}</ul>
@@ -122,8 +122,8 @@ export default function PracticeRunner({ detail, kind }: { detail: EnglishSetDet
 			
 			<div className="mt-6 flex flex-wrap justify-center gap-3">
 				<button type="button" onClick={restart} className="min-h-11 rounded-control bg-accent px-5 font-bold text-accent-foreground">Luyện lại</button>
-				<span className="inline-flex items-center gap-2"><Link href={`/sets/${detail.id}/test?type=${kind === 'mix' ? 'mcq' : kind}`} className="inline-flex min-h-11 items-center rounded-control border border-border px-5 font-bold">Làm bài kiểm tra {kind === 'mix' ? 'MCQ' : label}</Link><InfoHint title={HINTS.practice.title}>{HINTS.practice.body}</InfoHint></span>
+				<span className="inline-flex items-center gap-2"><Link href={`/sets/${detail.id}/test?type=${kind === 'mix' ? 'mcq' : kind}`} className="inline-flex min-h-11 items-center rounded-control border border-border px-5 font-bold">Thử thách {kind === 'mix' ? 'MCQ' : label}</Link><InfoHint title={HINTS.practice.title}>{HINTS.practice.body}</InfoHint></span>
 			</div>
-		</section>}
+		</SessionSummary>}
 	</FocusFrame>;
 }

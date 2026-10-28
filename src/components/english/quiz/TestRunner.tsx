@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { englishPost } from '@/components/english/englishApi';
 import EnglishAudioButton from '@/components/english/EnglishAudioButton';
 import FocusFrame from '@/components/english/quiz/FocusFrame';
+import SessionSummary from '@/components/english/session/SessionSummary';
 import QuestionView, { type PublicQuestion } from '@/components/english/quiz/QuestionView';
 import { EN_QUIZ_MAX_ITEMS } from '@/lib/english/constants';
 import { QUIZ_META, type QuizKind } from '@/lib/english/quiz';
@@ -112,11 +113,11 @@ export default function TestRunner({ detail, kind }: { detail: EnglishSetDetail;
 	const currentSenseId = started?.items[pos] && typeof started.items[pos].prompt.senseId === 'string' ? started.items[pos].prompt.senseId : '';
 	const missed = result?.items.filter((item) => !item.correct) ?? [];
 
-	return <FocusFrame title={detail.title} subtitle={`Bài kiểm tra · ${label}`} progress={phase === 'result' ? started?.wordCount ?? 0 : answered} total={started?.wordCount ?? EN_QUIZ_MAX_ITEMS} dirty={phase === 'run'} exitHref={`/sets/${detail.id}`}>
+	return <FocusFrame title={detail.title} subtitle={`Thử thách · ${label}`} progress={phase === 'result' ? started?.wordCount ?? 0 : answered} total={started?.wordCount ?? EN_QUIZ_MAX_ITEMS} dirty={phase === 'run'} exitHref={`/sets/${detail.id}`}>
 		{phase === 'loading' && <div className="h-64 animate-pulse rounded-panel bg-surface-container" aria-busy="true" aria-label="Đang tải bài kiểm tra" />}
 
 		{phase === 'intro' && <section className="mode-card text-center">
-			<h1 className="text-4xl">Bài kiểm tra {label}</h1>
+			<h1 className="text-4xl">Thử thách {label}</h1>
 			<p className="mt-3">Tối đa {EN_QUIZ_MAX_ITEMS} câu · khoảng 5 phút · {QUIZ_META[kind].hint.toLowerCase()}</p>
 			<p className="mt-2 text-sm text-muted">Đáp án chỉ hiện sau khi nộp bài. Câu bỏ qua tính là sai. Tải lại trang vẫn làm tiếp được.</p>
 			<button type="button" autoFocus onClick={() => void start()} className="mt-6 min-h-11 rounded-control bg-accent px-6 font-bold text-accent-foreground">Bắt đầu</button>
@@ -143,12 +144,8 @@ export default function TestRunner({ detail, kind }: { detail: EnglishSetDetail;
 			{error && <p role="alert" className="text-error">{error}</p>}
 		</div>}
 
-		{phase === 'result' && result && <section className="mode-card text-center">
-			<p className="label-caps">Kết quả</p>
-			<p className="game-number mt-2 text-6xl">{result.passedCount}/{result.wordCount}</p>
-			{result.reward && result.reward.xp > 0
-				? <p className="animate-badge-pop mt-3"><span className="xp-chip px-3 py-1 text-base">+{result.reward.xp} XP</span></p>
-				: result.passedCount > 0 && <p className="mt-2 text-sm text-muted">Bài làm lại trong ngày không cộng thêm XP.</p>}
+		{phase === 'result' && result && <SessionSummary title="Kết quả thử thách" correct={result.passedCount} total={result.wordCount} xp={result.reward?.xp ?? 0}>
+			{!result.reward?.xp && result.passedCount > 0 && <p className="text-center text-sm text-muted">Bài làm lại trong ngày không cộng thêm XP.</p>}
 			{result.reward && (result.reward.quests.length > 0 || result.reward.achievements.length > 0) && <ul className="mx-auto mt-3 max-w-sm space-y-1 text-left text-sm">
 				{result.reward.quests.map((quest) => <li key={quest.title} className="font-bold text-success">✓ {quest.title} · +{quest.xp} XP</li>)}
 				{result.reward.achievements.map((badge) => <li key={badge.key} className="font-bold">🏆 {badge.title}{badge.tierName ? ` · ${badge.tierName}` : ''}</li>)}
@@ -168,6 +165,6 @@ export default function TestRunner({ detail, kind }: { detail: EnglishSetDetail;
 				<Link href={`/sets/${detail.id}`} className="inline-flex min-h-11 items-center rounded-control border border-border px-5 font-bold">Về bộ từ</Link>
 				<Link href="/quests" className="inline-flex min-h-11 items-center rounded-control border border-border px-5 font-bold">Nhiệm vụ</Link>
 			</div>
-		</section>}
+		</SessionSummary>}
 	</FocusFrame>;
 }
