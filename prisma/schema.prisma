@@ -222,6 +222,30 @@ model EnReview {
   @@index([sessionId])
 }
 
+/// A learner's claim that a wrong SRS answer was also correct. Admin accepts or rejects it;
+/// accepting undoes the schedule penalty of that review.
+model EnAnswerAppeal {
+  id         String    @id @default(cuid())
+  reviewId   String    @unique
+  userId     String
+  userName   String    @default("")
+  userEmail  String    @default("")
+  senseId    String
+  answer     String
+  expected   String
+  note       String    @default("")
+  /// pending | accepted | rejected
+  status     String    @default("pending")
+  /// True when accepting moved the learner's schedule back up.
+  restored   Boolean   @default(false)
+  createdAt  DateTime  @default(now())
+  resolvedAt DateTime?
+  resolvedBy String?
+
+  @@index([status, createdAt])
+  @@index([userId, createdAt])
+}
+
 model EnPracticeSession {
   id            String    @id @default(cuid())
   userId        String

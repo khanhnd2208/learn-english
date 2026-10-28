@@ -2,7 +2,8 @@
 import { useSyncExternalStore } from 'react';
 
 /** Per-device reading preference: show fixed phrases on word cards. */
-const KEY = 'wordquest:advanced:v1';
+// v2: everyone starts with Nâng cao off again; it is opt-in on the Ôn tập page.
+const KEY = 'wordquest:advanced:v2';
 const listeners = new Set<() => void>();
 function read(): boolean { try { return localStorage.getItem(KEY) === 'on'; } catch { return false; } }
 function subscribe(listener: () => void) { listeners.add(listener); window.addEventListener('storage', listener); return () => { listeners.delete(listener); window.removeEventListener('storage', listener); }; }
