@@ -4,20 +4,17 @@ export type LifetimeMetrics = {
 	longestStreak: number;
 	goalDays: number;
 	chests: number;
-	perfectQuizzes: number;
 	revived: number;
 	sessionsFinished: number;
 	enrolledSets: number;
-	quizKindsToday: number;
 };
 
-export type AchievementGroup = 'memory' | 'vocab' | 'habit' | 'quiz' | 'mistakes' | 'start';
+export type AchievementGroup = 'memory' | 'vocab' | 'habit' | 'mistakes' | 'start';
 
 export const ACHIEVEMENT_GROUPS: Record<AchievementGroup, string> = {
 	memory: 'Ghi nhớ',
 	vocab: 'Vốn từ',
 	habit: 'Kiên trì',
-	quiz: 'Bài kiểm tra',
 	mistakes: 'Lỗi sai',
 	start: 'Khởi đầu',
 };
@@ -37,15 +34,13 @@ export type AchievementDef = {
 
 export const ACHIEVEMENTS: AchievementDef[] = [
 	{ id: 'memory_vault', title: 'Kho báu trí nhớ', description: 'Có {n} từ ở nhóm Nhớ lâu', group: 'memory', icon: 'chest', metric: 'longTerm', tiers: [10, 50, 200, 500] },
-	{ id: 'explorer', title: 'Nhà thám hiểm', description: 'Học {n} từ', group: 'vocab', icon: 'compass', metric: 'learned', tiers: [25, 100, 500, 1000] },
+	{ id: 'explorer', title: 'Nhà thám hiểm', description: 'Đã học {n} từ', group: 'vocab', icon: 'compass', metric: 'learned', tiers: [25, 100, 500, 1000] },
 	{ id: 'flame', title: 'Ngọn lửa', description: 'Chuỗi {n} ngày học', group: 'habit', icon: 'spark', metric: 'longestStreak', tiers: [3, 7, 30, 100] },
 	{ id: 'on_time', title: 'Đúng hẹn', description: 'Đạt mục tiêu ngày {n} lần', group: 'habit', icon: 'target', metric: 'goalDays', tiers: [5, 30, 100, 365] },
 	{ id: 'perfect_week', title: 'Tuần hoàn hảo', description: 'Mở {n} rương tuần', group: 'habit', icon: 'trophy', metric: 'chests', tiers: [1, 4, 12, 52] },
-	{ id: 'perfect_score', title: 'Điểm tuyệt đối', description: '{n} bài kiểm tra đúng 100%', group: 'quiz', icon: 'sword', metric: 'perfectQuizzes', tiers: [1, 10, 50] },
-	{ id: 'revival', title: 'Hồi sinh', description: '{n} từ từng quên đã lên lại hộp 3', group: 'mistakes', icon: 'shield', metric: 'revived', tiers: [10, 50, 200] },
+	{ id: 'revival', title: 'Hồi sinh', description: '{n} từ từng quên nay đã nhớ lại', group: 'mistakes', icon: 'shield', metric: 'revived', tiers: [10, 50, 200] },
 	{ id: 'first_step', title: 'Bước đầu tiên', description: 'Hoàn thành phiên học đầu tiên', group: 'start', icon: 'flag', metric: 'sessionsFinished', tiers: [1] },
 	{ id: 'collector', title: 'Người sưu tầm', description: 'Theo học {n} bộ từ', group: 'start', icon: 'map', metric: 'enrolledSets', tiers: [3] },
-	{ id: 'triple', title: 'Đủ bộ ba', description: 'Làm đủ {n} dạng bài kiểm tra trong một ngày', group: 'start', icon: 'star', metric: 'quizKindsToday', tiers: [3] },
 ];
 
 export const TIER_NAMES = ['Đồng', 'Bạc', 'Vàng', 'Kim cương'] as const;

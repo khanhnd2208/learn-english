@@ -4,8 +4,7 @@ import { AppError } from '@/lib/appError';
 import { EN_WEEKLY_DAYS_DEFAULT } from '@/lib/english/constants';
 import { shiftVnDay, vnDayKey, vnWeekDays } from '@/lib/english/gapRule';
 import { vnDayStart } from '@/lib/english/schedule';
-import { isQuizKind } from '@/lib/english/quiz';
-import { periodMetrics, quizKindsOn, type QuizRow, type XpRow } from '@/lib/english/goalMetrics';
+import { periodMetrics, type XpRow } from '@/lib/english/goalMetrics';
 import { dailyQuests, parseQuests, topUpQuests, questProgress, QUEST_META, weeklyQuests, type Quest, type QuestAction, type QuestContext, type QuestMetrics } from '@/lib/english/quests';
 import { achievementStatus, newlyEarned, nearestAchievements, parseAchievementKey, describeAchievement, TIER_NAMES, type LifetimeMetrics } from '@/lib/english/achievements';
 import { DAILY_GOAL_DEFAULT, goalTierIndex, isDailyGoalXp, levelFromXp, XP, type LevelInfo, type XpKind } from '@/lib/english/xp';
@@ -114,15 +113,12 @@ async function loadState(userId: string, now: Date) {
 	const weeklyDaysGoal = profile?.weeklyDaysGoal ?? EN_WEEKLY_DAYS_DEFAULT;
 	const ctx = questContext(overview, dailyGoalXp, weeklyDaysGoal);
 	const weekFrom = vnDayStart(weekStart);
-	const [daily, weekly, reviews, guidedReviews, xpRows, weekAttempts, allAttempts, total, wordStates, kindCounts, legacySessionsFinished, guidedSessionsFinished, achievements] = await Promise.all([
+	const [daily, weeklyBoard, reviews, guidedReviews, xpRows, total, wordStates, kindCounts, legacySessionsFinished, guidedSessionsFinished, achievements] = await Promise.all([
 		ensureBoard(userId, 'daily', today, () => dailyQuests(ctx)),
 		ensureBoard(userId, 'weekly', weekStart, () => weeklyQuests(ctx)),
 		prisma.enReview.findMany({ where: { userId, at: { gte: weekFrom } }, select: { at: true, scheduled: true } }),
 		prisma.enGuidedReviewQuestion.findMany({ where: { kind: 'main', session: { userId, questions: { some: { kind: 'main', answeredAt: { gte: weekFrom } } } } }, select: { sessionId: true, chunkNumber: true, answer: true, answeredAt: true, correct: true } }),
 		prisma.enXpEvent.findMany({ where: { userId, day: { gte: weekStart } }, select: { day: true, xp: true, kind: true, sourceKey: true } }),
-		prisma.enTestAttempt.findMany({ where: { userId, mode: 'set', status: 'finished', finishedAt: { gte: weekFrom } }, select: { blueprint: true, finishedAt: true } }),
-		// Achievements need every finished quiz, but only its score.
-		prisma.enTestAttempt.findMany({ where: { userId, mode: 'set', status: 'finished' }, select: { passedCount: true, wordCount: true } }),
 		prisma.enXpEvent.aggregate({ where: { userId }, _sum: { xp: true } }),
 		prisma.enWordState.findMany({ where: { userId, box: { gt: 0 } }, select: { senseId: true, box: true, lapses: true } }),
 		prisma.enXpEvent.groupBy({ by: ['kind'], where: { userId, kind: { in: ['goal', 'chest'] } }, _count: { _all: true } }),
@@ -131,11 +127,9 @@ async function loadState(userId: string, now: Date) {
 		prisma.enAchievement.findMany({ where: { userId }, select: { key: true, seenAt: true } }),
 	]);
 	const guidedRows = guidedReviews.map((row) => ({ sessionId: row.sessionId, chunkNumber: row.chunkNumber, answered: row.answer !== null && row.answeredAt !== null, answeredAt: row.answeredAt, correct: row.correct === true }));
-	const quizzes: QuizRow[] = weekAttempts.flatMap((attempt) => {
-		const kind = (attempt.blueprint as { kind?: string } | null)?.kind;
-		return kind && isQuizKind(kind) && attempt.finishedAt ? [{ kind, passedCount: 0, wordCount: 0, finishedAt: attempt.finishedAt }] : [];
-	});
-	const base = { reviews, guided: guidedRows, xp: xpRows as XpRow[], quizzes };
+	// Boards stored before the chest became the only weekly reward still carry quest XP.
+	const weekly = weeklyBoard.map((quest) => ({ ...quest, xp: 0 }));
+	const base = { reviews, guided: guidedRows, xp: xpRows as XpRow[] };
 	const kindCount = (kind: string) => kindCounts.find((row) => row.kind === kind)?._count._all ?? 0;
 	const dayMetrics = periodMetrics({ ...base, days: new Set([today]) });
 	const lifetime: LifetimeMetrics = {
@@ -144,11 +138,9 @@ async function loadState(userId: string, now: Date) {
 		longestStreak: overview.longestStreak,
 		goalDays: kindCount('goal'),
 		chests: kindCount('chest'),
-		perfectQuizzes: allAttempts.filter((quiz) => quiz.wordCount > 0 && quiz.passedCount === quiz.wordCount).length,
 		revived: wordStates.filter((state) => state.lapses > 0 && state.box >= 3).length,
 		sessionsFinished: legacySessionsFinished + guidedSessionsFinished,
 		enrolledSets: overview.enrolledSets,
-		quizKindsToday: quizKindsOn(quizzes, new Set([today])),
 	};
 	return {
 		today,
@@ -205,14 +197,9 @@ export function pendingRewards(state: Pick<GoalState, 'today' | 'weekStart' | 'd
 			quests.push({ title: `Đạt mục tiêu ngày ${state.dailyGoalXp} XP`, xp: XP.dailyGoal });
 			lifetime.goalDays += 1;
 		}
-		for (const quest of state.weekly) {
-			const sourceKey = questSourceKey('weekly', state.weekStart, quest.key);
-			if (quest.target <= 0 || claimed.has(sourceKey) || !questProgress(quest, week).done) continue;
-			pay({ sourceKey, kind: 'quest', xp: quest.xp });
-			quests.push({ title: QUEST_META[quest.key].title(quest.target), xp: quest.xp });
-		}
+		// Weekly quests pay nothing themselves: the chest opens once all of them are done.
 		const chest = chestSourceKey(state.weekStart);
-		if (!claimed.has(chest) && state.weekly.length > 0 && state.weekly.every((quest) => claimed.has(questSourceKey('weekly', state.weekStart, quest.key)))) {
+		if (!claimed.has(chest) && state.weekly.length > 0 && state.weekly.every((quest) => questProgress(quest, week).done)) {
 			pay({ sourceKey: chest, kind: 'chest', xp: XP.weeklyChest });
 			quests.push({ title: 'Mở rương tuần', xp: XP.weeklyChest });
 			lifetime.chests += 1;

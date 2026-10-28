@@ -11,8 +11,8 @@ import InfoHint from '@/components/ui/InfoHint';
 import { HINTS } from '@/lib/english/hintCopy';
 
 function tierHint(index: number): string {
-	const { srs, review } = tierQuestTargets(index);
-	return `≈ ${srs} từ ôn + ${review} câu học thêm`;
+	const { srs, chunks } = tierQuestTargets(index);
+	return `≈ ${srs} từ đến hạn + ${chunks} chặng Ôn theo bộ`;
 }
 
 /** Pick one of four daily XP goals. A change shows up on tomorrow's quest board. */
@@ -58,6 +58,6 @@ export default function DailyGoalSheet({ open, onClose, current, todayGoal, intr
 			})}
 		</div>
 		<button type="button" disabled={saving} onClick={() => void save(selected)} className="mt-5 min-h-12 w-full rounded-control bg-accent px-5 font-bold text-accent-foreground disabled:opacity-60">{saving ? 'Đang lưu…' : intro ? 'Bắt đầu' : 'Lưu mục tiêu'}</button>
-		{!intro && selected !== todayGoal && <p className="mt-2 text-center text-xs text-muted">Mục tiêu XP đổi ngay; số từ và câu trong nhiệm vụ hôm nay giữ mức cũ, mức mới áp dụng từ ngày mai.</p>}
+		{!intro && selected !== todayGoal && <p className="mt-2 text-center text-xs text-muted">Mục tiêu XP đổi ngay; nhiệm vụ hôm nay giữ mức cũ, mức mới áp dụng từ ngày mai.</p>}
 	</Sheet>;
 }

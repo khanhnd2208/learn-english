@@ -6,32 +6,37 @@ const mocks = vi.hoisted(() => ({ upsert: vi.fn() }));
 vi.mock('@/lib/prisma', () => ({ prisma: { enLearnerProfile: { upsert: mocks.upsert } } }));
 vi.mock('@/services/english/enDailyService', () => ({ getTodayOverview: vi.fn() }));
 
-const lifetime = { longTerm: 0, learned: 0, longestStreak: 0, goalDays: 0, chests: 0, perfectQuizzes: 0, revived: 0, sessionsFinished: 0, enrolledSets: 0, quizKindsToday: 0 };
+const lifetime = { longTerm: 0, learned: 0, longestStreak: 0, goalDays: 0, chests: 0, revived: 0, sessionsFinished: 0, enrolledSets: 0 };
 const base = {
 	today: '2026-10-26',
 	weekStart: '2026-10-26',
 	dailyGoalXp: 400,
-	daily: [{ key: 'srs_words' as const, target: 20, xp: 100 }, { key: 'review_correct' as const, target: 10, xp: 100 }, { key: 'chunk_done' as const, target: 0, xp: 0 }],
-	weekly: [{ key: 'week_srs' as const, target: 100, xp: 400 }],
+	daily: [{ key: 'srs_words' as const, target: 20, xp: 100 }, { key: 'chunk_done' as const, target: 0, xp: 0 }],
+	weekly: [{ key: 'week_days' as const, target: 4, xp: 0 }],
 	dayMetrics: { ...emptyMetrics(), xp: 320, srsWords: 20 },
-	weekMetrics: { ...emptyMetrics(), xp: 320, srsWords: 100 },
+	weekMetrics: { ...emptyMetrics(), xp: 320, srsWords: 100, daysStudied: 4 },
 	claimed: new Set<string>(),
 	lifetime,
 	achievements: [] as Array<{ key: string; seenAt: Date | null }>,
 };
 
 describe('pending goal rewards', () => {
-	it('lets a quest bonus finish the XP goal, the weekly quest and the chest in one pass', () => {
+	it('lets a quest bonus finish the XP goal, and opens the chest once the weekly quest is done', () => {
 		const result = pendingRewards(base);
 		expect(result.xp.map((event) => event.sourceKey)).toEqual([
 			'quest:daily:2026-10-26:srs_words',
 			'quest:daily:2026-10-26:daily_goal',
-			'quest:weekly:2026-10-26:week_srs',
 			'chest:2026-10-26',
 			'ach:perfect_week_1',
 		]);
 		expect(result.xp.find((event) => event.sourceKey.endsWith('daily_goal'))).toMatchObject({ kind: 'goal', xp: 100 });
 		expect(result.quests.map((quest) => quest.title)).toContain('Mở rương tuần');
+		expect(result.xp.find((event) => event.kind === 'chest')?.xp).toBe(500);
+	});
+
+	it('keeps the chest closed until the weekly quest is done', () => {
+		const result = pendingRewards({ ...base, weekMetrics: { ...emptyMetrics(), daysStudied: 3 } });
+		expect(result.xp.some((event) => event.kind === 'chest')).toBe(false);
 	});
 
 	it('pays the goal from day XP alone, and not before it is reached', () => {

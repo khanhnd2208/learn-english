@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import InfoHint from '@/components/ui/InfoHint';
 import Sheet from '@/components/ui/Sheet';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/Tabs';
 import { AdventureIcon } from '@/components/english/AdventureIcon';
@@ -10,6 +11,7 @@ import LevelBar from '@/components/english/goals/LevelBar';
 import QuestItem from '@/components/english/goals/QuestItem';
 import WeekStrip from '@/components/english/goals/WeekStrip';
 import { ACHIEVEMENT_GROUPS, TIER_NAMES, type AchievementGroup, type AchievementIcon } from '@/lib/english/achievements';
+import { HINTS } from '@/lib/english/hintCopy';
 import { DAILY_GOAL_TIERS, XP } from '@/lib/english/xp';
 import type { GoalAchievement, GoalBoard } from '@/services/english/enGoalService';
 
@@ -24,7 +26,7 @@ function goalMessage(xp: number, goal: number): string {
 	if (xp >= goal) return 'Đã đạt mục tiêu hôm nay. Phần còn lại là thưởng thêm!';
 	if (xp === 0) return 'Một lượt ôn ngắn là đủ để bắt đầu.';
 	const left = goal - xp;
-	return left <= 100 ? `Còn ${left} XP, chỉ vài câu nữa thôi.` : `Còn ${left} XP, khoảng ${Math.max(1, Math.ceil(left / (XP.review * 6)))} phút ôn.`;
+	return left <= 100 ? `Còn ${left} XP, chỉ vài câu nữa thôi.` : `Còn ${left} XP, khoảng ${Math.max(1, Math.ceil(left / (XP.srs * 3)))} phút ôn.`;
 }
 
 export default function QuestsView({ board, dayResetsIn, weekResetsIn, initialTab }: {
@@ -38,7 +40,6 @@ export default function QuestsView({ board, dayResetsIn, weekResetsIn, initialTa
 	const [detail, setDetail] = useState<GoalAchievement | null>(null);
 	const unlockedCount = board.achievements.reduce((sum, entry) => sum + entry.reached, 0);
 	const tierCount = board.achievements.reduce((sum, entry) => sum + entry.tiers.length, 0);
-	const weekDone = board.week.quests.filter((quest) => quest.done).length;
 
 	return <div className="mx-auto max-w-3xl space-y-4 px-4 py-5 sm:px-6 sm:py-8">
 		<header className="game-hero relative overflow-hidden rounded-panel border-2 p-4">
@@ -59,7 +60,7 @@ export default function QuestsView({ board, dayResetsIn, weekResetsIn, initialTa
 					<GoalRing value={board.today.xp} max={board.today.goal} size={72} stroke={8} label="Mục tiêu ngày">
 						<span className="game-number text-xl tabular-nums">{board.today.xp}</span><span className="text-xs text-muted">/{board.today.goal}</span>
 					</GoalRing>
-					<div className="min-w-0 flex-1"><h2 className="text-xl">Mục tiêu ngày</h2><p className="text-sm">{goalMessage(board.today.xp, board.today.goal)}</p>
+					<div className="min-w-0 flex-1"><h2 className="flex items-center gap-1.5 text-xl">Mục tiêu ngày<InfoHint title={HINTS.xp.title}>{HINTS.xp.body}</InfoHint></h2><p className="text-sm">{goalMessage(board.today.xp, board.today.goal)}</p>
 						<button type="button" onClick={() => setGoalOpen(true)} className="inline-flex min-h-11 items-center gap-1 rounded-control border border-border px-3 text-sm font-bold hover:border-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent">Mức: {goalLabel(board.dailyGoalXp)} ▾</button>
 					</div>
 				</section>
@@ -80,8 +81,7 @@ export default function QuestsView({ board, dayResetsIn, weekResetsIn, initialTa
 					<span className={board.week.chestOpened ? 'animate-badge-pop' : 'opacity-60 grayscale'}><AdventureIcon name="chest" size={28} framed /></span>
 					<div className="min-w-0 flex-1">
 						<p className="font-black">{board.week.chestOpened ? 'Đã mở rương tuần!' : 'Rương tuần'}</p>
-						<p className="text-sm text-muted">{board.week.chestOpened ? `+${board.week.chestXp} XP đã vào túi. Tuần sau gặp lại.` : `Xong ${weekDone}/${board.week.quests.length} nhiệm vụ tuần để mở: +${board.week.chestXp} XP.`}</p>
-						{!board.week.chestOpened && <div className="segment-progress mt-2">{board.week.quests.map((quest) => <span key={quest.key} data-done={quest.done} />)}</div>}
+						<p className="text-sm text-muted">{board.week.chestOpened ? `+${board.week.chestXp} XP đã vào túi. Tuần sau gặp lại.` : `Xong nhiệm vụ tuần để mở: +${board.week.chestXp} XP.`}</p>
 					</div>
 				</section>
 			</TabsContent>
