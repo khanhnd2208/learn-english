@@ -59,6 +59,8 @@ model EnSense {
   synonyms     String[]        @default([])
   /// Short Vietnamese usage note.
   noteVi       String          @default("")
+  /// Optional advanced reading: [{ kind, phrase, meaningVi, example }] (see advancedNotes.ts).
+  advanced     Json            @default("[]")
   status       EnContentStatus @default(draft)
   sortOrder    Int             @default(0)
   createdAt    DateTime        @default(now())

@@ -1,21 +1,22 @@
+import { parseAdvancedNotes, type AdvancedNote } from '@/lib/english/advancedNotes';
 export interface BundleExample {
  id: string; english: string; meaningVi: string; target: string;
  targetStart: number | null; targetLength: number | null;
  role: 'study' | 'grade'; sortOrder: number;
 }
 export interface SenseBundle {
- sense: { id: string; senseKey: string | null; meaningVi: string; partOfSpeech: string; synonyms: string[]; noteVi: string };
+ sense: { id: string; senseKey: string | null; meaningVi: string; partOfSpeech: string; synonyms: string[]; noteVi: string; advanced: AdvancedNote[] };
  word: { id: string; lemma: string; lemmaKey: string; partOfSpeech: string; ipa: string; audioPath: string; forms: string[] };
  examples: BundleExample[];
 }
 export interface SenseBundleSource {
- id: string; senseKey: string | null; meaningVi: string; partOfSpeech: string; synonyms: string[]; noteVi: string;
+ id: string; senseKey: string | null; meaningVi: string; partOfSpeech: string; synonyms: string[]; noteVi: string; advanced?: unknown;
  word: SenseBundle['word'];
  examples: Array<BundleExample & { status: string }>;
 }
 export function toSenseBundle(row: SenseBundleSource): SenseBundle {
  return {
-  sense: { id: row.id, senseKey: row.senseKey, meaningVi: row.meaningVi, partOfSpeech: row.partOfSpeech, synonyms: row.synonyms, noteVi: row.noteVi },
+  sense: { id: row.id, senseKey: row.senseKey, meaningVi: row.meaningVi, partOfSpeech: row.partOfSpeech, synonyms: row.synonyms, noteVi: row.noteVi, advanced: parseAdvancedNotes(row.advanced) },
   word: { ...row.word },
   examples: row.examples.filter((e) => e.status === 'published').sort((a, b) => a.sortOrder - b.sortOrder).map(({ id, english, meaningVi, target, targetStart, targetLength, role, sortOrder }) => ({ id, english, meaningVi, target, targetStart, targetLength, role, sortOrder })),
  };

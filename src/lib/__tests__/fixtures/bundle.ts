@@ -1,5 +1,5 @@
 import type { SenseBundle } from '@/lib/english/senseBundle';
 export function bundle(i: number): SenseBundle {
  const lemma = `word${i}`;
- return { sense: { id: `s${i}`, senseKey: null, meaningVi: `nghĩa ${i}`, partOfSpeech: 'noun', synonyms: [], noteVi: '' }, word: { id: `w${i}`, lemma, lemmaKey: lemma, partOfSpeech: 'noun', ipa: '/word/', audioPath: 'word.mp3', forms: [] }, examples: [{ id: `e${i}`, english: `Use ${lemma} here.`, meaningVi: `Dùng từ số ${i} ở đây.`, target: lemma, targetStart: 4, targetLength: lemma.length, role: 'grade', sortOrder: 0 }] };
+ return { sense: { id: `s${i}`, senseKey: null, meaningVi: `nghĩa ${i}`, partOfSpeech: 'noun', synonyms: [], noteVi: '', advanced: [] }, word: { id: `w${i}`, lemma, lemmaKey: lemma, partOfSpeech: 'noun', ipa: '/word/', audioPath: 'word.mp3', forms: [] }, examples: [{ id: `e${i}`, english: `Use ${lemma} here.`, meaningVi: `Dùng từ số ${i} ở đây.`, target: lemma, targetStart: 4, targetLength: lemma.length, role: 'grade', sortOrder: 0 }] };
 }
