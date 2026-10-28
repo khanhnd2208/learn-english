@@ -68,7 +68,7 @@ export default function SetDetail({ detail }: { detail: EnglishSetDetail }) {
 			<ul className="space-y-2">
 				{words.map((word) => {
 					const stage = STAGE_META[stageOf(word.box)];
-					const audio = Boolean(word.bundle.word.audioPath || word.bundle.word.audioUkPath || word.bundle.word.audioUsPath);
+					const audio = Boolean(word.bundle.word.audioPath);
 					return <li key={word.bundle.sense.id} className="word-row">
 						<button type="button" onClick={() => setSelected(word.bundle.sense.id)} className="min-h-11 min-w-0 flex-1 text-left focus-visible:outline-2 focus-visible:outline-accent">
 							<span className="font-bold">{word.bundle.word.lemma}</span>{' '}

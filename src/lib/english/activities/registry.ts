@@ -1,11 +1,11 @@
 import type { ActivityContext, ActivityDefinition, ActivityItem, ActivityKey } from '@/lib/english/activities/types';
 import { chooseDistractors } from '@/lib/english/activities/distractors';
 import { gradeEnglishAnswer } from '@/lib/english/grade';
-import { clozeOf, type SenseBundle } from '@/lib/english/senseBundle';
+import { exampleParts, type SenseBundle } from '@/lib/english/senseBundle';
 import { lemmaKeyOf, normalizeLearnerText, uniqueTexts } from '@/lib/english/text';
 
 function hasAudio(sense: SenseBundle): boolean {
-	return Boolean(sense.word.audioPath.trim() || sense.word.audioUkPath.trim() || sense.word.audioUsPath.trim());
+	return Boolean(sense.word.audioPath.trim());
 }
 
 function gradeTyped(item: ActivityItem, answer: string): boolean {
@@ -22,14 +22,6 @@ function gradeTyped(item: ActivityItem, answer: string): boolean {
 
 function gradeChoice(item: ActivityItem, answer: string): boolean {
 	return normalizeLearnerText(answer) === normalizeLearnerText(item.answerKey);
-}
-
-function gradePairs(item: ActivityItem, answer: string): boolean {
-	const given = answer.split('|').map((part) => {
-		const [lemma, meaning] = part.split('=');
-		return `${normalizeLearnerText(lemma ?? '')}=${normalizeLearnerText(meaning ?? '')}`;
-	}).filter((part) => part !== '=').sort().join('|');
-	return given === item.answerKey;
 }
 
 function meaningOptions(sense: SenseBundle, ctx: ActivityContext): string[] | null {
@@ -54,7 +46,8 @@ function lemmaOptions(sense: SenseBundle, ctx: ActivityContext): string[] | null
 
 function clozeExamples(sense: SenseBundle) {
 	return sense.examples.flatMap((example) => {
-		const cloze = clozeOf(example);
+		if (example.role !== 'grade') return [];
+		const cloze = exampleParts(example);
 		return cloze ? [{ example, cloze }] : [];
 	});
 }
@@ -71,19 +64,7 @@ function meaningChoice(sense: SenseBundle, ctx: ActivityContext): ActivityItem |
 		kind: 'meaning_choice',
 		senseId: sense.sense.id,
 		lemma: sense.word.lemma,
-		ipa: sense.sense.ipaOverride || sense.word.ipa,
-		choices,
-	}, sense.sense.meaningVi);
-}
-
-function listenChoice(sense: SenseBundle, ctx: ActivityContext): ActivityItem | null {
-	if (!hasAudio(sense) && !ctx.allowSyntheticAudio) return null;
-	const choices = meaningOptions(sense, ctx);
-	if (!choices) return null;
-	return base(sense, 'listen_choice', 'recognize', {
-		kind: 'listen_choice',
-		senseId: sense.sense.id,
-		lemma: sense.word.lemma,
+		ipa: sense.word.ipa,
 		choices,
 	}, sense.sense.meaningVi);
 }
@@ -108,96 +89,19 @@ function clozeChoice(sense: SenseBundle, ctx: ActivityContext): ActivityItem | n
 	}, surface);
 }
 
-function matchPairs(sense: SenseBundle, ctx: ActivityContext): ActivityItem | null {
-	const others = chooseDistractors(sense, ctx.pool, 4, false);
-	if (others.length < 4) return null;
-	const pairs = [
-		{ lemma: sense.word.lemma, meaning: sense.sense.meaningVi },
-		...others.map((entry) => ({ lemma: entry.lemma, meaning: entry.meaningVi })),
-	];
-	return base(sense, 'match_pairs', 'recognize', {
-		kind: 'match_pairs',
-		lemmas: ctx.rng.shuffle(pairs.map((pair) => pair.lemma)),
-		meanings: ctx.rng.shuffle(pairs.map((pair) => pair.meaning)),
-	}, pairKey(pairs));
-}
-
-function pairKey(pairs: Array<{ lemma: string; meaning: string }>): string {
-	return pairs
-		.map((pair) => `${normalizeLearnerText(pair.lemma)}=${normalizeLearnerText(pair.meaning)}`)
-		.sort()
-		.join('|');
-}
-
-function spellHinted(sense: SenseBundle): ActivityItem | null {
-	const lemma = sense.word.lemma.trim();
-	const letters = lemma.replace(/[\s-]/g, '');
-	if (!lemma || !sense.sense.meaningVi.trim() || !letters) return null;
-	return base(sense, 'spell_hinted', 'recall', {
-		kind: 'spell_hinted',
-		meaningVi: sense.sense.meaningVi,
-		firstLetter: letters[0] ?? '',
-		letterCount: letters.length,
-	}, lemma, sense.word.forms.filter((form) => normalizeLearnerText(form) !== normalizeLearnerText(lemma)));
-}
-
-function recallType(sense: SenseBundle, ctx: ActivityContext): ActivityItem | null {
-	const cloze = ctx.rng.pick(clozeExamples(sense));
-	const meaning = sense.sense.meaningVi.trim();
-	const useCloze = ctx.recallPrompt !== 'meaning' && Boolean(cloze) && (!meaning || ctx.rng.next() < 0.5);
-	if (useCloze && cloze) {
-		return base(sense, 'recall_type', 'recall', {
-			kind: 'recall_type',
-			mode: 'cloze',
-			before: cloze.cloze.before,
-			after: cloze.cloze.after,
-			meaningVi: cloze.example.meaningVi,
-		}, cloze.cloze.answer);
-	}
-	if (!meaning || !sense.word.lemma.trim()) return null;
-	return base(sense, 'recall_type', 'recall', {
-		kind: 'recall_type',
-		mode: 'meaning',
-		meaningVi: meaning,
-		partOfSpeech: sense.sense.partOfSpeech,
-	}, sense.word.lemma, sense.word.forms.filter((form) => normalizeLearnerText(form) !== normalizeLearnerText(sense.word.lemma)));
-}
-
 function listenType(sense: SenseBundle, ctx: ActivityContext): ActivityItem | null {
 	if ((!hasAudio(sense) && !ctx.allowSyntheticAudio) || !sense.word.lemma.trim()) return null;
 	return base(sense, 'listen_type', 'recall', {
 		kind: 'listen_type',
 		senseId: sense.sense.id,
+		meaningVi: sense.sense.meaningVi,
 	}, sense.word.lemma, sense.word.forms.filter((form) => normalizeLearnerText(form) !== normalizeLearnerText(sense.word.lemma)));
 }
 
-function speakShadow(sense: SenseBundle, ctx: ActivityContext): ActivityItem | null {
-	if ((!hasAudio(sense) && !ctx.allowSyntheticAudio) || !sense.word.lemma.trim()) return null;
-	return base(sense, 'speak_shadow', 'none', {
-		kind: 'speak_shadow',
-		senseId: sense.sense.id,
-		lemma: sense.word.lemma,
-		ipa: sense.sense.ipaOverride || sense.word.ipa,
-	}, '');
-}
-
 export const ACTIVITIES: ActivityDefinition[] = [
-	{ key: 'meaning_choice', label: 'Nhìn từ → chọn nghĩa', role: 'recognize', inPractice: true, inTest: true, sortOrder: 10, build: meaningChoice, grade: gradeChoice },
-	{ key: 'listen_choice', label: 'Nghe → chọn nghĩa', role: 'recognize', inPractice: true, inTest: true, sortOrder: 20, build: listenChoice, grade: gradeChoice },
-	{ key: 'cloze_choice', label: 'Điền vào câu (chọn)', role: 'recognize', inPractice: true, inTest: true, sortOrder: 30, build: clozeChoice, grade: gradeChoice },
-	{ key: 'match_pairs', label: 'Ghép cặp', role: 'recognize', inPractice: true, inTest: false, sortOrder: 40, build: matchPairs, grade: gradePairs },
-	{ key: 'spell_hinted', label: 'Nhìn nghĩa → viết từ (có chữ đầu + số chữ)', role: 'recall', inPractice: true, inTest: false, sortOrder: 50, build: (sense) => spellHinted(sense), grade: gradeTyped },
-	{ key: 'recall_type', label: 'Nhìn nghĩa hoặc câu đục lỗ → viết từ', role: 'recall', inPractice: true, inTest: true, sortOrder: 60, build: recallType, grade: gradeTyped },
-	{ key: 'listen_type', label: 'Nghe → viết từ', role: 'recall', inPractice: true, inTest: true, sortOrder: 70, build: listenType, grade: gradeTyped },
-	{ key: 'speak_shadow', label: 'Nghe mẫu, ghi âm, tự so', role: 'none', inPractice: true, inTest: false, sortOrder: 80, build: speakShadow },
+ { key: 'meaning_choice', label: 'Nhìn từ → chọn nghĩa', role: 'recognize', build: meaningChoice, grade: gradeChoice },
+ { key: 'listen_type', label: 'Nghe → viết từ', role: 'recall', build: listenType, grade: gradeTyped },
+ { key: 'cloze_choice', label: 'Điền vào câu', role: 'recognize', build: clozeChoice, grade: gradeChoice },
 ];
-
 const byKey = new Map(ACTIVITIES.map((activity) => [activity.key, activity]));
-
-export function activityByKey(key: string): ActivityDefinition | null {
-	return byKey.get(key as ActivityKey) ?? null;
-}
-
-export function isActivityKey(key: string): key is ActivityKey {
-	return byKey.has(key as ActivityKey);
-}
+export function activityByKey(key: string): ActivityDefinition | null { return byKey.get(key as ActivityKey) ?? null; }

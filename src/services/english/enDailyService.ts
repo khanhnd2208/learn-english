@@ -1,31 +1,22 @@
 import { cache } from 'react';
 import { prisma } from '@/lib/prisma';
 import { AppError } from '@/lib/appError';
-import { EN_DAILY_DUE_LIMIT, EN_NEW_WORDS_DEFAULT, EN_ROUND_REVIEW_LIMIT, EN_TX_MAX_WAIT_MS, EN_TX_TIMEOUT_MS, EN_WEEKLY_DAYS_DEFAULT } from '@/lib/english/constants';
+import { EN_HINT_MAX_BOX, EN_DAILY_DUE_LIMIT, EN_NEW_WORDS_DEFAULT, EN_ROUND_REVIEW_LIMIT, EN_TX_MAX_WAIT_MS, EN_TX_TIMEOUT_MS, EN_WEEKLY_DAYS_DEFAULT } from '@/lib/english/constants';
 import { buildDailyQueue, intervalChange, isLongTerm, isNearMiss, scheduleMove, vnDayStart, type ScheduledState } from '@/lib/english/schedule';
 import { gradeEnglishAnswer } from '@/lib/english/grade';
 import { shiftVnDay, vnDayKey, vnWeekDays } from '@/lib/english/gapRule';
 import { streakStats } from '@/lib/english/streak';
 import { pacedEnough, reviewXpEvents } from '@/lib/english/xp';
-import { exampleParts, type SenseBundle } from '@/lib/english/senseBundle';
+import { type SenseBundle } from '@/lib/english/senseBundle';
 import { getSenseBundles } from '@/services/english/enContentService';
 import { answerLayout, type AnswerLayout } from '@/lib/english/answerLayout';
+import { hintFor } from '@/lib/english/srsPrompt';
+import { normalizeLearnerText } from '@/lib/english/text';
 
-export type DailyPrompt = 'meaning' | 'cloze' | 'listen';
-
-export type DailyCloze = { before: string; after: string; meaningVi: string; layout: AnswerLayout };
-
-export type DailyItem = {
-	senseId: string;
-	kind: 'review' | 'new';
-	prompt: DailyPrompt;
-	cloze: DailyCloze | null;
-	layout: AnswerLayout;
-	bundle: SenseBundle;
-};
+export type DailyItem = { senseId: string; kind: 'review' | 'new'; box: number; hint: { firstLetter: string; letterCount: number } | null; layout: AnswerLayout; bundle: SenseBundle };
 
 export type DailyAnswerResult = {
-	result: 'correct' | 'wrong' | 'near';
+	result: 'correct' | 'wrong' | 'near' | 'synonym';
 	expected: string;
 	boxBefore: number;
 	boxAfter: number;
@@ -108,26 +99,6 @@ async function planToday(userId: string, now: Date) {
 	return { states, queue, dueTotal, introducedToday, enrolledSets };
 }
 
-function pick<T>(values: T[]): T | undefined {
-	return values[Math.floor(Math.random() * values.length)];
-}
-
-function hasAudio(bundle: SenseBundle): boolean {
-	return Boolean(bundle.word.audioPath || bundle.word.audioUkPath || bundle.word.audioUsPath);
-}
-
-function promptFor(bundle: SenseBundle): { prompt: DailyPrompt; cloze: DailyCloze | null } {
-	const clozes = bundle.examples.flatMap((example) => {
-		const parts = exampleParts(example);
-		return parts ? [{ before: parts.before, after: parts.after, meaningVi: example.meaningVi, layout: answerLayout(parts.answer) }] : [];
-	});
-	const options: DailyPrompt[] = ['meaning'];
-	if (clozes.length) options.push('cloze');
-	if (hasAudio(bundle)) options.push('listen');
-	const prompt = pick(options) ?? 'meaning';
-	return { prompt, cloze: prompt === 'cloze' ? pick(clozes) ?? null : null };
-}
-
 export async function startToday(userId: string, now = new Date()) {
 	const plan = await planToday(userId, now);
 	const { dueTotal } = plan;
@@ -135,14 +106,15 @@ export async function startToday(userId: string, now = new Date()) {
 	const senseIds = queue.map((item) => item.kind === 'new' ? item.senseId : item.state.senseId);
 	if (!senseIds.length) return { sessionId: null, dueCount: 0, newCount: 0, dueTotal, items: [] as DailyItem[] };
 	const session = await prisma.enPracticeSession.create({
-		data: { userId, mode: 'review', activityKey: 'recall_type', senseIds, startedAt: now },
+		data: { userId, mode: 'review', activityKey: 'srs_type', senseIds, startedAt: now },
 	});
 	const bundles = await getSenseBundles(senseIds, true);
 	const bySense = new Map(bundles.map((bundle) => [bundle.sense.id, bundle]));
 	const items = queue.flatMap((item): DailyItem[] => {
 		const senseId = item.kind === 'new' ? item.senseId : item.state.senseId;
 		const bundle = bySense.get(senseId);
-		return bundle ? [{ senseId, kind: item.kind, bundle, layout: answerLayout(bundle.word.lemma), ...promptFor(bundle) }] : [];
+		const box = item.kind === 'new' ? 0 : item.state.box;
+		return bundle ? [{ senseId, kind: item.kind, box, hint: box <= EN_HINT_MAX_BOX ? hintFor(bundle.word.lemma) : null, bundle, layout: answerLayout(bundle.word.lemma) }] : [];
 	});
 	return {
 		sessionId: session.id,
@@ -210,14 +182,11 @@ export const getTodayOverview = cache(async (userId: string, now = new Date()): 
 	};
 });
 
-function acceptedAnswers(bundle: SenseBundle): string[] {
-	const targets = bundle.examples.map((example) => example.target.trim()).filter(Boolean);
-	return [...new Set([...bundle.word.forms, ...targets])];
-}
+function acceptedAnswers(bundle: SenseBundle): string[] { return bundle.word.forms; }
 
 export async function answerToday(
 	userId: string,
-	input: { sessionId: string; senseId: string; answer: string; prompt?: DailyPrompt; responseMs?: number; giveUp?: boolean; typoChecked?: boolean },
+	input: { sessionId: string; senseId: string; answer: string; responseMs?: number; giveUp?: boolean; typoChecked?: boolean },
 	now = new Date(),
 ): Promise<DailyAnswerResult> {
 	const session = await prisma.enPracticeSession.findFirst({ where: { id: input.sessionId, userId, mode: 'review' } });
@@ -231,6 +200,9 @@ export async function answerToday(
 	const correct = !input.giveUp && gradeEnglishAnswer({ skill: 'sound', answer: input.answer, expected, acceptedAnswers: accepted, audioOpened: false, skipped: false }).displayCorrect;
 	const state = await prisma.enWordState.findUnique({ where: { userId_senseId: { userId, senseId: input.senseId } } });
 	const before = state?.box ?? 0;
+	if (!correct && !input.giveUp && bundle.sense.synonyms.some((synonym) => normalizeLearnerText(synonym) === normalizeLearnerText(input.answer))) {
+		return { result: 'synonym', expected: '', boxBefore: before, boxAfter: before, scheduled: false, nextDueAt: state?.dueAt.toISOString() ?? null, ...intervalChange(before, before), xp: 0 };
+	}
 	if (!correct && !input.giveUp && !input.typoChecked && isNearMiss(input.answer, [expected, ...accepted])) {
 		return { result: 'near', expected: '', boxBefore: before, boxAfter: before, scheduled: false, nextDueAt: state?.dueAt.toISOString() ?? null, ...intervalChange(before, before), xp: 0 };
 	}
@@ -250,7 +222,7 @@ export async function answerToday(
 		}
 		const last = await tx.enReview.findFirst({ where: { sessionId: session.id }, orderBy: { at: 'desc' }, select: { at: true } });
 			const paced = pacedEnough(last?.at ?? session.startedAt, now);
-			const review = await tx.enReview.create({ data: { sessionId: session.id, userId, senseId: input.senseId, at: now, prompt: input.prompt ?? 'meaning', correct, responseMs, boxBefore: before, boxAfter: next.box, scheduled: changed } });
+			const review = await tx.enReview.create({ data: { sessionId: session.id, userId, senseId: input.senseId, at: now, prompt: before <= EN_HINT_MAX_BOX ? 'hinted' : 'free', correct, responseMs, boxBefore: before, boxAfter: next.box, scheduled: changed } });
 		const day = vnDayKey(now);
 		const extraToday = !changed && correct
 			? (await tx.enXpEvent.aggregate({ where: { userId, day, kind: 'extra' }, _sum: { xp: true } }))._sum.xp ?? 0

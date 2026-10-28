@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { exampleParts } from '@/lib/english/senseBundle';
 
-const base = { targetTag: '', targetStart: null, targetLength: null };
+const base = { targetStart: null, targetLength: null };
 
 describe('exampleParts', () => {
 	it('uses target offsets when present', () => {

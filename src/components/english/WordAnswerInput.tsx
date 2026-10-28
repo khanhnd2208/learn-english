@@ -3,15 +3,13 @@
 import { useId, useRef, useState, type ChangeEvent, type ClipboardEvent, type KeyboardEvent } from 'react';
 import { answerLetters, completeAnswer, isAnswerComplete, type AnswerLayout } from '@/lib/english/answerLayout';
 
-export default function WordAnswerInput({ layout, value, onChange, disabled = false, firstLetter, inputRef, autoFocus = false }: {
-	layout: AnswerLayout;
-	value: string;
-	onChange: (value: string) => void;
-	disabled?: boolean;
-	firstLetter?: string;
-	inputRef?: (node: HTMLInputElement | null) => void;
-	autoFocus?: boolean;
-}) {
+type Props = { layout?: AnswerLayout; value: string; onChange: (value: string) => void; disabled?: boolean; firstLetter?: string; inputRef?: (node: HTMLInputElement | null) => void; autoFocus?: boolean; freeText?: boolean };
+export default function WordAnswerInput({ layout, value, onChange, disabled, firstLetter, inputRef, autoFocus, freeText }: Props) {
+ if (freeText) return <input ref={inputRef} autoFocus={autoFocus} value={value} onChange={(event) => onChange(event.target.value)} disabled={disabled} autoComplete="off" autoCorrect="off" autoCapitalize="none" spellCheck={false} aria-label="Gõ từ tiếng Anh" className="w-full rounded-panel border-2 border-border bg-background p-3 text-center text-lg focus:border-accent" />;
+ if (!layout) return null;
+ return <SlottedInput layout={layout} value={value} onChange={onChange} disabled={disabled} firstLetter={firstLetter} inputRef={inputRef} autoFocus={autoFocus} />;
+}
+function SlottedInput({ layout, value, onChange, disabled = false, firstLetter, inputRef, autoFocus = false }: Props & { layout: AnswerLayout }) {
 	const ownRef = useRef<HTMLInputElement | null>(null);
 	const [message, setMessage] = useState('');
 	const [cursor, setCursor] = useState(0);

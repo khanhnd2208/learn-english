@@ -6,13 +6,13 @@ Back up both databases before importing or deleting data. Apply `prisma/migratio
 
 Copy these tables with `pg_dump --data-only --table='EnWord' ...` and restore with `psql`:
 
-`EnWord`, `EnSense`, `EnExample`, `EnSenseHint`, `EnSenseRelation`, `EnWordFamily`, `EnWordFamilyMember`, `EnPattern`, `EnPatternExample`, `EnPatternSense`, `EnQuestion`, `EnSet`, `EnSetItem`, `EnActivityType`, `EnTestBlueprint`.
+`EnWord`, `EnSense`, `EnExample`, `EnSet`, `EnSetItem`.
 
 Use dependency order when importing, or produce one dump containing all listed tables so PostgreSQL preserves the dump's ordering.
 
 ## Learner data
 
-Do not copy learner tables by default. Their `userId` values reference MongoDB IDs. To preserve them, first copy the matching `users` and `accounts` documents with unchanged `_id` values, then copy `EnEnrollment`, `EnWordState`, `EnPracticeSession`, `EnTestAttempt`, `EnTestItem`, `EnTestWordResult`, `EnPatternProgress`, `EnAnswerLog`, `EnAudioOpen`, and `EnDispute`.
+Do not copy learner tables by default. Their `userId` values reference MongoDB IDs. To preserve them, first copy the matching `users` and `accounts` documents with unchanged `_id` values, then copy `EnEnrollment`, `EnWordState`, `EnPracticeSession`, `EnTestAttempt`, `EnTestItem`, `EnReview`, and the guided review and goal tables.
 
 Verify row counts with:
 

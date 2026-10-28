@@ -114,43 +114,14 @@ export default function EnglishAdmin({ sets, qaEnabled }: { sets: SetRow[]; qaEn
 					{preview && (
 						<div className="space-y-3 border-t border-border pt-3">
 							<h2 className="text-lg font-black">Xem trước — chỉ đọc</h2>
-							{preview.families.map((family) => (
-								<p key={family.key} className="text-sm text-foreground-secondary">
-									Họ {family.kind === 'root' ? 'gốc' : 'từ'} <span className="font-bold">{family.root}</span>
-									{family.meaningVi ? ` · ${family.meaningVi}` : ''}: {family.members.map((member) => member.lemma).join(', ')}
-								</p>
-							))}
-							{preview.words.map((word) => (
-								<div key={`${word.senseKey || word.lemma}-${word.meaningVi}`} className="space-y-1 text-sm">
-									<p className="font-black text-foreground">
-										{word.lemma}
-										{word.cefr ? <span className="ml-2 text-xs font-bold uppercase text-muted">{word.cefr === 'pre_a1' ? 'A0' : word.cefr}</span> : null}
-									</p>
-									<p className="text-muted">
-										{[word.ipaUk && `Anh ${word.ipaUk}`, word.ipaUs && `Mỹ ${word.ipaUs}`, word.syllables.length > 0 && word.syllables.join('·')].filter(Boolean).join(' · ')}
-									</p>
-									<p>{word.meaningVi}</p>
-									{word.definitionEn && <p className="text-foreground-secondary">{word.definitionEn}</p>}
-									{word.definitionEnSimple && <p className="text-muted">{word.definitionEnSimple}</p>}
-									{word.grammarNoteVi && <p className="text-muted">{word.grammarNoteVi}</p>}
-									{word.hints.map((hint) => (
-										<p key={`${word.lemma}-${hint.order}`} className="text-foreground-secondary">
-											Gợi ý {hint.order} · {hint.kind}: {hint.textVi || hint.textEn}
-										</p>
-									))}
-									{word.relations.map((relation) => (
-										<p key={`${word.lemma}-${relation.kind}-${relation.lemma}`} className="text-foreground-secondary">
-											{relation.kind}{relation.confusableType ? ` (${relation.confusableType})` : ''}: {relation.lemma}
-											{relation.noteVi ? ` — ${relation.noteVi}` : ''}
-										</p>
-									))}
-									{word.examples.filter((example) => example.targetStart != null).map((example) => (
-										<p key={`${word.lemma}-${example.english}`} className="text-muted">
-											Ví dụ “{example.target}”{example.targetTag ? ` · ${example.targetTag}` : ''} tại ký tự {example.targetStart}
-										</p>
-									))}
-								</div>
-							))}
+                            {preview.words.map((word) => <div key={`${word.senseKey}-${word.meaningVi}`} className="space-y-1 text-sm">
+                                <p className="font-black">{word.lemma} · {word.ipa} · {word.partOfSpeech}</p>
+                                <p>{word.meaningVi}</p>
+                                {word.noteVi && <p>{word.noteVi}</p>}
+                                {word.synonyms.length > 0 && <p>Gần nghĩa: {word.synonyms.join(', ')}</p>}
+                                {word.examples.map((example, index) => <p key={index} className="text-muted">{example.english} — {example.meaningVi}</p>)}
+                                {word.examples.some((example) => example.gradable) && <div className="rounded-control bg-accent-subtle p-3"><p className="font-bold">Câu dùng để chấm</p>{word.examples.filter((example) => example.gradable).map((example, index) => <p key={index}><strong>{example.english}</strong> — {example.meaningVi}</p>)}</div>}
+                            </div>)}
 						</div>
 					)}
 					{issues.length > 0 && (

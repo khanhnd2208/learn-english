@@ -32,238 +32,63 @@ enum EnExampleRole {
   grade
 }
 
-enum EnCefr {
-  pre_a1
-  a1
-  a2
-  b1
-  b2
-  c1
-  c2
-}
-
-enum EnEntryType {
-  word
-  phrasal_verb
-  idiom
-  fixed_phrase
-}
-
-enum EnRegister {
-  neutral
-  formal
-  informal
-  slang
-  literary
-  technical
-  old_fashioned
-  offensive
-}
-
-enum EnRegion {
-  both
-  uk
-  us
-}
-
-enum EnContentOrigin {
-  authored
-  ai_generated
-  corpus
-}
-
-enum EnHintKind {
-  category
-  function
-  context
-  association
-  contrast
-  morphology
-}
-
-enum EnRelationKind {
-  synonym
-  antonym
-  broader
-  narrower
-  confusable
-}
-
-enum EnConfusableType {
-  spelling
-  sound
-  meaning
-  false_friend
-  grammar
-  collocation
-}
-
-enum EnFamilyKind {
-  derivation
-  root
-}
-
 model EnWord {
-  id            String               @id @default(cuid())
-  lemma         String
-  ipa           String               @default("")
-  stress        String               @default("")
-  partOfSpeech  String               @default("")
-  forms         String[]             @default([])
-  audioPath     String               @default("")
-  status        EnContentStatus      @default(draft)
-  createdAt     DateTime             @default(now())
-  updatedAt     DateTime             @updatedAt
-  lemmaKey      String               @unique
-  entryType     EnEntryType          @default(word)
-  ipaUk         String               @default("")
-  ipaUs         String               @default("")
-  syllables     String[]             @default([])
-  stressIndex   Int?
-  inflections   Json                 @default("[]")
-  frequencyRank Int?
-  cefr          EnCefr?
-  audioUkPath   String               @default("")
-  audioUsPath   String               @default("")
-  senses        EnSense[]
-  familyLinks   EnWordFamilyMember[]
+  id           String          @id @default(cuid())
+  lemma        String
+  lemmaKey     String          @unique
+  partOfSpeech String          @default("")
+  ipa          String          @default("")
+  audioPath    String          @default("")
+  forms        String[]        @default([])
+  status       EnContentStatus @default(draft)
+  createdAt    DateTime        @default(now())
+  updatedAt    DateTime        @updatedAt
+  senses       EnSense[]
 
   @@index([status])
   @@index([lemma])
-  @@index([cefr])
-  @@index([frequencyRank])
 }
 
 model EnSense {
-  id                  String            @id @default(cuid())
-  wordId              String
-  meaningVi           String
-  partOfSpeech        String            @default("")
-  pitfallVi           String            @default("")
-  chunks              Json              @default("[]")
-  commonErrors        Json              @default("[]")
-  distractorMeanings  String[]          @default([])
-  distractorLemmas    String[]          @default([])
-  isPrimary           Boolean           @default(true)
-  status              EnContentStatus   @default(draft)
-  createdAt           DateTime          @default(now())
-  updatedAt           DateTime          @updatedAt
-  senseKey            String?           @unique
-  definitionEn        String            @default("")
-  definitionEnSimple  String            @default("")
-  cefr                EnCefr?
-  register            EnRegister        @default(neutral)
-  region              EnRegion          @default(both)
-  topics              String[]          @default([])
-  grammarTags         String[]          @default([])
-  grammarNoteVi       String            @default("")
-  ipaOverride         String            @default("")
-  stressIndexOverride Int?
-  imagePath           String            @default("")
-  imageAlt            String            @default("")
-  sortOrder           Int               @default(0)
-  word                EnWord            @relation(fields: [wordId], references: [id], onDelete: Cascade)
-  examples            EnExample[]
-  wordStates          EnWordState[]
-  setItems            EnSetItem[]
-  hints               EnSenseHint[]
-  relations           EnSenseRelation[] @relation("SenseRelationFrom")
-  relatedFrom         EnSenseRelation[] @relation("SenseRelationTo")
+  id           String          @id @default(cuid())
+  wordId       String
+  senseKey     String?         @unique
+  meaningVi    String
+  partOfSpeech String          @default("")
+  /// Accepted near-synonyms do not change the learner's schedule.
+  synonyms     String[]        @default([])
+  /// Short Vietnamese usage note.
+  noteVi       String          @default("")
+  status       EnContentStatus @default(draft)
+  sortOrder    Int             @default(0)
+  createdAt    DateTime        @default(now())
+  updatedAt    DateTime        @updatedAt
+  word         EnWord          @relation(fields: [wordId], references: [id], onDelete: Cascade)
+  examples     EnExample[]
+  wordStates   EnWordState[]
+  setItems     EnSetItem[]
 
   @@index([wordId])
   @@index([status])
-  @@index([cefr])
 }
 
 model EnExample {
-  id            String          @id @default(cuid())
-  senseId       String
-  english       String
-  meaningVi     String          @default("")
-  target        String
-  audioPath     String          @default("")
-  role          EnExampleRole   @default(study)
-  alternatives  String[]        @default([])
-  ambiguityNote String          @default("")
-  status        EnContentStatus @default(draft)
-  createdAt     DateTime        @default(now())
-  updatedAt     DateTime        @updatedAt
-  targetStart   Int?
-  targetLength  Int?
-  targetTag     String          @default("")
-  cefr          EnCefr?
-  origin        EnContentOrigin @default(authored)
-  sourceNote    String          @default("")
-  sortOrder     Int             @default(0)
-  sense         EnSense         @relation(fields: [senseId], references: [id], onDelete: Cascade)
+  id           String          @id @default(cuid())
+  senseId      String
+  english      String
+  meaningVi    String          @default("")
+  target       String
+  targetStart  Int?
+  targetLength Int?
+  /// Study examples are displayed; grade examples can be used in cloze questions.
+  role         EnExampleRole   @default(study)
+  status       EnContentStatus @default(draft)
+  sortOrder    Int             @default(0)
+  createdAt    DateTime        @default(now())
+  updatedAt    DateTime        @updatedAt
+  sense        EnSense         @relation(fields: [senseId], references: [id], onDelete: Cascade)
 
   @@index([senseId, status, role])
-}
-
-model EnSenseHint {
-  id        String          @id @default(cuid())
-  senseId   String
-  order     Int
-  kind      EnHintKind
-  textEn    String
-  textVi    String          @default("")
-  cefr      EnCefr?
-  status    EnContentStatus @default(draft)
-  createdAt DateTime        @default(now())
-  updatedAt DateTime        @updatedAt
-  sense     EnSense         @relation(fields: [senseId], references: [id], onDelete: Cascade)
-
-  @@unique([senseId, order])
-  @@index([senseId, status])
-}
-
-model EnSenseRelation {
-  id             String            @id @default(cuid())
-  senseId        String
-  kind           EnRelationKind
-  lemma          String
-  targetSenseId  String?
-  confusableType EnConfusableType?
-  noteVi         String            @default("")
-  contrast       Json              @default("[]")
-  mistake        Json?
-  sortOrder      Int               @default(0)
-  createdAt      DateTime          @default(now())
-  sense          EnSense           @relation("SenseRelationFrom", fields: [senseId], references: [id], onDelete: Cascade)
-  targetSense    EnSense?          @relation("SenseRelationTo", fields: [targetSenseId], references: [id], onDelete: SetNull)
-
-  @@unique([senseId, kind, lemma])
-  @@index([targetSenseId])
-}
-
-model EnWordFamily {
-  id         String               @id @default(cuid())
-  key        String               @unique
-  kind       EnFamilyKind
-  root       String
-  meaningVi  String               @default("")
-  meaningEn  String               @default("")
-  originNote String               @default("")
-  status     EnContentStatus      @default(draft)
-  createdAt  DateTime             @default(now())
-  updatedAt  DateTime             @updatedAt
-  members    EnWordFamilyMember[]
-}
-
-model EnWordFamilyMember {
-  id           String       @id @default(cuid())
-  familyId     String
-  lemma        String
-  wordId       String?
-  partOfSpeech String       @default("")
-  affixNote    String       @default("")
-  meaningVi    String       @default("")
-  sortOrder    Int          @default(0)
-  family       EnWordFamily @relation(fields: [familyId], references: [id], onDelete: Cascade)
-  word         EnWord?      @relation(fields: [wordId], references: [id], onDelete: SetNull)
-
-  @@unique([familyId, lemma])
-  @@index([wordId])
 }
 
 model EnSet {
@@ -313,22 +138,22 @@ model EnReviewPreference {
 }
 
 model EnGuidedReviewSession {
-  id                    String                   @id @default(cuid())
-  userId                String
-  activeKey             String?                  @unique
-  selectedSetIds        String[]                 @default([])
-  poolSenseIds          String[]                 @default([])
-  remainingSenseIds     String[]                 @default([])
-  currentChunkSenseIds  String[]                 @default([])
-  chunkNumber           Int                      @default(1)
-  phase                 String                   @default("study")
-  studyPosition         Int                      @default(0)
-  questionPosition      Int                      @default(0)
-  startedAt             DateTime                 @default(now())
-  updatedAt             DateTime                 @updatedAt
-  endedAt               DateTime?
-  activeSeconds         Int                      @default(0)
-  questions             EnGuidedReviewQuestion[]
+  id                   String                   @id @default(cuid())
+  userId               String
+  activeKey            String?                  @unique
+  selectedSetIds       String[]                 @default([])
+  poolSenseIds         String[]                 @default([])
+  remainingSenseIds    String[]                 @default([])
+  currentChunkSenseIds String[]                 @default([])
+  chunkNumber          Int                      @default(1)
+  phase                String                   @default("study")
+  studyPosition        Int                      @default(0)
+  questionPosition     Int                      @default(0)
+  startedAt            DateTime                 @default(now())
+  updatedAt            DateTime                 @updatedAt
+  endedAt              DateTime?
+  activeSeconds        Int                      @default(0)
+  questions            EnGuidedReviewQuestion[]
 
   @@index([userId, startedAt])
 }

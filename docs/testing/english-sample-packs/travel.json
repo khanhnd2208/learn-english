@@ -1,7 +1,7 @@
 {
   "title": "Du lịch (mẫu 10 từ)",
   "description": "Bộ mẫu để thử Đọc, Luyện, Kiểm tra: sân bay, vé, hành lý, chuyến đi.",
-  "packVersion": 2,
+  "packVersion": 3,
   "audioFiles": [
     "ticket.mp3",
     "ticket-1.mp3",
@@ -50,96 +50,32 @@
       "senseKey": "ticket.n.travel_pass",
       "partOfSpeech": "noun",
       "ipa": "/ˈtɪkɪt/",
-      "ipaUk": "/ˈtɪkɪt/",
-      "ipaUs": "/ˈtɪkɪt/",
-      "stress": "ticket",
-      "cefr": "a1",
-      "topics": [
-        "travel",
-        "money"
-      ],
+      "audioFile": "ticket.mp3",
       "forms": [
         "ticket",
         "tickets"
       ],
       "meaningVi": "vé",
-      "definitionEn": "a piece of paper or a code that lets you travel or enter a place",
-      "definitionEnSimple": "a paper or code you need to travel",
-      "chunks": [
-        {
-          "text": "buy a ticket",
-          "vi": "mua vé"
-        },
-        {
-          "text": "a one-way ticket",
-          "vi": "vé một chiều"
-        }
-      ],
-      "commonErrors": [],
-      "audioFile": "ticket.mp3",
-      "hints": [
-        {
-          "order": 1,
-          "kind": "context",
-          "textEn": "You show it to the person at the gate before you get on.",
-          "textVi": "Bạn đưa nó cho người ở cổng trước khi lên."
-        },
-        {
-          "order": 2,
-          "kind": "function",
-          "textEn": "It proves that you paid for a trip or a show.",
-          "textVi": "Nó chứng minh bạn đã trả tiền cho một chuyến đi hoặc một buổi diễn."
-        },
-        {
-          "order": 3,
-          "kind": "association",
-          "textEn": "Trains, planes, and cinemas all ask for one.",
-          "textVi": "Tàu hỏa, máy bay và rạp phim đều đòi thứ này."
-        }
-      ],
-      "relations": [],
+      "synonyms": [],
+      "noteVi": "",
       "examples": [
         {
           "english": "I need to buy a ___ to Hà Nội for Friday.",
           "meaningVi": "Tôi cần mua một tấm vé đi Hà Nội cho thứ Sáu.",
           "target": "ticket",
-          "audioFile": "ticket-1.mp3",
-          "alternativesTried": [
-            "coat",
-            "bridge",
-            "bottle",
-            "garden",
-            "window"
-          ],
-          "stillPlausible": [],
-          "cefr": "a1",
-          "origin": "authored"
+          "gradable": true
         },
         {
           "english": "Please show your ___ to the driver.",
           "meaningVi": "Làm ơn đưa vé của bạn cho tài xế xem.",
           "target": "ticket",
-          "audioFile": "ticket-2.mp3",
-          "alternativesTried": [
-            "shoe",
-            "cloud",
-            "spoon",
-            "letter",
-            "chair"
-          ],
-          "stillPlausible": [],
-          "cefr": "a1",
-          "origin": "authored"
+          "gradable": true
         },
         {
           "english": "The tickets for the concert were very expensive.",
           "meaningVi": "Vé xem hòa nhạc rất đắt.",
           "target": "tickets",
-          "audioFile": "ticket-3.mp3",
-          "alternativesTried": [],
-          "stillPlausible": [],
-          "cefr": "a1",
-          "origin": "authored"
+          "gradable": false
         }
       ]
     },
@@ -148,95 +84,32 @@
       "senseKey": "airport.n.plane_place",
       "partOfSpeech": "noun",
       "ipa": "/ˈeəpɔːt/",
-      "ipaUk": "/ˈeəpɔːt/",
-      "ipaUs": "/ˈeəpɔːt/",
-      "stress": "airport",
-      "cefr": "a1",
-      "topics": [
-        "travel"
-      ],
+      "audioFile": "airport.mp3",
       "forms": [
         "airport",
         "airports"
       ],
       "meaningVi": "sân bay",
-      "definitionEn": "a place where planes take off and land",
-      "definitionEnSimple": "a place for planes",
-      "chunks": [
-        {
-          "text": "get to the airport",
-          "vi": "đến sân bay"
-        },
-        {
-          "text": "an airport taxi",
-          "vi": "taxi sân bay"
-        }
-      ],
-      "commonErrors": [],
-      "audioFile": "airport.mp3",
-      "hints": [
-        {
-          "order": 1,
-          "kind": "category",
-          "textEn": "It is a big place, not a small room.",
-          "textVi": "Đây là một nơi rộng lớn, không phải căn phòng nhỏ."
-        },
-        {
-          "order": 2,
-          "kind": "context",
-          "textEn": "You arrive here two hours before your flight.",
-          "textVi": "Bạn đến đây hai tiếng trước chuyến bay."
-        },
-        {
-          "order": 3,
-          "kind": "association",
-          "textEn": "You see long runways and many big planes.",
-          "textVi": "Bạn thấy đường băng dài và nhiều máy bay lớn."
-        }
-      ],
-      "relations": [],
+      "synonyms": [],
+      "noteVi": "",
       "examples": [
         {
           "english": "We must leave home at five to get to the ___ on time.",
           "meaningVi": "Chúng tôi phải ra khỏi nhà lúc năm giờ để đến sân bay đúng giờ.",
           "target": "airport",
-          "audioFile": "airport-1.mp3",
-          "alternativesTried": [
-            "school",
-            "market",
-            "kitchen",
-            "museum",
-            "library"
-          ],
-          "stillPlausible": [],
-          "cefr": "a1",
-          "origin": "authored"
+          "gradable": true
         },
         {
           "english": "My uncle will pick me up at the ___ tomorrow.",
           "meaningVi": "Ngày mai chú tôi sẽ đón tôi ở sân bay.",
           "target": "airport",
-          "audioFile": "airport-2.mp3",
-          "alternativesTried": [
-            "farm",
-            "bakery",
-            "theater",
-            "bedroom",
-            "bank"
-          ],
-          "stillPlausible": [],
-          "cefr": "a1",
-          "origin": "authored"
+          "gradable": true
         },
         {
           "english": "This airport is very busy in the summer.",
           "meaningVi": "Sân bay này rất đông vào mùa hè.",
           "target": "airport",
-          "audioFile": "airport-3.mp3",
-          "alternativesTried": [],
-          "stillPlausible": [],
-          "cefr": "a1",
-          "origin": "authored"
+          "gradable": false
         }
       ]
     },
@@ -245,100 +118,31 @@
       "senseKey": "luggage.n.travel_bags",
       "partOfSpeech": "noun",
       "ipa": "/ˈlʌɡɪdʒ/",
-      "ipaUk": "/ˈlʌɡɪdʒ/",
-      "ipaUs": "/ˈlʌɡɪdʒ/",
-      "stress": "luggage",
-      "cefr": "a2",
-      "topics": [
-        "travel"
-      ],
+      "audioFile": "luggage.mp3",
       "forms": [
         "luggage"
       ],
       "meaningVi": "hành lý",
-      "definitionEn": "the bags and cases that you take with you when you travel",
-      "definitionEnSimple": "the bags you take on a trip",
-      "chunks": [
-        {
-          "text": "pack your luggage",
-          "vi": "sắp xếp hành lý"
-        },
-        {
-          "text": "lose your luggage",
-          "vi": "bị thất lạc hành lý"
-        }
-      ],
-      "commonErrors": [
-        {
-          "wrong": "I have three luggages.",
-          "right": "I have three bags.",
-          "whyVi": "Luggage không đếm được, không thêm s. Nói three bags hoặc three pieces of luggage."
-        }
-      ],
-      "audioFile": "luggage.mp3",
-      "hints": [
-        {
-          "order": 1,
-          "kind": "context",
-          "textEn": "It goes round and round on a belt after a flight.",
-          "textVi": "Nó chạy vòng vòng trên băng chuyền sau chuyến bay."
-        },
-        {
-          "order": 2,
-          "kind": "function",
-          "textEn": "It holds your clothes and things for a trip.",
-          "textVi": "Nó đựng quần áo và đồ dùng cho chuyến đi."
-        },
-        {
-          "order": 3,
-          "kind": "association",
-          "textEn": "Wheels and a long handle make it easy to pull.",
-          "textVi": "Bánh xe và tay kéo dài giúp kéo nó dễ dàng."
-        }
-      ],
-      "relations": [],
+      "synonyms": [],
+      "noteVi": "",
       "examples": [
         {
           "english": "My ___ was very heavy, so I paid extra at the airport.",
           "meaningVi": "Hành lý của tôi rất nặng nên tôi phải trả thêm ở sân bay.",
           "target": "luggage",
-          "audioFile": "luggage-1.mp3",
-          "alternativesTried": [
-            "coffee",
-            "letter",
-            "ticket",
-            "garden",
-            "window"
-          ],
-          "stillPlausible": [],
-          "cefr": "a2",
-          "origin": "authored"
+          "gradable": true
         },
         {
           "english": "Please do not leave your ___ alone in the station.",
           "meaningVi": "Làm ơn đừng để hành lý của bạn một mình ở nhà ga.",
           "target": "luggage",
-          "audioFile": "luggage-2.mp3",
-          "alternativesTried": [
-            "dinner",
-            "weather",
-            "holiday",
-            "story",
-            "music"
-          ],
-          "stillPlausible": [],
-          "cefr": "a2",
-          "origin": "authored"
+          "gradable": true
         },
         {
           "english": "I packed my luggage the night before the trip.",
           "meaningVi": "Tôi sắp xếp hành lý vào đêm trước chuyến đi.",
           "target": "luggage",
-          "audioFile": "luggage-3.mp3",
-          "alternativesTried": [],
-          "stillPlausible": [],
-          "cefr": "a2",
-          "origin": "authored"
+          "gradable": false
         }
       ]
     },
@@ -347,116 +151,32 @@
       "senseKey": "passenger.n.person_traveling",
       "partOfSpeech": "noun",
       "ipa": "/ˈpæsɪndʒə/",
-      "ipaUk": "/ˈpæsɪndʒə/",
-      "ipaUs": "/ˈpæsɪndʒə/",
-      "stress": "passenger",
-      "cefr": "b1",
-      "topics": [
-        "travel",
-        "people"
-      ],
+      "audioFile": "passenger.mp3",
       "forms": [
         "passenger",
         "passengers"
       ],
       "meaningVi": "hành khách",
-      "definitionEn": "a person who travels in a vehicle but does not drive it",
-      "definitionEnSimple": "a person who rides but does not drive",
-      "chunks": [
-        {
-          "text": "a bus passenger",
-          "vi": "hành khách đi xe buýt"
-        },
-        {
-          "text": "passengers on board",
-          "vi": "hành khách trên tàu xe"
-        }
-      ],
-      "commonErrors": [],
-      "audioFile": "passenger.mp3",
-      "hints": [
-        {
-          "order": 1,
-          "kind": "category",
-          "textEn": "It is a word for a person.",
-          "textVi": "Đây là từ chỉ một người."
-        },
-        {
-          "order": 2,
-          "kind": "context",
-          "textEn": "This person sits in a seat and looks out of the window.",
-          "textVi": "Người này ngồi trên ghế và nhìn ra ngoài cửa sổ."
-        },
-        {
-          "order": 3,
-          "kind": "association",
-          "textEn": "The driver and the pilot are not this person.",
-          "textVi": "Tài xế và phi công không phải là người này."
-        }
-      ],
-      "relations": [
-        {
-          "kind": "confusable",
-          "lemma": "ticket",
-          "confusableType": "meaning",
-          "noteVi": "passenger là người đi. ticket là tấm vé của người đó.",
-          "contrast": [
-            {
-              "lemma": "passenger",
-              "en": "The passenger is waiting at the gate.",
-              "vi": "Hành khách đang đợi ở cổng."
-            },
-            {
-              "lemma": "ticket",
-              "en": "The ticket is in her bag.",
-              "vi": "Tấm vé ở trong túi cô ấy."
-            }
-          ],
-          "mistake": null
-        }
-      ],
+      "synonyms": [],
+      "noteVi": "",
       "examples": [
         {
           "english": "Every ___ must wear a seat belt on the plane.",
           "meaningVi": "Mọi hành khách phải thắt dây an toàn trên máy bay.",
           "target": "passenger",
-          "audioFile": "passenger-1.mp3",
-          "alternativesTried": [
-            "teacher",
-            "farmer",
-            "doctor",
-            "singer",
-            "painter"
-          ],
-          "stillPlausible": [],
-          "cefr": "b1",
-          "origin": "authored"
+          "gradable": true
         },
         {
           "english": "The bus was full, and one ___ had to stand.",
           "meaningVi": "Xe buýt đã đầy nên có một hành khách phải đứng.",
           "target": "passenger",
-          "audioFile": "passenger-2.mp3",
-          "alternativesTried": [
-            "actor",
-            "baker",
-            "police",
-            "writer",
-            "waiter"
-          ],
-          "stillPlausible": [],
-          "cefr": "b1",
-          "origin": "authored"
+          "gradable": true
         },
         {
           "english": "The passengers waited quietly for the train.",
           "meaningVi": "Các hành khách lặng lẽ chờ tàu.",
           "target": "passengers",
-          "audioFile": "passenger-3.mp3",
-          "alternativesTried": [],
-          "stillPlausible": [],
-          "cefr": "b1",
-          "origin": "authored"
+          "gradable": false
         }
       ]
     },
@@ -465,95 +185,32 @@
       "senseKey": "journey.n.long_trip",
       "partOfSpeech": "noun",
       "ipa": "/ˈdʒɜːni/",
-      "ipaUk": "/ˈdʒɜːni/",
-      "ipaUs": "/ˈdʒɜːni/",
-      "stress": "journey",
-      "cefr": "b1",
-      "topics": [
-        "travel"
-      ],
+      "audioFile": "journey.mp3",
       "forms": [
         "journey",
         "journeys"
       ],
       "meaningVi": "chuyến đi dài",
-      "definitionEn": "an act of traveling from one place to another, usually a long one",
-      "definitionEnSimple": "a long trip from one place to another",
-      "chunks": [
-        {
-          "text": "a long journey",
-          "vi": "một chuyến đi dài"
-        },
-        {
-          "text": "enjoy your journey",
-          "vi": "chúc chuyến đi vui vẻ"
-        }
-      ],
-      "commonErrors": [],
-      "audioFile": "journey.mp3",
-      "hints": [
-        {
-          "order": 1,
-          "kind": "context",
-          "textEn": "You sleep, read, and look at far places on the way.",
-          "textVi": "Bạn ngủ, đọc sách và ngắm những nơi xa trên đường đi."
-        },
-        {
-          "order": 2,
-          "kind": "function",
-          "textEn": "It names the time between leaving and arriving.",
-          "textVi": "Nó gọi tên khoảng thời gian giữa lúc rời đi và lúc đến nơi."
-        },
-        {
-          "order": 3,
-          "kind": "association",
-          "textEn": "A train ride across a country is a good example.",
-          "textVi": "Một chuyến tàu xuyên quốc gia là ví dụ tốt."
-        }
-      ],
-      "relations": [],
+      "synonyms": [],
+      "noteVi": "",
       "examples": [
         {
           "english": "The ___ from Huế to Sài Gòn by train takes almost a day.",
           "meaningVi": "Chuyến đi từ Huế vào Sài Gòn bằng tàu mất gần một ngày.",
           "target": "journey",
-          "audioFile": "journey-1.mp3",
-          "alternativesTried": [
-            "recipe",
-            "letter",
-            "mirror",
-            "sweater",
-            "theme"
-          ],
-          "stillPlausible": [],
-          "cefr": "b1",
-          "origin": "authored"
+          "gradable": true
         },
         {
           "english": "Have a safe ___ and call me when you arrive.",
           "meaningVi": "Chúc bạn đi bình an và gọi mình khi đến nơi nhé.",
           "target": "journey",
-          "audioFile": "journey-2.mp3",
-          "alternativesTried": [
-            "dinner",
-            "candle",
-            "finger",
-            "pocket",
-            "ladder"
-          ],
-          "stillPlausible": [],
-          "cefr": "b1",
-          "origin": "authored"
+          "gradable": true
         },
         {
           "english": "It was a long journey, but we were not tired.",
           "meaningVi": "Đó là một chuyến đi dài nhưng chúng tôi không mệt.",
           "target": "journey",
-          "audioFile": "journey-3.mp3",
-          "alternativesTried": [],
-          "stillPlausible": [],
-          "cefr": "b1",
-          "origin": "authored"
+          "gradable": false
         }
       ]
     },
@@ -562,14 +219,7 @@
       "senseKey": "arrive.v.reach_place",
       "partOfSpeech": "verb",
       "ipa": "/əˈraɪv/",
-      "ipaUk": "/əˈraɪv/",
-      "ipaUs": "/əˈraɪv/",
-      "stress": "arrive",
-      "cefr": "a2",
-      "topics": [
-        "travel",
-        "time"
-      ],
+      "audioFile": "arrive.mp3",
       "forms": [
         "arrive",
         "arrives",
@@ -577,89 +227,26 @@
         "arriving"
       ],
       "meaningVi": "đến nơi",
-      "definitionEn": "to reach a place at the end of a journey",
-      "definitionEnSimple": "to get to a place",
-      "chunks": [
-        {
-          "text": "arrive at the station",
-          "vi": "đến nhà ga"
-        },
-        {
-          "text": "arrive in Đà Nẵng",
-          "vi": "đến Đà Nẵng"
-        }
-      ],
-      "commonErrors": [
-        {
-          "wrong": "We arrived to the hotel at noon.",
-          "right": "We arrived at the hotel at noon.",
-          "whyVi": "Sau arrive dùng at cho nơi nhỏ, in cho thành phố hoặc nước. Không dùng to."
-        }
-      ],
-      "audioFile": "arrive.mp3",
-      "hints": [
-        {
-          "order": 1,
-          "kind": "context",
-          "textEn": "The train stops, and you finally step onto the platform.",
-          "textVi": "Tàu dừng lại và cuối cùng bạn bước xuống sân ga."
-        },
-        {
-          "order": 2,
-          "kind": "function",
-          "textEn": "It marks the end of a trip.",
-          "textVi": "Nó đánh dấu lúc kết thúc một chuyến đi."
-        },
-        {
-          "order": 3,
-          "kind": "association",
-          "textEn": "The opposite is what you do when you say goodbye and go.",
-          "textVi": "Điều ngược lại là việc bạn làm khi chào tạm biệt và đi."
-        }
-      ],
-      "relations": [],
+      "synonyms": [],
+      "noteVi": "",
       "examples": [
         {
           "english": "Our flight will ___ at nine o'clock tomorrow morning.",
           "meaningVi": "Chuyến bay của chúng tôi sẽ đến nơi lúc chín giờ sáng mai.",
           "target": "arrive",
-          "audioFile": "arrive-1.mp3",
-          "alternativesTried": [
-            "cook",
-            "paint",
-            "break",
-            "wash",
-            "sing"
-          ],
-          "stillPlausible": [],
-          "cefr": "a2",
-          "origin": "authored"
+          "gradable": true
         },
         {
           "english": "Please call me when you ___ at the hotel.",
           "meaningVi": "Làm ơn gọi mình khi bạn đến khách sạn nhé.",
           "target": "arrive",
-          "audioFile": "arrive-2.mp3",
-          "alternativesTried": [
-            "sleep",
-            "taste",
-            "carry",
-            "draw",
-            "climb"
-          ],
-          "stillPlausible": [],
-          "cefr": "a2",
-          "origin": "authored"
+          "gradable": true
         },
         {
           "english": "They arrived in Đà Lạt late in the evening.",
           "meaningVi": "Họ đến Đà Lạt vào chiều muộn.",
           "target": "arrived",
-          "audioFile": "arrive-3.mp3",
-          "alternativesTried": [],
-          "stillPlausible": [],
-          "cefr": "a2",
-          "origin": "authored"
+          "gradable": false
         }
       ]
     },
@@ -668,14 +255,7 @@
       "senseKey": "delay.v.make_late",
       "partOfSpeech": "verb",
       "ipa": "/dɪˈleɪ/",
-      "ipaUk": "/dɪˈleɪ/",
-      "ipaUs": "/dɪˈleɪ/",
-      "stress": "delay",
-      "cefr": "b1",
-      "topics": [
-        "travel",
-        "time"
-      ],
+      "audioFile": "delay.mp3",
       "forms": [
         "delay",
         "delays",
@@ -683,103 +263,26 @@
         "delaying"
       ],
       "meaningVi": "làm chậm, hoãn",
-      "definitionEn": "to make something happen later than planned",
-      "definitionEnSimple": "to make something late",
-      "chunks": [
-        {
-          "text": "delay a flight",
-          "vi": "hoãn một chuyến bay"
-        },
-        {
-          "text": "be delayed",
-          "vi": "bị chậm giờ"
-        }
-      ],
-      "commonErrors": [],
-      "audioFile": "delay.mp3",
-      "hints": [
-        {
-          "order": 1,
-          "kind": "context",
-          "textEn": "A passenger reads a screen and sees a new, later time.",
-          "textVi": "Một người đọc màn hình và thấy một giờ mới, muộn hơn."
-        },
-        {
-          "order": 2,
-          "kind": "function",
-          "textEn": "It moves something to a later time.",
-          "textVi": "Nó dời một việc sang lúc muộn hơn."
-        },
-        {
-          "order": 3,
-          "kind": "association",
-          "textEn": "Heavy rain or fog can do this to a plane.",
-          "textVi": "Mưa lớn hoặc sương mù có thể làm điều này với máy bay."
-        }
-      ],
-      "relations": [
-        {
-          "kind": "confusable",
-          "lemma": "arrive",
-          "confusableType": "meaning",
-          "noteVi": "delay là làm chậm. arrive là đến nơi.",
-          "contrast": [
-            {
-              "lemma": "delay",
-              "en": "The rain delays our trip.",
-              "vi": "Cơn mưa làm chuyến đi của chúng tôi chậm lại."
-            },
-            {
-              "lemma": "arrive",
-              "en": "We arrive at noon.",
-              "vi": "Chúng tôi đến nơi lúc trưa."
-            }
-          ],
-          "mistake": null
-        }
-      ],
+      "synonyms": [],
+      "noteVi": "",
       "examples": [
         {
           "english": "The bad weather may ___ our flight by two hours.",
           "meaningVi": "Thời tiết xấu có thể làm chuyến bay của chúng tôi chậm hai tiếng.",
           "target": "delay",
-          "audioFile": "delay-1.mp3",
-          "alternativesTried": [
-            "wash",
-            "taste",
-            "sing",
-            "plant",
-            "sell"
-          ],
-          "stillPlausible": [],
-          "cefr": "b1",
-          "origin": "authored"
+          "gradable": true
         },
         {
           "english": "We had to ___ the meeting because the manager was sick.",
           "meaningVi": "Chúng tôi phải hoãn cuộc họp vì quản lý bị ốm.",
           "target": "delay",
-          "audioFile": "delay-2.mp3",
-          "alternativesTried": [
-            "eat",
-            "wear",
-            "climb",
-            "draw",
-            "throw"
-          ],
-          "stillPlausible": [],
-          "cefr": "b1",
-          "origin": "authored"
+          "gradable": true
         },
         {
           "english": "The train was delayed because of the storm.",
           "meaningVi": "Tàu bị chậm vì cơn bão.",
           "target": "delayed",
-          "audioFile": "delay-3.mp3",
-          "alternativesTried": [],
-          "stillPlausible": [],
-          "cefr": "b1",
-          "origin": "authored"
+          "gradable": false
         }
       ]
     },
@@ -788,13 +291,7 @@
       "senseKey": "cancel.v.stop_plan",
       "partOfSpeech": "verb",
       "ipa": "/ˈkænsl/",
-      "ipaUk": "/ˈkænsl/",
-      "ipaUs": "/ˈkænsl/",
-      "stress": "cancel",
-      "cefr": "b1",
-      "topics": [
-        "travel"
-      ],
+      "audioFile": "cancel.mp3",
       "forms": [
         "cancel",
         "cancels",
@@ -802,103 +299,26 @@
         "cancelling"
       ],
       "meaningVi": "hủy",
-      "definitionEn": "to decide that a planned event will not happen",
-      "definitionEnSimple": "to say that a plan will not happen",
-      "chunks": [
-        {
-          "text": "cancel a flight",
-          "vi": "hủy một chuyến bay"
-        },
-        {
-          "text": "cancel a booking",
-          "vi": "hủy một lượt đặt chỗ"
-        }
-      ],
-      "commonErrors": [],
-      "audioFile": "cancel.mp3",
-      "hints": [
-        {
-          "order": 1,
-          "kind": "context",
-          "textEn": "An email says that your trip next week is not going to happen.",
-          "textVi": "Một email nói chuyến đi tuần sau sẽ không diễn ra."
-        },
-        {
-          "order": 2,
-          "kind": "function",
-          "textEn": "It stops a plan completely.",
-          "textVi": "Nó dừng hẳn một kế hoạch."
-        },
-        {
-          "order": 3,
-          "kind": "association",
-          "textEn": "Hotels and airlines may give your money back after this.",
-          "textVi": "Khách sạn và hãng bay có thể trả lại tiền sau việc này."
-        }
-      ],
-      "relations": [
-        {
-          "kind": "confusable",
-          "lemma": "delay",
-          "confusableType": "meaning",
-          "noteVi": "cancel là bỏ hẳn kế hoạch. delay chỉ dời sang lúc muộn hơn.",
-          "contrast": [
-            {
-              "lemma": "cancel",
-              "en": "They cancel the flight.",
-              "vi": "Họ hủy chuyến bay."
-            },
-            {
-              "lemma": "delay",
-              "en": "They delay the flight.",
-              "vi": "Họ hoãn chuyến bay."
-            }
-          ],
-          "mistake": null
-        }
-      ],
+      "synonyms": [],
+      "noteVi": "",
       "examples": [
         {
           "english": "Because of the typhoon, the airline had to ___ all flights.",
           "meaningVi": "Vì bão, hãng bay phải hủy tất cả chuyến bay.",
           "target": "cancel",
-          "audioFile": "cancel-1.mp3",
-          "alternativesTried": [
-            "eat",
-            "wear",
-            "paint",
-            "taste",
-            "plant"
-          ],
-          "stillPlausible": [],
-          "cefr": "b1",
-          "origin": "authored"
+          "gradable": true
         },
         {
           "english": "I want to ___ my hotel booking because I am sick.",
           "meaningVi": "Tôi muốn hủy đặt phòng khách sạn vì tôi bị ốm.",
           "target": "cancel",
-          "audioFile": "cancel-2.mp3",
-          "alternativesTried": [
-            "cook",
-            "sing",
-            "carry",
-            "wash",
-            "climb"
-          ],
-          "stillPlausible": [],
-          "cefr": "b1",
-          "origin": "authored"
+          "gradable": true
         },
         {
           "english": "She cancelled the trip when her mother got sick.",
           "meaningVi": "Cô ấy hủy chuyến đi khi mẹ cô ấy bị ốm.",
           "target": "cancelled",
-          "audioFile": "cancel-3.mp3",
-          "alternativesTried": [],
-          "stillPlausible": [],
-          "cefr": "b1",
-          "origin": "authored"
+          "gradable": false
         }
       ]
     },
@@ -907,95 +327,31 @@
       "senseKey": "crowded.adj.too_many_people",
       "partOfSpeech": "adjective",
       "ipa": "/ˈkraʊdɪd/",
-      "ipaUk": "/ˈkraʊdɪd/",
-      "ipaUs": "/ˈkraʊdɪd/",
-      "stress": "crowded",
-      "cefr": "b1",
-      "topics": [
-        "travel",
-        "people"
-      ],
+      "audioFile": "crowded.mp3",
       "forms": [
         "crowded"
       ],
       "meaningVi": "đông đúc",
-      "definitionEn": "full of people so that there is little space",
-      "definitionEnSimple": "with too many people in a place",
-      "chunks": [
-        {
-          "text": "a crowded bus",
-          "vi": "một chuyến xe buýt đông"
-        },
-        {
-          "text": "crowded with tourists",
-          "vi": "đông khách du lịch"
-        }
-      ],
-      "commonErrors": [],
-      "audioFile": "crowded.mp3",
-      "hints": [
-        {
-          "order": 1,
-          "kind": "category",
-          "textEn": "It describes a place, not a person.",
-          "textVi": "Từ này mô tả một nơi, không phải một người."
-        },
-        {
-          "order": 2,
-          "kind": "context",
-          "textEn": "You cannot find a seat on the bus at six in the evening.",
-          "textVi": "Bạn không tìm được ghế trên xe buýt lúc sáu giờ chiều."
-        },
-        {
-          "order": 3,
-          "kind": "association",
-          "textEn": "The opposite is an empty street at night.",
-          "textVi": "Điều ngược lại là một con phố vắng vào ban đêm."
-        }
-      ],
-      "relations": [],
+      "synonyms": [],
+      "noteVi": "",
       "examples": [
         {
           "english": "The market is very ___ on weekends, so we go early.",
           "meaningVi": "Chợ rất đông vào cuối tuần nên chúng tôi đi sớm.",
           "target": "crowded",
-          "audioFile": "crowded-1.mp3",
-          "alternativesTried": [
-            "sweet",
-            "tired",
-            "broken",
-            "quiet",
-            "proud"
-          ],
-          "stillPlausible": [],
-          "cefr": "b1",
-          "origin": "authored"
+          "gradable": true
         },
         {
           "english": "I do not like ___ trains because I cannot sit down.",
           "meaningVi": "Tôi không thích những chuyến tàu đông người vì không ngồi được.",
           "target": "crowded",
-          "audioFile": "crowded-2.mp3",
-          "alternativesTried": [
-            "sleepy",
-            "polite",
-            "clever",
-            "empty",
-            "honest"
-          ],
-          "stillPlausible": [],
-          "cefr": "b1",
-          "origin": "authored"
+          "gradable": true
         },
         {
           "english": "The beach was crowded with tourists in July.",
           "meaningVi": "Bãi biển đông nghẹt khách du lịch vào tháng Bảy.",
           "target": "crowded",
-          "audioFile": "crowded-3.mp3",
-          "alternativesTried": [],
-          "stillPlausible": [],
-          "cefr": "b1",
-          "origin": "authored"
+          "gradable": false
         }
       ]
     },
@@ -1004,96 +360,32 @@
       "senseKey": "souvenir.n.trip_memory_gift",
       "partOfSpeech": "noun",
       "ipa": "/ˌsuːvəˈnɪə/",
-      "ipaUk": "/ˌsuːvəˈnɪə/",
-      "ipaUs": "/ˌsuːvəˈnɪə/",
-      "stress": "souvenir",
-      "cefr": "b1",
-      "topics": [
-        "travel",
-        "shopping"
-      ],
+      "audioFile": "souvenir.mp3",
       "forms": [
         "souvenir",
         "souvenirs"
       ],
       "meaningVi": "quà lưu niệm",
-      "definitionEn": "a small thing that you buy to remember a place you visited",
-      "definitionEnSimple": "a small gift from a trip",
-      "chunks": [
-        {
-          "text": "buy a souvenir",
-          "vi": "mua quà lưu niệm"
-        },
-        {
-          "text": "a souvenir shop",
-          "vi": "cửa hàng quà lưu niệm"
-        }
-      ],
-      "commonErrors": [],
-      "audioFile": "souvenir.mp3",
-      "hints": [
-        {
-          "order": 1,
-          "kind": "context",
-          "textEn": "You buy a small thing near a famous place before you go home.",
-          "textVi": "Bạn mua một món nhỏ gần nơi nổi tiếng trước khi về nhà."
-        },
-        {
-          "order": 2,
-          "kind": "function",
-          "textEn": "It helps you remember a trip later.",
-          "textVi": "Nó giúp bạn nhớ về chuyến đi sau này."
-        },
-        {
-          "order": 3,
-          "kind": "association",
-          "textEn": "Magnets, postcards, and small hats are common ones.",
-          "textVi": "Nam châm, bưu thiếp và những chiếc mũ nhỏ là những món phổ biến."
-        }
-      ],
-      "relations": [],
+      "synonyms": [],
+      "noteVi": "",
       "examples": [
         {
           "english": "I bought a small ___ for my mother in Huế.",
           "meaningVi": "Tôi mua một món quà lưu niệm nhỏ cho mẹ ở Huế.",
           "target": "souvenir",
-          "audioFile": "souvenir-1.mp3",
-          "alternativesTried": [
-            "breakfast",
-            "weather",
-            "homework",
-            "highway",
-            "accident"
-          ],
-          "stillPlausible": [],
-          "cefr": "b1",
-          "origin": "authored"
+          "gradable": true
         },
         {
           "english": "The shop near the temple sells cheap ___.",
           "meaningVi": "Cửa hàng gần ngôi chùa bán quà lưu niệm giá rẻ.",
           "target": "souvenirs",
-          "audioFile": "souvenir-2.mp3",
-          "alternativesTried": [
-            "rivers",
-            "roads",
-            "clouds",
-            "storms",
-            "mountains"
-          ],
-          "stillPlausible": [],
-          "cefr": "b1",
-          "origin": "authored"
+          "gradable": true
         },
         {
           "english": "Every tourist wants to take a souvenir home.",
           "meaningVi": "Du khách nào cũng muốn mang một món quà lưu niệm về nhà.",
           "target": "souvenir",
-          "audioFile": "souvenir-3.mp3",
-          "alternativesTried": [],
-          "stillPlausible": [],
-          "cefr": "b1",
-          "origin": "authored"
+          "gradable": false
         }
       ]
     }

@@ -1,33 +1,5 @@
-import { describe, expect, it } from 'vitest';
-import { poolFromBundles, promptHidesAnswer } from '@/lib/english/activities';
-import { mulberry32 } from '@/lib/english/activities/rng';
-import { pickQuizSenses, quizItemFor } from '@/lib/english/quiz';
-import type { SenseBundle } from '@/lib/english/senseBundle';
-import { publicQuizItems } from '@/lib/english/quizPublic';
-
-function bundle(id: number): SenseBundle {
- const lemma = `word${id}`;
- return { sense: { id: lemma, senseKey: null, meaningVi: `nghĩa ${id}`, definitionEn: '', definitionEnSimple: '', cefr: null, register: '', region: '', topics: [], grammarTags: [], grammarNoteVi: '', pitfallVi: '', chunks: [], commonErrors: [], distractorLemmas: [], distractorMeanings: [], ipaOverride: '', partOfSpeech: 'noun' }, word: { id: lemma, lemma, lemmaKey: lemma, ipa: '', ipaUk: '', ipaUs: '', syllables: [], stressIndex: null, stress: '', forms: [], inflections: [], cefr: null, frequencyRank: null, entryType: 'word', audioPath: '', audioUkPath: '', audioUsPath: '' }, examples: [], hints: [], relations: [], families: [] };
-}
-const words = Array.from({ length: 24 }, (_, index) => bundle(index));
-describe('new quiz rules', () => {
-	it('resumes a stored typed item with shape but no answer text', () => {
-		const [item] = publicQuizItems([{ position: 0, activityKey: 'listen_type', prompt: { senseId: 's1' }, answer: null, answerKey: 'ice-cream' }]);
-		expect(item.layout?.letterCount).toBe(8);
-		expect(item.layout?.slots[3]).toEqual({ kind: 'fixed', value: '-' });
-		expect(JSON.stringify(item)).not.toContain('ice-cream');
-		expect(item).not.toHaveProperty('answerKey');
-	});
- it('takes at most 20 words and prioritizes lapsed words', () => {
-  const picked = pickQuizSenses(words.map((entry, index) => ({ senseId: entry.sense.id, lapses: index === 23 ? 4 : 0, box: 0 })), 30, mulberry32(1));
-  expect(picked).toHaveLength(20);
-  expect(picked[0]?.senseId).toBe('word23');
- });
- it.each(['mcq', 'fill', 'listen'] as const)('builds %s without revealing answers in prompt', (kind) => {
-  const item = quizItemFor(kind, words[0]!, { pool: poolFromBundles(words), rng: mulberry32(2), allowSyntheticAudio: true });
-  expect(item).not.toBeNull();
-  expect(promptHidesAnswer(item!)).toBe(true);
-  expect(item!.prompt).not.toHaveProperty('answerKey');
-  if (kind === 'fill') expect(item!.prompt.mode).toBe('meaning');
- });
-});
+import { expect, it } from 'vitest';
+import { quizItemFor } from '@/lib/english/quiz';
+import { mulberry32, poolFromBundles } from '@/lib/english/activities';
+import { bundle } from './fixtures/bundle';
+it('does not fall back from meaning choice and requires grade examples for fill', () => { const all = [1,2,3,4].map(bundle); const ctx = { pool: poolFromBundles(all), rng: mulberry32(1) }; expect(quizItemFor('mcq', all[0]!, ctx)?.activityKey).toBe('meaning_choice'); expect(quizItemFor('fill', all[0]!, ctx)?.activityKey).toBe('cloze_choice'); all[0]!.examples[0]!.role = 'study'; expect(quizItemFor('fill', all[0]!, ctx)).toBeNull(); expect(quizItemFor('mcq', all[0]!, { ...ctx, pool: poolFromBundles([all[0]!]) })).toBeNull(); });
