@@ -10,11 +10,12 @@ import AnswerFeedback from '@/components/english/session/AnswerFeedback';
 import SessionSummary from '@/components/english/session/SessionSummary';
 import EnglishAudioButton from '@/components/english/EnglishAudioButton';
 import AdvancedNotes from '@/components/english/advanced/AdvancedNotes';
+import WordFamily from '@/components/english/WordFamily';
 import { useRewardToasts } from '@/components/english/goals/useRewardToasts';
 import WordAnswerInput from '@/components/english/WordAnswerInput';
 import { completeAnswer, isAnswerComplete } from '@/lib/english/answerLayout';
 import { englishPost } from '@/components/english/englishApi';
-import { exampleParts, type BundleExample, type SenseBundle } from '@/lib/english/senseBundle';
+import { cardExampleOf, exampleParts, type BundleExample, type SenseBundle } from '@/lib/english/senseBundle';
 import type { DailyAnswerResult, DailyItem } from '@/services/english/enDailyService';
 import { normalizeLearnerText } from '@/lib/english/text';
 import type { GoalReward } from '@/services/english/enGoalService';
@@ -30,7 +31,7 @@ function hasAudio(bundle: SenseBundle): boolean { return Boolean(bundle.word.aud
 function ipaOf(bundle: SenseBundle): string { const ipa = bundle.word.ipa; return ipa ? (ipa.startsWith('/') ? ipa : `/${ipa}/`) : ''; }
 function Example({ example }: { example: BundleExample }) { const parts = exampleParts(example); return <div className="rounded-panel border border-border/70 bg-surface-secondary px-4 py-3"><p className="text-[15px] leading-relaxed text-foreground">{parts ? <>{parts.before}<mark className="rounded bg-accent-subtle px-0.5 font-bold text-accent">{parts.answer}</mark>{parts.after}</> : example.english}</p>{example.meaningVi && <p className="mt-1 text-sm text-muted">{example.meaningVi}</p>}</div>; }
 function WordHeader({ bundle, autoPlay }: { bundle: SenseBundle; autoPlay: boolean }) { return <div className="flex items-start justify-between gap-4"><div className="min-w-0"><p role="heading" aria-level={2} className="break-words font-sans text-4xl font-extrabold tracking-tight text-foreground sm:text-5xl">{bundle.word.lemma}</p><p className="mt-2 flex flex-wrap items-center gap-x-2 text-sm text-muted">{ipaOf(bundle) && <span className="font-mono">{ipaOf(bundle)}</span>}{bundle.sense.partOfSpeech && <span className="rounded-full bg-surface-container px-2 py-0.5 text-xs font-bold">{bundle.sense.partOfSpeech}</span>}</p></div><EnglishAudioButton key={`${bundle.sense.id}-${autoPlay}`} compact autoPlay={autoPlay} senseId={bundle.sense.id} lemma={bundle.word.lemma} recordedAudioAvailable={hasAudio(bundle)} /></div>; }
-function WordDetails({ bundle }: { bundle: SenseBundle }) { return <div className="space-y-3"><p className="text-xl font-bold text-foreground">{bundle.sense.meaningVi}</p>{bundle.examples.slice(0, 2).map((example) => <Example key={example.id} example={example} />)}{bundle.sense.noteVi && <p className="flex gap-2 rounded-panel border border-warning/30 bg-warning/5 px-4 py-3 text-sm text-foreground-secondary"><MaterialIcon name="lightbulb" size={18} className="mt-0.5 text-warning" /><span>{bundle.sense.noteVi}</span></p>}<AdvancedNotes notes={bundle.sense.advanced} /></div>; }
+function WordDetails({ bundle }: { bundle: SenseBundle }) { const example = cardExampleOf(bundle.examples); return <div className="space-y-3"><p className="text-xl font-bold text-foreground">{bundle.sense.meaningVi}</p>{example && <Example example={example} />}{bundle.sense.noteVi && <p className="flex gap-2 rounded-panel border border-warning/30 bg-warning/5 px-4 py-3 text-sm text-foreground-secondary"><MaterialIcon name="lightbulb" size={18} className="mt-0.5 text-warning" /><span>{bundle.sense.noteVi}</span></p>}<WordFamily family={bundle.sense.family} /><AdvancedNotes notes={bundle.sense.advanced} /></div>; }
 function scheduleNote(feedback: Feedback): string { if (!feedback.scheduled) return 'Lịch không đổi vì từ này chưa đến hạn.'; if (feedback.fromDays === 0) return `Từ mới · hẹn ôn sau ${feedback.toDays} ngày.`; return `${feedback.toDays > feedback.fromDays ? '⬆' : feedback.toDays < feedback.fromDays ? '⬇' : '→'} ${feedback.fromDays} ngày → ${feedback.toDays} ngày`; }
 
 export default function StudySession({ onClose }: { onClose: (studied: boolean) => void }) {

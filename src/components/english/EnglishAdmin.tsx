@@ -119,8 +119,10 @@ export default function EnglishAdmin({ sets, qaEnabled }: { sets: SetRow[]; qaEn
                                 <p>{word.meaningVi}</p>
                                 {word.noteVi && <p>{word.noteVi}</p>}
                                 {word.synonyms.length > 0 && <p>Gần nghĩa: {word.synonyms.join(', ')}</p>}
-                                {word.examples.map((example, index) => <p key={index} className="text-muted">{example.english} — {example.meaningVi}</p>)}
-                                {word.examples.some((example) => example.gradable) && <div className="rounded-control bg-accent-subtle p-3"><p className="font-bold">Câu dùng để chấm</p>{word.examples.filter((example) => example.gradable).map((example, index) => <p key={index}><strong>{example.english}</strong> — {example.meaningVi}</p>)}</div>}
+                                {word.family.length > 0 && <p>Họ từ: {word.family.map((member) => `${member.word} (${member.partOfSpeech}) ${member.meaningVi}`).join(' · ')}</p>}
+                                <p className="text-muted"><span className="font-bold">Trên thẻ:</span> {word.cardExample.english} — {word.cardExample.meaningVi}</p>
+                                {word.quizExamples.length > 0 && <div className="rounded-control bg-accent-subtle p-3"><p className="font-bold">Câu hỏi ẩn ({word.quizExamples.length})</p>{word.quizExamples.map((example, index) => <p key={index}><strong>{example.english}</strong> — {example.meaningVi}</p>)}</div>}
+                                {word.advanced.length > 0 && <p className="text-muted">Nâng cao: {word.advanced.map((note) => note.phrase).join(' · ')}</p>}
                             </div>)}
 						</div>
 					)}
