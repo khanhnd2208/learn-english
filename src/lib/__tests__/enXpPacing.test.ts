@@ -38,7 +38,7 @@ describe('SRS pacing', () => {
 	beforeEach(() => {
 		vi.clearAllMocks();
 		mocks.prisma.enPracticeSession.findFirst.mockResolvedValue({ id: 'p1', senseIds: ['s1'], endedAt: null, startedAt });
-		mocks.bundles.mockResolvedValue([{ word: { lemma: 'apple', forms: ['apple'] }, examples: [] }]);
+		mocks.bundles.mockResolvedValue([{ word: { lemma: 'apple', forms: ['apples'] }, sense: { synonyms: ['fruit'] }, examples: [{ target: 'orchard' }] }]);
 		mocks.prisma.enWordState.findUnique.mockResolvedValue({ box: 1, lapses: 0, dueAt: new Date(startedAt.getTime() - 1000), introducedAt: startedAt });
 		mocks.tx.enReview.create.mockImplementation(async ({ data }) => ({ id: 'r1', ...data }));
 		mocks.tx.enXpEvent.createManyAndReturn.mockImplementation(async ({ data }) => data.map((row: { xp: number }) => ({ xp: row.xp })));
@@ -57,6 +57,21 @@ describe('SRS pacing', () => {
 		expect(mocks.tx.enXpEvent.createManyAndReturn).not.toHaveBeenCalled();
 	});
 
+ it('does not write progress or XP for a synonym', async () => {
+  const result = await answerToday('u1', { sessionId: 'p1', senseId: 's1', answer: 'fruit' }, after(4));
+  expect(result).toMatchObject({ result: 'synonym', boxBefore: 1, boxAfter: 1, scheduled: false });
+  expect(mocks.prisma.$transaction).not.toHaveBeenCalled();
+  expect(mocks.tx.enWordState.upsert).not.toHaveBeenCalled(); expect(mocks.tx.enReview.create).not.toHaveBeenCalled(); expect(mocks.tx.enXpEvent.createManyAndReturn).not.toHaveBeenCalled();
+ });
+ it('accepts a form but not an unrelated example target and records server box', async () => {
+  mocks.tx.enReview.findFirst.mockResolvedValue(null);
+  expect((await answerToday('u1', { sessionId: 'p1', senseId: 's1', answer: 'apples' }, after(4))).result).toBe('correct');
+  expect(mocks.tx.enReview.create.mock.calls.at(-1)?.[0].data.prompt).toBe('hinted');
+  mocks.prisma.enWordState.findUnique.mockResolvedValue({ box: 3, lapses: 0, dueAt: new Date(startedAt.getTime() - 1000), introducedAt: startedAt });
+  expect((await answerToday('u1', { sessionId: 'p1', senseId: 's1', answer: 'orchard' }, after(5))).result).toBe('wrong');
+  expect(mocks.tx.enReview.create.mock.calls.at(-1)?.[0].data.prompt).toBe('free');
+ });
+
 	it('pays nothing for a wrong answer', async () => {
 		mocks.tx.enReview.findFirst.mockResolvedValue(null);
 		const result = await answerToday('u1', { sessionId: 'p1', senseId: 's1', answer: 'xyz', giveUp: true }, after(30));
@@ -66,7 +81,7 @@ describe('SRS pacing', () => {
 
 describe('Review pacing and cap', () => {
 	const session = { id: 'g1', userId: 'u1', phase: 'quiz', chunkNumber: 1, studyPosition: 0, questionPosition: 0, selectedSetIds: [], poolSenseIds: [], remainingSenseIds: [], currentChunkSenseIds: [], startedAt, endedAt: null };
-	const question = { id: 'q1', sessionId: 'g1', chunkNumber: 1, kind: 'main', answer: null, activityKey: 'recall_type', role: 'main', senseId: 's1', prompt: {}, answerKey: 'apple', accepted: [], layout: null, position: 0, correct: null };
+	const question = { id: 'q1', sessionId: 'g1', chunkNumber: 1, kind: 'main', answer: null, activityKey: 'listen_type', role: 'main', senseId: 's1', prompt: {}, answerKey: 'apple', accepted: [], layout: null, position: 0, correct: null };
 
 	beforeEach(() => {
 		vi.clearAllMocks();

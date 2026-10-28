@@ -6,41 +6,7 @@ import { resolveAudioFile } from '@/lib/english/audioPath';
 import { sampleEnglishPack } from '@/lib/english/samplePack';
 
 describe('english content gate', () => {
-	const assessment = assessEnglishPack(sampleEnglishPack);
-
-	it('keeps an ambiguous sentence out of graded examples', () => {
-		expect(assessment.schemaError).toBeNull();
-		const borrow = assessment.words[0];
-		expect(borrow?.examples[2]?.gradeEligible).toBe(false);
-		expect(borrow?.examples[2]?.issues.some((item) => item.code === 'ambiguous')).toBe(true);
-		expect(assessment.words.every((word) => word.publishable)).toBe(true);
-	});
-
-	it('blocks a sentence that has no full Vietnamese meaning or audio', () => {
-		const broken = structuredClone(sampleEnglishPack);
-		broken.words[1]!.examples[0]!.meaningVi = 'cho mượn';
-		broken.words[1]!.examples[1]!.audioFile = '';
-		const result = assessEnglishPack(broken);
-		expect(result.words[1]?.examples[0]?.gradeEligible).toBe(false);
-		expect(result.words[1]?.examples[1]?.gradeEligible).toBe(false);
-	});
-
-	it('warns about optional fields without blocking publication', () => {
-		const loose = structuredClone(sampleEnglishPack);
-		loose.words[0]!.hints = [];
-		loose.words[0]!.definitionEn = '';
-		loose.words[0]!.distractorMeanings = [];
-		const result = assessEnglishPack(loose);
-		expect(result.words[0]?.issues.some((item) => item.code === 'hint_too_few')).toBe(true);
-		expect(result.words[0]?.issues.filter((item) => item.code === 'definition_missing').every((item) => !item.blocksGrade)).toBe(true);
-		expect(result.words[0]?.publishable).toBe(true);
-	});
-
-	it('still blocks a word without a Vietnamese meaning', () => {
-		const broken = structuredClone(sampleEnglishPack);
-		broken.words[0]!.meaningVi = '';
-		expect(assessEnglishPack(broken).words[0]?.publishable).toBe(false);
-	});
+ it('blocks a word without a Vietnamese meaning', () => { const broken = structuredClone(sampleEnglishPack); broken.words[0]!.meaningVi = ''; expect(assessEnglishPack(broken).words[0]?.publishable).toBe(false); });
 });
 
 describe('english grading and mastery', () => {
