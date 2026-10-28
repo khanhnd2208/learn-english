@@ -1,17 +1,12 @@
 import { createHash, timingSafeEqual } from 'node:crypto';
 import { prisma } from '@/lib/prisma';
 import { AppError } from '@/lib/appError';
-import { getDailyTasks, type DailyTasks } from '@/services/english/enQuizService';
 import { getSenseBundles } from '@/services/english/enContentService';
 import { EN_LOCKED_PREVIEW_WORDS } from '@/lib/english/constants';
 import { countStages, isLongTerm } from '@/lib/english/schedule';
-import type { QuizKind } from '@/lib/english/quiz';
 import type { SenseBundle } from '@/lib/english/senseBundle';
 
-export type SetDailyTasks = Partial<Record<QuizKind, { passedCount: number; wordCount: number }>>;
-
 export interface EnglishSetSummary {
-	dailyTasks: SetDailyTasks;
 	levels: string[];
 	topics: string[];
 	id: string;
@@ -40,7 +35,6 @@ export interface EnglishSetWord {
 }
 
 export interface EnglishSetDetail {
-	dailyTasks: SetDailyTasks;
 	id: string;
 	title: string;
 	description: string;
@@ -51,12 +45,6 @@ export interface EnglishSetDetail {
 	listed: boolean;
 	/** A locked set seen before unlocking shows only the first few words. */
 	previewOnly: boolean;
-}
-
-function tasksForSet(daily: DailyTasks, setId: string): SetDailyTasks {
-	return Object.fromEntries(Object.entries(daily).flatMap(([kind, task]) => (
-		task?.setId === setId ? [[kind, { passedCount: task.passedCount, wordCount: task.wordCount }]] : []
-	)));
 }
 
 export async function listEnglishSets(userId: string, includeDrafts: boolean, opts: { storeOnly?: boolean } = {}): Promise<EnglishSetSummary[]> {
@@ -74,18 +62,16 @@ export async function listEnglishSets(userId: string, includeDrafts: boolean, op
 		item.senseId && (includeDrafts || item.sense?.status === 'published') ? [item.senseId] : []
 	);
 	const senseIds = sets.flatMap((set) => set.items.flatMap(visible));
-	const [states, daily] = await Promise.all([
+	const states = await (
 		senseIds.length === 0
 			? []
-			: prisma.enWordState.findMany({ where: { userId, senseId: { in: senseIds } }, select: { senseId: true, box: true, dueAt: true } }),
-		getDailyTasks(userId),
-	]);
+			: prisma.enWordState.findMany({ where: { userId, senseId: { in: senseIds } }, select: { senseId: true, box: true, dueAt: true } })
+	);
 	const boxOf = new Map(states.map((state) => [state.senseId, state.box]));
 	const stateOf = new Map(states.map((state) => [state.senseId, state]));
 	return sets.map((set) => {
 		const published = set.items.flatMap(visible);
 		return {
-			dailyTasks: tasksForSet(daily, set.id),
 			levels: [...new Set(set.items.filter((item) => item.sense && (includeDrafts || item.sense.status === 'published')).flatMap((item) => item.sense?.cefr ? [item.sense.cefr] : []))].sort(),
 			topics: [...new Set(set.items.filter((item) => item.sense && (includeDrafts || item.sense.status === 'published')).flatMap((item) => item.sense?.topics ?? []))].sort(),
 			id: set.id,
@@ -155,18 +141,16 @@ export async function getEnglishSetDetail(userId: string, setId: string, include
 		const bundle = bundleById.get(id);
 		return bundle ? [bundle] : [];
 	});
-	const [states, daily] = await Promise.all([
+	const states = await (
 		ordered.length === 0
 			? []
 			: prisma.enWordState.findMany({
 				where: { userId, senseId: { in: ordered.map((bundle) => bundle.sense.id) } },
 				select: { senseId: true, box: true, lapses: true },
-			}),
-		getDailyTasks(userId),
-	]);
+			})
+	);
 	const bySense = new Map(states.map((state) => [state.senseId, state]));
 	return {
-		dailyTasks: tasksForSet(daily, set.id),
 		id: set.id,
 		title: set.title,
 		description: set.description,

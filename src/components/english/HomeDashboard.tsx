@@ -3,7 +3,6 @@ import StageBar from '@/components/english/StageBar';
 import QuestItem from '@/components/english/goals/QuestItem';
 import ProgressStrip from '@/components/english/home/ProgressStrip';
 import TodayHero from '@/components/english/home/TodayHero';
-import { quizHrefFor } from '@/lib/english/quests';
 import type { EnglishSetSummary } from '@/services/english/enCatalogService';
 import type { TodayOverview } from '@/services/english/enDailyService';
 import type { GoalBoard } from '@/services/english/enGoalService';
@@ -30,7 +29,6 @@ function SetRow({ set }: { set: EnglishSetSummary }) {
  */
 export default function HomeDashboard({ overview, sets, board, resetsIn, greeting, dateLabel }: { overview: TodayOverview; sets: EnglishSetSummary[]; board: GoalBoard; resetsIn: string; greeting: string; dateLabel: string }) {
 	const enrolled = sets.filter((set) => set.enrolled).sort((a, b) => b.dueToday - a.dueToday);
-	const quizHref = quizHrefFor(sets);
 	const questsDone = board.today.quests.filter((quest) => quest.done).length;
 	const stages = enrolled.reduce((sum, set) => ({ new: sum.new + set.stages.new, learning: sum.learning + set.stages.learning, remembering: sum.remembering + set.stages.remembering, longTerm: sum.longTerm + set.stages.longTerm }), { new: 0, learning: 0, remembering: 0, longTerm: 0 });
 	const hasSets = enrolled.length > 0;
@@ -45,7 +43,7 @@ export default function HomeDashboard({ overview, sets, board, resetsIn, greetin
 
 			{hasSets && <section aria-labelledby="today-quests-heading" className="mode-card min-w-0 lg:col-start-3 lg:row-start-2">
 				<div className="flex items-baseline justify-between gap-2"><h2 id="today-quests-heading" className="text-lg">Nhiệm vụ hôm nay</h2><span className={`text-sm font-bold tabular-nums ${questsDone === board.today.quests.length ? 'text-success' : 'text-muted'}`}>{questsDone}/{board.today.quests.length}</span></div>
-				<ul className="mt-2">{board.today.quests.map((quest) => <QuestItem key={quest.key} quest={quest} quizHref={quizHref} dense />)}</ul>
+				<ul className="mt-2">{board.today.quests.map((quest) => <QuestItem key={quest.key} quest={quest} dense />)}</ul>
 				<p className="mt-2 flex items-center justify-between gap-2 text-xs text-muted"><span>Làm mới sau {resetsIn}</span><Link href="/quests" className="inline-flex min-h-11 items-center text-sm font-bold text-accent">Tất cả →</Link></p>
 			</section>}
 

@@ -25,7 +25,6 @@ const linkButton = 'inline-flex min-h-11 items-center justify-center rounded-con
 export default function SetDetail({ detail }: { detail: EnglishSetDetail }) {
 	const [search, setSearch] = useState('');
 	const [practiceOpen, setPracticeOpen] = useState(false);
-	const [challengeOpen, setChallengeOpen] = useState(false);
 	const [filter, setFilter] = useState<Filter>('all');
 	const [hideMeaning, setHideMeaning] = useState(false);
 	const [selected, setSelected] = useState<string | null>(null);
@@ -50,13 +49,12 @@ export default function SetDetail({ detail }: { detail: EnglishSetDetail }) {
 				<div className="absolute inset-y-0 left-0 rounded-full bg-accent/40" style={{ width: percent(learned) }} />
 				<div className="absolute inset-y-0 left-0 rounded-full bg-success" style={{ width: percent(longTerm) }} />
 			</div>
-			{detail.enrolled ? <div className="flex flex-wrap items-center gap-2"><Button size="lg" onClick={() => setPracticeOpen(true)}>Luyện bộ này ▾</Button><Button size="lg" variant="secondary" onClick={() => setChallengeOpen(true)}>Thử thách</Button><InfoHint title={HINTS.practice.title}>{HINTS.practice.body}</InfoHint></div> : <EnrollButton setId={detail.id} enrolled={false} locked={detail.locked} />}
+			{detail.enrolled ? <div className="flex flex-wrap items-center gap-2"><Button size="lg" onClick={() => setPracticeOpen(true)}>Luyện bộ này ▾</Button><InfoHint title={HINTS.practice.title}>{HINTS.practice.body}</InfoHint></div> : <EnrollButton setId={detail.id} enrolled={false} locked={detail.locked} />}
 			{detail.previewOnly && <p className="flex items-start gap-2 rounded-panel border border-warning/30 bg-warning/5 px-3 py-2 text-sm text-foreground-secondary"><span aria-hidden="true">🔒</span><span>Đang xem <strong className="tabular-nums">{detail.words.length}/{detail.wordCount}</strong> từ mẫu. Nhập mật khẩu để tải cả bộ.</span></p>}
 		</header>
 
 		<Sheet open={practiceOpen} onClose={() => setPracticeOpen(false)} title="Chọn dạng luyện tập"><div className="grid gap-2"><Link href={`/sets/${detail.id}/practice`} className={linkButton}>Trộn các dạng</Link>{QUIZ_KINDS.map((kind) => <Link key={kind} href={`/sets/${detail.id}/practice?type=${kind}`} className={linkButton}>{QUIZ_META[kind].label}</Link>)}</div></Sheet>
 
-		<Sheet open={challengeOpen} onClose={() => setChallengeOpen(false)} title="Chọn dạng thử thách"><div className="grid gap-2">{QUIZ_KINDS.map((kind) => <Link key={kind} href={`/sets/${detail.id}/test?type=${kind}`} className={linkButton}>{QUIZ_META[kind].label}{detail.dailyTasks[kind] && ` ✓ ${detail.dailyTasks[kind]?.passedCount}/${detail.dailyTasks[kind]?.wordCount}`}</Link>)}</div></Sheet>
 
 		<section className="space-y-3">
 			<div className="flex items-center justify-between gap-3"><h2 className="text-2xl">Danh sách từ <span className="text-base font-normal text-muted">({words.length})</span></h2></div>

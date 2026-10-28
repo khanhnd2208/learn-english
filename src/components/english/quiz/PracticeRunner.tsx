@@ -1,7 +1,6 @@
 'use client';
 
 import { useEffect, useMemo, useState } from 'react';
-import Link from 'next/link';
 import type { EnglishSetDetail } from '@/services/english/enCatalogService';
 import { QUIZ_KINDS, QUIZ_META, quizItemFor, type QuizKind } from '@/lib/english/quiz';
 import { activityByKey, poolFromBundles, randomRng, type ActivityItem } from '@/lib/english/activities';
@@ -12,8 +11,6 @@ import SessionSummary from '@/components/english/session/SessionSummary';
 import EnglishAudioButton from '@/components/english/EnglishAudioButton';
 import QuestionView, { type QuestionFeedback } from '@/components/english/quiz/QuestionView';
 import { answerLayout } from '@/lib/english/answerLayout';
-import InfoHint from '@/components/ui/InfoHint';
-import { HINTS } from '@/lib/english/hintCopy';
 
 export type PracticeKind = QuizKind | 'mix';
 
@@ -122,7 +119,6 @@ export default function PracticeRunner({ detail, kind }: { detail: EnglishSetDet
 			
 			<div className="mt-6 flex flex-wrap justify-center gap-3">
 				<button type="button" onClick={restart} className="min-h-11 rounded-control bg-accent px-5 font-bold text-accent-foreground">Luyện lại</button>
-				<span className="inline-flex items-center gap-2"><Link href={`/sets/${detail.id}/test?type=${kind === 'mix' ? 'mcq' : kind}`} className="inline-flex min-h-11 items-center rounded-control border border-border px-5 font-bold">Thử thách {kind === 'mix' ? 'MCQ' : label}</Link><InfoHint title={HINTS.practice.title}>{HINTS.practice.body}</InfoHint></span>
 			</div>
 		</SessionSummary>}
 	</FocusFrame>;

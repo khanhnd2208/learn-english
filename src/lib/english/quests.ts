@@ -1,23 +1,23 @@
 import { XP } from '@/lib/english/xp';
 
-export type DailyQuestKey = 'srs_words' | 'review_correct' | 'quiz_done';
+export type DailyQuestKey = 'srs_words' | 'review_correct' | 'chunk_done';
 export type WeeklyQuestKey = 'week_days' | 'week_srs' | 'week_review';
 export type QuestKey = DailyQuestKey | WeeklyQuestKey;
 
 export type Quest = { key: QuestKey; target: number; xp: number };
 
 /** Where a quest is done: the SRS round, the Review session or a graded quiz. */
-export type QuestAction = 'srs' | 'review' | 'quiz';
+export type QuestAction = 'srs' | 'review';
 
 export type QuestIcon = 'target' | 'star' | 'sprout' | 'flag' | 'shield' | 'spark' | 'sword' | 'trophy' | 'mountain' | 'chest';
 
 export const QUEST_META: Record<QuestKey, { title: (target: number) => string; hint: string; icon: QuestIcon; action: QuestAction }> = {
 	srs_words: { title: (n) => n > 0 ? `Ôn ${n} từ đến hạn` : 'Hôm nay không có từ đến hạn', hint: 'Mỗi từ đến hạn trả lời đúng +20 XP.', icon: 'sprout', action: 'srs' },
-	review_correct: { title: (n) => n > 0 ? `Học thêm đúng ${n} câu` : 'Chưa có bộ từ để học thêm', hint: 'Câu chính đúng trong Học thêm +10 XP, tối đa 300 XP mỗi ngày.', icon: 'star', action: 'review' },
-	quiz_done: { title: (n) => n > 0 ? 'Làm 1 bài kiểm tra' : 'Chưa có bộ từ để làm bài kiểm tra', hint: 'Trắc nghiệm, điền từ hay nghe đều được.', icon: 'sword', action: 'quiz' },
+	review_correct: { title: (n) => n > 0 ? `Ôn theo bộ đúng ${n} câu` : 'Chưa có bộ từ để ôn theo bộ', hint: 'Câu chính đúng trong Ôn theo bộ +10 XP, tối đa 300 XP mỗi ngày.', icon: 'star', action: 'review' },
+	chunk_done: { title: (n) => n > 0 ? 'Hoàn thành 1 chặng Ôn theo bộ' : 'Chưa có bộ từ để ôn', hint: 'Học 5 từ và làm xong 5 câu.', icon: 'sword', action: 'review' },
 	week_days: { title: (n) => `Học đủ ${n} ngày`, hint: 'Không cần ngày nào cũng học: nghỉ có kế hoạch vẫn ổn.', icon: 'mountain', action: 'srs' },
 	week_srs: { title: (n) => `Ôn ${n} từ đến hạn trong tuần`, hint: 'Cộng dồn từ thứ Hai.', icon: 'chest', action: 'srs' },
-	week_review: { title: (n) => `Học thêm đúng ${n} câu trong tuần`, hint: 'Cộng dồn từ thứ Hai.', icon: 'trophy', action: 'review' },
+	week_review: { title: (n) => `Ôn theo bộ đúng ${n} câu trong tuần`, hint: 'Cộng dồn từ thứ Hai.', icon: 'trophy', action: 'review' },
 };
 
 /** Targets per daily-goal tier: light, steady, keen, warrior. */
@@ -53,7 +53,7 @@ export function dailyQuests(ctx: QuestContext): Quest[] {
 	return [
 		quest('srs_words', Math.min(tierTarget('srs', ctx.tier), Math.max(0, ctx.srsAvailable))),
 		quest('review_correct', ctx.enrolledSets > 0 ? tierTarget('review', ctx.tier) : 0),
-		quest('quiz_done', ctx.enrolledSets > 0 ? 1 : 0),
+		quest('chunk_done', ctx.enrolledSets > 0 ? 1 : 0),
 	];
 }
 
@@ -71,18 +71,18 @@ export type QuestMetrics = {
 	srsWords: number;
 	/** Correct main questions in Review. */
 	reviewCorrect: number;
-	quizzesDone: number;
+	chunksDone: number;
 	daysStudied: number;
 };
 
 export function emptyMetrics(): QuestMetrics {
-	return { xp: 0, srsWords: 0, reviewCorrect: 0, quizzesDone: 0, daysStudied: 0 };
+	return { xp: 0, srsWords: 0, reviewCorrect: 0, chunksDone: 0, daysStudied: 0 };
 }
 
 const CURRENT: Record<QuestKey, (metrics: QuestMetrics) => number> = {
 	srs_words: (m) => m.srsWords,
 	review_correct: (m) => m.reviewCorrect,
-	quiz_done: (m) => m.quizzesDone,
+	chunk_done: (m) => m.chunksDone,
 	week_days: (m) => m.daysStudied,
 	week_srs: (m) => m.srsWords,
 	week_review: (m) => m.reviewCorrect,
@@ -123,19 +123,4 @@ export function topUpQuests(current: Quest[], fresh: Quest[]): Quest[] {
 	});
 	const keys = new Set(filled.map((quest) => quest.key));
 	return [...filled, ...fresh.filter((quest) => !keys.has(quest.key))];
-}
-
-/**
- * The set a "do a quiz" quest should open: the one with the most words due, then the most
- * words learned, so the learner lands on a real quiz instead of a list to choose from.
- */
-export function pickQuizSet(sets: Array<{ id: string; enrolled: boolean; dueToday: number; learned: number }>): string | null {
-	const enrolled = sets.filter((set) => set.enrolled);
-	enrolled.sort((a, b) => b.dueToday - a.dueToday || b.learned - a.learned);
-	return enrolled[0]?.id ?? null;
-}
-
-export function quizHrefFor(sets: Array<{ id: string; enrolled: boolean; dueToday: number; learned: number }>): string {
-	const id = pickQuizSet(sets);
-	return id ? `/sets/${id}/test?type=mcq` : '/store';
 }

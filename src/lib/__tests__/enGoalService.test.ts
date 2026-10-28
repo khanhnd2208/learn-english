@@ -11,7 +11,7 @@ const base = {
 	today: '2026-10-26',
 	weekStart: '2026-10-26',
 	dailyGoalXp: 400,
-	daily: [{ key: 'srs_words' as const, target: 20, xp: 100 }, { key: 'review_correct' as const, target: 10, xp: 100 }, { key: 'quiz_done' as const, target: 0, xp: 0 }],
+	daily: [{ key: 'srs_words' as const, target: 20, xp: 100 }, { key: 'review_correct' as const, target: 10, xp: 100 }, { key: 'chunk_done' as const, target: 0, xp: 0 }],
 	weekly: [{ key: 'week_srs' as const, target: 100, xp: 400 }],
 	dayMetrics: { ...emptyMetrics(), xp: 320, srsWords: 20 },
 	weekMetrics: { ...emptyMetrics(), xp: 320, srsWords: 100 },
@@ -41,7 +41,7 @@ describe('pending goal rewards', () => {
 	});
 
 	it('never pays a quest with nothing to do', () => {
-		const result = pendingRewards({ ...base, dayMetrics: emptyMetrics(), weekMetrics: emptyMetrics(), daily: [{ key: 'quiz_done' as const, target: 0, xp: 0 }, { key: 'srs_words' as const, target: 0, xp: 0 }] });
+		const result = pendingRewards({ ...base, dayMetrics: emptyMetrics(), weekMetrics: emptyMetrics(), daily: [{ key: 'chunk_done' as const, target: 0, xp: 0 }, { key: 'srs_words' as const, target: 0, xp: 0 }] });
 		expect(result.xp).toEqual([]);
 	});
 

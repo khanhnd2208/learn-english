@@ -21,7 +21,6 @@ vi.mock('@/lib/prisma', () => ({ prisma: {
 	enWordState: { findMany: mocks.wordStateFindMany },
 	$transaction: mocks.transaction,
 } }));
-vi.mock('@/services/english/enQuizService', () => ({ getDailyTasks: vi.fn().mockResolvedValue({}) }));
 vi.mock('@/services/english/enContentService', async (importOriginal) => ({
 	...(await importOriginal<typeof import('@/services/english/enContentService')>()),
 	getSenseBundles: mocks.getSenseBundles,
