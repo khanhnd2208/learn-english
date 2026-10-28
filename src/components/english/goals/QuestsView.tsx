@@ -58,7 +58,7 @@ export default function QuestsView({ board, quizHref, dayResetsIn, weekResetsIn,
 			<TabsContent value="today" className="space-y-5 pt-5">
 				<section className="mode-card flex items-center gap-4" aria-label="Mục tiêu ngày">
 					<GoalRing value={board.today.xp} max={board.today.goal} size={72} stroke={8} label="Mục tiêu ngày">
-						<span className="game-number text-xl tabular-nums">{board.today.xp}</span><span className="text-[10px] text-muted">/{board.today.goal}</span>
+						<span className="game-number text-xl tabular-nums">{board.today.xp}</span><span className="text-xs text-muted">/{board.today.goal}</span>
 					</GoalRing>
 					<div className="min-w-0 flex-1"><h2 className="text-xl">Mục tiêu ngày</h2><p className="text-sm">{goalMessage(board.today.xp, board.today.goal)}</p>
 						<button type="button" onClick={() => setGoalOpen(true)} className="inline-flex min-h-11 items-center gap-1 rounded-control border border-border px-3 text-sm font-bold hover:border-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent">Mức: {goalLabel(board.dailyGoalXp)} ▾</button>
@@ -132,7 +132,7 @@ function AchievementBadge({ achievement, onOpen }: { achievement: GoalAchievemen
 		<span className={locked ? 'opacity-50 grayscale' : ''}><AdventureIcon name={achievement.icon as AchievementIcon} size={24} framed /></span>
 		<span className="text-sm font-bold leading-tight">{achievement.title}</span>
 		{multi && <span className="flex gap-0.5" aria-hidden="true">{achievement.tiers.map((target, index) => <span key={target} className={index < achievement.reached ? 'text-gold' : 'text-border'}>★</span>)}</span>}
-		<span className="text-[11px] text-muted tabular-nums">{achievement.next === null ? 'Hoàn tất' : `${Math.min(achievement.current, achievement.next)}/${achievement.next}`}</span>
+		<span className="text-xs text-muted tabular-nums">{achievement.next === null ? 'Hoàn tất' : `${Math.min(achievement.current, achievement.next)}/${achievement.next}`}</span>
 	</button>;
 }
 
