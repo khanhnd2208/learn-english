@@ -20,11 +20,12 @@ function kindFor(wordIndex: number, chosen: PracticeKind): QuizKind {
 }
 
 /** Ungraded practice: graded in the browser, wrong words come back later, nothing is saved. */
-export default function PracticeRunner({ detail, kind }: { detail: EnglishSetDetail; kind: PracticeKind }) {
+/** `seed` comes from the server so SSR and hydration build the same queue and choices. */
+export default function PracticeRunner({ detail, kind, seed }: { detail: EnglishSetDetail; kind: PracticeKind; seed: number }) {
 	const source = useMemo(() => {
 		const bundles = detail.words.map((word) => word.bundle);
-		return { rng: mulberry32(1), bundles, pool: poolFromBundles(bundles) };
-	}, [detail.words]);
+		return { rng: mulberry32(seed), bundles, pool: poolFromBundles(bundles) };
+	}, [detail.words, seed]);
 	const freshQueue = () => initialPracticeQueue(detail.words.filter((word) => (kind === 'mix' ? QUIZ_KINDS : [kind]).some((key) => quizItemFor(key, word.bundle, { pool: source.pool, rng: source.rng, allowSyntheticAudio: true }))).map((word) => word.bundle.sense.id));
 	const [run, setRun] = useState(0);
 	const [queue, setQueue] = useState<PracticeStep[]>(freshQueue);

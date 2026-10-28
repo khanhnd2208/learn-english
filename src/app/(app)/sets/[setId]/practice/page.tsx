@@ -1,3 +1,4 @@
+import { randomInt } from 'node:crypto';
 import { notFound, redirect } from 'next/navigation';
 import PracticeRunner, { type PracticeKind } from '@/components/english/quiz/PracticeRunner';
 import { auth } from '@/lib/auth';
@@ -22,5 +23,5 @@ export default async function SetPracticePage({ params, searchParams }: { params
 		throw error;
 	}
 	if (!detail.enrolled) redirect(`/sets/${setId}`);
-	return <PracticeRunner detail={detail} kind={type as PracticeKind} />;
+	return <PracticeRunner detail={detail} kind={type as PracticeKind} seed={randomInt(2 ** 31)} />;
 }
