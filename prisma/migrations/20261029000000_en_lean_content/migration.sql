@@ -118,4 +118,3 @@ DROP TYPE "EnConfusableType";
 
 -- DropEnum
 DROP TYPE "EnFamilyKind";
-
