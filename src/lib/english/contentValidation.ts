@@ -83,7 +83,7 @@ export function assessEnglishPack(input: unknown): AssessedPack {
   if (!w.partOfSpeech) issues.push(issue(path, 'part_of_speech', 'Thiếu loại từ.'));
   if (!w.meaningVi) issues.push(issue(path, 'meaning_vi', 'Thiếu nghĩa tiếng Việt.'));
   if (!/^\/[^/\n]+\/$/.test(w.ipa)) issues.push(issue(path, 'ipa', 'IPA cần nằm trong dấu / /.'));
-  if (!w.audioFile || !pack.audioFiles.includes(w.audioFile)) issues.push(issue(path, 'audio', 'Audio không có trong danh sách.'));
+  if (!w.audioFile || !pack.audioFiles.includes(w.audioFile)) issues.push(issue(path, 'audio', 'Chưa có file audio; sẽ đọc bằng giọng máy (TTS).', false));
   const forms = new Set([w.lemma, ...w.forms].map(lemmaKeyOf));
   if (raw.words[index].synonyms.some((s) => forms.has(lemmaKeyOf(s)))) issues.push(issue(path, 'synonym_self', 'Từ đồng nghĩa trùng từ hoặc dạng của từ.'));
   if (w.synonyms.length > EN_MAX_SYNONYMS) issues.push(issue(path, 'synonym_count', 'Quá nhiều từ đồng nghĩa.'));
