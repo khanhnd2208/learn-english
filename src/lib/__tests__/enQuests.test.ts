@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { dailyQuests, emptyMetrics, parseQuests, questProgress, timeLeftLabel, topUpQuests, weeklyQuests, type QuestContext } from '@/lib/english/quests';
+import { dailyQuests, emptyMetrics, isIdleQuest, todayQuestCount, parseQuests, questProgress, timeLeftLabel, topUpQuests, weeklyQuests, type QuestContext } from '@/lib/english/quests';
 import { periodMetrics } from '@/lib/english/goalMetrics';
 import { achievementStatus, newlyEarned, nearestAchievements, type LifetimeMetrics } from '@/lib/english/achievements';
 
@@ -130,5 +130,15 @@ describe('topping up a board', () => {
 	it('leaves a shown quest alone', () => {
 		const shown = dailyQuests(ctx);
 		expect(topUpQuests(shown, dailyQuests({ ...ctx, tier: 3 }))).toEqual(shown);
+	});
+});
+
+describe('today quest count', () => {
+	it('skips idle quests and counts the daily XP goal', () => {
+		const quests = [{ target: 0, done: true }, { target: 2, done: true }, { target: 10, done: false }];
+		expect(isIdleQuest(quests[0]!)).toBe(true);
+		expect(todayQuestCount(quests, 40, 50)).toEqual({ done: 1, total: 3 });
+		expect(todayQuestCount(quests, 50, 50)).toEqual({ done: 2, total: 3 });
+		expect(todayQuestCount([{ target: 0, done: true }], 0, 50)).toEqual({ done: 0, total: 1 });
 	});
 });
