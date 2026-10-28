@@ -39,6 +39,7 @@ export default function ReviewOverview({ overview, guided: initial }: { overview
 	const [saving, setSaving] = useState(false);
 	const [error, setError] = useState('');
 	const saveRun = useRef(0);
+	const saveQueue = useRef<Promise<void>>(Promise.resolve());
 	const filtered = useMemo(() => guided.sets.filter((set) => set.title.toLocaleLowerCase('vi').includes(search.trim().toLocaleLowerCase('vi'))), [guided.sets, search]);
 	const selected = new Set(guided.selectedSetIds);
 	const allSetIds = guided.sets.map((set) => set.id);
@@ -46,20 +47,22 @@ export default function ReviewOverview({ overview, guided: initial }: { overview
 	const srsWaiting = !isReviewDone(overview) ? overview.dueCount + overview.newCount : 0;
 	const noSets = guided.sets.length === 0;
 
-	/** The chips change at once; the server answer only refreshes the word count, and a newer click wins. */
-	async function saveSelection(setIds: string[]) {
+	/** Update immediately, but serialize writes so older choices cannot overwrite newer ones. */
+	function saveSelection(setIds: string[]) {
 		const run = ++saveRun.current;
 		setGuided((current) => ({ ...current, selectedSetIds: setIds }));
 		setSaving(true);
 		setError('');
-		try {
-			const saved = await englishPost<GuidedReviewOverview>('/api/review', { action: 'selection', setIds });
-			if (run === saveRun.current) setGuided(saved);
-		} catch (cause) {
-			if (run === saveRun.current) setError(cause instanceof Error ? cause.message : 'Không lưu được lựa chọn.');
-		} finally {
-			if (run === saveRun.current) setSaving(false);
-		}
+		saveQueue.current = saveQueue.current.then(async () => {
+			try {
+				const saved = await englishPost<GuidedReviewOverview>('/api/review', { action: 'selection', setIds });
+				if (run === saveRun.current) setGuided(saved);
+			} catch (cause) {
+				if (run === saveRun.current) setError(cause instanceof Error ? cause.message : 'Không lưu được lựa chọn.');
+			} finally {
+				if (run === saveRun.current) setSaving(false);
+			}
+		});
 	}
 
 	async function start() {
