@@ -29,13 +29,7 @@ function Prompt({ item, audioText, recordedAudioAvailable }: {
 	if (item.activityKey === 'listen_type') {
 		return <>
 			<div className="flex justify-center"><EnglishAudioButton key={item.position} compact autoPlay senseId={audio.senseId} lemma={audio.lemma} recordedAudioAvailable={audio.recordedAudioAvailable} /></div>
-			<p className="mt-3 text-sm text-muted">Nghe và gõ lại từ tiếng Anh</p>
-		</>;
-	}
-	if (item.activityKey === 'listen_choice') {
-		return <>
-			<div className="flex justify-center"><EnglishAudioButton key={item.position} compact senseId={audio.senseId} lemma={audio.lemma} recordedAudioAvailable={audio.recordedAudioAvailable} /></div>
-			<p className="mt-3 text-sm text-muted">Nghe và chọn nghĩa đúng</p>
+			<p className="mt-3 text-sm text-muted">Nghe và gõ lại từ tiếng Anh</p><p className="mt-2 text-sm text-muted">{text(prompt.meaningVi)}</p>
 		</>;
 	}
 	if (item.activityKey === 'cloze_choice') {
@@ -53,18 +47,7 @@ function Prompt({ item, audioText, recordedAudioAvailable }: {
 			<div className="mt-3 flex justify-center"><EnglishAudioButton compact senseId={audio.senseId} lemma={audio.lemma} recordedAudioAvailable={audio.recordedAudioAvailable} /></div>
 		</>;
 	}
-	if (item.activityKey === 'spell_hinted') {
-		return <>
-			<p className="text-sm text-muted">Gõ từ tiếng Anh có nghĩa là</p>
-			<p role="heading" aria-level={2} className="mt-3 text-3xl font-black">{text(prompt.meaningVi)}</p>
-			<p className="mt-2 text-sm text-muted">Bắt đầu bằng “{text(prompt.firstLetter)}” · {typeof prompt.letterCount === 'number' ? prompt.letterCount : ''} chữ cái</p>
-		</>;
-	}
-	return <>
-		<p className="text-sm text-muted">Gõ từ tiếng Anh có nghĩa là</p>
-		<p role="heading" aria-level={2} className="mt-3 text-3xl font-black">{text(prompt.meaningVi)}</p>
-		{text(prompt.partOfSpeech) && <p className="mt-1 text-sm text-muted">{text(prompt.partOfSpeech)}</p>}
-	</>;
+	return <p>Câu hỏi này không còn được hỗ trợ</p>;
 }
 
 /** One question of any quiz kind, shared by ungraded practice and graded tests. */
@@ -86,7 +69,7 @@ export default function QuestionView({
 	const [typed, setTyped] = useState('');
 	const submitted = useRef(false);
 	const choices = Array.isArray(item.prompt.choices) ? item.prompt.choices.filter((value): value is string => typeof value === 'string') : [];
-	const isChoice = item.activityKey === 'meaning_choice' || item.activityKey === 'cloze_choice' || item.activityKey === 'listen_choice';
+	const isChoice = item.activityKey === 'meaning_choice' || item.activityKey === 'cloze_choice';
 	const locked = disabled || Boolean(feedback);
 
 	function send(answer: string) {
@@ -113,7 +96,7 @@ export default function QuestionView({
 
 	return <div className="space-y-6 rounded-panel border border-border bg-surface p-5 sm:p-8">
 		<div className="text-center"><Prompt item={item} audioText={audioText} recordedAudioAvailable={recordedAudioAvailable} /></div>
-		{isChoice
+		{!['meaning_choice', 'cloze_choice', 'listen_type'].includes(item.activityKey) ? null : isChoice
 			? <div className="grid gap-2">
 				{choices.map((option, index) => <button key={option} type="button" disabled={locked} onClick={() => send(option)} className="choice-btn" data-state={stateOf(option)}>
 					<span className="mr-3 text-muted">{index + 1}.</span>{option}

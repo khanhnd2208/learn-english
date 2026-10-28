@@ -233,7 +233,9 @@ export async function answerGuidedReview(userId: string, sessionId: string, ques
 	if (!question || question.kind !== (session.phase === 'retry' ? 'retry' : 'main')) throw new AppError('Không tìm thấy câu hỏi', 404);
 	if (question.answer !== null) return { questionId, answer: question.answer, correct: question.correct === true, expected: question.answerKey, xp: 0, session: await serializeSession(userId, session.id) };
 	const item: ActivityItem = { activityKey: question.activityKey as ActivityItem['activityKey'], role: question.role as ActivityItem['role'], senseId: question.senseId, prompt: question.prompt as Record<string, unknown>, answerKey: question.answerKey, accepted: question.accepted };
-	const correct = answer.trim() !== '' && Boolean(activityByKey(question.activityKey)?.grade?.(item, answer));
+	const activity = activityByKey(question.activityKey);
+	if (!activity) console.warn('Unsupported guided review activity:', question.activityKey);
+	const correct = answer.trim() !== '' && Boolean(activity?.grade(item, answer));
 	let xp = 0;
 	let persisted = false;
 	const now = new Date();
