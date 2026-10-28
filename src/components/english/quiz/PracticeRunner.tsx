@@ -7,6 +7,8 @@ import { QUIZ_KINDS, QUIZ_META, quizItemFor, type QuizKind } from '@/lib/english
 import { activityByKey, poolFromBundles, randomRng, type ActivityItem } from '@/lib/english/activities';
 import { initialPracticeQueue, queueAfterAnswer, takePracticeStep, type PracticeStep } from '@/lib/english/practiceLoop';
 import FocusFrame from '@/components/english/quiz/FocusFrame';
+import AnswerFeedback from '@/components/english/session/AnswerFeedback';
+import EnglishAudioButton from '@/components/english/EnglishAudioButton';
 import QuestionView, { type QuestionFeedback } from '@/components/english/quiz/QuestionView';
 import { answerLayout } from '@/lib/english/answerLayout';
 import InfoHint from '@/components/ui/InfoHint';
@@ -100,14 +102,11 @@ export default function PracticeRunner({ detail, kind }: { detail: EnglishSetDet
 				audioText={bundle?.word.lemma}
 				recordedAudioAvailable={Boolean(bundle && [bundle.word.audioPath, bundle.word.audioUkPath, bundle.word.audioUsPath].some((path) => path.trim()))}
 			/>
-			{feedback && <div role="status" className={`rounded-panel p-4 ${feedback.correct ? 'bg-success-subtle text-success' : 'border-2 border-error bg-surface'}`}>
-				<p className="font-bold">{feedback.correct ? 'Chính xác!' : `Đáp án: ${feedback.expected}`}</p>
-				{!feedback.correct && bundle && <>
-					<p className="mt-1 text-sm"><span className="font-bold">{bundle.word.lemma}</span> {bundle.word.ipa && <span className="font-mono text-muted">{bundle.word.ipa}</span>} · {bundle.sense.meaningVi}</p>
-					<p className="mt-1 text-xs text-muted">Từ này sẽ quay lại sau vài câu.</p>
-					<button type="button" autoFocus onClick={advance} className="mt-3 min-h-11 rounded-control bg-accent px-4 font-bold text-accent-foreground">Tiếp tục ↵</button>
-				</>}
-			</div>}
+			{feedback && <AnswerFeedback correct={feedback.correct}>
+				{!feedback.correct && <p className="font-bold">Đáp án: {feedback.expected}</p>}
+				{bundle && <><div className="flex items-center justify-between gap-2"><p className="text-sm"><span className="font-bold">{bundle.word.lemma}</span> {bundle.word.ipa && <span className="font-mono text-muted">{bundle.word.ipa}</span>} · {bundle.sense.meaningVi}</p><EnglishAudioButton compact senseId={bundle.sense.id} lemma={bundle.word.lemma} recordedAudioAvailable={Boolean(bundle.word.audioPath || bundle.word.audioUkPath || bundle.word.audioUsPath)} /></div>{bundle.examples[0] && <p className="text-sm text-muted">{bundle.examples[0].english}</p>}</>}
+				{!feedback.correct && <><p className="text-xs text-muted">Từ này sẽ quay lại sau vài câu.</p><button type="button" autoFocus onClick={advance} className="min-h-11 w-full rounded-control bg-accent px-4 font-bold text-accent-foreground">Tiếp tục ↵</button></>}
+			</AnswerFeedback>}
 		</div>}
 		{step && !item && <div className="mode-card space-y-3 text-center">
 			<p>Từ <span className="font-bold">{bundle?.word.lemma}</span> chưa đủ nội dung cho dạng {label}.</p>
