@@ -75,7 +75,7 @@ export default function InAppBrowserNotice() {
 				{externalUrl ? (
 					<a
 						href={externalUrl}
-						className="inline-flex rounded-full border border-accent bg-accent px-4 py-2 text-xs font-semibold uppercase tracking-wide text-white transition-opacity hover:opacity-90"
+						className="inline-flex rounded-full border border-accent bg-accent px-4 py-2 text-xs font-semibold uppercase tracking-wide text-accent-foreground transition-opacity hover:opacity-90"
 					>
 						Mở trong trình duyệt hệ thống
 					</a>

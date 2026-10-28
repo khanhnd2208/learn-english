@@ -12,7 +12,7 @@ export default function WeekStrip({ days }: { days: GoalBoard['week']['days'] })
 				const mark = state === 'goal' ? '✓' : state === 'studied' ? '◐' : state === 'future' ? '' : '·';
 				const status = state === 'goal' ? 'đạt mục tiêu' : state === 'studied' ? 'có học' : state === 'future' ? 'chưa tới' : 'nghỉ';
 				return <li key={entry.day} aria-label={`${WEEKDAY_LABELS[index]}: ${status}${entry.isToday ? ' (hôm nay)' : ''}`} className={`week-day-tile flex flex-col items-center gap-0.5 py-2 ${tile} ${entry.isToday ? 'ring-2 ring-accent ring-offset-2 ring-offset-surface' : ''}`}>
-					<span className="text-[10px] font-bold">{WEEKDAY_LABELS[index]}</span>
+					<span className="text-xs font-bold">{WEEKDAY_LABELS[index]}</span>
 					<span aria-hidden="true" className="h-5 text-base font-black leading-5">{mark}</span>
 				</li>;
 			})}

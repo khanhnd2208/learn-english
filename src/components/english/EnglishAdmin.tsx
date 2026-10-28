@@ -171,7 +171,7 @@ export default function EnglishAdmin({ sets, qaEnabled }: { sets: SetRow[]; qaEn
 								<p className="font-black">{set.title}</p>
 								<p className="text-xs text-muted">{set.status} · {set.items} mục · {set.learners} người học</p>
 							</div>
-							<div className="flex flex-wrap justify-end gap-2"><Link href={`/store`} className="inline-flex min-h-10 items-center rounded-pill border border-border px-4 text-xs font-bold">Quản lý trên cửa hàng</Link><Button type="button" variant="secondary" disabled={busy} onClick={() => void publish(set.id)}>Xuất bản</Button></div>
+							<div className="flex flex-wrap justify-end gap-2"><Link href={`/store`} className="inline-flex min-h-10 items-center rounded-control border border-border px-4 text-xs font-bold">Quản lý trên cửa hàng</Link><Button type="button" variant="secondary" disabled={busy} onClick={() => void publish(set.id)}>Xuất bản</Button></div>
 						</CardContent>
 					</Card>
 				))}

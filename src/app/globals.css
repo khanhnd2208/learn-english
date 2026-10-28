@@ -1,6 +1,7 @@
 @import "tailwindcss";
 
-/* Pixel Parchment — a calm, playful RPG visual system for language learning. */
+/* Pixel Parchment — a calm, playful RPG visual system for language learning.
+   Every colour lives in a token below; components and recipes only read tokens. */
 
 :root {
 	--background: #fbf0e5;
@@ -26,6 +27,75 @@
 	--warning: #a85d21;
 	--error: #a94355;
 	--sidebar-width: 240px;
+
+	/* Page */
+	--page-glow: rgb(255 255 255 / 72%);
+	--page-gradient: linear-gradient(180deg, #fbf2e8 0%, #f8eee4 62%, #f5e9de 100%);
+	--page-dots: rgb(99 77 122 / 19%);
+	--page-dots-opacity: .22;
+
+	/* Chrome: sidebar, mobile header and bottom nav */
+	--chrome: rgb(255 248 239 / 96%);
+	--chrome-border: #cdbca8;
+	--chrome-shadow: rgb(71 54 63 / 8%);
+	--sidebar-bg: linear-gradient(180deg, #fff8ee, #f8eee2);
+	--sidebar-border: #d7c7b6;
+	--sidebar-shadow: rgb(83 62 70 / 8%);
+	--brand-accent: #8b68a7;
+	--brand-tile-border: #282b45;
+	--brand-tile-bg: linear-gradient(145deg, #9878b5, #6e4f91);
+	--brand-tile-fg: #fff8e9;
+	--brand-tile-shadow: #49345f;
+	--nav-fg: #58566d;
+	--nav-fg-active: #282641;
+	--nav-bg-hover: #f0e7f2;
+	--nav-bg-active: #e5d8ee;
+	--nav-ring-active: #bda8d0;
+	--nav-shadow-active: #c7b2d4;
+	--nav-glyph-fg: #71568e;
+	--nav-glyph-bg: #f0e7f2;
+	--nav-glyph-border: #ddcfe7;
+	--nav-glyph-active-fg: #fff9ef;
+	--nav-glyph-active-bg: #795a99;
+	--mobile-nav-fg: var(--foreground-secondary);
+	--mobile-nav-active: #765292;
+	--panel-quest-bg: #eee3f3;
+	--panel-quest-border: #c4aed1;
+	--panel-quest-shadow: #d3c1dd;
+
+	/* Pixel controls */
+	--pixel-outline: #41354e;
+	--btn-primary-bg: #785596;
+	--btn-primary-fg: #fffaf1;
+	--btn-primary-shadow: #d0bed8;
+	--icon-tile-border: #48445e;
+	--icon-tile-shadow: rgb(49 43 66 / 17%);
+	--level-badge-fg: #2b2233;
+	--level-badge-shadow: #a8792a;
+	--progress-track-border: #635672;
+	--progress-track-bg: #fffaf0;
+	--progress-fill: linear-gradient(90deg, #8e6ca8, #b488c9);
+	--focus-ring: #8a69a8;
+
+	/* Reward surfaces */
+	--hero-bg: linear-gradient(120deg, #f5e9f2 0%, #fff7e8 66%, #f8efd9 100%);
+	--hero-border: #bbabc5;
+	--hero-shadow: #d3c4d6;
+	--hero-landscape-opacity: .22;
+	--card-amber-bg: linear-gradient(145deg, #fff2ce, #fffaf0);
+	--card-amber-border: #d6b760;
+	--card-lilac-bg: linear-gradient(145deg, #eee5f5, #fcf8ff);
+	--card-lilac-border: #c1abd2;
+	--day-done-bg: #dfe9cf;
+	--day-done-border: #637f58;
+	--day-done-fg: #355c3b;
+	--day-done-shadow: #b8caa4;
+	--day-pending-bg: #fff4d6;
+	--day-pending-border: #d7c79d;
+	--day-pending-fg: #8b7337;
+	--day-future-bg: rgb(255 250 243 / 65%);
+	--day-future-fg: #9690a1;
+
 	/* Motion */
 	--duration-instant: 100ms;
 	--duration-fast: 150ms;
@@ -53,6 +123,55 @@
 	--ink: #fff4e7;
 	--success: #b8d4a9;
 	--success-subtle: #394a3d;
+
+	--page-glow: rgb(126 92 155 / 18%);
+	--page-gradient: linear-gradient(180deg, var(--background), var(--background-secondary));
+	--page-dots: rgb(231 209 245 / 24%);
+	--page-dots-opacity: .1;
+
+	--chrome: rgb(43 39 55 / 96%);
+	--chrome-border: #51485d;
+	--sidebar-bg: linear-gradient(180deg, #302b3c, #262332);
+	--sidebar-border: #51485d;
+	--nav-fg: #d8cde1;
+	--nav-fg-active: #fff5ea;
+	--nav-bg-hover: #493b58;
+	--nav-bg-active: #493b58;
+	--nav-ring-active: #725d83;
+	--nav-shadow-active: #3a3048;
+	--nav-glyph-fg: #f4e7ff;
+	--nav-glyph-bg: #5c4771;
+	--nav-glyph-border: #806b91;
+	--nav-glyph-active-fg: #f4e7ff;
+	--nav-glyph-active-bg: #5c4771;
+	--mobile-nav-fg: #eee1f3;
+	--mobile-nav-active: var(--accent);
+	--panel-quest-bg: #3e334a;
+	--panel-quest-border: #675475;
+	--panel-quest-shadow: #33283d;
+
+	--pixel-outline: #d7c3e4;
+	--btn-primary-bg: #8967a4;
+	--btn-primary-fg: #211d2c;
+	--level-badge-shadow: #6e5124;
+
+	--hero-bg: linear-gradient(120deg, #3c3048, #393447 66%, #443d31);
+	--hero-border: #6e5a7d;
+	--hero-shadow: #33293d;
+	--hero-landscape-opacity: .13;
+	--card-amber-bg: linear-gradient(145deg, #49402f, #35313a);
+	--card-amber-border: #897546;
+	--card-lilac-bg: linear-gradient(145deg, #3b3247, #302d3d);
+	--card-lilac-border: #6c5a7c;
+	--day-done-bg: #43513f;
+	--day-done-border: #829775;
+	--day-done-fg: #e2f0d4;
+	--day-done-shadow: #303c32;
+	--day-pending-bg: #49402f;
+	--day-pending-border: #8b7955;
+	--day-pending-fg: #f2d98f;
+	--day-future-bg: #34313e;
+	--day-future-fg: #b1a8bb;
 }
 
 @theme inline {
@@ -93,11 +212,11 @@
 	--spacing-12: 48px;
 	--spacing-16: 64px;
 
-	/* Radius */
+	/* Radius: control 8 · card 12 · panel 16 · dialog 14 · pill fully round */
 	--radius-control: 8px;
 	--radius-card: 12px;
 	--radius-panel: 16px;
-	--radius-dialog: 20px;
+	--radius-dialog: 14px;
 	--radius-pill: 9999px;
 
 	/* Elevation shadows (use sparingly) */
@@ -112,17 +231,17 @@
 	--z-index-dialog: 70;
 	--z-index-toast: 80;
 	--z-index-critical: 90;
-
-	/* Motion */
-	--duration-instant: var(--duration-instant);
-	--duration-fast: var(--duration-fast);
-	--duration-standard: var(--duration-standard);
-	--duration-slow: var(--duration-slow);
 }
+
+/* Tailwind has no duration namespace, so the motion tokens get their own utilities. */
+@utility duration-instant { transition-duration: var(--duration-instant); }
+@utility duration-fast { transition-duration: var(--duration-fast); }
+@utility duration-standard { transition-duration: var(--duration-standard); }
+@utility duration-slow { transition-duration: var(--duration-slow); }
 
 body {
 	background-color: var(--background);
-	background-image: radial-gradient(ellipse at 8% 2%, rgb(255 255 255 / 72%), transparent 34%), linear-gradient(180deg, #fbf2e8 0%, #f8eee4 62%, #f5e9de 100%);
+	background-image: radial-gradient(ellipse at 8% 2%, var(--page-glow), transparent 34%), var(--page-gradient);
 	color: var(--foreground);
 	font-family: var(--font-sans), system-ui, sans-serif;
 	-webkit-font-smoothing: antialiased;
@@ -135,26 +254,10 @@ body::before {
 	inset: 0;
 	pointer-events: none;
 	z-index: 0;
-	opacity: .22;
-	background-image: radial-gradient(rgb(99 77 122 / 19%) .8px, transparent .8px);
+	opacity: var(--page-dots-opacity);
+	background-image: radial-gradient(var(--page-dots) .8px, transparent .8px);
 	background-size: 16px 16px;
 	mask-image: linear-gradient(to bottom, black, transparent 70%);
-}
-.dark body { background-image: radial-gradient(ellipse at 10% 0%, rgb(126 92 155 / 18%), transparent 34%), linear-gradient(180deg, var(--background), var(--background-secondary)); }
-.dark body::before { opacity: .1; background-image: radial-gradient(rgb(231 209 245 / 24%) .8px, transparent .8px); }
-
-.hanzi-display {
-	font-family: var(--font-hanzi), "PingFang SC", "Noto Sans SC", sans-serif;
-	font-size: 3rem;
-	font-weight: 900;
-	line-height: 1.1;
-}
-
-.hanzi-lg {
-	font-family: var(--font-hanzi), "PingFang SC", "Noto Sans SC", sans-serif;
-	font-size: 2.25rem;
-	font-weight: 900;
-	line-height: 1.2;
 }
 
 .material-symbols-outlined {
@@ -196,44 +299,7 @@ body::before {
 	-webkit-tap-highlight-color: transparent;
 }
 
-/* Reusable component recipes */
-@utility btn-primary {
-	@apply inline-flex items-center justify-center gap-2 rounded-full bg-accent px-4 py-2 text-xs font-bold uppercase tracking-widest text-accent-foreground transition-colors hover:bg-accent-hover;
-}
-
-@utility btn-secondary {
-	@apply inline-flex items-center justify-center gap-2 rounded-full border border-border bg-transparent px-4 py-2 text-xs font-bold uppercase tracking-widest text-foreground-secondary transition-colors hover:border-accent hover:text-accent;
-}
-
-@utility card-paper {
-	@apply rounded-xl border border-border bg-surface transition-colors hover:border-accent;
-}
-
-@utility label-caps {
-	@apply text-xs font-bold uppercase tracking-[0.15em] text-muted;
-}
-
-@utility nav-pill-active {
-	@apply mx-3 flex min-h-12 items-center gap-3 rounded-2xl bg-[#347f54] px-3 py-3 text-sm font-extrabold text-[#f5f4d8];
-	box-shadow: inset 0 -3px 0 rgb(14 65 42 / 38%), 0 5px 12px rgb(7 29 19 / 22%);
-}
-
-@utility nav-pill {
-	@apply mx-3 flex min-h-12 items-center gap-3 rounded-2xl px-3 py-3 text-sm font-extrabold text-emerald-100/75 transition-colors duration-200 hover:bg-white/10 hover:text-white;
-}
-
-/* Session & page entrance animations */
-@keyframes slide-down {
-	from {
-		transform: translateY(-100%);
-		opacity: 0;
-	}
-	to {
-		transform: translateY(0);
-		opacity: 1;
-	}
-}
-
+/* Entrance and reward animations */
 @keyframes fade-slide-up {
 	from {
 		transform: translateY(16px);
@@ -244,287 +310,10 @@ body::before {
 		opacity: 1;
 	}
 }
-
-@keyframes float {
-	0%,
-	100% {
-		transform: translateY(0);
-	}
-	50% {
-		transform: translateY(-4px);
-	}
-}
-
-@keyframes pulse-success {
-	0%,
-	100% {
-		border-color: color-mix(in srgb, var(--success) 40%, transparent);
-	}
-	50% {
-		border-color: color-mix(in srgb, var(--success) 80%, transparent);
-	}
-}
-
-.animate-slide-down {
-	animation: slide-down 0.4s ease-out forwards;
-}
-
 .animate-fade-slide-up {
 	animation: fade-slide-up 0.4s ease-out forwards;
 }
 
-.animate-fade-slide-up-delay-1 {
-	animation: fade-slide-up 0.4s ease-out 0.1s forwards;
-	opacity: 0;
-}
-
-.animate-fade-slide-up-delay-2 {
-	animation: fade-slide-up 0.4s ease-out 0.2s forwards;
-	opacity: 0;
-}
-
-.animate-fade-slide-up-delay-3 {
-	animation: fade-slide-up 0.4s ease-out 0.3s forwards;
-	opacity: 0;
-}
-
-.animate-fade-slide-up-delay-4 {
-	animation: fade-slide-up 0.4s ease-out 0.4s forwards;
-	opacity: 0;
-}
-
-.animate-float {
-	animation: float 4s ease-in-out infinite;
-}
-
-.animate-pulse-success {
-	animation: pulse-success 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
-}
-
-.animate-section-in {
-	animation: fade-slide-up 0.45s ease-out forwards;
-}
-
-@media (prefers-reduced-motion: reduce) {
-	.animate-slide-down,
-	.animate-fade-slide-up,
-	.animate-fade-slide-up-delay-1,
-	.animate-fade-slide-up-delay-2,
-	.animate-fade-slide-up-delay-3,
-	.animate-fade-slide-up-delay-4,
-	.animate-float,
-	.animate-pulse-success,
-	.animate-section-in {
-		animation: none;
-		opacity: 1;
-		transform: none;
-	}
-}
-
-/* Pixel parchment design system — inspired by the supplied RPG reference. */
-
-h1, h2, .game-number {
-	font-family: var(--font-pixel), var(--font-pixel-fallback), var(--font-sans), system-ui, sans-serif;
-	letter-spacing: .015em;
-	line-height: 1.2;
-}
-.label-caps {
-	font-family: var(--font-sans), system-ui, sans-serif;
-	font-size: 12px;
-	letter-spacing: .055em;
-}
-
-.rounded-card { border-radius: 12px; }
-.rounded-panel { border-radius: 16px; }
-.rounded-control, .rounded-pill { border-radius: 8px; }
-.rounded-dialog { border-radius: 14px; }
-.bg-surface.rounded-card {
-	border-width: 2px;
-	box-shadow: 0 3px 0 color-mix(in srgb, var(--border) 78%, transparent), 0 8px 16px rgb(65 48 63 / 5%);
-}
-.adventure-sidebar {
-	background: linear-gradient(180deg, #fff8ee, #f8eee2);
-	border-color: #d7c7b6;
-	box-shadow: 5px 0 18px rgb(83 62 70 / 8%);
-}
-.adventure-sidebar .text-white { color: var(--foreground); }
-.adventure-sidebar .text-amber-300 { color: #8b68a7; }
-.adventure-sidebar .text-emerald-100\/70, .adventure-sidebar .text-emerald-100\/75 { color: #777488; }
-.adventure-sidebar .label-caps { color: #777488; }
-.brand-compass {
-	width: 40px; height: 40px;
-	border: 2px solid #282b45;
-	border-radius: 8px;
-	color: #fff8e9;
-	background: linear-gradient(145deg, #9878b5, #6e4f91);
-	box-shadow: 0 3px 0 #49345f;
-}
-.nav-pill, .nav-pill-active {
-	min-height: 44px;
-	margin-inline: 12px;
-	border-radius: 8px;
-	font-weight: 750;
-}
-.nav-pill { color: #58566d; }
-.nav-pill:hover { color: #282641; background: #f0e7f2; }
-.nav-pill-active {
-	color: #302844;
-	background: #e5d8ee;
-	box-shadow: inset 0 0 0 1px #bda8d0, 0 3px 0 #c7b2d4;
-}
-.nav-glyph { color: #71568e; background: #f0e7f2; border: 1px solid #ddcfe7; border-radius: 7px; }
-.nav-pill-active .nav-glyph { color: #fff9ef; background: #795a99; }
-.sidebar-quest {
-	border: 2px solid #c4aed1;
-	border-radius: 10px;
-	background: #eee3f3;
-	box-shadow: 0 3px 0 #d3c1dd;
-}
-.sidebar-quest p.text-white { color: #302844; }
-.sidebar-quest p.text-emerald-100\/70 { color: #676278; }
-.sidebar-quest > svg { color: #795a99; }
-.adventure-mobile-header, .adventure-mobile-nav {
-	color: var(--foreground);
-	border-color: #cdbca8;
-	background: rgb(255 248 239 / 96%);
-	box-shadow: 0 -4px 15px rgb(71 54 63 / 8%);
-	backdrop-filter: blur(12px);
-}
-.adventure-mobile-header a, .adventure-mobile-nav a { color: var(--foreground-secondary); }
-.adventure-mobile-header .text-amber-300 { color: #8b68a7; }
-.adventure-mobile-nav a.text-amber-200 { color: #765292; }
-
-.game-hero {
-	min-height: 220px;
-	border: 2px solid #bbabc5;
-	border-radius: 14px;
-	background: linear-gradient(120deg, #f5e9f2 0%, #fff7e8 66%, #f8efd9 100%);
-	box-shadow: 0 4px 0 #d3c4d6, 0 10px 20px rgb(65 48 63 / 7%);
-}
-.game-hero::before, .game-hero::after { display: none; }
-.game-hero > .adventure-landscape { opacity: .22; filter: saturate(.62) sepia(.16); }
-.game-hero-stamps { color: #a87e39; opacity: .8; }
-.game-avatar {
-	border: 3px solid #34344d;
-	border-radius: 9px;
-	background: linear-gradient(145deg, #f2d4ee, #d5c1ed);
-	color: #60427d;
-	box-shadow: 0 4px 0 #a48bb4, 0 7px 14px rgb(63 47 72 / 14%);
-	transform: none;
-}
-.adventure-icon {
-	width: 38px; height: 38px;
-	border: 2px solid #48445e;
-	border-radius: 8px;
-	box-shadow: 0 3px 0 rgb(49 43 66 / 17%);
-	transform: none;
-}
-.adventure-icon svg { shape-rendering: crispEdges; image-rendering: pixelated; }
-.game-stat-box {
-	border: 2px solid #c7a95d;
-	border-radius: 10px;
-	background: linear-gradient(145deg, #fff3c8, #fffaf0);
-	box-shadow: 0 4px 0 #ddc478;
-}
-.game-progress-track {
-	border: 2px solid #635672;
-	border-radius: 4px;
-	background: #fffaf0;
-	box-shadow: none;
-}
-.game-progress-fill { border-radius: 2px; background: linear-gradient(90deg, #8e6ca8, #b488c9); }
-.game-card {
-	border-width: 2px;
-	border-radius: 11px;
-	box-shadow: 0 4px 0 color-mix(in srgb, var(--border) 78%, transparent);
-}
-.game-card:hover { transform: translateY(-2px); box-shadow: 0 6px 0 color-mix(in srgb, var(--border) 78%, transparent); }
-.game-card-amber { background: linear-gradient(145deg, #fff2ce, #fffaf0); border-color: #d6b760; }
-.game-card-lilac { background: linear-gradient(145deg, #eee5f5, #fcf8ff); border-color: #c1abd2; }
-.game-card-rose { background: linear-gradient(110deg, #fbe5e5, #fff5ea); border-color: #d9a8aa; }
-.game-action {
-	min-height: 68px;
-	border: 2px solid #d9cdbb;
-	border-radius: 8px;
-	background: #fffaf2;
-	color: #302f49;
-}
-.game-action:hover { transform: translateY(-2px); box-shadow: 0 4px 0 #d9cdbb; }
-.week-day-tile { border: 2px solid #cdbca8; border-radius: 7px; }
-.week-day-tile.is-done { border-color: #637f58; background: #dfe9cf; color: #355c3b; box-shadow: 0 3px 0 #b8caa4; }
-.week-day-tile.is-pending { border-color: #d7c79d; background: #fff4d6; color: #8b7337; }
-.week-day-tile.is-future { border-style: dashed; background: rgb(255 250 243 / 65%); color: #9690a1; }
-
-button { letter-spacing: .045em; }
-button:not(:disabled) { transition: transform 120ms steps(2, end), filter 120ms ease, box-shadow 120ms ease; }
-button:not(:disabled):active { transform: translateY(2px); }
-button.bg-accent {
-	border: 2px solid #41354e;
-	border-bottom-width: 4px;
-	border-radius: 8px;
-	background: #785596;
-	color: #fffaf1;
-	box-shadow: 0 2px 0 #d0bed8;
-}
-button.bg-accent:hover { filter: brightness(1.07); }
-input, textarea, select { border-radius: 8px !important; }
-input:focus-visible, textarea:focus-visible, select:focus-visible { outline-color: #8a69a8; }
-.dark body { color: var(--foreground); }
-.dark .adventure-sidebar { background: linear-gradient(180deg, #302b3c, #262332); border-color: #51485d; }
-.dark .adventure-sidebar .text-white, .dark .sidebar-quest p.text-white { color: var(--foreground); }
-.dark .nav-pill { color: #d8cde1; }
-.dark .nav-pill:hover, .dark .nav-pill-active { color: #fff5ea; background: #493b58; box-shadow: inset 0 0 0 1px #725d83, 0 3px 0 #3a3048; }
-.dark .nav-glyph, .dark .nav-pill-active .nav-glyph { color: #f4e7ff; background: #5c4771; border-color: #806b91; }
-.dark .sidebar-quest { background: #3e334a; border-color: #675475; box-shadow: 0 3px 0 #33283d; }
-.dark .adventure-mobile-header, .dark .adventure-mobile-nav { background: rgb(43 39 55 / 96%); border-color: #51485d; }
-.dark .adventure-mobile-header a, .dark .adventure-mobile-nav a { color: #eee1f3; }
-.dark .game-hero { background: linear-gradient(120deg, #3c3048, #393447 66%, #443d31); border-color: #6e5a7d; box-shadow: 0 4px 0 #33293d; }
-.dark .game-hero > .adventure-landscape { opacity: .13; }
-.dark .game-stat-box { background: linear-gradient(145deg, #49402f, #35313a); border-color: #897546; box-shadow: 0 4px 0 #554a35; }
-.dark .game-card-amber { background: linear-gradient(145deg, #49402f, #35313a); border-color: #897546; }
-.dark .game-card-lilac { background: linear-gradient(145deg, #3b3247, #302d3d); border-color: #6c5a7c; }
-.dark .game-card-rose { background: linear-gradient(110deg, #49323c, #35313a); border-color: #805b64; }
-.dark .game-action { background: #35313e; border-color: #625568; color: var(--foreground); }
-.dark .week-day-tile.is-done { border-color: #829775; background: #43513f; color: #e2f0d4; box-shadow: 0 3px 0 #303c32; }
-.dark .week-day-tile.is-pending { border-color: #8b7955; background: #49402f; color: #f2d98f; }
-.dark .week-day-tile.is-future { background: #34313e; color: #b1a8bb; }
-.dark button.bg-accent { background: #8967a4; border-color: #d7c3e4; color: #211d2c; }
-
-@media (max-width: 640px) {
-	.game-hero { min-height: 200px; }
-	.game-hero > .adventure-landscape { width: 86%; height: 75%; opacity: .13; }
-	.adventure-icon { width: 34px; height: 34px; }
-}
-
-.task-row,.mode-card,.word-row { border: 1px solid var(--border); background: var(--surface); border-radius: 14px; }
-.task-row { display:flex; align-items:center; gap:12px; padding:14px; min-height:56px; }
-.mode-card { padding:20px; }
-.word-row { display:flex; align-items:center; gap:12px; padding:10px 14px; min-height:60px; }
-.choice-btn { display:block; width:100%; min-height:52px; padding:12px 16px; text-align:left; border:2px solid var(--border); border-radius:12px; background:var(--surface); color:var(--foreground); }
-.choice-btn:hover,.choice-btn:focus-visible { border-color:var(--accent); outline:none; }
-.choice-btn[data-state="selected"] { border-color:var(--accent); background:var(--accent-subtle); }
-.choice-btn[data-state="correct"] { border-color:var(--success); background:var(--success-subtle); }
-.choice-btn[data-state="wrong"] { border-color:var(--error); background:color-mix(in srgb,var(--error) 12%,var(--surface)); }
-.segment-progress { display:flex; gap:3px; }
-.segment-progress>span { height:7px; flex:1; border-radius:3px; background:var(--surface-dim); }
-.segment-progress>span[data-done="true"] { background:var(--accent); }
-.dark .choice-btn[data-state="wrong"] { background:color-mix(in srgb,var(--error) 20%,var(--surface)); }
-
-/* Goals: level badge, XP pop, quest states. In a layer so size and spacing utilities can override them. */
-@layer components {
-	.level-badge {
-		display: inline-flex; align-items: center; justify-content: center;
-		min-width: 2.25rem; padding: 1px 6px;
-		border: 2px solid #41354e; border-radius: 6px;
-		background: var(--gold); color: #2b2233;
-		font-family: var(--font-pixel, inherit); font-size: .75rem; font-weight: 900; line-height: 1.2;
-		box-shadow: 0 2px 0 #a8792a;
-	}
-	.dark .level-badge { border-color: #d7c3e4; box-shadow: 0 2px 0 #6e5124; }
-	.quest-card { border: 2px solid var(--border); border-radius: 12px; background: var(--surface); }
-	.quest-card[data-done="true"] { border-color: color-mix(in srgb, var(--success) 55%, var(--border)); background: var(--success-subtle); }
-	.xp-chip { display: inline-flex; align-items: center; gap: 2px; border-radius: 999px; padding: 1px 8px; font-size: .75rem; font-weight: 800; background: color-mix(in srgb, var(--gold) 26%, var(--surface)); color: var(--foreground); white-space: nowrap; }
-}
 @keyframes xp-pop {
 	0% { transform: translateY(6px) scale(.9); opacity: 0; }
 	20% { transform: translateY(0) scale(1.08); opacity: 1; }
@@ -532,13 +321,175 @@ input:focus-visible, textarea:focus-visible, select:focus-visible { outline-colo
 	100% { transform: translateY(-14px); opacity: 0; }
 }
 .animate-xp-pop { animation: xp-pop 1.2s ease-out forwards; }
+
 @keyframes badge-pop {
 	0% { transform: scale(.6) rotate(-8deg); opacity: 0; }
 	60% { transform: scale(1.1) rotate(3deg); opacity: 1; }
 	100% { transform: scale(1) rotate(0); }
 }
 .animate-badge-pop { animation: badge-pop 480ms steps(6, end) both; }
+
 @media (prefers-reduced-motion: reduce) {
+	.animate-fade-slide-up {
+		animation: none;
+		opacity: 1;
+		transform: none;
+	}
 	.animate-xp-pop { animation-duration: 1ms; animation-delay: 900ms; }
 	.animate-badge-pop { animation: none; }
+}
+
+/* Typography: the pixel face is for page titles and big numbers only. */
+h1, h2, .game-number {
+	font-family: var(--font-pixel), var(--font-pixel-fallback), var(--font-sans), system-ui, sans-serif;
+	letter-spacing: .015em;
+	line-height: 1.2;
+}
+
+@utility label-caps {
+	@apply text-xs font-bold uppercase text-muted;
+	font-family: var(--font-sans), system-ui, sans-serif;
+	letter-spacing: .055em;
+}
+
+/* Surfaces */
+.bg-surface.rounded-card {
+	border-width: 2px;
+	box-shadow: 0 3px 0 color-mix(in srgb, var(--border) 78%, transparent), 0 8px 16px rgb(65 48 63 / 5%);
+}
+.mode-card, .word-row { border: 1px solid var(--border); background: var(--surface); border-radius: 14px; }
+.mode-card { padding: 20px; }
+.word-row { display: flex; align-items: center; gap: 12px; padding: 10px 14px; min-height: 60px; }
+
+/* App chrome */
+.adventure-sidebar {
+	background: var(--sidebar-bg);
+	border-color: var(--sidebar-border);
+	box-shadow: 5px 0 18px var(--sidebar-shadow);
+}
+.adventure-mobile-header, .adventure-mobile-nav {
+	color: var(--foreground);
+	border-color: var(--chrome-border);
+	background: var(--chrome);
+	box-shadow: 0 -4px 15px var(--chrome-shadow);
+	backdrop-filter: blur(12px);
+}
+.brand-wordmark { color: var(--foreground); }
+.brand-accent { color: var(--brand-accent); }
+.brand-tagline { color: var(--muted); }
+.brand-compass {
+	width: 40px; height: 40px;
+	border: 2px solid var(--brand-tile-border);
+	border-radius: 8px;
+	color: var(--brand-tile-fg);
+	background: var(--brand-tile-bg);
+	box-shadow: 0 3px 0 var(--brand-tile-shadow);
+}
+@utility nav-pill {
+	@apply flex items-center gap-3 px-3 py-3 text-sm transition-colors duration-200;
+	min-height: 44px;
+	margin-inline: 12px;
+	border-radius: 8px;
+	font-weight: 750;
+	color: var(--nav-fg);
+	&:hover { color: var(--nav-fg-active); background: var(--nav-bg-hover); }
+}
+@utility nav-pill-active {
+	@apply flex items-center gap-3 px-3 py-3 text-sm;
+	min-height: 44px;
+	margin-inline: 12px;
+	border-radius: 8px;
+	font-weight: 750;
+	color: var(--nav-fg-active);
+	background: var(--nav-bg-active);
+	box-shadow: inset 0 0 0 1px var(--nav-ring-active), 0 3px 0 var(--nav-shadow-active);
+}
+.nav-glyph { color: var(--nav-glyph-fg); background: var(--nav-glyph-bg); border: 1px solid var(--nav-glyph-border); border-radius: 7px; }
+.nav-pill-active .nav-glyph { color: var(--nav-glyph-active-fg); background: var(--nav-glyph-active-bg); }
+.adventure-mobile-header a, .mobile-nav-link { color: var(--mobile-nav-fg); }
+.mobile-nav-link[aria-current="page"] { color: var(--mobile-nav-active); }
+.sidebar-quest {
+	border: 2px solid var(--panel-quest-border);
+	border-radius: 10px;
+	background: var(--panel-quest-bg);
+	box-shadow: 0 3px 0 var(--panel-quest-shadow);
+}
+.sidebar-quest > svg { color: var(--nav-glyph-active-bg); }
+
+/* Pixel controls */
+button { letter-spacing: .045em; }
+button:not(:disabled) { transition: transform 120ms steps(2, end), filter 120ms ease, box-shadow 120ms ease; }
+button:not(:disabled):active { transform: translateY(2px); }
+button.bg-accent {
+	border: 2px solid var(--pixel-outline);
+	border-bottom-width: 4px;
+	border-radius: 8px;
+	background: var(--btn-primary-bg);
+	color: var(--btn-primary-fg);
+	box-shadow: 0 2px 0 var(--btn-primary-shadow);
+}
+button.bg-accent:hover { filter: brightness(1.07); }
+input, textarea, select { border-radius: 8px !important; }
+input:focus-visible, textarea:focus-visible, select:focus-visible { outline-color: var(--focus-ring); }
+
+.adventure-icon {
+	width: 38px; height: 38px;
+	border: 2px solid var(--icon-tile-border);
+	border-radius: 8px;
+	box-shadow: 0 3px 0 var(--icon-tile-shadow);
+}
+.adventure-icon svg { shape-rendering: crispEdges; image-rendering: pixelated; }
+
+.game-progress-track {
+	border: 2px solid var(--progress-track-border);
+	border-radius: 4px;
+	background: var(--progress-track-bg);
+}
+.game-progress-fill { border-radius: 2px; background: var(--progress-fill); }
+
+.choice-btn { display: block; width: 100%; min-height: 52px; padding: 12px 16px; text-align: left; border: 2px solid var(--border); border-radius: 12px; background: var(--surface); color: var(--foreground); }
+.choice-btn:hover, .choice-btn:focus-visible { border-color: var(--accent); outline: none; }
+.choice-btn[data-state="selected"] { border-color: var(--accent); background: var(--accent-subtle); }
+.choice-btn[data-state="correct"] { border-color: var(--success); background: var(--success-subtle); }
+.choice-btn[data-state="wrong"] { border-color: var(--error); background: color-mix(in srgb, var(--error) 12%, var(--surface)); }
+.dark .choice-btn[data-state="wrong"] { background: color-mix(in srgb, var(--error) 20%, var(--surface)); }
+.segment-progress { display: flex; gap: 3px; }
+.segment-progress > span { height: 7px; flex: 1; border-radius: 3px; background: var(--surface-dim); }
+.segment-progress > span[data-done="true"] { background: var(--accent); }
+
+/* Reward surfaces: level hero, badges, week tiles */
+.game-hero {
+	min-height: 220px;
+	border: 2px solid var(--hero-border);
+	border-radius: 14px;
+	background: var(--hero-bg);
+	box-shadow: 0 4px 0 var(--hero-shadow), 0 10px 20px rgb(65 48 63 / 7%);
+}
+.game-hero > .adventure-landscape { opacity: var(--hero-landscape-opacity); filter: saturate(.62) sepia(.16); }
+.game-card-amber { background: var(--card-amber-bg); border-color: var(--card-amber-border); }
+.game-card-lilac { background: var(--card-lilac-bg); border-color: var(--card-lilac-border); }
+.week-day-tile { border: 2px solid var(--border); border-radius: 7px; }
+.week-day-tile.is-done { border-color: var(--day-done-border); background: var(--day-done-bg); color: var(--day-done-fg); box-shadow: 0 3px 0 var(--day-done-shadow); }
+.week-day-tile.is-pending { border-color: var(--day-pending-border); background: var(--day-pending-bg); color: var(--day-pending-fg); }
+.week-day-tile.is-future { border-style: dashed; background: var(--day-future-bg); color: var(--day-future-fg); }
+
+@media (max-width: 640px) {
+	.game-hero { min-height: 200px; }
+	.game-hero > .adventure-landscape { width: 86%; height: 75%; opacity: .13; }
+	.adventure-icon { width: 34px; height: 34px; }
+}
+
+/* Goals: level badge, XP chip, quest states. In a layer so size and spacing utilities can override them. */
+@layer components {
+	.level-badge {
+		display: inline-flex; align-items: center; justify-content: center;
+		min-width: 2.25rem; padding: 1px 6px;
+		border: 2px solid var(--pixel-outline); border-radius: 6px;
+		background: var(--gold); color: var(--level-badge-fg);
+		font-family: var(--font-pixel, inherit); font-size: .75rem; font-weight: 900; line-height: 1.2;
+		box-shadow: 0 2px 0 var(--level-badge-shadow);
+	}
+	.quest-card { border: 2px solid var(--border); border-radius: 12px; background: var(--surface); }
+	.quest-card[data-done="true"] { border-color: color-mix(in srgb, var(--success) 55%, var(--border)); background: var(--success-subtle); }
+	.xp-chip { display: inline-flex; align-items: center; gap: 2px; border-radius: 999px; padding: 1px 8px; font-size: .75rem; font-weight: 800; background: color-mix(in srgb, var(--gold) 26%, var(--surface)); color: var(--foreground); white-space: nowrap; }
 }
