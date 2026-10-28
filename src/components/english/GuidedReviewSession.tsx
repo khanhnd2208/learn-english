@@ -3,6 +3,8 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import ConfirmExitDialog from '@/components/english/ConfirmExitDialog';
 import SessionHeader from '@/components/english/session/SessionHeader';
+import AnswerFeedback from '@/components/english/session/AnswerFeedback';
+import EnglishAudioButton from '@/components/english/EnglishAudioButton';
 import EnglishWordCard from '@/components/english/EnglishWordCard';
 import { useRewardToasts } from '@/components/english/goals/useRewardToasts';
 import { englishPost } from '@/components/english/englishApi';
@@ -164,11 +166,11 @@ export default function GuidedReviewSession({ initial, onClose }: { initial: Gui
 
 				{['quiz', 'retry'].includes(session.phase) && shownQuestion && <div className="mx-auto w-full max-w-2xl space-y-4">
 					<QuestionView key={shownQuestion.id} item={shownQuestion} disabled={busy} feedback={feedback} onAnswer={(value) => void answer(value)} audioText={questionWord?.word.lemma} recordedAudioAvailable={Boolean(questionWord && (questionWord.word.audioPath || questionWord.word.audioUkPath || questionWord.word.audioUsPath))} />
-					{feedback ? <div aria-live="polite" className={`rounded-panel border p-4 ${feedback.correct ? 'border-success/40 bg-success/5' : 'border-error/40 bg-error/5'}`}>
-						<p className="text-lg font-bold">{feedback.correct ? '✓ Chính xác' : `Đáp án: ${feedback.expected}`}</p>
-						{questionWord && <><p className="mt-1">{questionWord.sense.meaningVi}</p>{questionWord.examples[0] && <p className="mt-2 text-sm text-muted">{questionWord.examples[0].english}<br />{questionWord.examples[0].meaningVi}</p>}</>}
-						<button type="button" autoFocus onClick={continueAfterFeedback} className="mt-4 min-h-11 w-full rounded-control bg-accent px-5 font-bold text-accent-foreground">Tiếp tục →</button>
-					</div> : <button type="button" disabled={busy} onClick={() => void answer('')} className="min-h-11 w-full rounded-control border border-border px-4 font-bold">Chưa nhớ</button>}
+					{feedback ? <AnswerFeedback correct={feedback.correct}>
+						{!feedback.correct && <p className="font-bold">Đáp án: {feedback.expected}</p>}
+						{questionWord && <><div className="flex items-center justify-between gap-2"><p className="font-bold">{questionWord.word.lemma} <span className="font-normal text-muted">{questionWord.sense.ipaOverride || questionWord.word.ipa}</span></p><EnglishAudioButton compact senseId={questionWord.sense.id} lemma={questionWord.word.lemma} recordedAudioAvailable={Boolean(questionWord.word.audioPath || questionWord.word.audioUkPath || questionWord.word.audioUsPath)} /></div><p>{questionWord.sense.meaningVi}</p>{questionWord.examples[0] && <p className="text-sm text-muted">{questionWord.examples[0].english}<br />{questionWord.examples[0].meaningVi}</p>}</>}
+						<button type="button" autoFocus onClick={continueAfterFeedback} className="min-h-11 w-full rounded-control bg-accent px-5 font-bold text-accent-foreground">Tiếp tục →</button>
+					</AnswerFeedback> : <button type="button" disabled={busy} onClick={() => void answer('')} className="min-h-11 w-full rounded-control border border-border px-4 font-bold">Chưa nhớ</button>}
 				</div>}
 
 				{session.phase === 'summary' && <section className="mode-card mx-auto w-full max-w-2xl p-6 text-center sm:p-8">
