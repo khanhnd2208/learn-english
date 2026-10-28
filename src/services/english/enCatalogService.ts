@@ -36,6 +36,8 @@ export interface EnglishSetDetail {
 	id: string;
 	title: string;
 	description: string;
+	/** 'draft' until at least one word is published; only admins can open a draft. */
+	status: string;
 	enrolled: boolean;
 	wordCount: number;
 	words: EnglishSetWord[];
@@ -150,6 +152,7 @@ export async function getEnglishSetDetail(userId: string, setId: string, include
 		id: set.id,
 		title: set.title,
 		description: set.description,
+		status: set.status,
 		enrolled,
 		locked: set.accessCode != null,
 		listed: set.listed,

@@ -17,5 +17,5 @@ export default async function EnglishSetPage({ params }: { params: Promise<{ set
 		if (error instanceof AppError && error.status === 404) notFound();
 		throw error;
 	}
-	return <SetDetail detail={detail} />;
+	return <SetDetail detail={detail} isAdmin={session.user.role === 'admin'} />;
 }
