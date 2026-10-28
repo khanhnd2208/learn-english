@@ -1,0 +1,7 @@
+import { describe, expect, it } from 'vitest';
+import { parseAdvancedNotes } from '@/lib/english/advancedNotes';
+import { buildAiPackPrompt } from '@/lib/english/aiPackPrompt';
+describe('advanced notes', () => {
+ it('drops malformed stored rows', () => { expect(parseAdvancedNotes([{ kind: 'idiom', phrase: 'keep an eye on', meaningVi: 'để mắt tới', example: '' }, { kind: 'x', phrase: 'a' }, { kind: 'idiom', phrase: ' ' }, 'bad'])).toHaveLength(1); expect(parseAdvancedNotes(null)).toEqual([]); });
+ it('prompt asks for advanced phrases and keeps the word list', () => { const prompt = buildAiPackPrompt('belonging\ngive up', 'Social'); expect(prompt).toContain('advanced'); expect(prompt).toContain('give up'); expect(prompt).toContain('"Social"'); });
+});

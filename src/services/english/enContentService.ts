@@ -4,6 +4,7 @@ import { AppError } from '@/lib/appError';
 import { EN_PACK_TX_TIMEOUT_MS, EN_TX_MAX_WAIT_MS } from '@/lib/english/constants';
 import { assessEnglishPack, type AssessedPack } from '@/lib/english/contentValidation';
 import { lemmaKeyOf } from '@/lib/english/text';
+import { parseAdvancedNotes } from '@/lib/english/advancedNotes';
 import { toSenseBundle, type SenseBundle } from '@/lib/english/senseBundle';
 import { audioFileExists } from '@/services/english/enAudioService';
 
@@ -22,8 +23,8 @@ export async function saveEnglishPack(input: unknown): Promise<EnglishPackSaveRe
    const wordData = { lemma: word.lemma, partOfSpeech: word.partOfSpeech, ipa: word.ipa, audioPath: word.audioFile, forms: word.forms };
    const wordUpdate = { lemma: word.lemma, ...(word.partOfSpeech ? { partOfSpeech: word.partOfSpeech } : {}), ...(word.ipa ? { ipa: word.ipa } : {}), ...(word.audioFile ? { audioPath: word.audioFile } : {}), ...(word.forms.length ? { forms: word.forms } : {}) };
    const storedWord = await tx.enWord.upsert({ where: { lemmaKey }, create: { lemmaKey, ...wordData, status: 'draft' }, update: wordUpdate });
-   const senseData = { wordId: storedWord.id, meaningVi: word.meaningVi, partOfSpeech: word.partOfSpeech, synonyms: word.synonyms, noteVi: word.noteVi, sortOrder: index };
-   const senseUpdate = { wordId: storedWord.id, sortOrder: index, ...(word.meaningVi ? { meaningVi: word.meaningVi } : {}), ...(word.partOfSpeech ? { partOfSpeech: word.partOfSpeech } : {}), synonyms: word.synonyms, noteVi: word.noteVi };
+   const senseData = { wordId: storedWord.id, meaningVi: word.meaningVi, partOfSpeech: word.partOfSpeech, synonyms: word.synonyms, noteVi: word.noteVi, advanced: word.advanced, sortOrder: index };
+   const senseUpdate = { wordId: storedWord.id, sortOrder: index, ...(word.meaningVi ? { meaningVi: word.meaningVi } : {}), ...(word.partOfSpeech ? { partOfSpeech: word.partOfSpeech } : {}), synonyms: word.synonyms, noteVi: word.noteVi, advanced: word.advanced };
    const sense = word.senseKey ? await tx.enSense.upsert({ where: { senseKey: word.senseKey }, create: { ...senseData, senseKey: word.senseKey, status: 'draft' }, update: senseUpdate }) : await tx.enSense.create({ data: { ...senseData, status: 'draft' } });
    await tx.enSetItem.create({ data: { setId: set.id, senseId: sense.id, position: index } });
    const existing = await tx.enExample.findMany({ where: { senseId: sense.id } });
@@ -47,7 +48,7 @@ export async function publishEnglishSet(setId: string, exists: (file: string) =>
  for (const item of set.items) {
   const sense = item.sense; if (!sense) continue;
   const audio = sense.word.audioPath;
-  const assessment = assessEnglishPack({ title: set.title, description: set.description, packVersion: 3, audioFiles: audio && await exists(audio) ? [audio] : [], words: [{ lemma: sense.word.lemma, senseKey: sense.senseKey ?? '', partOfSpeech: sense.partOfSpeech, ipa: sense.word.ipa, audioFile: audio, forms: sense.word.forms, meaningVi: sense.meaningVi, synonyms: sense.synonyms, noteVi: sense.noteVi, examples: sense.examples.map((e) => ({ english: e.english, meaningVi: e.meaningVi, target: e.target, targetStart: e.targetStart, targetLength: e.targetLength, gradable: e.role === 'grade' })) }] });
+  const assessment = assessEnglishPack({ title: set.title, description: set.description, packVersion: 3, audioFiles: audio && await exists(audio) ? [audio] : [], words: [{ lemma: sense.word.lemma, senseKey: sense.senseKey ?? '', partOfSpeech: sense.partOfSpeech, ipa: sense.word.ipa, audioFile: audio, forms: sense.word.forms, meaningVi: sense.meaningVi, synonyms: sense.synonyms, noteVi: sense.noteVi, advanced: parseAdvancedNotes(sense.advanced), examples: sense.examples.map((e) => ({ english: e.english, meaningVi: e.meaningVi, target: e.target, targetStart: e.targetStart, targetLength: e.targetLength, gradable: e.role === 'grade' })) }] });
   issues.push(...assessment.issues.map((i) => ({ ...i, path: `${sense.word.lemma}: ${i.path}` })));
   if (!assessment.words[0]?.publishable) continue;
   await prisma.enSense.update({ where: { id: sense.id }, data: { status: 'published' } });

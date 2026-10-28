@@ -9,6 +9,7 @@ import SrsPanel from '@/components/english/SrsPanel';
 import Checkbox from '@/components/ui/Checkbox';
 import { englishPost } from '@/components/english/englishApi';
 import InfoHint from '@/components/ui/InfoHint';
+import AdvancedToggle from '@/components/english/advanced/AdvancedToggle';
 import { EN_GUIDED_CHUNK_SIZE } from '@/lib/english/constants';
 import { HINTS } from '@/lib/english/hintCopy';
 import type { TodayOverview } from '@/services/english/enDailyService';
@@ -89,7 +90,7 @@ export default function ReviewOverview({ overview, guided: initial, mode }: { ov
 	}
 
 	return <div className="mx-auto max-w-2xl px-4 py-5 sm:px-6 sm:py-8">
-		<header className="mb-4 sm:mb-5"><h1 className="text-3xl sm:text-4xl">Ôn tập</h1></header>
+		<header className="mb-4 flex items-center justify-between gap-3 sm:mb-5"><h1 className="text-3xl sm:text-4xl">Ôn tập</h1><AdvancedToggle /></header>
 		<div role="group" aria-label="Chế độ ôn tập" className="mb-5 flex rounded-control border border-border bg-surface p-1">
 			{([['bo', 'Ôn theo bộ'], ['luan-phien', 'Ôn luân phiên']] as const).map(([value, label]) => <button key={value} type="button" aria-pressed={mode === value} onClick={() => router.replace(`/review?mode=${value}`)} className={`min-h-11 flex-1 rounded-control px-2 text-sm font-bold ${mode === value ? 'bg-accent text-accent-foreground' : 'text-muted'}`}>{label}</button>)}
 		</div>
