@@ -118,7 +118,7 @@ async function loadState(userId: string, now: Date) {
 		ensureBoard(userId, 'daily', today, () => dailyQuests(ctx)),
 		ensureBoard(userId, 'weekly', weekStart, () => weeklyQuests(ctx)),
 		prisma.enReview.findMany({ where: { userId, at: { gte: weekFrom } }, select: { at: true, scheduled: true } }),
-		prisma.enGuidedReviewQuestion.findMany({ where: { kind: 'main', answeredAt: { gte: weekFrom }, session: { userId } }, select: { answeredAt: true, correct: true } }),
+		prisma.enGuidedReviewQuestion.findMany({ where: { kind: 'main', session: { userId, questions: { some: { kind: 'main', answeredAt: { gte: weekFrom } } } } }, select: { sessionId: true, chunkNumber: true, answer: true, answeredAt: true, correct: true } }),
 		prisma.enXpEvent.findMany({ where: { userId, day: { gte: weekStart } }, select: { day: true, xp: true, kind: true, sourceKey: true } }),
 		prisma.enTestAttempt.findMany({ where: { userId, mode: 'set', status: 'finished', finishedAt: { gte: weekFrom } }, select: { blueprint: true, finishedAt: true } }),
 		// Achievements need every finished quiz, but only its score.
@@ -130,7 +130,7 @@ async function loadState(userId: string, now: Date) {
 		prisma.enGuidedReviewSession.count({ where: { userId, endedAt: { not: null } } }),
 		prisma.enAchievement.findMany({ where: { userId }, select: { key: true, seenAt: true } }),
 	]);
-	const guidedRows = guidedReviews.flatMap((row) => row.answeredAt ? [{ answeredAt: row.answeredAt, correct: row.correct === true }] : []);
+	const guidedRows = guidedReviews.map((row) => ({ sessionId: row.sessionId, chunkNumber: row.chunkNumber, answered: row.answer !== null && row.answeredAt !== null, answeredAt: row.answeredAt, correct: row.correct === true }));
 	const quizzes: QuizRow[] = weekAttempts.flatMap((attempt) => {
 		const kind = (attempt.blueprint as { kind?: string } | null)?.kind;
 		return kind && isQuizKind(kind) && attempt.finishedAt ? [{ kind, passedCount: 0, wordCount: 0, finishedAt: attempt.finishedAt }] : [];

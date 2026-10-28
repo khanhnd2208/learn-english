@@ -14,7 +14,7 @@ export const HINTS = {
 		body: `Lần đầu gặp, cứ đoán thử. Sai là bình thường, bạn sẽ gặp lại sau ${EN_LEITNER_INTERVALS[1]} ngày.`,
 	},
 	guided: {
-		title: 'Học thêm',
+		title: 'Ôn theo bộ',
 		body: 'Xem thẻ vài từ rồi luyện ngay. Không ảnh hưởng lịch ôn, chọn bộ nào cũng được, bỏ chọn không xoá tiến độ.',
 	},
 	stages: {
@@ -23,10 +23,10 @@ export const HINTS = {
 	},
 	xp: {
 		title: 'XP tính thế nào?',
-		body: `Ôn hôm nay đúng +${XP.srs} · Học thêm đúng +${XP.review} · Từ lên Nhớ lâu +${XP.longTerm}. Câu sai không mất điểm.`,
+		body: `Ôn luân phiên đúng +${XP.srs} · Ôn theo bộ đúng +${XP.review} · Từ lên Nhớ lâu +${XP.longTerm}. Câu sai không mất điểm.`,
 	},
 	practice: {
-		title: 'Luyện tập khác kiểm tra?',
-		body: 'Luyện tập không đổi lịch ôn và không tính nhiệm vụ. Bài kiểm tra giấu đáp án đến khi nộp và được tính vào nhiệm vụ ngày.',
+		title: 'Luyện tập',
+		body: 'Luyện tập để quen từ: không đổi cấp từ, sai thì từ quay lại sau vài câu.',
 	},
 } as const;

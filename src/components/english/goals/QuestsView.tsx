@@ -27,9 +27,8 @@ function goalMessage(xp: number, goal: number): string {
 	return left <= 100 ? `Còn ${left} XP, chỉ vài câu nữa thôi.` : `Còn ${left} XP, khoảng ${Math.max(1, Math.ceil(left / (XP.review * 6)))} phút ôn.`;
 }
 
-export default function QuestsView({ board, quizHref, dayResetsIn, weekResetsIn, initialTab }: {
+export default function QuestsView({ board, dayResetsIn, weekResetsIn, initialTab }: {
 	board: GoalBoard;
-	quizHref: string;
 	dayResetsIn: string;
 	weekResetsIn: string;
 	initialTab: Tab;
@@ -66,7 +65,7 @@ export default function QuestsView({ board, quizHref, dayResetsIn, weekResetsIn,
 				</section>
 				<section aria-labelledby="daily-heading">
 					<div className="flex items-baseline justify-between gap-2"><h2 id="daily-heading" className="text-2xl">Nhiệm vụ hôm nay</h2><p className="text-xs text-muted">Làm mới sau {dayResetsIn}</p></div>
-					<ul className="mt-3 space-y-2">{board.today.quests.map((quest) => <QuestItem key={quest.key} quest={quest} quizHref={quizHref} compact />)}</ul>
+					<ul className="mt-3 space-y-2">{board.today.quests.map((quest) => <QuestItem key={quest.key} quest={quest} compact />)}</ul>
 				</section>
 				<section className="mode-card" aria-labelledby="week-strip-heading">
 					<h2 id="week-strip-heading" className="text-xl">Tuần của bạn</h2>
@@ -76,7 +75,7 @@ export default function QuestsView({ board, quizHref, dayResetsIn, weekResetsIn,
 
 			<TabsContent value="week" className="space-y-5 pt-5">
 				<div className="flex items-baseline justify-between gap-2"><h2 className="text-2xl">Nhiệm vụ tuần</h2><p className="text-xs text-muted">Còn {weekResetsIn}</p></div>
-				<ul className="space-y-2">{board.week.quests.map((quest) => <QuestItem key={quest.key} quest={quest} quizHref={quizHref} compact />)}</ul>
+				<ul className="space-y-2">{board.week.quests.map((quest) => <QuestItem key={quest.key} quest={quest} compact />)}</ul>
 				<section className={`flex items-center gap-3 rounded-panel border-2 p-3 ${board.week.chestOpened ? 'game-card-amber' : 'border-dashed border-border bg-surface'}`} aria-label="Rương tuần">
 					<span className={board.week.chestOpened ? 'animate-badge-pop' : 'opacity-60 grayscale'}><AdventureIcon name="chest" size={28} framed /></span>
 					<div className="min-w-0 flex-1">

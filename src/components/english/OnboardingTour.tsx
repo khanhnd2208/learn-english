@@ -6,8 +6,8 @@ import Button from '@/components/ui/Button';
 
 const STEPS = [
  { title: 'Chào mừng đến WordQuest', text: 'Chọn một bộ từ trong Thư viện để bắt đầu hành trình của bạn.' },
- { title: 'Ôn hôm nay', text: 'Mỗi ngày, mở trang Hôm nay để gặp lại các từ vào lúc phù hợp.' },
- { title: 'Học thêm và xem tiến bộ', text: 'Luyện thêm khi bạn muốn và theo dõi những gì mình đã ghi nhớ.' },
+ { title: 'Ôn luân phiên', text: 'Mỗi ngày, mở trang Hôm nay để gặp lại các từ vào lúc phù hợp.' },
+ { title: 'Ôn theo bộ và xem tiến bộ', text: 'Luyện thêm khi bạn muốn và theo dõi những gì mình đã ghi nhớ.' },
 ];
 export default function OnboardingTour({ eligible }: { eligible: boolean }) {
  const [step, setStep] = useState(-1);

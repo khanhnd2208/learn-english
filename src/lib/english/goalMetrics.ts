@@ -2,7 +2,7 @@ import { vnDayKey } from '@/lib/english/gapRule';
 import { emptyMetrics, type QuestMetrics } from '@/lib/english/quests';
 
 export type ReviewRow = { at: Date; scheduled: boolean };
-export type GuidedRow = { answeredAt: Date; correct: boolean };
+export type GuidedRow = { sessionId: string; chunkNumber: number; answered: boolean; answeredAt: Date | null; correct: boolean };
 export type XpRow = { day: string; xp: number; kind: string; sourceKey: string };
 export type QuizRow = { kind: string; passedCount: number; wordCount: number; finishedAt: Date };
 
@@ -21,11 +21,16 @@ export function periodMetrics(input: {
 }): QuestMetrics {
 	const metrics = emptyMetrics();
 	const reviews = input.reviews.filter((review) => input.days.has(vnDayKey(review.at)));
-	const guided = input.guided.filter((row) => input.days.has(vnDayKey(row.answeredAt)));
+	const guided = input.guided.filter((row) => row.answeredAt !== null && input.days.has(vnDayKey(row.answeredAt)));
 	metrics.srsWords = reviews.filter((review) => review.scheduled).length;
 	metrics.reviewCorrect = guided.filter((row) => row.correct).length;
-	metrics.daysStudied = new Set([...reviews.map((review) => vnDayKey(review.at)), ...guided.map((row) => vnDayKey(row.answeredAt))]).size;
+	metrics.daysStudied = new Set([...reviews.map((review) => vnDayKey(review.at)), ...guided.map((row) => vnDayKey(row.answeredAt!))]).size;
 	metrics.xp = input.xp.filter((row) => input.days.has(row.day)).reduce((sum, row) => sum + row.xp, 0);
-	metrics.quizzesDone = input.quizzes.filter((quiz) => input.days.has(vnDayKey(quiz.finishedAt))).length;
+	const chunks = new Map<string, GuidedRow[]>();
+	for (const row of input.guided) {
+		const key = JSON.stringify([row.sessionId, row.chunkNumber]);
+		chunks.set(key, [...(chunks.get(key) ?? []), row]);
+	}
+	metrics.chunksDone = [...chunks.values()].filter((rows) => rows.every((row) => row.answered && row.answeredAt) && input.days.has(vnDayKey(new Date(Math.max(...rows.map((row) => row.answeredAt!.getTime())))))).length;
 	return metrics;
 }
