@@ -147,7 +147,7 @@ export default function GuidedReviewSession({ initial, onClose }: { initial: Gui
 	const stepDone = session.phase === 'summary' ? stepTotal : session.phase === 'study' ? viewedWord : session.questionPosition;
 	const stepLabel = session.phase === 'study' ? `Xem thẻ ${viewedWord + 1}/${session.words.length}` : session.phase === 'summary' ? 'Kết quả chặng' : `${session.phase === 'retry' ? 'Luyện lại từ sai' : 'Luyện'} · câu ${Math.min(session.questionPosition + 1, session.questions.length)}/${session.questions.length}`;
 
-	return <div role="dialog" aria-modal="true" aria-label="Học & luyện" className="fixed inset-0 z-overlay overflow-y-auto bg-background">
+	return <div role="dialog" aria-modal="true" aria-label="Học thêm" className="fixed inset-0 z-overlay overflow-y-auto bg-background">
 		<div className="mx-auto flex min-h-full max-w-3xl flex-col px-4 py-4 sm:px-6 sm:py-7">
 			<header className="space-y-2 border-b border-border pb-3">
 				<div className="flex items-center justify-between gap-3">
@@ -187,7 +187,7 @@ export default function GuidedReviewSession({ initial, onClose }: { initial: Gui
 					</div>
 				</section>}
 			</main>
-			<ConfirmExitDialog open={confirmExit} title="Tạm dừng Học & luyện?" description="Câu đã trả lời được giữ. Bạn có thể bấm “Tiếp tục” ở trang Ôn tập để học tiếp đúng chỗ này." leaveLabel="Tạm dừng" onStay={() => setConfirmExit(false)} onLeave={() => onClose(false)} />
+			<ConfirmExitDialog open={confirmExit} title="Tạm dừng Học thêm?" description="Câu đã trả lời được giữ. Bạn có thể bấm “Tiếp tục” ở trang Học thêm để học tiếp đúng chỗ này." leaveLabel="Tạm dừng" onStay={() => setConfirmExit(false)} onLeave={() => onClose(false)} />
 			{error && <div role="alert" className="sticky bottom-3 rounded-panel border border-error/40 bg-surface p-3 text-sm text-error">{error} <button type="button" onClick={() => setError('')} className="ml-2 font-bold underline">Đóng</button></div>}
 		</div>
 	</div>;

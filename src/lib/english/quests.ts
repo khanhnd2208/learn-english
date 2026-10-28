@@ -12,12 +12,12 @@ export type QuestAction = 'srs' | 'review' | 'quiz';
 export type QuestIcon = 'target' | 'star' | 'sprout' | 'flag' | 'shield' | 'spark' | 'sword' | 'trophy' | 'mountain' | 'chest';
 
 export const QUEST_META: Record<QuestKey, { title: (target: number) => string; hint: string; icon: QuestIcon; action: QuestAction }> = {
-	srs_words: { title: (n) => n > 0 ? `Ôn theo lịch ${n} từ` : 'Hôm nay không có từ đến hạn', hint: 'Mỗi từ đến hạn trả lời đúng +20 XP.', icon: 'sprout', action: 'srs' },
-	review_correct: { title: (n) => n > 0 ? `Học & luyện đúng ${n} câu` : 'Chưa có bộ từ để học & luyện', hint: 'Câu chính đúng trong Học & luyện +10 XP, tối đa 300 XP mỗi ngày.', icon: 'star', action: 'review' },
+	srs_words: { title: (n) => n > 0 ? `Ôn ${n} từ đến hạn` : 'Hôm nay không có từ đến hạn', hint: 'Mỗi từ đến hạn trả lời đúng +20 XP.', icon: 'sprout', action: 'srs' },
+	review_correct: { title: (n) => n > 0 ? `Học thêm đúng ${n} câu` : 'Chưa có bộ từ để học thêm', hint: 'Câu chính đúng trong Học thêm +10 XP, tối đa 300 XP mỗi ngày.', icon: 'star', action: 'review' },
 	quiz_done: { title: (n) => n > 0 ? 'Làm 1 bài kiểm tra' : 'Chưa có bộ từ để làm bài kiểm tra', hint: 'Trắc nghiệm, điền từ hay nghe đều được.', icon: 'sword', action: 'quiz' },
 	week_days: { title: (n) => `Học đủ ${n} ngày`, hint: 'Không cần ngày nào cũng học: nghỉ có kế hoạch vẫn ổn.', icon: 'mountain', action: 'srs' },
-	week_srs: { title: (n) => `Ôn theo lịch ${n} từ trong tuần`, hint: 'Cộng dồn từ thứ Hai.', icon: 'chest', action: 'srs' },
-	week_review: { title: (n) => `Học & luyện đúng ${n} câu trong tuần`, hint: 'Cộng dồn từ thứ Hai.', icon: 'trophy', action: 'review' },
+	week_srs: { title: (n) => `Ôn ${n} từ đến hạn trong tuần`, hint: 'Cộng dồn từ thứ Hai.', icon: 'chest', action: 'srs' },
+	week_review: { title: (n) => `Học thêm đúng ${n} câu trong tuần`, hint: 'Cộng dồn từ thứ Hai.', icon: 'trophy', action: 'review' },
 };
 
 /** Targets per daily-goal tier: light, steady, keen, warrior. */

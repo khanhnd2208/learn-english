@@ -8,7 +8,7 @@ export interface NavLink {
 /** Main learner navigation. */
 export const MAIN_NAV: NavLink[] = [
 	{ href: '/', label: 'Tổng quan', icon: 'target', shortLabel: 'Tổng quan' },
-	{ href: '/review', label: 'Ôn tập', icon: 'explore', shortLabel: 'Ôn tập' },
+	{ href: '/review', label: 'Học thêm', icon: 'explore', shortLabel: 'Học thêm' },
 	{ href: '/quests', label: 'Nhiệm vụ', icon: 'flag', shortLabel: 'Nhiệm vụ' },
 	{ href: '/store', label: 'Cửa hàng', icon: 'map', shortLabel: 'Cửa hàng' },
 ];
