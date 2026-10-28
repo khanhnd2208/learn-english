@@ -24,9 +24,9 @@ export const viewport: Viewport = {
 
 export const metadata: Metadata = {
 	metadataBase: new URL(process.env.NEXTAUTH_URL ?? 'http://localhost:3002'),
-	title: 'Học Tiếng Anh — Vocabulary Mastery',
+	title: 'WordQuest — Học tiếng Anh',
 	description: 'Học từ vựng Tiếng Anh theo ngữ cảnh & phản xạ',
-	applicationName: 'Học Tiếng Anh',
+	applicationName: 'WordQuest',
 	appleWebApp: {
 		capable: true,
 		title: 'Tiếng Anh',

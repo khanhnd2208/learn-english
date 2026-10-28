@@ -22,5 +22,5 @@ export default async function AppLayout({ children }: { children: React.ReactNod
 		showGoalPicker: !board.goalChosen && (overview.enrolledSets > 0 || overview.learnedCount > 0),
 		unseen: board.unseenAchievements,
 	};
-	return <EnglishShell goals={goals}>{children}</EnglishShell>;
+	return <EnglishShell goals={goals} newLearner={overview.enrolledSets === 0 && overview.learnedCount === 0}>{children}</EnglishShell>;
 }

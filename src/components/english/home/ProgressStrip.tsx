@@ -27,7 +27,7 @@ export default function ProgressStrip({ streak, longTerm, level, xp, goal, stage
 	return <section aria-labelledby="progress-heading" className="mode-card space-y-4">
 		<div className="flex items-center justify-between gap-2">
 			<h2 id="progress-heading" className="text-lg">Tiến bộ</h2>
-			<Link href="/quests" className="inline-flex min-h-11 items-center text-sm font-bold text-accent">Chi tiết →</Link>
+			<Link href="/progress" className="inline-flex min-h-11 items-center text-sm font-bold text-accent">Chi tiết →</Link>
 		</div>
 		<dl className="grid grid-cols-3 gap-3">
 			<Stat value={streak} label="Ngày liên tiếp" />

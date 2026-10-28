@@ -1,5 +1,4 @@
 import Link from 'next/link';
-import DueForecast from '@/components/english/DueForecast';
 import StageBar from '@/components/english/StageBar';
 import QuestItem from '@/components/english/goals/QuestItem';
 import ProgressStrip from '@/components/english/home/ProgressStrip';
@@ -9,7 +8,7 @@ import type { EnglishSetSummary } from '@/services/english/enCatalogService';
 import type { TodayOverview } from '@/services/english/enDailyService';
 import type { GoalBoard } from '@/services/english/enGoalService';
 
-const SETS_SHOWN = 5;
+const SETS_SHOWN = 3;
 
 function SetRow({ set }: { set: EnglishSetSummary }) {
 	return <li className="border-b border-border last:border-b-0">
@@ -51,18 +50,11 @@ export default function HomeDashboard({ overview, sets, board, resetsIn, greetin
 			</section>}
 
 			{hasSets && <section id="your-sets" aria-labelledby="your-sets-heading" className="min-w-0 overflow-hidden rounded-panel border border-border bg-surface lg:col-span-2 lg:row-span-2 lg:row-start-2">
-				<div className="flex items-center justify-between gap-3 border-b border-border px-4 py-2"><h2 id="your-sets-heading" className="text-lg">Đang học <span className="text-sm font-normal text-muted">({enrolled.length})</span></h2><Link href="/store" className="inline-flex min-h-11 shrink-0 items-center text-sm font-bold text-accent">+ Thêm bộ</Link></div>
+				<div className="flex items-center justify-between gap-3 border-b border-border px-4 py-2"><h2 id="your-sets-heading" className="text-lg">Đang học <span className="text-sm font-normal text-muted">({enrolled.length})</span></h2><Link href="/sets" className="inline-flex min-h-11 shrink-0 items-center text-sm font-bold text-accent">Xem tất cả →</Link></div>
 				<ul>{enrolled.slice(0, SETS_SHOWN).map((set) => <SetRow key={set.id} set={set} />)}</ul>
-				{enrolled.length > SETS_SHOWN && <details className="border-t border-border">
-					<summary className="flex min-h-11 cursor-pointer items-center px-4 text-sm font-bold text-accent">Xem thêm {enrolled.length - SETS_SHOWN} bộ</summary>
-					<ul className="border-t border-border">{enrolled.slice(SETS_SHOWN).map((set) => <SetRow key={set.id} set={set} />)}</ul>
-				</details>}
+
 			</section>}
 
-			{hasSets && <section aria-labelledby="forecast-heading" className="mode-card min-w-0 lg:col-start-3 lg:row-start-3">
-				<h2 id="forecast-heading" className="text-lg">7 ngày tới</h2>
-				<div className="mt-3"><DueForecast days={overview.dueNext7Days} height="h-20" /></div>
-			</section>}
 		</div>
 	</div>;
 }

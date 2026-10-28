@@ -72,8 +72,10 @@ describe('english grading and mastery', () => {
 
 describe('english area boundaries', () => {
 	it('uses root-level routes in the standalone app', () => {
-		expect(MAIN_NAV.map((item) => item.href)).toEqual(['/', '/review', '/quests', '/store']);
-		expect(isNavActive('/sets/example/practice', '/')).toBe(true);
+		expect(MAIN_NAV.map((item) => item.href)).toEqual(['/', '/sets', '/progress', '/store']);
+		expect(isNavActive('/sets/example/practice', '/sets')).toBe(true);
+		expect(isNavActive('/sets/example/practice', '/')).toBe(false);
+		expect(isNavActive('/quests', '/progress')).toBe(true);
 		expect(isNavActive('/store', '/')).toBe(false);
 	});
 

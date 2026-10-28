@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import ConfirmExitDialog from '@/components/english/ConfirmExitDialog';
 import SessionHeader from '@/components/english/session/SessionHeader';
+import SessionSummary from '@/components/english/session/SessionSummary';
 import AnswerFeedback from '@/components/english/session/AnswerFeedback';
 import EnglishAudioButton from '@/components/english/EnglishAudioButton';
 import EnglishWordCard from '@/components/english/EnglishWordCard';
@@ -173,17 +174,15 @@ export default function GuidedReviewSession({ initial, onClose }: { initial: Gui
 					</AnswerFeedback> : <button type="button" disabled={busy} onClick={() => void answer('')} className="min-h-11 w-full rounded-control border border-border px-4 font-bold">Chưa nhớ</button>}
 				</div>}
 
-				{session.phase === 'summary' && <section className="mode-card mx-auto w-full max-w-2xl p-6 text-center sm:p-8">
-					<p className="text-sm font-bold uppercase tracking-wide text-accent">Hoàn thành chặng {session.chunkNumber}</p>
-					<h2 className="mt-2 text-4xl">Đúng lần đầu {correctCount}/{session.mainResults.length}</h2>
-					<p className="mt-2 text-sm text-muted">Đã đi {covered}/{session.poolSize} từ trong các bộ đã chọn{sessionXp > 0 ? ` · +${sessionXp} XP phiên này` : ''}</p>
+				{session.phase === 'summary' && <SessionSummary title={`Hoàn thành chặng ${session.chunkNumber}`} correct={correctCount} total={session.mainResults.length} xp={sessionXp}>
+					<p className="text-center text-sm text-muted">Đã đi {covered}/{session.poolSize} từ trong các bộ đã chọn.</p>
 					{wrongIds.size > 0 ? <div className="mt-5 rounded-panel bg-surface-secondary p-4 text-left"><p className="font-bold">Từ cần luyện thêm</p><p className="mt-1 text-sm text-muted">{session.words.filter((entry) => wrongIds.has(entry.sense.id)).map((entry) => entry.word.lemma).join(' · ')}</p></div> : <p className="mt-4 font-bold text-success">Bạn nhớ đúng tất cả từ trong chặng này.</p>}
 					<div className="mt-6 grid gap-3 sm:grid-cols-2">
 						{wrongIds.size > 0 && !session.retryCompleted && <button type="button" disabled={busy} onClick={() => void action('retry')} className="min-h-12 rounded-control border border-accent px-5 font-bold text-accent">Luyện lại từ sai</button>}
 						{session.remainingCount > 0 ? <button type="button" disabled={busy} onClick={() => void action('next')} className="min-h-12 rounded-control bg-accent px-5 font-bold text-accent-foreground">Học {Math.min(EN_GUIDED_CHUNK_SIZE, session.remainingCount)} từ tiếp →</button> : <button type="button" disabled={busy} onClick={() => void action('next', true)} className="min-h-12 rounded-control border border-border px-5 font-bold">Ôn lại một vòng</button>}
 						<button type="button" disabled={busy} onClick={() => void finish()} className="min-h-12 rounded-control border border-border px-5 font-bold sm:col-span-2">Kết thúc phiên</button>
 					</div>
-				</section>}
+				</SessionSummary>}
 			</main>
 			<ConfirmExitDialog open={confirmExit} title="Tạm dừng Học thêm?" description="Câu đã trả lời được giữ. Bạn có thể bấm “Tiếp tục” ở trang Học thêm để học tiếp đúng chỗ này." leaveLabel="Tạm dừng" onStay={() => setConfirmExit(false)} onLeave={() => onClose(false)} />
 			{error && <div role="alert" className="sticky bottom-3 rounded-panel border border-error/40 bg-surface p-3 text-sm text-error">{error} <button type="button" onClick={() => setError('')} className="ml-2 font-bold underline">Đóng</button></div>}

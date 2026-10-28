@@ -12,6 +12,8 @@ export type SetDailyTasks = Partial<Record<QuizKind, { passedCount: number; word
 
 export interface EnglishSetSummary {
 	dailyTasks: SetDailyTasks;
+	levels: string[];
+	topics: string[];
 	id: string;
 	title: string;
 	description: string;
@@ -63,7 +65,7 @@ export async function listEnglishSets(userId: string, includeDrafts: boolean, op
 		where: { ...(includeDrafts ? {} : { status: 'published' }), ...(opts.storeOnly ? { listed: true } : {}) },
 		orderBy: [{ sortOrder: 'asc' }, { title: 'asc' }],
 		include: {
-			items: { select: { senseId: true, sense: { select: { status: true } } } },
+			items: { select: { senseId: true, sense: { select: { status: true, cefr: true, topics: true } } } },
 			enrollments: { where: { userId }, select: { id: true } },
 		_count: { select: { enrollments: true } },
 		},
@@ -84,6 +86,8 @@ export async function listEnglishSets(userId: string, includeDrafts: boolean, op
 		const published = set.items.flatMap(visible);
 		return {
 			dailyTasks: tasksForSet(daily, set.id),
+			levels: [...new Set(set.items.filter((item) => item.sense && (includeDrafts || item.sense.status === 'published')).flatMap((item) => item.sense?.cefr ? [item.sense.cefr] : []))].sort(),
+			topics: [...new Set(set.items.filter((item) => item.sense && (includeDrafts || item.sense.status === 'published')).flatMap((item) => item.sense?.topics ?? []))].sort(),
 			id: set.id,
 			title: set.title,
 			description: set.description,

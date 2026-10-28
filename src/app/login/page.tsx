@@ -16,28 +16,25 @@ export default async function LoginPage() {
 					<div className="flex items-center gap-3">
 						<Image
 							src="/app-icon.png"
-							alt="Học Tiếng Anh"
+							alt="WordQuest"
 							width={48}
 							height={48}
 							className="rounded-xl border border-border"
 						/>
 						<div>
-							<p className="label-caps">Học Tiếng Anh</p>
+							<p className="label-caps">Học tiếng Anh mỗi ngày</p>
 							<h1 className="text-2xl font-black text-foreground">
-								Vocabulary Mastery
+								WordQuest
 							</h1>
 						</div>
 					</div>
 					<p className="mt-4 text-sm text-foreground-secondary">
-						Đăng nhập để luyện tập từ vựng tiếng Anh theo ngữ cảnh và phản xạ.
+						Ghi nhớ từ vựng theo nhịp của bạn, mỗi ngày một chút.
 					</p>
-					<div className="mt-8">
+					<ul className="mt-5 grid gap-2 text-sm font-bold"><li>◆ Ôn đúng lúc</li><li>◆ Luyện theo ngữ cảnh</li><li>◆ Theo dõi tiến bộ</li></ul><div className="mt-8">
 						<InAppBrowserNotice />
 						<SignInWithGoogleButton callbackUrl="/" />
 					</div>
-					<p className="mt-6 text-center text-xs text-muted">
-						Hệ thống học độc lập
-					</p>
 				</CardContent>
 			</Card>
 		</div>

@@ -19,7 +19,7 @@ export default function QuestItem({ quest, quizHref, compact = false, dense = fa
 	return <li className={`quest-card flex items-center gap-3 ${compact ? 'p-3' : 'p-4'}`} data-done={quest.done}>
 		<span className="relative shrink-0">
 			<AdventureIcon name={quest.icon} size={compact ? 20 : 24} framed />
-			{quest.done && <span aria-hidden="true" className="absolute -right-1.5 -bottom-1.5 flex size-5 items-center justify-center rounded-full border-2 border-surface bg-success text-[11px] font-black text-white">✓</span>}
+			{quest.done && <span aria-hidden="true" className="absolute -right-1.5 -bottom-1.5 flex size-5 items-center justify-center rounded-full border-2 border-surface bg-success text-xs font-black text-white">✓</span>}
 		</span>
 		<div className="min-w-0 flex-1">
 			<div className="flex items-start justify-between gap-2">
