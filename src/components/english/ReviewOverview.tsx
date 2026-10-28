@@ -10,6 +10,8 @@ import { englishPost } from '@/components/english/englishApi';
 import { EN_GUIDED_CHUNK_SIZE } from '@/lib/english/constants';
 import { dueRoundLabel, isReviewDone, reviewMinutes } from '@/lib/english/reviewSummary';
 import type { TodayOverview } from '@/services/english/enDailyService';
+import InfoHint from '@/components/ui/InfoHint';
+import { HINTS } from '@/lib/english/hintCopy';
 
 export type GuidedReviewOverview = {
 	sets: Array<{ id: string; title: string; words: number }>;
@@ -91,12 +93,12 @@ export default function ReviewOverview({ overview, guided: initial }: { overview
 	const srsCard = <section key="srs" aria-labelledby="srs-review-heading" className={`mode-card relative flex flex-col overflow-hidden p-4 sm:p-6 ${srsFirst ? 'border-2 border-accent' : 'border border-border'}`}>
 		<div className="relative flex items-start gap-3">
 			<span aria-hidden="true" className="flex size-11 shrink-0 items-center justify-center rounded-card border-2 border-accent bg-accent-subtle text-2xl shadow-sm">🧠</span>
-			<div className="min-w-0 flex-1"><div className="flex flex-wrap items-center gap-2"><h2 id="srs-review-heading" className="text-2xl">Ôn theo lịch</h2><StepBadge step={1} recommended={srsFirst} /></div><p className="mt-0.5 text-sm text-muted">SRS: hỏi lại từ đúng lúc sắp quên. Đúng → hẹn xa hơn, sai → hẹn sớm lại.</p></div>
+			<div className="min-w-0 flex-1"><div className="flex flex-wrap items-center gap-2"><h2 id="srs-review-heading" className="text-2xl">Ôn theo lịch</h2><StepBadge step={1} recommended={srsFirst} /></div><p className="mt-0.5 flex items-center gap-1.5 text-sm text-muted">Hỏi lại từ đúng lúc sắp quên <InfoHint title={HINTS.srs.title}>{HINTS.srs.body}</InfoHint></p></div>
 		</div>
 		<div className="relative my-4 flex flex-1 items-center">
 			{srsDone ? <p className="text-lg font-bold text-success">✓ Xong hôm nay · mai có <span className="tabular-nums">{overview.tomorrowCount}</span> từ</p> : srsTotal === 0 ? <p className="text-sm text-muted">Chưa có từ để ôn. Tải một bộ từ ở Cửa hàng trước.</p> : <div>
-				<p className="text-xl font-bold">{dueRoundLabel(overview)}{overview.newCount > 0 && <> · <span className="tabular-nums">{overview.newCount}</span> mới</>}</p>
-				{overview.newCount > 0 && <p className="mt-1 text-sm text-foreground-secondary">Từ mới được hỏi lần đầu: sai là bình thường.</p>}
+				<p className="flex flex-wrap items-center gap-x-1.5 text-xl font-bold">{dueRoundLabel(overview)}{overview.newCount > 0 && <> · <span className="tabular-nums">{overview.newCount}</span> mới <InfoHint title={HINTS.newWords.title}>{HINTS.newWords.body}</InfoHint></>}</p>
+				
 				{minutes > 0 && <p className="mt-2 inline-flex items-center gap-1.5 rounded-full bg-accent-subtle px-3 py-1 text-sm font-bold text-accent"><span aria-hidden="true">⏱</span>~{minutes} phút</p>}
 			</div>}
 		</div>
@@ -106,13 +108,13 @@ export default function ReviewOverview({ overview, guided: initial }: { overview
 	const guidedCard = <section key="guided" aria-labelledby="guided-review-heading" className={`mode-card relative flex flex-col overflow-hidden p-4 sm:p-6 ${srsFirst ? 'border border-border' : 'border-2 border-accent'}`}>
 		<div className="relative flex items-start gap-3">
 			<span aria-hidden="true" className="flex size-11 shrink-0 items-center justify-center rounded-card border-2 border-accent bg-accent-subtle text-2xl shadow-sm">📖</span>
-			<div className="min-w-0 flex-1"><div className="flex flex-wrap items-center gap-2"><h2 id="guided-review-heading" className="text-2xl">Học & luyện</h2><StepBadge step={2} recommended={!srsFirst && !noSets} /></div><p className="mt-0.5 text-sm text-muted">Xem thẻ {EN_GUIDED_CHUNK_SIZE} từ rồi luyện ngay. Không đổi lịch ôn.</p></div>
+			<div className="min-w-0 flex-1"><div className="flex flex-wrap items-center gap-2"><h2 id="guided-review-heading" className="text-2xl">Học & luyện</h2><StepBadge step={2} recommended={!srsFirst && !noSets} /></div><p className="mt-0.5 flex items-center gap-1.5 text-sm text-muted">Xem thẻ {EN_GUIDED_CHUNK_SIZE} từ rồi luyện ngay <InfoHint title={HINTS.guided.title}>{HINTS.guided.body}</InfoHint></p></div>
 		</div>
 
 		{guided.activeSessionId && !noSets && <div className="relative mt-3 flex flex-wrap items-center justify-between gap-2 rounded-card border border-accent/40 bg-accent-subtle px-3 py-2 text-sm"><span className="font-bold">Bạn có phiên đang dở</span><button type="button" disabled={busy} onClick={() => void resume()} className="min-h-10 rounded-control bg-accent px-4 font-bold text-accent-foreground disabled:opacity-50">Tiếp tục →</button></div>}
 
 		{!noSets ? <div className="relative mt-3 flex flex-col sm:mt-4">
-			<p className="mb-2 text-xs font-bold text-muted">Chọn bộ để luyện. Bỏ chọn không gỡ bộ và không xoá tiến độ.</p>
+			<p className="mb-2 text-xs font-bold text-muted">Chọn bộ để luyện</p>
 			{guided.sets.length > 8 && <input value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Tìm bộ từ…" aria-label="Tìm bộ từ" className="mb-2 min-h-10 w-full rounded-control border border-border bg-background px-3 text-sm" />}
 			<div className="max-h-32 overflow-y-auto pr-1" aria-label="Chọn bộ từ để ôn">
 				<div className="flex flex-wrap gap-2">
@@ -134,7 +136,7 @@ export default function ReviewOverview({ overview, guided: initial }: { overview
 	</section>;
 
 	return <div className="mx-auto max-w-5xl px-4 py-4 sm:px-6 sm:py-8">
-		<header className="mb-4 sm:mb-5"><h1 className="text-3xl sm:text-4xl">{heading}</h1><p className="mt-1 text-sm text-muted">Ôn theo lịch giữ từ cũ khỏi quên. Học & luyện để xem thẻ và luyện thêm bất cứ lúc nào.</p></header>
+		<header className="mb-4 sm:mb-5"><h1 className="text-3xl sm:text-4xl">{heading}</h1></header>
 		<div className="grid gap-4 sm:grid-cols-2 sm:gap-5">{srsCard}{guidedCard}</div>
 
 		{srsOpen && <StudySession onClose={(studied) => { setSrsOpen(false); if (studied) router.refresh(); }} />}

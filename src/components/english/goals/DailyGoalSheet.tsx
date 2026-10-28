@@ -7,6 +7,8 @@ import { useToast } from '@/components/ui/Toast';
 import { englishPost } from '@/components/english/englishApi';
 import { tierQuestTargets } from '@/lib/english/quests';
 import { DAILY_GOAL_TIERS } from '@/lib/english/xp';
+import InfoHint from '@/components/ui/InfoHint';
+import { HINTS } from '@/lib/english/hintCopy';
 
 function tierHint(index: number): string {
 	const { srs, review } = tierQuestTargets(index);
@@ -45,7 +47,7 @@ export default function DailyGoalSheet({ open, onClose, current, todayGoal, intr
 	const dismiss = () => { if (intro) void save(current); else onClose(); };
 
 	return <Sheet open={open} onClose={dismiss} title={intro ? 'Chọn mục tiêu mỗi ngày' : 'Mục tiêu ngày'}>
-		<p className="text-sm text-muted">{intro ? 'Học đều mỗi ngày quan trọng hơn học nhiều một lúc. Bạn có thể đổi bất cứ lúc nào trong Nhiệm vụ.' : 'Mục tiêu tính bằng XP. Ôn theo lịch đúng +20, Học & luyện đúng +10, từ lên Nhớ lâu +100, câu sai 0 XP.'}</p>
+		<p className="flex items-center gap-1.5 text-sm text-muted">{intro ? 'Học đều mỗi ngày quan trọng hơn học nhiều. Đổi được bất cứ lúc nào.' : 'Mục tiêu tính bằng XP.'}<InfoHint title={HINTS.xp.title}>{HINTS.xp.body}</InfoHint></p>
 		<div role="radiogroup" aria-label="Mức mục tiêu" className="mt-4 space-y-2">
 			{DAILY_GOAL_TIERS.map((tier, index) => {
 				const active = selected === tier.xp;
