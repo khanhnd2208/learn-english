@@ -7,8 +7,6 @@ import { countStages, isLongTerm } from '@/lib/english/schedule';
 import type { SenseBundle } from '@/lib/english/senseBundle';
 
 export interface EnglishSetSummary {
-	levels: string[];
-	topics: string[];
 	id: string;
 	title: string;
 	description: string;
@@ -53,7 +51,7 @@ export async function listEnglishSets(userId: string, includeDrafts: boolean, op
 		where: { ...(includeDrafts ? {} : { status: 'published' }), ...(opts.storeOnly ? { listed: true } : {}) },
 		orderBy: [{ sortOrder: 'asc' }, { title: 'asc' }],
 		include: {
-			items: { select: { senseId: true, sense: { select: { status: true, cefr: true, topics: true } } } },
+			items: { select: { senseId: true, sense: { select: { status: true } } } },
 			enrollments: { where: { userId }, select: { id: true } },
 		_count: { select: { enrollments: true } },
 		},
@@ -72,8 +70,6 @@ export async function listEnglishSets(userId: string, includeDrafts: boolean, op
 	return sets.map((set) => {
 		const published = set.items.flatMap(visible);
 		return {
-			levels: [...new Set(set.items.filter((item) => item.sense && (includeDrafts || item.sense.status === 'published')).flatMap((item) => item.sense?.cefr ? [item.sense.cefr] : []))].sort(),
-			topics: [...new Set(set.items.filter((item) => item.sense && (includeDrafts || item.sense.status === 'published')).flatMap((item) => item.sense?.topics ?? []))].sort(),
 			id: set.id,
 			title: set.title,
 			description: set.description,

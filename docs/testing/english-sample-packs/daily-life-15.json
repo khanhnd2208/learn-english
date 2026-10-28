@@ -1,7 +1,7 @@
 {
   "title": "Sinh hoạt hằng ngày (mẫu 15 từ)",
   "description": "15 từ về nhà cửa, việc thường ngày và chăm sóc bản thân.",
-  "packVersion": 2,
+  "packVersion": 3,
   "audioFiles": [
     "wake.mp3",
     "wake-1.mp3",
@@ -55,68 +55,25 @@
       "senseKey": "wake.v.sample_daily_life",
       "partOfSpeech": "verb",
       "ipa": "/weɪk/",
-      "cefr": "a2",
-      "topics": [
-        "daily_life"
-      ],
+      "audioFile": "wake.mp3",
       "forms": [
         "wake"
       ],
       "meaningVi": "thức dậy",
-      "definitionEn": "to stop sleeping",
-      "definitionEnSimple": "to stop sleeping",
-      "chunks": [
-        {
-          "text": "wake up early",
-          "vi": "thức dậy"
-        }
-      ],
-      "audioFile": "wake.mp3",
-      "hints": [
-        {
-          "kind": "category",
-          "textEn": "This is an everyday action.",
-          "textVi": "Đây là một hành động thường gặp."
-        },
-        {
-          "kind": "context",
-          "textEn": "I ___ up at six every day.",
-          "textVi": "Tôi thức dậy lúc sáu giờ mỗi ngày."
-        },
-        {
-          "kind": "function",
-          "textEn": "to stop sleeping",
-          "textVi": "Hãy nghĩ đến tình huống trong câu ví dụ."
-        }
-      ],
+      "synonyms": [],
+      "noteVi": "",
       "examples": [
         {
           "english": "I ___ up at six every day.",
           "meaningVi": "Tôi thức dậy lúc sáu giờ mỗi ngày.",
           "target": "wake",
-          "audioFile": "wake-1.mp3",
-          "alternativesTried": [
-            "eat",
-            "play",
-            "draw",
-            "sing",
-            "jump"
-          ],
-          "stillPlausible": []
+          "gradable": true
         },
         {
           "english": "The children ___ up early on school days.",
           "meaningVi": "Bọn trẻ thức dậy sớm vào ngày đi học.",
           "target": "wake",
-          "audioFile": "wake-2.mp3",
-          "alternativesTried": [
-            "eat",
-            "play",
-            "draw",
-            "sing",
-            "jump"
-          ],
-          "stillPlausible": []
+          "gradable": true
         }
       ]
     },
@@ -125,68 +82,25 @@
       "senseKey": "wash.v.sample_daily_life",
       "partOfSpeech": "verb",
       "ipa": "/wɒʃ/",
-      "cefr": "a2",
-      "topics": [
-        "daily_life"
-      ],
+      "audioFile": "wash.mp3",
       "forms": [
         "wash"
       ],
       "meaningVi": "rửa",
-      "definitionEn": "to clean something with water",
-      "definitionEnSimple": "to clean something with water",
-      "chunks": [
-        {
-          "text": "wash hands",
-          "vi": "rửa"
-        }
-      ],
-      "audioFile": "wash.mp3",
-      "hints": [
-        {
-          "kind": "category",
-          "textEn": "This is an everyday action.",
-          "textVi": "Đây là một hành động thường gặp."
-        },
-        {
-          "kind": "context",
-          "textEn": "I ___ my hands before eating.",
-          "textVi": "Tôi rửa tay trước khi ăn."
-        },
-        {
-          "kind": "function",
-          "textEn": "to clean something with water",
-          "textVi": "Hãy nghĩ đến tình huống trong câu ví dụ."
-        }
-      ],
+      "synonyms": [],
+      "noteVi": "",
       "examples": [
         {
           "english": "I ___ my hands before eating.",
           "meaningVi": "Tôi rửa tay trước khi ăn.",
           "target": "wash",
-          "audioFile": "wash-1.mp3",
-          "alternativesTried": [
-            "eat",
-            "play",
-            "draw",
-            "sing",
-            "jump"
-          ],
-          "stillPlausible": []
+          "gradable": true
         },
         {
           "english": "Please ___ the cups after breakfast.",
           "meaningVi": "Hãy rửa cốc sau bữa sáng.",
           "target": "wash",
-          "audioFile": "wash-2.mp3",
-          "alternativesTried": [
-            "eat",
-            "play",
-            "draw",
-            "sing",
-            "jump"
-          ],
-          "stillPlausible": []
+          "gradable": true
         }
       ]
     },
@@ -195,68 +109,25 @@
       "senseKey": "brush.v.sample_daily_life",
       "partOfSpeech": "verb",
       "ipa": "/brʌʃ/",
-      "cefr": "a2",
-      "topics": [
-        "daily_life"
-      ],
+      "audioFile": "brush.mp3",
       "forms": [
         "brush"
       ],
       "meaningVi": "chải",
-      "definitionEn": "to clean or arrange with a brush",
-      "definitionEnSimple": "to clean or arrange with a brush",
-      "chunks": [
-        {
-          "text": "brush teeth",
-          "vi": "chải"
-        }
-      ],
-      "audioFile": "brush.mp3",
-      "hints": [
-        {
-          "kind": "category",
-          "textEn": "This is an everyday action.",
-          "textVi": "Đây là một hành động thường gặp."
-        },
-        {
-          "kind": "context",
-          "textEn": "I ___ my teeth twice a day.",
-          "textVi": "Tôi chải răng hai lần một ngày."
-        },
-        {
-          "kind": "function",
-          "textEn": "to clean or arrange with a brush",
-          "textVi": "Hãy nghĩ đến tình huống trong câu ví dụ."
-        }
-      ],
+      "synonyms": [],
+      "noteVi": "",
       "examples": [
         {
           "english": "I ___ my teeth twice a day.",
           "meaningVi": "Tôi chải răng hai lần một ngày.",
           "target": "brush",
-          "audioFile": "brush-1.mp3",
-          "alternativesTried": [
-            "eat",
-            "play",
-            "draw",
-            "sing",
-            "jump"
-          ],
-          "stillPlausible": []
+          "gradable": true
         },
         {
           "english": "She likes to ___ her hair before school.",
           "meaningVi": "Cô ấy thích chải tóc trước khi đi học.",
           "target": "brush",
-          "audioFile": "brush-2.mp3",
-          "alternativesTried": [
-            "eat",
-            "play",
-            "draw",
-            "sing",
-            "jump"
-          ],
-          "stillPlausible": []
+          "gradable": true
         }
       ]
     },
@@ -265,68 +136,25 @@
       "senseKey": "dress.v.sample_daily_life",
       "partOfSpeech": "verb",
       "ipa": "/dres/",
-      "cefr": "a2",
-      "topics": [
-        "daily_life"
-      ],
+      "audioFile": "dress.mp3",
       "forms": [
         "dress"
       ],
       "meaningVi": "mặc quần áo",
-      "definitionEn": "to put clothes on your body",
-      "definitionEnSimple": "to put clothes on your body",
-      "chunks": [
-        {
-          "text": "dress quickly",
-          "vi": "mặc quần áo"
-        }
-      ],
-      "audioFile": "dress.mp3",
-      "hints": [
-        {
-          "kind": "category",
-          "textEn": "This is an everyday action.",
-          "textVi": "Đây là một hành động thường gặp."
-        },
-        {
-          "kind": "context",
-          "textEn": "I ___ quickly before breakfast.",
-          "textVi": "Tôi mặc quần áo nhanh trước bữa sáng."
-        },
-        {
-          "kind": "function",
-          "textEn": "to put clothes on your body",
-          "textVi": "Hãy nghĩ đến tình huống trong câu ví dụ."
-        }
-      ],
+      "synonyms": [],
+      "noteVi": "",
       "examples": [
         {
           "english": "I ___ quickly before breakfast.",
           "meaningVi": "Tôi mặc quần áo nhanh trước bữa sáng.",
           "target": "dress",
-          "audioFile": "dress-1.mp3",
-          "alternativesTried": [
-            "eat",
-            "play",
-            "draw",
-            "sing",
-            "jump"
-          ],
-          "stillPlausible": []
+          "gradable": true
         },
         {
           "english": "The children ___ themselves for school.",
           "meaningVi": "Bọn trẻ tự mặc quần áo để đi học.",
           "target": "dress",
-          "audioFile": "dress-2.mp3",
-          "alternativesTried": [
-            "eat",
-            "play",
-            "draw",
-            "sing",
-            "jump"
-          ],
-          "stillPlausible": []
+          "gradable": true
         }
       ]
     },
@@ -335,68 +163,25 @@
       "senseKey": "clean.v.sample_daily_life",
       "partOfSpeech": "verb",
       "ipa": "/kliːn/",
-      "cefr": "a2",
-      "topics": [
-        "daily_life"
-      ],
+      "audioFile": "clean.mp3",
       "forms": [
         "clean"
       ],
       "meaningVi": "lau dọn",
-      "definitionEn": "to remove dirt from something",
-      "definitionEnSimple": "to remove dirt from something",
-      "chunks": [
-        {
-          "text": "clean a room",
-          "vi": "lau dọn"
-        }
-      ],
-      "audioFile": "clean.mp3",
-      "hints": [
-        {
-          "kind": "category",
-          "textEn": "This is an everyday action.",
-          "textVi": "Đây là một hành động thường gặp."
-        },
-        {
-          "kind": "context",
-          "textEn": "I ___ my room every Saturday.",
-          "textVi": "Tôi dọn phòng mỗi thứ Bảy."
-        },
-        {
-          "kind": "function",
-          "textEn": "to remove dirt from something",
-          "textVi": "Hãy nghĩ đến tình huống trong câu ví dụ."
-        }
-      ],
+      "synonyms": [],
+      "noteVi": "",
       "examples": [
         {
           "english": "I ___ my room every Saturday.",
           "meaningVi": "Tôi dọn phòng mỗi thứ Bảy.",
           "target": "clean",
-          "audioFile": "clean-1.mp3",
-          "alternativesTried": [
-            "eat",
-            "play",
-            "draw",
-            "sing",
-            "jump"
-          ],
-          "stillPlausible": []
+          "gradable": true
         },
         {
           "english": "Please ___ the table after dinner.",
           "meaningVi": "Hãy lau bàn sau bữa tối.",
           "target": "clean",
-          "audioFile": "clean-2.mp3",
-          "alternativesTried": [
-            "eat",
-            "play",
-            "draw",
-            "sing",
-            "jump"
-          ],
-          "stillPlausible": []
+          "gradable": true
         }
       ]
     },
@@ -405,68 +190,25 @@
       "senseKey": "sweep.v.sample_daily_life",
       "partOfSpeech": "verb",
       "ipa": "/swiːp/",
-      "cefr": "a2",
-      "topics": [
-        "daily_life"
-      ],
+      "audioFile": "sweep.mp3",
       "forms": [
         "sweep"
       ],
       "meaningVi": "quét",
-      "definitionEn": "to clean a floor with a broom",
-      "definitionEnSimple": "to clean a floor with a broom",
-      "chunks": [
-        {
-          "text": "sweep the floor",
-          "vi": "quét"
-        }
-      ],
-      "audioFile": "sweep.mp3",
-      "hints": [
-        {
-          "kind": "category",
-          "textEn": "This is an everyday action.",
-          "textVi": "Đây là một hành động thường gặp."
-        },
-        {
-          "kind": "context",
-          "textEn": "I ___ the floor after lunch.",
-          "textVi": "Tôi quét sàn sau bữa trưa."
-        },
-        {
-          "kind": "function",
-          "textEn": "to clean a floor with a broom",
-          "textVi": "Hãy nghĩ đến tình huống trong câu ví dụ."
-        }
-      ],
+      "synonyms": [],
+      "noteVi": "",
       "examples": [
         {
           "english": "I ___ the floor after lunch.",
           "meaningVi": "Tôi quét sàn sau bữa trưa.",
           "target": "sweep",
-          "audioFile": "sweep-1.mp3",
-          "alternativesTried": [
-            "eat",
-            "play",
-            "draw",
-            "sing",
-            "jump"
-          ],
-          "stillPlausible": []
+          "gradable": true
         },
         {
           "english": "Please ___ the kitchen before guests arrive.",
           "meaningVi": "Hãy quét bếp trước khi khách tới.",
           "target": "sweep",
-          "audioFile": "sweep-2.mp3",
-          "alternativesTried": [
-            "eat",
-            "play",
-            "draw",
-            "sing",
-            "jump"
-          ],
-          "stillPlausible": []
+          "gradable": true
         }
       ]
     },
@@ -475,68 +217,25 @@
       "senseKey": "fold.v.sample_daily_life",
       "partOfSpeech": "verb",
       "ipa": "/fəʊld/",
-      "cefr": "a2",
-      "topics": [
-        "daily_life"
-      ],
+      "audioFile": "fold.mp3",
       "forms": [
         "fold"
       ],
       "meaningVi": "gấp",
-      "definitionEn": "to bend something so one part lies over another",
-      "definitionEnSimple": "to bend something so one part lies over another",
-      "chunks": [
-        {
-          "text": "fold clothes",
-          "vi": "gấp"
-        }
-      ],
-      "audioFile": "fold.mp3",
-      "hints": [
-        {
-          "kind": "category",
-          "textEn": "This is an everyday action.",
-          "textVi": "Đây là một hành động thường gặp."
-        },
-        {
-          "kind": "context",
-          "textEn": "I ___ my clothes after they dry.",
-          "textVi": "Tôi gấp quần áo sau khi chúng khô."
-        },
-        {
-          "kind": "function",
-          "textEn": "to bend something so one part lies over another",
-          "textVi": "Hãy nghĩ đến tình huống trong câu ví dụ."
-        }
-      ],
+      "synonyms": [],
+      "noteVi": "",
       "examples": [
         {
           "english": "I ___ my clothes after they dry.",
           "meaningVi": "Tôi gấp quần áo sau khi chúng khô.",
           "target": "fold",
-          "audioFile": "fold-1.mp3",
-          "alternativesTried": [
-            "eat",
-            "play",
-            "draw",
-            "sing",
-            "jump"
-          ],
-          "stillPlausible": []
+          "gradable": true
         },
         {
           "english": "Please ___ the towel neatly.",
           "meaningVi": "Hãy gấp khăn cho gọn.",
           "target": "fold",
-          "audioFile": "fold-2.mp3",
-          "alternativesTried": [
-            "eat",
-            "play",
-            "draw",
-            "sing",
-            "jump"
-          ],
-          "stillPlausible": []
+          "gradable": true
         }
       ]
     },
@@ -545,68 +244,25 @@
       "senseKey": "carry.v.sample_daily_life",
       "partOfSpeech": "verb",
       "ipa": "/ˈkæri/",
-      "cefr": "a2",
-      "topics": [
-        "daily_life"
-      ],
+      "audioFile": "carry.mp3",
       "forms": [
         "carry"
       ],
       "meaningVi": "mang",
-      "definitionEn": "to hold something while moving it",
-      "definitionEnSimple": "to hold something while moving it",
-      "chunks": [
-        {
-          "text": "carry a bag",
-          "vi": "mang"
-        }
-      ],
-      "audioFile": "carry.mp3",
-      "hints": [
-        {
-          "kind": "category",
-          "textEn": "This is an everyday action.",
-          "textVi": "Đây là một hành động thường gặp."
-        },
-        {
-          "kind": "context",
-          "textEn": "I ___ a small bag to work.",
-          "textVi": "Tôi mang một chiếc túi nhỏ đi làm."
-        },
-        {
-          "kind": "function",
-          "textEn": "to hold something while moving it",
-          "textVi": "Hãy nghĩ đến tình huống trong câu ví dụ."
-        }
-      ],
+      "synonyms": [],
+      "noteVi": "",
       "examples": [
         {
           "english": "I ___ a small bag to work.",
           "meaningVi": "Tôi mang một chiếc túi nhỏ đi làm.",
           "target": "carry",
-          "audioFile": "carry-1.mp3",
-          "alternativesTried": [
-            "eat",
-            "play",
-            "draw",
-            "sing",
-            "jump"
-          ],
-          "stillPlausible": []
+          "gradable": true
         },
         {
           "english": "Can you ___ these boxes upstairs?",
           "meaningVi": "Bạn có thể mang những hộp này lên tầng trên không?",
           "target": "carry",
-          "audioFile": "carry-2.mp3",
-          "alternativesTried": [
-            "eat",
-            "play",
-            "draw",
-            "sing",
-            "jump"
-          ],
-          "stillPlausible": []
+          "gradable": true
         }
       ]
     },
@@ -615,68 +271,25 @@
       "senseKey": "open.v.sample_daily_life",
       "partOfSpeech": "verb",
       "ipa": "/ˈəʊpən/",
-      "cefr": "a2",
-      "topics": [
-        "daily_life"
-      ],
+      "audioFile": "open.mp3",
       "forms": [
         "open"
       ],
       "meaningVi": "mở",
-      "definitionEn": "to move something so people can enter or see inside",
-      "definitionEnSimple": "to move something so people can enter or see inside",
-      "chunks": [
-        {
-          "text": "open a window",
-          "vi": "mở"
-        }
-      ],
-      "audioFile": "open.mp3",
-      "hints": [
-        {
-          "kind": "category",
-          "textEn": "This is an everyday action.",
-          "textVi": "Đây là một hành động thường gặp."
-        },
-        {
-          "kind": "context",
-          "textEn": "Please ___ the window for fresh air.",
-          "textVi": "Hãy mở cửa sổ cho thoáng."
-        },
-        {
-          "kind": "function",
-          "textEn": "to move something so people can enter or see inside",
-          "textVi": "Hãy nghĩ đến tình huống trong câu ví dụ."
-        }
-      ],
+      "synonyms": [],
+      "noteVi": "",
       "examples": [
         {
           "english": "Please ___ the window for fresh air.",
           "meaningVi": "Hãy mở cửa sổ cho thoáng.",
           "target": "open",
-          "audioFile": "open-1.mp3",
-          "alternativesTried": [
-            "eat",
-            "play",
-            "draw",
-            "sing",
-            "jump"
-          ],
-          "stillPlausible": []
+          "gradable": true
         },
         {
           "english": "I ___ the door when someone knocks.",
           "meaningVi": "Tôi mở cửa khi có người gõ.",
           "target": "open",
-          "audioFile": "open-2.mp3",
-          "alternativesTried": [
-            "eat",
-            "play",
-            "draw",
-            "sing",
-            "jump"
-          ],
-          "stillPlausible": []
+          "gradable": true
         }
       ]
     },
@@ -685,68 +298,25 @@
       "senseKey": "close.v.sample_daily_life",
       "partOfSpeech": "verb",
       "ipa": "/kləʊz/",
-      "cefr": "a2",
-      "topics": [
-        "daily_life"
-      ],
+      "audioFile": "close.mp3",
       "forms": [
         "close"
       ],
       "meaningVi": "đóng",
-      "definitionEn": "to move something so an opening is covered",
-      "definitionEnSimple": "to move something so an opening is covered",
-      "chunks": [
-        {
-          "text": "close a door",
-          "vi": "đóng"
-        }
-      ],
-      "audioFile": "close.mp3",
-      "hints": [
-        {
-          "kind": "category",
-          "textEn": "This is an everyday action.",
-          "textVi": "Đây là một hành động thường gặp."
-        },
-        {
-          "kind": "context",
-          "textEn": "Please ___ the door quietly.",
-          "textVi": "Hãy đóng cửa nhẹ nhàng."
-        },
-        {
-          "kind": "function",
-          "textEn": "to move something so an opening is covered",
-          "textVi": "Hãy nghĩ đến tình huống trong câu ví dụ."
-        }
-      ],
+      "synonyms": [],
+      "noteVi": "",
       "examples": [
         {
           "english": "Please ___ the door quietly.",
           "meaningVi": "Hãy đóng cửa nhẹ nhàng.",
           "target": "close",
-          "audioFile": "close-1.mp3",
-          "alternativesTried": [
-            "eat",
-            "play",
-            "draw",
-            "sing",
-            "jump"
-          ],
-          "stillPlausible": []
+          "gradable": true
         },
         {
           "english": "I ___ the window before going out.",
           "meaningVi": "Tôi đóng cửa sổ trước khi ra ngoài.",
           "target": "close",
-          "audioFile": "close-2.mp3",
-          "alternativesTried": [
-            "eat",
-            "play",
-            "draw",
-            "sing",
-            "jump"
-          ],
-          "stillPlausible": []
+          "gradable": true
         }
       ]
     },
@@ -755,68 +325,25 @@
       "senseKey": "turn.v.sample_daily_life",
       "partOfSpeech": "verb",
       "ipa": "/tɜːn/",
-      "cefr": "a2",
-      "topics": [
-        "daily_life"
-      ],
+      "audioFile": "turn.mp3",
       "forms": [
         "turn"
       ],
       "meaningVi": "xoay",
-      "definitionEn": "to move something around a central point",
-      "definitionEnSimple": "to move something around a central point",
-      "chunks": [
-        {
-          "text": "turn a key",
-          "vi": "xoay"
-        }
-      ],
-      "audioFile": "turn.mp3",
-      "hints": [
-        {
-          "kind": "category",
-          "textEn": "This is an everyday action.",
-          "textVi": "Đây là một hành động thường gặp."
-        },
-        {
-          "kind": "context",
-          "textEn": "Please ___ the key to open the door.",
-          "textVi": "Hãy xoay chìa khóa để mở cửa."
-        },
-        {
-          "kind": "function",
-          "textEn": "to move something around a central point",
-          "textVi": "Hãy nghĩ đến tình huống trong câu ví dụ."
-        }
-      ],
+      "synonyms": [],
+      "noteVi": "",
       "examples": [
         {
           "english": "Please ___ the key to open the door.",
           "meaningVi": "Hãy xoay chìa khóa để mở cửa.",
           "target": "turn",
-          "audioFile": "turn-1.mp3",
-          "alternativesTried": [
-            "eat",
-            "play",
-            "draw",
-            "sing",
-            "jump"
-          ],
-          "stillPlausible": []
+          "gradable": true
         },
         {
           "english": "I ___ the handle slowly.",
           "meaningVi": "Tôi xoay tay nắm từ từ.",
           "target": "turn",
-          "audioFile": "turn-2.mp3",
-          "alternativesTried": [
-            "eat",
-            "play",
-            "draw",
-            "sing",
-            "jump"
-          ],
-          "stillPlausible": []
+          "gradable": true
         }
       ]
     },
@@ -825,68 +352,25 @@
       "senseKey": "rest.v.sample_daily_life",
       "partOfSpeech": "verb",
       "ipa": "/rest/",
-      "cefr": "a2",
-      "topics": [
-        "daily_life"
-      ],
+      "audioFile": "rest.mp3",
       "forms": [
         "rest"
       ],
       "meaningVi": "nghỉ ngơi",
-      "definitionEn": "to stop working for a short time",
-      "definitionEnSimple": "to stop working for a short time",
-      "chunks": [
-        {
-          "text": "rest after work",
-          "vi": "nghỉ ngơi"
-        }
-      ],
-      "audioFile": "rest.mp3",
-      "hints": [
-        {
-          "kind": "category",
-          "textEn": "This is an everyday action.",
-          "textVi": "Đây là một hành động thường gặp."
-        },
-        {
-          "kind": "context",
-          "textEn": "I ___ for ten minutes after lunch.",
-          "textVi": "Tôi nghỉ mười phút sau bữa trưa."
-        },
-        {
-          "kind": "function",
-          "textEn": "to stop working for a short time",
-          "textVi": "Hãy nghĩ đến tình huống trong câu ví dụ."
-        }
-      ],
+      "synonyms": [],
+      "noteVi": "",
       "examples": [
         {
           "english": "I ___ for ten minutes after lunch.",
           "meaningVi": "Tôi nghỉ mười phút sau bữa trưa.",
           "target": "rest",
-          "audioFile": "rest-1.mp3",
-          "alternativesTried": [
-            "eat",
-            "play",
-            "draw",
-            "sing",
-            "jump"
-          ],
-          "stillPlausible": []
+          "gradable": true
         },
         {
           "english": "You should ___ when you feel tired.",
           "meaningVi": "Bạn nên nghỉ khi cảm thấy mệt.",
           "target": "rest",
-          "audioFile": "rest-2.mp3",
-          "alternativesTried": [
-            "eat",
-            "play",
-            "draw",
-            "sing",
-            "jump"
-          ],
-          "stillPlausible": []
+          "gradable": true
         }
       ]
     },
@@ -895,68 +379,25 @@
       "senseKey": "sleep.v.sample_daily_life",
       "partOfSpeech": "verb",
       "ipa": "/sliːp/",
-      "cefr": "a2",
-      "topics": [
-        "daily_life"
-      ],
+      "audioFile": "sleep.mp3",
       "forms": [
         "sleep"
       ],
       "meaningVi": "ngủ",
-      "definitionEn": "to rest with your eyes closed and mind inactive",
-      "definitionEnSimple": "to rest with your eyes closed and mind inactive",
-      "chunks": [
-        {
-          "text": "sleep well",
-          "vi": "ngủ"
-        }
-      ],
-      "audioFile": "sleep.mp3",
-      "hints": [
-        {
-          "kind": "category",
-          "textEn": "This is an everyday action.",
-          "textVi": "Đây là một hành động thường gặp."
-        },
-        {
-          "kind": "context",
-          "textEn": "I ___ for eight hours each night.",
-          "textVi": "Tôi ngủ tám giờ mỗi đêm."
-        },
-        {
-          "kind": "function",
-          "textEn": "to rest with your eyes closed and mind inactive",
-          "textVi": "Hãy nghĩ đến tình huống trong câu ví dụ."
-        }
-      ],
+      "synonyms": [],
+      "noteVi": "",
       "examples": [
         {
           "english": "I ___ for eight hours each night.",
           "meaningVi": "Tôi ngủ tám giờ mỗi đêm.",
           "target": "sleep",
-          "audioFile": "sleep-1.mp3",
-          "alternativesTried": [
-            "eat",
-            "play",
-            "draw",
-            "sing",
-            "jump"
-          ],
-          "stillPlausible": []
+          "gradable": true
         },
         {
           "english": "Babies often ___ during the day.",
           "meaningVi": "Em bé thường ngủ vào ban ngày.",
           "target": "sleep",
-          "audioFile": "sleep-2.mp3",
-          "alternativesTried": [
-            "eat",
-            "play",
-            "draw",
-            "sing",
-            "jump"
-          ],
-          "stillPlausible": []
+          "gradable": true
         }
       ]
     },
@@ -965,68 +406,25 @@
       "senseKey": "exercise.v.sample_daily_life",
       "partOfSpeech": "verb",
       "ipa": "/ˈeksəsaɪz/",
-      "cefr": "a2",
-      "topics": [
-        "daily_life"
-      ],
+      "audioFile": "exercise.mp3",
       "forms": [
         "exercise"
       ],
       "meaningVi": "tập thể dục",
-      "definitionEn": "to move your body to stay healthy",
-      "definitionEnSimple": "to move your body to stay healthy",
-      "chunks": [
-        {
-          "text": "exercise daily",
-          "vi": "tập thể dục"
-        }
-      ],
-      "audioFile": "exercise.mp3",
-      "hints": [
-        {
-          "kind": "category",
-          "textEn": "This is an everyday action.",
-          "textVi": "Đây là một hành động thường gặp."
-        },
-        {
-          "kind": "context",
-          "textEn": "I ___ for twenty minutes each morning.",
-          "textVi": "Tôi tập thể dục hai mươi phút mỗi sáng."
-        },
-        {
-          "kind": "function",
-          "textEn": "to move your body to stay healthy",
-          "textVi": "Hãy nghĩ đến tình huống trong câu ví dụ."
-        }
-      ],
+      "synonyms": [],
+      "noteVi": "",
       "examples": [
         {
           "english": "I ___ for twenty minutes each morning.",
           "meaningVi": "Tôi tập thể dục hai mươi phút mỗi sáng.",
           "target": "exercise",
-          "audioFile": "exercise-1.mp3",
-          "alternativesTried": [
-            "eat",
-            "play",
-            "draw",
-            "sing",
-            "jump"
-          ],
-          "stillPlausible": []
+          "gradable": true
         },
         {
           "english": "We ___ in the park on weekends.",
           "meaningVi": "Chúng tôi tập thể dục ở công viên vào cuối tuần.",
           "target": "exercise",
-          "audioFile": "exercise-2.mp3",
-          "alternativesTried": [
-            "eat",
-            "play",
-            "draw",
-            "sing",
-            "jump"
-          ],
-          "stillPlausible": []
+          "gradable": true
         }
       ]
     },
@@ -1035,68 +433,25 @@
       "senseKey": "relax.v.sample_daily_life",
       "partOfSpeech": "verb",
       "ipa": "/rɪˈlæks/",
-      "cefr": "a2",
-      "topics": [
-        "daily_life"
-      ],
+      "audioFile": "relax.mp3",
       "forms": [
         "relax"
       ],
       "meaningVi": "thư giãn",
-      "definitionEn": "to become calm after effort or worry",
-      "definitionEnSimple": "to become calm after effort or worry",
-      "chunks": [
-        {
-          "text": "relax at home",
-          "vi": "thư giãn"
-        }
-      ],
-      "audioFile": "relax.mp3",
-      "hints": [
-        {
-          "kind": "category",
-          "textEn": "This is an everyday action.",
-          "textVi": "Đây là một hành động thường gặp."
-        },
-        {
-          "kind": "context",
-          "textEn": "I ___ with music after work.",
-          "textVi": "Tôi thư giãn bằng âm nhạc sau giờ làm."
-        },
-        {
-          "kind": "function",
-          "textEn": "to become calm after effort or worry",
-          "textVi": "Hãy nghĩ đến tình huống trong câu ví dụ."
-        }
-      ],
+      "synonyms": [],
+      "noteVi": "",
       "examples": [
         {
           "english": "I ___ with music after work.",
           "meaningVi": "Tôi thư giãn bằng âm nhạc sau giờ làm.",
           "target": "relax",
-          "audioFile": "relax-1.mp3",
-          "alternativesTried": [
-            "eat",
-            "play",
-            "draw",
-            "sing",
-            "jump"
-          ],
-          "stillPlausible": []
+          "gradable": true
         },
         {
           "english": "We ___ at home on Sunday.",
           "meaningVi": "Chúng tôi thư giãn ở nhà vào Chủ nhật.",
           "target": "relax",
-          "audioFile": "relax-2.mp3",
-          "alternativesTried": [
-            "eat",
-            "play",
-            "draw",
-            "sing",
-            "jump"
-          ],
-          "stillPlausible": []
+          "gradable": true
         }
       ]
     }

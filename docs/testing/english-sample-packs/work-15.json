@@ -1,7 +1,7 @@
 {
   "title": "Công việc (mẫu 15 từ)",
   "description": "15 từ về công việc, cuộc họp và cộng tác.",
-  "packVersion": 2,
+  "packVersion": 3,
   "audioFiles": [
     "plan.mp3",
     "plan-1.mp3",
@@ -55,68 +55,25 @@
       "senseKey": "plan.v.sample_work",
       "partOfSpeech": "verb",
       "ipa": "/plæn/",
-      "cefr": "a2",
-      "topics": [
-        "work"
-      ],
+      "audioFile": "plan.mp3",
       "forms": [
         "plan"
       ],
       "meaningVi": "lên kế hoạch",
-      "definitionEn": "to decide what to do before doing it",
-      "definitionEnSimple": "to decide what to do before doing it",
-      "chunks": [
-        {
-          "text": "plan a project",
-          "vi": "lên kế hoạch"
-        }
-      ],
-      "audioFile": "plan.mp3",
-      "hints": [
-        {
-          "kind": "category",
-          "textEn": "This is an everyday action.",
-          "textVi": "Đây là một hành động thường gặp."
-        },
-        {
-          "kind": "context",
-          "textEn": "We ___ the project on Monday.",
-          "textVi": "Chúng tôi lên kế hoạch cho dự án vào thứ Hai."
-        },
-        {
-          "kind": "function",
-          "textEn": "to decide what to do before doing it",
-          "textVi": "Hãy nghĩ đến tình huống trong câu ví dụ."
-        }
-      ],
+      "synonyms": [],
+      "noteVi": "",
       "examples": [
         {
           "english": "We ___ the project on Monday.",
           "meaningVi": "Chúng tôi lên kế hoạch cho dự án vào thứ Hai.",
           "target": "plan",
-          "audioFile": "plan-1.mp3",
-          "alternativesTried": [
-            "eat",
-            "play",
-            "draw",
-            "sing",
-            "jump"
-          ],
-          "stillPlausible": []
+          "gradable": true
         },
         {
           "english": "I ___ my tasks each morning.",
           "meaningVi": "Tôi lên kế hoạch công việc mỗi sáng.",
           "target": "plan",
-          "audioFile": "plan-2.mp3",
-          "alternativesTried": [
-            "eat",
-            "play",
-            "draw",
-            "sing",
-            "jump"
-          ],
-          "stillPlausible": []
+          "gradable": true
         }
       ]
     },
@@ -125,68 +82,25 @@
       "senseKey": "organize.v.sample_work",
       "partOfSpeech": "verb",
       "ipa": "/ˈɔːɡənaɪz/",
-      "cefr": "a2",
-      "topics": [
-        "work"
-      ],
+      "audioFile": "organize.mp3",
       "forms": [
         "organize"
       ],
       "meaningVi": "sắp xếp",
-      "definitionEn": "to arrange people or things in a clear order",
-      "definitionEnSimple": "to arrange people or things in a clear order",
-      "chunks": [
-        {
-          "text": "organize files",
-          "vi": "sắp xếp"
-        }
-      ],
-      "audioFile": "organize.mp3",
-      "hints": [
-        {
-          "kind": "category",
-          "textEn": "This is an everyday action.",
-          "textVi": "Đây là một hành động thường gặp."
-        },
-        {
-          "kind": "context",
-          "textEn": "I ___ my files by date.",
-          "textVi": "Tôi sắp xếp tệp theo ngày."
-        },
-        {
-          "kind": "function",
-          "textEn": "to arrange people or things in a clear order",
-          "textVi": "Hãy nghĩ đến tình huống trong câu ví dụ."
-        }
-      ],
+      "synonyms": [],
+      "noteVi": "",
       "examples": [
         {
           "english": "I ___ my files by date.",
           "meaningVi": "Tôi sắp xếp tệp theo ngày.",
           "target": "organize",
-          "audioFile": "organize-1.mp3",
-          "alternativesTried": [
-            "eat",
-            "play",
-            "draw",
-            "sing",
-            "jump"
-          ],
-          "stillPlausible": []
+          "gradable": true
         },
         {
           "english": "We ___ a team meeting every week.",
           "meaningVi": "Chúng tôi tổ chức cuộc họp nhóm mỗi tuần.",
           "target": "organize",
-          "audioFile": "organize-2.mp3",
-          "alternativesTried": [
-            "eat",
-            "play",
-            "draw",
-            "sing",
-            "jump"
-          ],
-          "stillPlausible": []
+          "gradable": true
         }
       ]
     },
@@ -195,68 +109,25 @@
       "senseKey": "schedule.v.sample_work",
       "partOfSpeech": "verb",
       "ipa": "/ˈʃedjuːl/",
-      "cefr": "a2",
-      "topics": [
-        "work"
-      ],
+      "audioFile": "schedule.mp3",
       "forms": [
         "schedule"
       ],
       "meaningVi": "lên lịch",
-      "definitionEn": "to arrange a time for an event",
-      "definitionEnSimple": "to arrange a time for an event",
-      "chunks": [
-        {
-          "text": "schedule a meeting",
-          "vi": "lên lịch"
-        }
-      ],
-      "audioFile": "schedule.mp3",
-      "hints": [
-        {
-          "kind": "category",
-          "textEn": "This is an everyday action.",
-          "textVi": "Đây là một hành động thường gặp."
-        },
-        {
-          "kind": "context",
-          "textEn": "Please ___ the meeting for Tuesday.",
-          "textVi": "Hãy lên lịch cuộc họp vào thứ Ba."
-        },
-        {
-          "kind": "function",
-          "textEn": "to arrange a time for an event",
-          "textVi": "Hãy nghĩ đến tình huống trong câu ví dụ."
-        }
-      ],
+      "synonyms": [],
+      "noteVi": "",
       "examples": [
         {
           "english": "Please ___ the meeting for Tuesday.",
           "meaningVi": "Hãy lên lịch cuộc họp vào thứ Ba.",
           "target": "schedule",
-          "audioFile": "schedule-1.mp3",
-          "alternativesTried": [
-            "eat",
-            "play",
-            "draw",
-            "sing",
-            "jump"
-          ],
-          "stillPlausible": []
+          "gradable": true
         },
         {
           "english": "I ___ calls in the afternoon.",
           "meaningVi": "Tôi lên lịch các cuộc gọi vào buổi chiều.",
           "target": "schedule",
-          "audioFile": "schedule-2.mp3",
-          "alternativesTried": [
-            "eat",
-            "play",
-            "draw",
-            "sing",
-            "jump"
-          ],
-          "stillPlausible": []
+          "gradable": true
         }
       ]
     },
@@ -265,68 +136,25 @@
       "senseKey": "attend.v.sample_work",
       "partOfSpeech": "verb",
       "ipa": "/əˈtend/",
-      "cefr": "a2",
-      "topics": [
-        "work"
-      ],
+      "audioFile": "attend.mp3",
       "forms": [
         "attend"
       ],
       "meaningVi": "tham dự",
-      "definitionEn": "to be present at an event",
-      "definitionEnSimple": "to be present at an event",
-      "chunks": [
-        {
-          "text": "attend a meeting",
-          "vi": "tham dự"
-        }
-      ],
-      "audioFile": "attend.mp3",
-      "hints": [
-        {
-          "kind": "category",
-          "textEn": "This is an everyday action.",
-          "textVi": "Đây là một hành động thường gặp."
-        },
-        {
-          "kind": "context",
-          "textEn": "I will ___ the meeting at nine.",
-          "textVi": "Tôi sẽ tham dự cuộc họp lúc chín giờ."
-        },
-        {
-          "kind": "function",
-          "textEn": "to be present at an event",
-          "textVi": "Hãy nghĩ đến tình huống trong câu ví dụ."
-        }
-      ],
+      "synonyms": [],
+      "noteVi": "",
       "examples": [
         {
           "english": "I will ___ the meeting at nine.",
           "meaningVi": "Tôi sẽ tham dự cuộc họp lúc chín giờ.",
           "target": "attend",
-          "audioFile": "attend-1.mp3",
-          "alternativesTried": [
-            "eat",
-            "play",
-            "draw",
-            "sing",
-            "jump"
-          ],
-          "stillPlausible": []
+          "gradable": true
         },
         {
           "english": "All staff must ___ the training.",
           "meaningVi": "Toàn bộ nhân viên phải tham dự buổi đào tạo.",
           "target": "attend",
-          "audioFile": "attend-2.mp3",
-          "alternativesTried": [
-            "eat",
-            "play",
-            "draw",
-            "sing",
-            "jump"
-          ],
-          "stillPlausible": []
+          "gradable": true
         }
       ]
     },
@@ -335,68 +163,25 @@
       "senseKey": "discuss.v.sample_work",
       "partOfSpeech": "verb",
       "ipa": "/dɪˈskʌs/",
-      "cefr": "a2",
-      "topics": [
-        "work"
-      ],
+      "audioFile": "discuss.mp3",
       "forms": [
         "discuss"
       ],
       "meaningVi": "thảo luận",
-      "definitionEn": "to talk about a subject with other people",
-      "definitionEnSimple": "to talk about a subject with other people",
-      "chunks": [
-        {
-          "text": "discuss a problem",
-          "vi": "thảo luận"
-        }
-      ],
-      "audioFile": "discuss.mp3",
-      "hints": [
-        {
-          "kind": "category",
-          "textEn": "This is an everyday action.",
-          "textVi": "Đây là một hành động thường gặp."
-        },
-        {
-          "kind": "context",
-          "textEn": "We ___ the new plan after lunch.",
-          "textVi": "Chúng tôi thảo luận kế hoạch mới sau bữa trưa."
-        },
-        {
-          "kind": "function",
-          "textEn": "to talk about a subject with other people",
-          "textVi": "Hãy nghĩ đến tình huống trong câu ví dụ."
-        }
-      ],
+      "synonyms": [],
+      "noteVi": "",
       "examples": [
         {
           "english": "We ___ the new plan after lunch.",
           "meaningVi": "Chúng tôi thảo luận kế hoạch mới sau bữa trưa.",
           "target": "discuss",
-          "audioFile": "discuss-1.mp3",
-          "alternativesTried": [
-            "eat",
-            "play",
-            "draw",
-            "sing",
-            "jump"
-          ],
-          "stillPlausible": []
+          "gradable": true
         },
         {
           "english": "Let us ___ the problem together.",
           "meaningVi": "Chúng ta hãy cùng thảo luận vấn đề.",
           "target": "discuss",
-          "audioFile": "discuss-2.mp3",
-          "alternativesTried": [
-            "eat",
-            "play",
-            "draw",
-            "sing",
-            "jump"
-          ],
-          "stillPlausible": []
+          "gradable": true
         }
       ]
     },
@@ -405,68 +190,25 @@
       "senseKey": "decide.v.sample_work",
       "partOfSpeech": "verb",
       "ipa": "/dɪˈsaɪd/",
-      "cefr": "a2",
-      "topics": [
-        "work"
-      ],
+      "audioFile": "decide.mp3",
       "forms": [
         "decide"
       ],
       "meaningVi": "quyết định",
-      "definitionEn": "to choose after thinking about the options",
-      "definitionEnSimple": "to choose after thinking about the options",
-      "chunks": [
-        {
-          "text": "decide on a date",
-          "vi": "quyết định"
-        }
-      ],
-      "audioFile": "decide.mp3",
-      "hints": [
-        {
-          "kind": "category",
-          "textEn": "This is an everyday action.",
-          "textVi": "Đây là một hành động thường gặp."
-        },
-        {
-          "kind": "context",
-          "textEn": "We need to ___ on a date today.",
-          "textVi": "Hôm nay chúng ta cần quyết định một ngày."
-        },
-        {
-          "kind": "function",
-          "textEn": "to choose after thinking about the options",
-          "textVi": "Hãy nghĩ đến tình huống trong câu ví dụ."
-        }
-      ],
+      "synonyms": [],
+      "noteVi": "",
       "examples": [
         {
           "english": "We need to ___ on a date today.",
           "meaningVi": "Hôm nay chúng ta cần quyết định một ngày.",
           "target": "decide",
-          "audioFile": "decide-1.mp3",
-          "alternativesTried": [
-            "eat",
-            "play",
-            "draw",
-            "sing",
-            "jump"
-          ],
-          "stillPlausible": []
+          "gradable": true
         },
         {
           "english": "The manager will ___ after the meeting.",
           "meaningVi": "Quản lý sẽ quyết định sau cuộc họp.",
           "target": "decide",
-          "audioFile": "decide-2.mp3",
-          "alternativesTried": [
-            "eat",
-            "play",
-            "draw",
-            "sing",
-            "jump"
-          ],
-          "stillPlausible": []
+          "gradable": true
         }
       ]
     },
@@ -475,68 +217,25 @@
       "senseKey": "report.v.sample_work",
       "partOfSpeech": "verb",
       "ipa": "/rɪˈpɔːt/",
-      "cefr": "a2",
-      "topics": [
-        "work"
-      ],
+      "audioFile": "report.mp3",
       "forms": [
         "report"
       ],
       "meaningVi": "báo cáo",
-      "definitionEn": "to give information about what happened",
-      "definitionEnSimple": "to give information about what happened",
-      "chunks": [
-        {
-          "text": "report progress",
-          "vi": "báo cáo"
-        }
-      ],
-      "audioFile": "report.mp3",
-      "hints": [
-        {
-          "kind": "category",
-          "textEn": "This is an everyday action.",
-          "textVi": "Đây là một hành động thường gặp."
-        },
-        {
-          "kind": "context",
-          "textEn": "I ___ our progress every Friday.",
-          "textVi": "Tôi báo cáo tiến độ mỗi thứ Sáu."
-        },
-        {
-          "kind": "function",
-          "textEn": "to give information about what happened",
-          "textVi": "Hãy nghĩ đến tình huống trong câu ví dụ."
-        }
-      ],
+      "synonyms": [],
+      "noteVi": "",
       "examples": [
         {
           "english": "I ___ our progress every Friday.",
           "meaningVi": "Tôi báo cáo tiến độ mỗi thứ Sáu.",
           "target": "report",
-          "audioFile": "report-1.mp3",
-          "alternativesTried": [
-            "eat",
-            "play",
-            "draw",
-            "sing",
-            "jump"
-          ],
-          "stillPlausible": []
+          "gradable": true
         },
         {
           "english": "Please ___ the problem to your manager.",
           "meaningVi": "Hãy báo cáo vấn đề với quản lý của bạn.",
           "target": "report",
-          "audioFile": "report-2.mp3",
-          "alternativesTried": [
-            "eat",
-            "play",
-            "draw",
-            "sing",
-            "jump"
-          ],
-          "stillPlausible": []
+          "gradable": true
         }
       ]
     },
@@ -545,68 +244,25 @@
       "senseKey": "check.v.sample_work",
       "partOfSpeech": "verb",
       "ipa": "/tʃek/",
-      "cefr": "a2",
-      "topics": [
-        "work"
-      ],
+      "audioFile": "check.mp3",
       "forms": [
         "check"
       ],
       "meaningVi": "kiểm tra",
-      "definitionEn": "to look at something to make sure it is correct",
-      "definitionEnSimple": "to look at something to make sure it is correct",
-      "chunks": [
-        {
-          "text": "check an email",
-          "vi": "kiểm tra"
-        }
-      ],
-      "audioFile": "check.mp3",
-      "hints": [
-        {
-          "kind": "category",
-          "textEn": "This is an everyday action.",
-          "textVi": "Đây là một hành động thường gặp."
-        },
-        {
-          "kind": "context",
-          "textEn": "Please ___ the numbers again.",
-          "textVi": "Hãy kiểm tra lại các con số."
-        },
-        {
-          "kind": "function",
-          "textEn": "to look at something to make sure it is correct",
-          "textVi": "Hãy nghĩ đến tình huống trong câu ví dụ."
-        }
-      ],
+      "synonyms": [],
+      "noteVi": "",
       "examples": [
         {
           "english": "Please ___ the numbers again.",
           "meaningVi": "Hãy kiểm tra lại các con số.",
           "target": "check",
-          "audioFile": "check-1.mp3",
-          "alternativesTried": [
-            "eat",
-            "play",
-            "draw",
-            "sing",
-            "jump"
-          ],
-          "stillPlausible": []
+          "gradable": true
         },
         {
           "english": "I ___ my email before the meeting.",
           "meaningVi": "Tôi kiểm tra email trước cuộc họp.",
           "target": "check",
-          "audioFile": "check-2.mp3",
-          "alternativesTried": [
-            "eat",
-            "play",
-            "draw",
-            "sing",
-            "jump"
-          ],
-          "stillPlausible": []
+          "gradable": true
         }
       ]
     },
@@ -615,68 +271,25 @@
       "senseKey": "send.v.sample_work",
       "partOfSpeech": "verb",
       "ipa": "/send/",
-      "cefr": "a2",
-      "topics": [
-        "work"
-      ],
+      "audioFile": "send.mp3",
       "forms": [
         "send"
       ],
       "meaningVi": "gửi",
-      "definitionEn": "to make a message or object go to another person",
-      "definitionEnSimple": "to make a message or object go to another person",
-      "chunks": [
-        {
-          "text": "send an email",
-          "vi": "gửi"
-        }
-      ],
-      "audioFile": "send.mp3",
-      "hints": [
-        {
-          "kind": "category",
-          "textEn": "This is an everyday action.",
-          "textVi": "Đây là một hành động thường gặp."
-        },
-        {
-          "kind": "context",
-          "textEn": "I will ___ the file tonight.",
-          "textVi": "Tôi sẽ gửi tệp tối nay."
-        },
-        {
-          "kind": "function",
-          "textEn": "to make a message or object go to another person",
-          "textVi": "Hãy nghĩ đến tình huống trong câu ví dụ."
-        }
-      ],
+      "synonyms": [],
+      "noteVi": "",
       "examples": [
         {
           "english": "I will ___ the file tonight.",
           "meaningVi": "Tôi sẽ gửi tệp tối nay.",
           "target": "send",
-          "audioFile": "send-1.mp3",
-          "alternativesTried": [
-            "eat",
-            "play",
-            "draw",
-            "sing",
-            "jump"
-          ],
-          "stillPlausible": []
+          "gradable": true
         },
         {
           "english": "Please ___ me the final report.",
           "meaningVi": "Hãy gửi cho tôi báo cáo cuối cùng.",
           "target": "send",
-          "audioFile": "send-2.mp3",
-          "alternativesTried": [
-            "eat",
-            "play",
-            "draw",
-            "sing",
-            "jump"
-          ],
-          "stillPlausible": []
+          "gradable": true
         }
       ]
     },
@@ -685,68 +298,25 @@
       "senseKey": "receive.v.sample_work",
       "partOfSpeech": "verb",
       "ipa": "/rɪˈsiːv/",
-      "cefr": "a2",
-      "topics": [
-        "work"
-      ],
+      "audioFile": "receive.mp3",
       "forms": [
         "receive"
       ],
       "meaningVi": "nhận",
-      "definitionEn": "to get something that another person sends",
-      "definitionEnSimple": "to get something that another person sends",
-      "chunks": [
-        {
-          "text": "receive an email",
-          "vi": "nhận"
-        }
-      ],
-      "audioFile": "receive.mp3",
-      "hints": [
-        {
-          "kind": "category",
-          "textEn": "This is an everyday action.",
-          "textVi": "Đây là một hành động thường gặp."
-        },
-        {
-          "kind": "context",
-          "textEn": "I ___ many emails each day.",
-          "textVi": "Tôi nhận nhiều email mỗi ngày."
-        },
-        {
-          "kind": "function",
-          "textEn": "to get something that another person sends",
-          "textVi": "Hãy nghĩ đến tình huống trong câu ví dụ."
-        }
-      ],
+      "synonyms": [],
+      "noteVi": "",
       "examples": [
         {
           "english": "I ___ many emails each day.",
           "meaningVi": "Tôi nhận nhiều email mỗi ngày.",
           "target": "receive",
-          "audioFile": "receive-1.mp3",
-          "alternativesTried": [
-            "eat",
-            "play",
-            "draw",
-            "sing",
-            "jump"
-          ],
-          "stillPlausible": []
+          "gradable": true
         },
         {
           "english": "Did you ___ the document yesterday?",
           "meaningVi": "Hôm qua bạn có nhận được tài liệu không?",
           "target": "receive",
-          "audioFile": "receive-2.mp3",
-          "alternativesTried": [
-            "eat",
-            "play",
-            "draw",
-            "sing",
-            "jump"
-          ],
-          "stillPlausible": []
+          "gradable": true
         }
       ]
     },
@@ -755,68 +325,25 @@
       "senseKey": "share.v.sample_work",
       "partOfSpeech": "verb",
       "ipa": "/ʃeə/",
-      "cefr": "a2",
-      "topics": [
-        "work"
-      ],
+      "audioFile": "share.mp3",
       "forms": [
         "share"
       ],
       "meaningVi": "chia sẻ",
-      "definitionEn": "to give other people access to something",
-      "definitionEnSimple": "to give other people access to something",
-      "chunks": [
-        {
-          "text": "share an idea",
-          "vi": "chia sẻ"
-        }
-      ],
-      "audioFile": "share.mp3",
-      "hints": [
-        {
-          "kind": "category",
-          "textEn": "This is an everyday action.",
-          "textVi": "Đây là một hành động thường gặp."
-        },
-        {
-          "kind": "context",
-          "textEn": "We ___ ideas at the start of the meeting.",
-          "textVi": "Chúng tôi chia sẻ ý tưởng khi bắt đầu cuộc họp."
-        },
-        {
-          "kind": "function",
-          "textEn": "to give other people access to something",
-          "textVi": "Hãy nghĩ đến tình huống trong câu ví dụ."
-        }
-      ],
+      "synonyms": [],
+      "noteVi": "",
       "examples": [
         {
           "english": "We ___ ideas at the start of the meeting.",
           "meaningVi": "Chúng tôi chia sẻ ý tưởng khi bắt đầu cuộc họp.",
           "target": "share",
-          "audioFile": "share-1.mp3",
-          "alternativesTried": [
-            "eat",
-            "play",
-            "draw",
-            "sing",
-            "jump"
-          ],
-          "stillPlausible": []
+          "gradable": true
         },
         {
           "english": "Please ___ the document with the team.",
           "meaningVi": "Hãy chia sẻ tài liệu với nhóm.",
           "target": "share",
-          "audioFile": "share-2.mp3",
-          "alternativesTried": [
-            "eat",
-            "play",
-            "draw",
-            "sing",
-            "jump"
-          ],
-          "stillPlausible": []
+          "gradable": true
         }
       ]
     },
@@ -825,68 +352,25 @@
       "senseKey": "finish.v.sample_work",
       "partOfSpeech": "verb",
       "ipa": "/ˈfɪnɪʃ/",
-      "cefr": "a2",
-      "topics": [
-        "work"
-      ],
+      "audioFile": "finish.mp3",
       "forms": [
         "finish"
       ],
       "meaningVi": "hoàn thành",
-      "definitionEn": "to come to the end of a task",
-      "definitionEnSimple": "to come to the end of a task",
-      "chunks": [
-        {
-          "text": "finish a task",
-          "vi": "hoàn thành"
-        }
-      ],
-      "audioFile": "finish.mp3",
-      "hints": [
-        {
-          "kind": "category",
-          "textEn": "This is an everyday action.",
-          "textVi": "Đây là một hành động thường gặp."
-        },
-        {
-          "kind": "context",
-          "textEn": "I will ___ the report by Friday.",
-          "textVi": "Tôi sẽ hoàn thành báo cáo trước thứ Sáu."
-        },
-        {
-          "kind": "function",
-          "textEn": "to come to the end of a task",
-          "textVi": "Hãy nghĩ đến tình huống trong câu ví dụ."
-        }
-      ],
+      "synonyms": [],
+      "noteVi": "",
       "examples": [
         {
           "english": "I will ___ the report by Friday.",
           "meaningVi": "Tôi sẽ hoàn thành báo cáo trước thứ Sáu.",
           "target": "finish",
-          "audioFile": "finish-1.mp3",
-          "alternativesTried": [
-            "eat",
-            "play",
-            "draw",
-            "sing",
-            "jump"
-          ],
-          "stillPlausible": []
+          "gradable": true
         },
         {
           "english": "We ___ work at five today.",
           "meaningVi": "Hôm nay chúng tôi kết thúc công việc lúc năm giờ.",
           "target": "finish",
-          "audioFile": "finish-2.mp3",
-          "alternativesTried": [
-            "eat",
-            "play",
-            "draw",
-            "sing",
-            "jump"
-          ],
-          "stillPlausible": []
+          "gradable": true
         }
       ]
     },
@@ -895,68 +379,25 @@
       "senseKey": "solve.v.sample_work",
       "partOfSpeech": "verb",
       "ipa": "/sɒlv/",
-      "cefr": "a2",
-      "topics": [
-        "work"
-      ],
+      "audioFile": "solve.mp3",
       "forms": [
         "solve"
       ],
       "meaningVi": "giải quyết",
-      "definitionEn": "to find an answer to a problem",
-      "definitionEnSimple": "to find an answer to a problem",
-      "chunks": [
-        {
-          "text": "solve a problem",
-          "vi": "giải quyết"
-        }
-      ],
-      "audioFile": "solve.mp3",
-      "hints": [
-        {
-          "kind": "category",
-          "textEn": "This is an everyday action.",
-          "textVi": "Đây là một hành động thường gặp."
-        },
-        {
-          "kind": "context",
-          "textEn": "We need to ___ this problem today.",
-          "textVi": "Hôm nay chúng ta cần giải quyết vấn đề này."
-        },
-        {
-          "kind": "function",
-          "textEn": "to find an answer to a problem",
-          "textVi": "Hãy nghĩ đến tình huống trong câu ví dụ."
-        }
-      ],
+      "synonyms": [],
+      "noteVi": "",
       "examples": [
         {
           "english": "We need to ___ this problem today.",
           "meaningVi": "Hôm nay chúng ta cần giải quyết vấn đề này.",
           "target": "solve",
-          "audioFile": "solve-1.mp3",
-          "alternativesTried": [
-            "eat",
-            "play",
-            "draw",
-            "sing",
-            "jump"
-          ],
-          "stillPlausible": []
+          "gradable": true
         },
         {
           "english": "Can you ___ the issue without help?",
           "meaningVi": "Bạn có thể tự giải quyết sự cố này không?",
           "target": "solve",
-          "audioFile": "solve-2.mp3",
-          "alternativesTried": [
-            "eat",
-            "play",
-            "draw",
-            "sing",
-            "jump"
-          ],
-          "stillPlausible": []
+          "gradable": true
         }
       ]
     },
@@ -965,68 +406,25 @@
       "senseKey": "support.v.sample_work",
       "partOfSpeech": "verb",
       "ipa": "/səˈpɔːt/",
-      "cefr": "a2",
-      "topics": [
-        "work"
-      ],
+      "audioFile": "support.mp3",
       "forms": [
         "support"
       ],
       "meaningVi": "hỗ trợ",
-      "definitionEn": "to help someone do something",
-      "definitionEnSimple": "to help someone do something",
-      "chunks": [
-        {
-          "text": "support a team",
-          "vi": "hỗ trợ"
-        }
-      ],
-      "audioFile": "support.mp3",
-      "hints": [
-        {
-          "kind": "category",
-          "textEn": "This is an everyday action.",
-          "textVi": "Đây là một hành động thường gặp."
-        },
-        {
-          "kind": "context",
-          "textEn": "Our team will ___ the new staff.",
-          "textVi": "Nhóm chúng tôi sẽ hỗ trợ nhân viên mới."
-        },
-        {
-          "kind": "function",
-          "textEn": "to help someone do something",
-          "textVi": "Hãy nghĩ đến tình huống trong câu ví dụ."
-        }
-      ],
+      "synonyms": [],
+      "noteVi": "",
       "examples": [
         {
           "english": "Our team will ___ the new staff.",
           "meaningVi": "Nhóm chúng tôi sẽ hỗ trợ nhân viên mới.",
           "target": "support",
-          "audioFile": "support-1.mp3",
-          "alternativesTried": [
-            "eat",
-            "play",
-            "draw",
-            "sing",
-            "jump"
-          ],
-          "stillPlausible": []
+          "gradable": true
         },
         {
           "english": "I ___ my colleagues when they are busy.",
           "meaningVi": "Tôi hỗ trợ đồng nghiệp khi họ bận.",
           "target": "support",
-          "audioFile": "support-2.mp3",
-          "alternativesTried": [
-            "eat",
-            "play",
-            "draw",
-            "sing",
-            "jump"
-          ],
-          "stillPlausible": []
+          "gradable": true
         }
       ]
     },
@@ -1035,68 +433,25 @@
       "senseKey": "deliver.v.sample_work",
       "partOfSpeech": "verb",
       "ipa": "/dɪˈlɪvə/",
-      "cefr": "a2",
-      "topics": [
-        "work"
-      ],
+      "audioFile": "deliver.mp3",
       "forms": [
         "deliver"
       ],
       "meaningVi": "giao",
-      "definitionEn": "to take something to the person waiting for it",
-      "definitionEnSimple": "to take something to the person waiting for it",
-      "chunks": [
-        {
-          "text": "deliver a package",
-          "vi": "giao"
-        }
-      ],
-      "audioFile": "deliver.mp3",
-      "hints": [
-        {
-          "kind": "category",
-          "textEn": "This is an everyday action.",
-          "textVi": "Đây là một hành động thường gặp."
-        },
-        {
-          "kind": "context",
-          "textEn": "They ___ packages every morning.",
-          "textVi": "Họ giao các kiện hàng mỗi sáng."
-        },
-        {
-          "kind": "function",
-          "textEn": "to take something to the person waiting for it",
-          "textVi": "Hãy nghĩ đến tình huống trong câu ví dụ."
-        }
-      ],
+      "synonyms": [],
+      "noteVi": "",
       "examples": [
         {
           "english": "They ___ packages every morning.",
           "meaningVi": "Họ giao các kiện hàng mỗi sáng.",
           "target": "deliver",
-          "audioFile": "deliver-1.mp3",
-          "alternativesTried": [
-            "eat",
-            "play",
-            "draw",
-            "sing",
-            "jump"
-          ],
-          "stillPlausible": []
+          "gradable": true
         },
         {
           "english": "We will ___ the order on Thursday.",
           "meaningVi": "Chúng tôi sẽ giao đơn hàng vào thứ Năm.",
           "target": "deliver",
-          "audioFile": "deliver-2.mp3",
-          "alternativesTried": [
-            "eat",
-            "play",
-            "draw",
-            "sing",
-            "jump"
-          ],
-          "stillPlausible": []
+          "gradable": true
         }
       ]
     }

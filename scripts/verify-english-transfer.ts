@@ -6,12 +6,7 @@ if (!sourceUrl || !targetUrl) {
 	throw new Error('Set SOURCE_DATABASE_URL and TARGET_DATABASE_URL');
 }
 
-const tables = [
-	'EnWord', 'EnSense', 'EnExample', 'EnSenseHint', 'EnSenseRelation',
-	'EnWordFamily', 'EnWordFamilyMember', 'EnPattern', 'EnPatternExample',
-	'EnPatternSense', 'EnQuestion', 'EnSet', 'EnSetItem', 'EnActivityType',
-	'EnTestBlueprint',
-] as const;
+const tables = ['EnWord', 'EnSense', 'EnExample', 'EnSet', 'EnSetItem'] as const;
 
 async function count(pool: Pool, table: string): Promise<number> {
 	const escaped = table.replaceAll('"', '""');

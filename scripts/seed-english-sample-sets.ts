@@ -59,16 +59,6 @@ async function main() {
 				const saved = await saveEnglishPack(assessment.pack);
 				setId = saved.setId;
 			}
-			for (const word of assessment.pack.words) {
-				if (!word.senseKey) continue;
-				await prisma.enSense.updateMany({
-					where: { senseKey: word.senseKey },
-					data: {
-						distractorMeanings: word.distractorMeanings,
-						distractorLemmas: word.distractorLemmas,
-					},
-				});
-			}
 
 			const published = existing?.status === 'published'
 				? { publishedSenses: expectedCount, issues: [] }
@@ -84,8 +74,7 @@ async function main() {
 			const seededSenseIds = seededItems.flatMap((item) => item.senseId ? [item.senseId] : []);
 			const seededWords = await prisma.enSense.findMany({ where: { id: { in: seededSenseIds } }, select: { wordId: true } });
 			await prisma.$transaction([
-				prisma.enWord.updateMany({ where: { id: { in: seededWords.map((word) => word.wordId) } }, data: { audioPath: '', audioUkPath: '', audioUsPath: '' } }),
-				prisma.enExample.updateMany({ where: { senseId: { in: seededSenseIds } }, data: { audioPath: '' } }),
+				prisma.enWord.updateMany({ where: { id: { in: seededWords.map((word) => word.wordId) } }, data: { audioPath: '' } }),
 			]);
 			console.log(`  ✅ ${assessment.pack.title}: ${expectedCount} từ`);
 		}

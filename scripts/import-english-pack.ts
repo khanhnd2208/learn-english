@@ -31,7 +31,7 @@ async function main() {
 	for (const item of assessment.issues) {
 		console.log(`  ${item.blocksGrade ? '✖' : '·'} ${item.path} [${item.code}]: ${item.message}`);
 	}
-	const blocked = assessment.words.filter((word) => !word.publishable || word.gradeExampleCount < 2);
+	const blocked = assessment.words.filter((word) => !word.publishable);
 	if (blocked.length > 0) {
 		throw new Error(`Chưa thể xuất bản: ${blocked.map((word) => pack.words[word.index]?.lemma).join(', ')}`);
 	}
@@ -48,7 +48,7 @@ async function main() {
 		}
 		const existingWords = await prisma.enWord.findMany({
 			where: { lemmaKey: { in: pack.words.map((word) => lemmaKeyOf(word.lemma)) } },
-			select: { id: true, lemma: true, audioPath: true, audioUkPath: true, audioUsPath: true },
+			select: { id: true, lemma: true, audioPath: true },
 		});
 		if (existingWords.length > 0) {
 			console.log(`  · Dùng lại ${existingWords.length} từ đã có: ${existingWords.map((word) => word.lemma).join(', ')}`);
@@ -71,13 +71,12 @@ async function main() {
 		await prisma.$transaction([
 			prisma.enWord.updateMany({
 				where: { id: { in: senses.map((sense) => sense.wordId).filter((id) => !keptIds.has(id)) } },
-				data: { audioPath: '', audioUkPath: '', audioUsPath: '' },
+				data: { audioPath: '' },
 			}),
-			...existingWords.map(({ id, audioPath, audioUkPath, audioUsPath }) => prisma.enWord.update({
+			...existingWords.map(({ id, audioPath }) => prisma.enWord.update({
 				where: { id },
-				data: { audioPath, audioUkPath, audioUsPath },
+				data: { audioPath },
 			})),
-			prisma.enExample.updateMany({ where: { senseId: { in: senseIds } }, data: { audioPath: '' } }),
 		]);
 		console.log(`  ✅ ${pack.title}: đã xuất bản ${published.publishedSenses} từ (set ${setId})`);
 	} finally {

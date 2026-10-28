@@ -1,12 +1,5 @@
-# Prompt tạo bộ từ tiếng Anh bằng AI
+# Prompt tạo pack tiếng Anh v3
 
-Prompt nằm ngay trên trang **Admin → Nội dung → Bước 1**: nhập danh sách từ, bấm **Copy prompt**, dán vào ChatGPT hoặc Claude, rồi dán JSON AI trả về vào **Bước 2**.
+Dùng nút tạo prompt trong trang quản trị để lấy mẫu JSON và danh sách từ. Mỗi mục là một nghĩa; ghi nghĩa tiếng Việt ngắn, IPA và audio giọng Mỹ. Liệt kê các dạng biến đổi và những từ gần nghĩa mà người học có thể nhập khi nhìn nghĩa Việt. Lưu ý tiếng Việt chỉ dùng cho bẫy thực sự.
 
-Nội dung prompt và ví dụ mẫu *belonging* nằm trong `src/lib/english/aiPackPrompt.ts`. Sửa prompt ở đó. Test `enContentValidation.test.ts` giữ cho ví dụ mẫu luôn xuất bản được.
-
-| Tab | Trường JSON | Số lượng |
-|---|---|---|
-| Cách nói | `chunks`, `grammarNoteVi` | Không giới hạn, ít nhất 1 (trần kỹ thuật 40) |
-| Phân biệt | `commonErrors`, `pitfallVi`, `relations[kind=confusable]` | Không giới hạn (trần kỹ thuật 20 lỗi) |
-| Ví dụ | `examples` | 3–5 câu, ít nhất 2 câu điền chấm được |
-| Tôi là ai? | `hints` | Đúng 3 |
+Viết 2–3 câu ngắn, tự nhiên. Chỉ đánh dấu `gradable: true` nếu câu có chỗ trống cùng bản dịch Việt chỉ có một từ điền tự nhiên; nếu phân vân, chọn `false`. Không thêm trường ngoài mẫu. Xem kỹ khối **Câu dùng để chấm** trước khi lưu hoặc xuất bản.
