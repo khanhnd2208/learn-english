@@ -1,28 +1,29 @@
 import { isLongTerm } from '@/lib/english/schedule';
 
-/** XP rules. XP only comes from answers graded on the server, and every source pays once (see `sourceKey`). */
+/**
+ * XP rules. XP only comes from answers graded on the server, and every source pays once (see `sourceKey`).
+ * Wrong answers never cost XP. Practice (Luyện tập) pays no XP: it does not change the schedule.
+ */
 export const XP = {
-	/** Scheduled SRS answer, correct. */
+	/** Ôn luân phiên: a word due today, answered right. */
 	srs: 20,
+	/** A word reaching the Nhớ lâu stage for the first time. */
 	longTerm: 100,
-	/** Unscheduled SRS answer (extra round), correct. */
+	/** Ôn luân phiên: an extra answer that does not move the schedule, answered right. */
 	extra: 10,
-	/** Guided Review main question, correct. */
+	/** Ôn theo bộ: a main question answered right. */
 	review: 10,
-	/** Daily cap shared by Review and extra SRS rounds. */
+	/** Daily cap shared by Ôn theo bộ and extra answers in Ôn luân phiên. */
 	reviewDailyCap: 300,
-	quizPerPass: 10,
-	quizBonus: 50,
-	quizBonusRatio: 0.8,
 	dailyQuest: 100,
-	weeklyQuest: 400,
-	weeklyChest: 500,
 	dailyGoal: 100,
+	weeklyChest: 500,
 	/** Minimum gap between two XP-earning answers in one session. */
 	minGapMs: 3000,
 } as const;
 
-export type XpKind = 'review' | 'longterm' | 'extra' | 'quiz' | 'quest' | 'goal' | 'chest' | 'achievement';
+/** `extra` covers Ôn theo bộ too, since both share the daily cap. */
+export type XpKind = 'review' | 'longterm' | 'extra' | 'quest' | 'goal' | 'chest' | 'achievement';
 
 export type XpEventInput = { sourceKey: string; kind: XpKind; xp: number };
 
@@ -53,18 +54,6 @@ export function pacedEnough(prevAt: Date, at: Date, minGapMs: number = XP.minGap
 	return at.getTime() - prevAt.getTime() >= minGapMs;
 }
 
-/** Correct answers that were paced, in time order. The first one is measured from `startedAt`. */
-export function pacedCorrectCount(answers: Array<{ at: Date | null; correct: boolean | null }>, startedAt: Date): number {
-	const answered = answers.flatMap((answer) => answer.at ? [{ at: answer.at, correct: answer.correct === true }] : []).sort((a, b) => a.at.getTime() - b.at.getTime());
-	let prev = startedAt;
-	let count = 0;
-	for (const answer of answered) {
-		if (answer.correct && pacedEnough(prev, answer.at)) count += 1;
-		prev = answer.at;
-	}
-	return count;
-}
-
 export type ReviewForXp = { id: string; senseId: string; correct: boolean; scheduled: boolean; boxBefore: number; boxAfter: number };
 
 /**
@@ -79,14 +68,6 @@ export function reviewXpEvents(review: ReviewForXp, extraXpToday: number, paced:
 	const events: XpEventInput[] = [{ sourceKey: `review:${review.id}`, kind: 'review', xp: XP.srs }];
 	if (!isLongTerm(review.boxBefore) && isLongTerm(review.boxAfter)) events.push({ sourceKey: `longterm:${review.senseId}`, kind: 'longterm', xp: XP.longTerm });
 	return events;
-}
-
-/** XP for a submitted quiz, from the correct answers that passed the pacing rule. Only the first submission of each kind on a day pays. */
-export function quizXpEvent(kind: string, day: string, passed: number, total: number): XpEventInput | null {
-	if (total <= 0) return null;
-	const bonus = passed / total >= XP.quizBonusRatio ? XP.quizBonus : 0;
-	const xp = passed * XP.quizPerPass + bonus;
-	return xp > 0 ? { sourceKey: `quiz:${kind}:${day}`, kind: 'quiz', xp } : null;
 }
 
 const LEVEL_TITLES = ['Tân binh', 'Lữ khách', 'Hiệp sĩ chữ', 'Pháp sư từ', 'Hiền giả', 'Huyền thoại'] as const;

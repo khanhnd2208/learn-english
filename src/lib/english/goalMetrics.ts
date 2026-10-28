@@ -4,12 +4,6 @@ import { emptyMetrics, type QuestMetrics } from '@/lib/english/quests';
 export type ReviewRow = { at: Date; scheduled: boolean };
 export type GuidedRow = { sessionId: string; chunkNumber: number; answered: boolean; answeredAt: Date | null; correct: boolean };
 export type XpRow = { day: string; xp: number; kind: string; sourceKey: string };
-export type QuizRow = { kind: string; passedCount: number; wordCount: number; finishedAt: Date };
-
-/** Distinct quiz kinds submitted on the given Vietnam days. */
-export function quizKindsOn(quizzes: QuizRow[], days: Set<string>): number {
-	return new Set(quizzes.filter((quiz) => days.has(vnDayKey(quiz.finishedAt))).map((quiz) => quiz.kind)).size;
-}
 
 /** Quest metrics for a set of Vietnam days, from rows already loaded for the week. */
 export function periodMetrics(input: {
@@ -17,13 +11,11 @@ export function periodMetrics(input: {
 	reviews: ReviewRow[];
 	guided: GuidedRow[];
 	xp: XpRow[];
-	quizzes: QuizRow[];
 }): QuestMetrics {
 	const metrics = emptyMetrics();
 	const reviews = input.reviews.filter((review) => input.days.has(vnDayKey(review.at)));
 	const guided = input.guided.filter((row) => row.answeredAt !== null && input.days.has(vnDayKey(row.answeredAt)));
 	metrics.srsWords = reviews.filter((review) => review.scheduled).length;
-	metrics.reviewCorrect = guided.filter((row) => row.correct).length;
 	metrics.daysStudied = new Set([...reviews.map((review) => vnDayKey(review.at)), ...guided.map((row) => vnDayKey(row.answeredAt!))]).size;
 	metrics.xp = input.xp.filter((row) => input.days.has(row.day)).reduce((sum, row) => sum + row.xp, 0);
 	const chunks = new Map<string, GuidedRow[]>();

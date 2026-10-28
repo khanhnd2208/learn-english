@@ -23,7 +23,7 @@ export const HINTS = {
 	},
 	xp: {
 		title: 'XP tính thế nào?',
-		body: `Ôn luân phiên đúng +${XP.srs} · Ôn theo bộ đúng +${XP.review} · Từ lên Nhớ lâu +${XP.longTerm}. Câu sai không mất điểm.`,
+		body: `Ôn luân phiên: mỗi từ đến hạn đúng +${XP.srs}, từ lên Nhớ lâu +${XP.longTerm}. Ôn theo bộ: mỗi câu đúng +${XP.review} (tối đa ${XP.reviewDailyCap} XP/ngày). Mỗi nhiệm vụ ngày +${XP.dailyQuest}, đạt mục tiêu ngày +${XP.dailyGoal}, rương tuần +${XP.weeklyChest}. Câu sai không bị trừ, Luyện tập không tính XP.`,
 	},
 	practice: {
 		title: 'Luyện tập',

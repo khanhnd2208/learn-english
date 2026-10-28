@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { DAILY_GOAL_DEFAULT, goalTierIndex, levelFromXp, pacedCorrectCount, pacedEnough, quizXpEvent, reviewXpEvents, xpForLevel, XP } from '@/lib/english/xp';
+import { DAILY_GOAL_DEFAULT, goalTierIndex, levelFromXp, pacedEnough, reviewXpEvents, xpForLevel, XP } from '@/lib/english/xp';
 import { currentStreak, streakStats } from '@/lib/english/streak';
 
 const review = { id: 'r1', senseId: 's1', correct: true, scheduled: true, boxBefore: 2, boxAfter: 3 };
@@ -38,27 +38,6 @@ describe('pacing', () => {
 		expect(pacedEnough(at(0), at(3))).toBe(true);
 	});
 
-	it('counts only paced correct answers, measuring the first from the start', () => {
-		const answers = [
-			{ at: at(2), correct: true },
-			{ at: at(6), correct: true },
-			{ at: at(7), correct: true },
-			{ at: at(11), correct: false },
-			{ at: at(15), correct: true },
-			{ at: null, correct: true },
-		];
-		// 2s after start is too fast, 6 ok, 7 too fast, 11 wrong, 15 ok.
-		expect(pacedCorrectCount(answers, at(0))).toBe(2);
-		expect(pacedCorrectCount([...answers].reverse(), at(0))).toBe(2);
-	});
-});
-
-describe('quiz XP', () => {
-	it('pays 10 per paced correct item plus 50 at 80%, keyed by kind and day', () => {
-		expect(quizXpEvent('mcq', '2026-10-26', 16, 20)).toEqual({ sourceKey: 'quiz:mcq:2026-10-26', kind: 'quiz', xp: 210 });
-		expect(quizXpEvent('fill', '2026-10-26', 10, 20)?.xp).toBe(100);
-		expect(quizXpEvent('fill', '2026-10-26', 0, 20)).toBeNull();
-	});
 });
 
 describe('levels', () => {

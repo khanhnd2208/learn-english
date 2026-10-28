@@ -6,18 +6,18 @@ import { achievementStatus, newlyEarned, nearestAchievements, type LifetimeMetri
 const ctx: QuestContext = { tier: 1, weeklyDaysGoal: 4, srsAvailable: 30, enrolledSets: 2 };
 
 describe('daily quests', () => {
-	it('are the same three quests every day, in order', () => {
+	it('are the same two quests every day, in order', () => {
 		const quests = dailyQuests(ctx);
-		expect(quests.map((quest) => [quest.key, quest.target, quest.xp])).toEqual([['srs_words', 20, 100], ['review_correct', 20, 100], ['chunk_done', 1, 100]]);
+		expect(quests.map((quest) => [quest.key, quest.target, quest.xp])).toEqual([['srs_words', 20, 100], ['chunk_done', 2, 100]]);
 		expect(dailyQuests(ctx)).toEqual(quests);
 	});
 
 	it('scales with the goal tier', () => {
 		const targets = (tier: number) => dailyQuests({ ...ctx, tier, srsAvailable: 100 }).map((quest) => quest.target);
-		expect(targets(0)).toEqual([10, 10, 1]);
-		expect(targets(1)).toEqual([20, 20, 1]);
-		expect(targets(2)).toEqual([30, 30, 1]);
-		expect(targets(3)).toEqual([40, 30, 1]);
+		expect(targets(0)).toEqual([10, 1]);
+		expect(targets(1)).toEqual([20, 2]);
+		expect(targets(2)).toEqual([30, 3]);
+		expect(targets(3)).toEqual([40, 4]);
 	});
 
 	it('shrinks the SRS target to the words available, down to a free zero', () => {
@@ -28,30 +28,27 @@ describe('daily quests', () => {
 	});
 
 	it('gives free zero quests when no set is downloaded', () => {
-		expect(dailyQuests({ ...ctx, enrolledSets: 0, srsAvailable: 0 }).map((quest) => [quest.target, quest.xp])).toEqual([[0, 0], [0, 0], [0, 0]]);
+		expect(dailyQuests({ ...ctx, enrolledSets: 0, srsAvailable: 0 }).map((quest) => [quest.target, quest.xp])).toEqual([[0, 0], [0, 0]]);
 	});
 });
 
 describe('weekly quests', () => {
-	it('use the weekly days goal and five days of the daily SRS and Review targets', () => {
-		expect(weeklyQuests(ctx).map((quest) => [quest.key, quest.target, quest.xp])).toEqual([['week_days', 4, 400], ['week_srs', 100, 400], ['week_review', 100, 400]]);
-		expect(weeklyQuests({ ...ctx, tier: 3, weeklyDaysGoal: 9 }).map((quest) => quest.target)).toEqual([7, 200, 150]);
+	it('is one study-days quest that pays through the chest', () => {
+		expect(weeklyQuests(ctx)).toEqual([{ key: 'week_days', target: 4, xp: 0 }]);
+		expect(weeklyQuests({ ...ctx, tier: 3, weeklyDaysGoal: 9 }).map((quest) => quest.target)).toEqual([7]);
 	});
 });
 
 describe('quest progress', () => {
 	it('reads each key from its own metric and caps at the target', () => {
-		const metrics = { ...emptyMetrics(), srsWords: 25, reviewCorrect: 4, chunksDone: 1, daysStudied: 2 };
+		const metrics = { ...emptyMetrics(), srsWords: 25, chunksDone: 1, daysStudied: 2 };
 		expect(questProgress({ key: 'srs_words', target: 20, xp: 100 }, metrics)).toEqual({ current: 20, done: true });
-		expect(questProgress({ key: 'review_correct', target: 10, xp: 100 }, metrics)).toEqual({ current: 4, done: false });
-		expect(questProgress({ key: 'chunk_done', target: 1, xp: 100 }, metrics)).toEqual({ current: 1, done: true });
-		expect(questProgress({ key: 'week_days', target: 4, xp: 400 }, metrics)).toEqual({ current: 2, done: false });
-		expect(questProgress({ key: 'week_srs', target: 100, xp: 400 }, metrics).current).toBe(25);
-		expect(questProgress({ key: 'week_review', target: 100, xp: 400 }, metrics).current).toBe(4);
+		expect(questProgress({ key: 'chunk_done', target: 2, xp: 100 }, metrics)).toEqual({ current: 1, done: false });
+		expect(questProgress({ key: 'week_days', target: 4, xp: 0 }, metrics)).toEqual({ current: 2, done: false });
 	});
 
 	it('drops retired quests from stored JSON', () => {
-		expect(parseQuests([{ key: 'srs_words', target: 20, xp: 100 }, { key: 'quiz_done', target: 1, xp: 100 }, null])).toEqual([{ key: 'srs_words', target: 20, xp: 100 }]);
+		expect(parseQuests([{ key: 'srs_words', target: 20, xp: 100 }, { key: 'review_correct', target: 20, xp: 100 }, { key: 'week_srs', target: 100, xp: 400 }, null])).toEqual([{ key: 'srs_words', target: 20, xp: 100 }]);
 	});
 
 	it('formats time left', () => {
@@ -65,7 +62,7 @@ describe('quest progress', () => {
 describe('period metrics', () => {
 	const at = (time: string, day = '26') => new Date(`2026-10-${day}T${time}+07:00`);
 
-	it('counts scheduled SRS answers, correct Review answers, quizzes and study days', () => {
+	it('counts scheduled SRS answers, finished chunks and study days', () => {
 		const metrics = periodMetrics({
 			days: new Set(['2026-10-26']),
 			reviews: [
@@ -81,9 +78,8 @@ describe('period metrics', () => {
 				{ sessionId: 'old', chunkNumber: 1, answered: true, answeredAt: at('09:00:10', '25'), correct: true },
 			],
 			xp: [{ day: '2026-10-26', xp: 120, kind: 'review', sourceKey: 'a' }, { day: '2026-10-25', xp: 990, kind: 'review', sourceKey: 'c' }],
-			quizzes: [{ kind: 'mcq', passedCount: 5, wordCount: 20, finishedAt: at('10:00:00') }, { kind: 'fill', passedCount: 0, wordCount: 0, finishedAt: at('10:00:00', '25') }],
 		});
-		expect(metrics).toEqual({ xp: 120, srsWords: 2, reviewCorrect: 2, chunksDone: 1, daysStudied: 1 });
+		expect(metrics).toEqual({ xp: 120, srsWords: 2, chunksDone: 1, daysStudied: 1 });
 	});
 
 	it('counts complete chunks on the day of their final answer', () => {
@@ -93,18 +89,18 @@ describe('period metrics', () => {
  { sessionId: 'a', chunkNumber: 2, answered: true, answeredAt: at('10:00:00'), correct: true },
  { sessionId: 'a', chunkNumber: 2, answered: false, answeredAt: null, correct: false },
  ];
- const base = { reviews: [], guided: rows, xp: [], quizzes: [] };
+ const base = { reviews: [], guided: rows, xp: [] };
  expect(periodMetrics({ ...base, days: new Set(['2026-10-25']) }).chunksDone).toBe(0);
  expect(periodMetrics({ ...base, days: new Set(['2026-10-26']) }).chunksDone).toBe(1);
  });
 	it('counts a day with only Review as studied', () => {
-		const metrics = periodMetrics({ days: new Set(['2026-10-26', '2026-10-27']), reviews: [{ at: at('08:00:00'), scheduled: true }], guided: [{ sessionId: 's', chunkNumber: 1, answered: true, answeredAt: at('09:00:00', '27'), correct: false }], xp: [], quizzes: [] });
+		const metrics = periodMetrics({ days: new Set(['2026-10-26', '2026-10-27']), reviews: [{ at: at('08:00:00'), scheduled: true }], guided: [{ sessionId: 's', chunkNumber: 1, answered: true, answeredAt: at('09:00:00', '27'), correct: false }], xp: [] });
 		expect(metrics.daysStudied).toBe(2);
 	});
 });
 
 describe('achievements', () => {
-	const metrics: LifetimeMetrics = { longTerm: 12, learned: 30, longestStreak: 2, goalDays: 0, chests: 0, perfectQuizzes: 0, revived: 0, sessionsFinished: 1, enrolledSets: 1, quizKindsToday: 0 };
+	const metrics: LifetimeMetrics = { longTerm: 12, learned: 30, longestStreak: 2, goalDays: 0, chests: 0, revived: 0, sessionsFinished: 1, enrolledSets: 1 };
 
 	it('unlocks each reached tier once, paying ten times the old XP', () => {
 		const earned = newlyEarned(metrics, new Set(['first_step_1']));
@@ -127,8 +123,8 @@ describe('topping up a board', () => {
 	it('upgrades empty quests once there is something to do and adds missing ones', () => {
 		const fresh = dailyQuests(ctx);
 		const empty = dailyQuests({ ...ctx, enrolledSets: 0, srsAvailable: 5 });
-		expect(topUpQuests(empty, fresh).map((quest) => [quest.key, quest.target])).toEqual([['srs_words', 5], ['review_correct', 20], ['chunk_done', 1]]);
-		expect(topUpQuests(empty.slice(0, 1), fresh).map((quest) => quest.key)).toEqual(['srs_words', 'review_correct', 'chunk_done']);
+		expect(topUpQuests(empty, fresh).map((quest) => [quest.key, quest.target])).toEqual([['srs_words', 5], ['chunk_done', 2]]);
+		expect(topUpQuests(empty.slice(0, 1), fresh).map((quest) => quest.key)).toEqual(['srs_words', 'chunk_done']);
 	});
 
 	it('leaves a shown quest alone', () => {
