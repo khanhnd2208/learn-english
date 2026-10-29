@@ -1,4 +1,4 @@
-import { EN_DAILY_DUE_LIMIT, EN_LEITNER_INTERVALS, EN_NEW_WORDS_DEFAULT, EN_ROUND_REVIEW_LIMIT } from '@/lib/english/constants';
+import { EN_LEITNER_INTERVALS } from '@/lib/english/constants';
 import { shiftVnDay, vnDayKey } from '@/lib/english/gapRule';
 import { normalizeLearnerText } from '@/lib/english/text';
 
@@ -10,15 +10,6 @@ export type ScheduledState = {
 	lapses: number;
 	introducedAt: Date;
 	lastReviewedAt: Date | null;
-};
-
-export type DailyQueueLimits = {
-	now?: Date;
-	newWordsPerDay?: number;
-	/** Words already introduced earlier today; they use up today's new-word quota. */
-	introducedToday?: number;
-	dueBacklogLimit?: number;
-	dueLimit?: number;
 };
 
 export type DailyQueueItem =
@@ -106,27 +97,22 @@ export function intervalDays(box: number): number {
 	return EN_LEITNER_INTERVALS[Math.min(EN_LEITNER_INTERVALS.length - 1, Math.max(0, box))] ?? 0;
 }
 
-export function buildDailyQueue<T extends ScheduledState>(
-	states: T[],
-	newPool: string[],
-	limits: DailyQueueLimits = {},
-): DailyQueueItem[] {
-	const now = limits.now ?? new Date();
-	const dueLimit = limits.dueLimit ?? EN_ROUND_REVIEW_LIMIT;
-	const backlogLimit = limits.dueBacklogLimit ?? EN_DAILY_DUE_LIMIT;
+/**
+ * Every due word, then every word of the downloaded sets that is not scheduled yet.
+ * SRS has no daily cap: correct answers push words further out, so the queue shrinks on
+ * its own, and a learner who cannot finish simply continues next time.
+ */
+export function buildDailyQueue<T extends ScheduledState>(states: T[], newPool: string[], now = new Date()): DailyQueueItem[] {
 	const dueStates = states.filter((state) => isDue(state, now));
 	dueStates.sort((a, b) => a.box - b.box || a.dueAt.getTime() - b.dueAt.getTime() || a.senseId.localeCompare(b.senseId));
-	const reviews = dueStates.slice(0, Math.max(0, dueLimit)).map((state) => ({ kind: 'review' as const, state }));
-	const quota = Math.max(0, (limits.newWordsPerDay ?? EN_NEW_WORDS_DEFAULT) - (limits.introducedToday ?? 0));
-	const newLimit = dueStates.length > backlogLimit ? 0 : quota;
 	const seen = new Set(states.map((state) => state.senseId));
-	const newWords = [...new Set(newPool)].filter((senseId) => !seen.has(senseId)).slice(0, newLimit);
-	return [...reviews, ...newWords.map((senseId) => ({ kind: 'new' as const, senseId }))];
+	const newWords = [...new Set(newPool)].filter((senseId) => !seen.has(senseId));
+	return [...dueStates.map((state) => ({ kind: 'review' as const, state })), ...newWords.map((senseId) => ({ kind: 'new' as const, senseId }))];
 }
 
 /**
- * New words from every downloaded set, taking one word from each set in turn, so a set
- * downloaded later starts in SRS the same day instead of waiting for earlier sets to run out.
+ * New words from every downloaded set, taking one word from each set in turn, so every set
+ * reaches the learner early instead of waiting behind the sets downloaded before it.
  * Words already scheduled are skipped before the turns are taken.
  */
 export function interleaveNewWords(groups: string[][], scheduled: Iterable<string> = []): string[] {

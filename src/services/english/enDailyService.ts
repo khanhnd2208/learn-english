@@ -1,7 +1,7 @@
 import { cache } from 'react';
 import { prisma } from '@/lib/prisma';
 import { AppError } from '@/lib/appError';
-import { EN_HINT_MAX_BOX, EN_DAILY_DUE_LIMIT, EN_NEW_WORDS_DEFAULT, EN_ROUND_REVIEW_LIMIT, EN_TX_MAX_WAIT_MS, EN_TX_TIMEOUT_MS, EN_WEEKLY_DAYS_DEFAULT } from '@/lib/english/constants';
+import { EN_HINT_MAX_BOX, EN_TX_MAX_WAIT_MS, EN_TX_TIMEOUT_MS, EN_WEEKLY_DAYS_DEFAULT } from '@/lib/english/constants';
 import { buildDailyQueue, interleaveNewWords, intervalChange, isLongTerm, isNearMiss, scheduleMove, vnDayStart, type ScheduledState } from '@/lib/english/schedule';
 import { gradeEnglishAnswer } from '@/lib/english/grade';
 import { shiftVnDay, vnDayKey, vnWeekDays } from '@/lib/english/gapRule';
@@ -36,7 +36,6 @@ export type TodayOverview = {
 	dueTotal: number;
 	dueCount: number;
 	newCount: number;
-	introducedToday: number;
 	enrolledSets: number;
 	tomorrowCount: number;
 	longTermCount: number;
@@ -56,6 +55,9 @@ export type TodayOverview = {
 	dueNext7Days: Array<{ day: string; count: number }>;
 	accuracy30: number | null;
 };
+
+/** Words whose audio the server prepares when a round starts; the player fetches the rest as the learner goes. */
+const WARM_AHEAD = 20;
 
 const SCHEDULED_SELECT = { id: true, senseId: true, box: true, dueAt: true, lapses: true, introducedAt: true, lastReviewedAt: true } as const;
 
@@ -86,24 +88,12 @@ async function newWordGroups(userId: string): Promise<{ groups: string[][]; enro
 	return { groups: [...bySet.values()], enrolledSets: setIds.length };
 }
 
-function countIntroducedToday(states: ScheduledState[], now: Date): number {
-	const start = vnDayStart(vnDayKey(now)).getTime();
-	return states.filter((state) => state.introducedAt.getTime() >= start).length;
-}
-
 async function planToday(userId: string, now: Date) {
 	const [states, { groups, enrolledSets }] = await Promise.all([scheduledStates(userId), newWordGroups(userId)]);
 	const pool = interleaveNewWords(groups, states.map((state) => state.senseId));
-	const introducedToday = countIntroducedToday(states, now);
-	const queue = buildDailyQueue(states, pool, {
-		now,
-		newWordsPerDay: EN_NEW_WORDS_DEFAULT,
-		introducedToday,
-		dueBacklogLimit: EN_DAILY_DUE_LIMIT,
-		dueLimit: EN_ROUND_REVIEW_LIMIT,
-	});
+	const queue = buildDailyQueue(states, pool, now);
 	const dueTotal = states.filter((state) => state.dueAt <= now).length;
-	return { states, queue, dueTotal, introducedToday, enrolledSets };
+	return { states, queue, dueTotal, enrolledSets };
 }
 
 export async function startToday(userId: string, now = new Date()) {
@@ -117,7 +107,7 @@ export async function startToday(userId: string, now = new Date()) {
 	});
 	const bundles = await getSenseBundles(senseIds, true);
 	const bySense = new Map(bundles.map((bundle) => [bundle.sense.id, bundle]));
-	warmBundleSpeech(senseIds.flatMap((senseId) => bySense.get(senseId) ?? []));
+	warmBundleSpeech(senseIds.slice(0, WARM_AHEAD).flatMap((senseId) => bySense.get(senseId) ?? []));
 	const items = queue.flatMap((item): DailyItem[] => {
 		const senseId = item.kind === 'new' ? item.senseId : item.state.senseId;
 		const bundle = bySense.get(senseId);
@@ -143,7 +133,7 @@ async function studiedDays(userId: string, from: Date): Promise<Set<string>> {
 
 /** Cached per request: the app layout and the page both read it. */
 export const getTodayOverview = cache(async (userId: string, now = new Date()): Promise<TodayOverview> => {
-	const { states, queue, dueTotal, introducedToday, enrolledSets } = await planToday(userId, now);
+	const { states, queue, dueTotal, enrolledSets } = await planToday(userId, now);
 	const today = vnDayKey(now);
 	const tomorrowEnd = vnDayStart(shiftVnDay(today, 2));
 	const days = vnWeekDays(today);
@@ -179,7 +169,6 @@ export const getTodayOverview = cache(async (userId: string, now = new Date()): 
 		dueTotal,
 		dueCount: queue.filter((item) => item.kind === 'review').length,
 		newCount: queue.filter((item) => item.kind === 'new').length,
-		introducedToday,
 		enrolledSets,
 		tomorrowCount: states.filter((state) => state.dueAt > now && state.dueAt < tomorrowEnd).length,
 		longTermCount: states.filter((state) => isLongTerm(state.box)).length,
