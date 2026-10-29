@@ -14,7 +14,7 @@ it('shows hints for new and low boxes, and none for box 3', async () => {
  expect(result.items.every((item) => !('prompt' in item) && !('cloze' in item))).toBe(true);
  expect(mock.create.mock.calls[0]![0].data.activityKey).toBe('srs_type');
 });
-it('brings new words from every downloaded set into the same round', async () => {
+it('brings every unscheduled word of every downloaded set into the round', async () => {
  const now = new Date('2026-10-28T12:00:00Z');
  mock.states.mockResolvedValue([{ id: 'st1', senseId: 'a1', box: 2, dueAt: new Date('2026-11-05T00:00:00Z'), lapses: 0, introducedAt: new Date('2026-10-20T00:00:00Z'), lastReviewedAt: null }]);
  mock.enrollments.mockResolvedValue([{ setId: 'setA' }, { setId: 'setB' }, { setId: 'setC' }]);
@@ -27,5 +27,5 @@ it('brings new words from every downloaded set into the same round', async () =>
  await startToday('user', now);
  const senseIds = mock.create.mock.calls.at(-1)![0].data.senseIds as string[];
  expect(senseIds.slice(0, 5)).toEqual(['a2', 'b1', 'c1', 'a3', 'b2']);
- expect(senseIds).toHaveLength(10);
+ expect(senseIds).toHaveLength(22);
 });

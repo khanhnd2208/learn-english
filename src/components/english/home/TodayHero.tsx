@@ -6,7 +6,7 @@ import { useRouter } from 'next/navigation';
 import StudySession from '@/components/english/StudySession';
 import InfoHint from '@/components/ui/InfoHint';
 import { HINTS } from '@/lib/english/hintCopy';
-import { dueRoundLabel, reviewMinutes } from '@/lib/english/reviewSummary';
+import { reviewMinutes } from '@/lib/english/reviewSummary';
 import { todayHeroState } from '@/lib/english/todayHero';
 import { estimateReviewXp } from '@/lib/english/xp';
 import type { TodayOverview } from '@/services/english/enDailyService';
@@ -34,7 +34,7 @@ export default function TodayHero({ overview, xp, goal }: { overview: TodayOverv
 			{state === 'review' && <>
 				<h2 id="today-heading" className="mt-1 flex items-center gap-2 text-2xl sm:text-3xl">{overview.dueCount + overview.newCount} từ cần ôn<InfoHint title={HINTS.srs.title}>{HINTS.srs.body}</InfoHint></h2>
 				<p className="mt-1 flex flex-wrap items-center gap-x-1.5 text-sm text-foreground-secondary">
-					{overview.dueCount > 0 && <span>{dueRoundLabel(overview)}</span>}
+					{overview.dueCount > 0 && <span>{overview.dueCount} từ đến hạn</span>}
 					{overview.dueCount > 0 && overview.newCount > 0 && <span aria-hidden="true">·</span>}
 					{overview.newCount > 0 && <span className="inline-flex items-center gap-1.5">{overview.newCount} từ mới <InfoHint title={HINTS.newWords.title}>{HINTS.newWords.body}</InfoHint></span>}
 					{minutes > 0 && <><span aria-hidden="true">·</span><span>~{minutes} phút</span></>}

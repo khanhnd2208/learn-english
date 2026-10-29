@@ -51,28 +51,25 @@ describe('Leitner schedule', () => {
 		expect(isDue({ dueAt: dueAt(1, now) }, now)).toBe(false);
 	});
 
-	it('orders due reviews by box then overdue date and pauses new words above backlog threshold', () => {
+	it('orders due reviews by box then overdue date, then adds every new word', () => {
 		const queue = buildDailyQueue([
 			state('s2', 2, '2026-10-20T00:00:00Z'),
 			state('s1', 1, '2026-10-25T00:00:00Z'),
-		], ['n1', 'n2'], { now, dueBacklogLimit: 1 });
-		expect(queue.map((item) => item.kind === 'review' ? item.state.senseId : item.senseId)).toEqual(['s1', 's2']);
+			state('later', 3, '2026-11-20T00:00:00Z'),
+		], ['n1', 'n2'], now);
+		expect(queue.map((item) => item.kind === 'review' ? item.state.senseId : item.senseId)).toEqual(['s1', 's2', 'n1', 'n2']);
 	});
 
-	it('caps a round of reviews', () => {
-		const states = Array.from({ length: 40 }, (_, index) => state(`s${index}`, 2, '2026-10-20T00:00:00Z'));
-		expect(buildDailyQueue(states, [], { now, dueLimit: 30, dueBacklogLimit: 100 })).toHaveLength(30);
+	it('has no cap on due or new words, even with a large backlog', () => {
+		const states = Array.from({ length: 400 }, (_, index) => state(`s${index}`, 2, '2026-10-20T00:00:00Z'));
+		const pool = Array.from({ length: 300 }, (_, index) => `n${index}`);
+		const queue = buildDailyQueue(states, pool, now);
+		expect(queue.filter((item) => item.kind === 'review')).toHaveLength(400);
+		expect(queue.filter((item) => item.kind === 'new')).toHaveLength(300);
 	});
 
-	it('limits new words per day and excludes existing or duplicate senses', () => {
-		expect(buildDailyQueue([], ['n1', 'n1', 'n2', 'n3'], { now, newWordsPerDay: 2 })).toEqual([{ kind: 'new', senseId: 'n1' }, { kind: 'new', senseId: 'n2' }]);
-		expect(buildDailyQueue([], ['n1', 'n2', 'n3'], { now, newWordsPerDay: 2, introducedToday: 1 })).toEqual([{ kind: 'new', senseId: 'n1' }]);
-		expect(buildDailyQueue([], ['n1'], { now, newWordsPerDay: 2, introducedToday: 5 })).toEqual([]);
-	});
-
-	it('takes new words from each set in turn, skipping scheduled and shared words', () => {
-		expect(interleaveNewWords([['a1', 'a2', 'a3', 'shared'], ['b1', 'shared'], []], ['a1'])).toEqual(['a2', 'b1', 'a3', 'shared']);
-		expect(interleaveNewWords([['a1'], ['b1']], ['a1', 'b1'])).toEqual([]);
+	it('excludes scheduled or duplicate senses from new words', () => {
+		expect(buildDailyQueue([state('n2', 1, '2026-11-20T00:00:00Z')], ['n1', 'n1', 'n2', 'n3'], now)).toEqual([{ kind: 'new', senseId: 'n1' }, { kind: 'new', senseId: 'n3' }]);
 	});
 
 	it('names learning stages without box jargon', () => {
