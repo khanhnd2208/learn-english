@@ -12,7 +12,7 @@ function removeNote(locked: boolean, listed: boolean): string {
 	return 'Bộ từ sẽ không còn trong lịch ôn. Tiến độ được giữ để bạn tải lại sau.';
 }
 
-export default function RemoveSetButton({ setId, setTitle, stayOnPage = false, compact = false, locked = false, listed = true }: { setId: string; setTitle?: string; stayOnPage?: boolean; compact?: boolean; locked?: boolean; listed?: boolean }) {
+export default function RemoveSetButton({ setId, setTitle, stayOnPage = false, compact = false, locked = false, listed = true, onRemoved, inline = false }: { setId: string; setTitle?: string; stayOnPage?: boolean; compact?: boolean; locked?: boolean; listed?: boolean; onRemoved?: () => void; inline?: boolean }) {
 	const router = useRouter();
 	const [open, setOpen] = useState(false);
 	const [pending, setPending] = useState(false);
@@ -26,6 +26,7 @@ export default function RemoveSetButton({ setId, setTitle, stayOnPage = false, c
 			const body = await response.json() as { ok?: boolean; error?: string };
 			if (!response.ok || !body.ok) throw new Error(body.error ?? 'Không gỡ được bộ từ');
 			setOpen(false);
+			onRemoved?.();
 			if (!stayOnPage) router.push('/');
 			router.refresh();
 		} catch (cause) {
@@ -45,7 +46,8 @@ export default function RemoveSetButton({ setId, setTitle, stayOnPage = false, c
 			{compact && <MaterialIcon name="delete" size={18} />}
 			<span className={compact ? 'hidden sm:inline' : ''}>Gỡ bộ</span>
 		</button>
-		<Dialog open={open} onClose={() => !pending && setOpen(false)} title={setTitle ? `Gỡ “${setTitle}” khỏi ôn tập?` : 'Gỡ bộ khỏi danh sách?'} description={removeNote(locked, listed)}>
+		{inline && open && <div className="w-full rounded-panel border border-border p-3"><p className="font-bold">{setTitle ? `Gỡ “${setTitle}” khỏi ôn tập?` : 'Gỡ bộ khỏi danh sách?'}</p><p className="mt-1 text-sm text-muted">{removeNote(locked, listed)}</p>{error && <p role="alert" className="text-error">{error}</p>}<div className="mt-2 flex gap-2"><button type="button" className="min-h-11 px-4 font-bold" onClick={() => setOpen(false)} disabled={pending}>Huỷ</button><Button type="button" variant="destructive" onClick={() => void remove()} loading={pending}>Gỡ bộ</Button></div></div>}
+		<Dialog open={open && !inline} onClose={() => !pending && setOpen(false)} title={setTitle ? `Gỡ “${setTitle}” khỏi ôn tập?` : 'Gỡ bộ khỏi danh sách?'} description={removeNote(locked, listed)}>
 			{error && <p className="mb-3 text-sm text-error">{error}</p>}
 			<div className="flex justify-end gap-2"><button type="button" className="min-h-11 px-4 font-bold" onClick={() => setOpen(false)} disabled={pending}>Huỷ</button><Button type="button" variant="destructive" onClick={() => void remove()} loading={pending}>Gỡ bộ</Button></div>
 		</Dialog>

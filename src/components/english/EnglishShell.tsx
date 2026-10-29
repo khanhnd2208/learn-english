@@ -20,12 +20,10 @@ function NavDot({ show }: { show: boolean }) {
 
 export default function EnglishShell({ children, goals, newLearner }: { children: React.ReactNode; goals: ShellGoals; newLearner: boolean }) {
 	const pathname = usePathname();
-	const focus = /\/sets\/[^/]+\/(practice|test)$/.test(pathname);
 	const { data } = useSession();
 	const admin = (data?.user as { role?: string } | undefined)?.role === 'admin';
 	const accountName = data?.user?.name || data?.user?.email || 'Tài khoản';
 
-	if (focus) return <main className="min-h-screen bg-background">{children}</main>;
 	return (
 		<div className="relative min-h-screen md:pl-[var(--sidebar-width)]">
 			<aside className="adventure-sidebar fixed inset-y-0 left-0 z-40 hidden w-[var(--sidebar-width)] flex-col border-r md:flex">

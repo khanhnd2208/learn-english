@@ -4,6 +4,8 @@ import Link from 'next/link';
 import { useMemo, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import GuidedReviewSession, { type GuidedSession } from '@/components/english/GuidedReviewSession';
+import SetWordsSheet from '@/components/english/SetWordsSheet';
+import RemoveSetButton from '@/components/english/RemoveSetButton';
 import SrsPanel from '@/components/english/SrsPanel';
 import Checkbox from '@/components/ui/Checkbox';
 import { englishPost } from '@/components/english/englishApi';
@@ -22,9 +24,10 @@ export type GuidedReviewOverview = {
 
 const solidButton = 'min-h-12 w-full rounded-control bg-accent px-5 font-bold text-accent-foreground disabled:opacity-50';
 
-export default function ReviewOverview({ overview, guided: initial, mode }: { overview: TodayOverview; guided: GuidedReviewOverview; mode: 'bo' | 'luan-phien' }) {
+export default function ReviewOverview({ overview, guided: initial, mode, initialSetId }: { overview: TodayOverview; guided: GuidedReviewOverview; mode: 'bo' | 'luan-phien'; initialSetId?: string }) {
 	const router = useRouter();
 	const [guided, setGuided] = useState(initial);
+	const [viewSetId, setViewSetId] = useState<string | null>(initialSetId ?? null);
 	const [session, setSession] = useState<GuidedSession | null>(null);
 	const [search, setSearch] = useState('');
 	const [busy, setBusy] = useState(false);
@@ -44,9 +47,11 @@ export default function ReviewOverview({ overview, guided: initial, mode }: { ov
 		setGuided((current) => ({ ...current, selectedSetIds: setIds }));
 		setSaving(true);
 		setError('');
+		let succeeded = false;
 		saveQueue.current = saveQueue.current.then(async () => {
 			try {
 				const saved = await englishPost<GuidedReviewOverview>('/api/review', { action: 'selection', setIds });
+				succeeded = true;
 				if (run === saveRun.current) setGuided(saved);
 			} catch (cause) {
 				if (run === saveRun.current) setError(cause instanceof Error ? cause.message : 'Không lưu được lựa chọn.');
@@ -54,13 +59,14 @@ export default function ReviewOverview({ overview, guided: initial, mode }: { ov
 				if (run === saveRun.current) setSaving(false);
 			}
 		});
+		return saveQueue.current.then(() => succeeded);
 	}
 
-	async function start() {
+	async function start(setIds = guided.selectedSetIds) {
 		setBusy(true);
 		setError('');
 		try {
-			const started = await englishPost<GuidedSession>('/api/review', { action: 'start', setIds: guided.selectedSetIds });
+			const started = await englishPost<GuidedSession>('/api/review', { action: 'start', setIds });
 			setSession(started);
 		} catch (cause) {
 			setError(cause instanceof Error ? cause.message : 'Không bắt đầu được phiên học.');
@@ -88,7 +94,7 @@ export default function ReviewOverview({ overview, guided: initial, mode }: { ov
 				{guided.sets.length > 8 && <input value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Tìm bộ từ…" aria-label="Tìm bộ từ" className="mb-2 min-h-11 w-full rounded-control border border-border bg-background px-3 text-sm" />}
 				<div className="max-h-60 overflow-y-auto divide-y divide-border" aria-label="Chọn bộ từ để học">
 					<Checkbox label="Tất cả" checked={allSelected} disabled={busy} onChange={() => saveSelection(allSelected ? [] : allSetIds)} className="w-full px-2 font-bold" />
-					{filtered.map((set) => <div key={set.id} className="flex items-center justify-between gap-3"><Checkbox label={set.title} checked={selected.has(set.id)} disabled={busy} onChange={() => saveSelection(selected.has(set.id) ? guided.selectedSetIds.filter((id) => id !== set.id) : [...guided.selectedSetIds, set.id])} className="min-w-0 flex-1 px-2 font-bold" /><span className="shrink-0 text-xs text-muted sm:text-sm">{set.words} từ</span></div>)}
+					{filtered.map((set) => <div key={set.id} className="flex items-center justify-between gap-3"><Checkbox label={set.title} checked={selected.has(set.id)} disabled={busy} onChange={() => saveSelection(selected.has(set.id) ? guided.selectedSetIds.filter((id) => id !== set.id) : [...guided.selectedSetIds, set.id])} className="min-w-0 flex-1 px-2 font-bold" /><button type="button" onClick={() => setViewSetId(set.id)} aria-label={`Xem ${set.words} từ trong ${set.title}`} className="min-h-11 shrink-0 rounded-control border border-border px-3 text-xs font-bold text-accent hover:border-accent sm:text-sm">{set.words} từ ›</button></div>)}
 				</div>
 				{filtered.length === 0 && <p className="mt-2 text-sm text-muted">Không tìm thấy bộ từ phù hợp.</p>}
 				<div className="mt-2.5 flex flex-wrap items-center justify-between gap-2 text-sm">
@@ -104,6 +110,7 @@ export default function ReviewOverview({ overview, guided: initial, mode }: { ov
 		</section>}
 
 		</>}
+		<SetWordsSheet setId={viewSetId ?? ''} title={guided.sets.find(set => set.id === viewSetId)?.title ?? 'Bộ từ'} open={Boolean(viewSetId && guided.sets.some(set => set.id === viewSetId))} onClose={() => { setViewSetId(null); router.replace('/review?mode=bo'); }} footer={detail => <><button type="button" disabled={busy || saving} className="min-h-11 rounded-control border border-border px-4 font-bold text-accent" onClick={() => { setViewSetId(null); void saveSelection([detail.id]).then((saved) => { if (saved) return start([detail.id]); }); }}>Ôn bộ này</button><RemoveSetButton setId={detail.id} setTitle={detail.title} locked={detail.locked} listed={detail.listed} stayOnPage inline onRemoved={() => { setGuided(current => ({ ...current, sets: current.sets.filter(set => set.id !== detail.id), selectedSetIds: current.selectedSetIds.filter(id => id !== detail.id) })); setViewSetId(null); router.replace('/review?mode=bo'); router.refresh(); }} /></>} />
 		{session && <GuidedReviewSession initial={session} onClose={() => { setSession(null); router.refresh(); }} />}
 	</div>;
 }
