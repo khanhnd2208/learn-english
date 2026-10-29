@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { pickSpeechVoice } from '@/lib/english/audioPlayback';
 
 export function useSpeech() {
 	const [supported, setSupported] = useState(false);
@@ -77,10 +78,8 @@ export function useSpeech() {
 			utterance.rate = 0.9;
 			utterance.pitch = 1;
 			utterance.volume = 1;
-			const requestedLanguage = lang.split('-')[0]?.toLowerCase();
 			if (voicesRef.current.length === 0) voicesRef.current = window.speechSynthesis.getVoices();
-			const matchingVoice = voicesRef.current.find((voice) => voice.lang.toLowerCase() === lang.toLowerCase())
-				?? voicesRef.current.find((voice) => voice.lang.toLowerCase().startsWith(requestedLanguage ?? ''));
+			const matchingVoice = pickSpeechVoice(voicesRef.current, lang);
 			if (matchingVoice) utterance.voice = matchingVoice;
 			utterance.onstart = () => {
 				if (utteranceRef.current === utterance) setSpeaking(true);
