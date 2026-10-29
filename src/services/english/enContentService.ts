@@ -1,3 +1,4 @@
+import type { DistractorPool } from '@/lib/english/activities/distractors';
 import { Prisma } from '@prisma/client';
 import { prisma } from '@/lib/prisma';
 import { AppError } from '@/lib/appError';
@@ -125,6 +126,19 @@ export async function getSenseBundles(senseIds: string[], publishedOnly = false)
 	return rows
 		.map((row) => toSenseBundle(row))
 		.sort((a, b) => (order.get(a.sense.id) ?? 0) - (order.get(b.sense.id) ?? 0));
+}
+
+/** Only the fields distractor builders use; example sentences stay scoped to the current chunk. */
+export async function getDistractorPool(senseIds: string[]): Promise<DistractorPool> {
+	const rows = await prisma.enSense.findMany({
+		where: { id: { in: senseIds }, status: 'published' },
+		select: { id: true, meaningVi: true, partOfSpeech: true, synonyms: true, word: { select: { lemma: true } } },
+	});
+	const byId = new Map(rows.map((row) => [row.id, row]));
+	return { entries: senseIds.flatMap((id) => {
+		const row = byId.get(id);
+		return row ? [{ senseId: row.id, lemma: row.word.lemma, meaningVi: row.meaningVi, partOfSpeech: row.partOfSpeech, sameSet: true, inTest: false, synonymKeys: row.synonyms.map(lemmaKeyOf) }] : [];
+	}) };
 }
 
 export async function listEnglishAdminSets() {

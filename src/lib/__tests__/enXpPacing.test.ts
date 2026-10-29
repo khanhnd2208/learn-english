@@ -12,6 +12,7 @@ const mocks = vi.hoisted(() => {
 	return {
 		tx,
 		prisma: {
+			$queryRaw: vi.fn(async () => [{ poolSize: 0, remainingCount: 0 }]),
 			$transaction: vi.fn(async (run: (client: typeof tx) => Promise<unknown>) => run(tx)),
 			enPracticeSession: { findFirst: vi.fn() },
 			enWordState: { findUnique: vi.fn() },

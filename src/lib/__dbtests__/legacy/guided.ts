@@ -4,7 +4,7 @@ import { prisma } from '@/lib/prisma';
 import { AppError } from '@/lib/appError';
 import { activityByKey, randomRng, type ActivityItem } from '@/lib/english/activities';
 import { EN_GUIDED_CHUNK_SIZE } from '@/lib/english/constants';
-import { buildGuidedQuestions, buildRetryQuestion, weightedOrder, type ReviewHistory } from '@/lib/english/guidedReview';
+import { buildGuidedQuestions, buildRetryQuestion, weightedOrder, type ReviewHistory } from './questions';
 import { vnDayKey } from '@/lib/english/gapRule';
 import { vnDayStart } from '@/lib/english/schedule';
 import { pacedEnough, XP } from '@/lib/english/xp';
