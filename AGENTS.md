@@ -38,6 +38,7 @@
 npm run quality
 npm test
 npm run typecheck
+npm run test:db # Required for PRs that change database queries; uses a local TEST_DATABASE_URL.
 ```
 
 ## Conventions
