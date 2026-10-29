@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { buildDailyQueue, countStages, dueAt, intervalChange, isDue, isNearMiss, nextBox, scheduleAnswer, scheduleMove, stageOf } from '@/lib/english/schedule';
+import { buildDailyQueue, countStages, interleaveNewWords, dueAt, intervalChange, isDue, isNearMiss, nextBox, scheduleAnswer, scheduleMove, stageOf } from '@/lib/english/schedule';
 
 describe('Leitner schedule', () => {
 	const now = new Date('2026-10-26T10:00:00+07:00');
@@ -68,6 +68,11 @@ describe('Leitner schedule', () => {
 		expect(buildDailyQueue([], ['n1', 'n1', 'n2', 'n3'], { now, newWordsPerDay: 2 })).toEqual([{ kind: 'new', senseId: 'n1' }, { kind: 'new', senseId: 'n2' }]);
 		expect(buildDailyQueue([], ['n1', 'n2', 'n3'], { now, newWordsPerDay: 2, introducedToday: 1 })).toEqual([{ kind: 'new', senseId: 'n1' }]);
 		expect(buildDailyQueue([], ['n1'], { now, newWordsPerDay: 2, introducedToday: 5 })).toEqual([]);
+	});
+
+	it('takes new words from each set in turn, skipping scheduled and shared words', () => {
+		expect(interleaveNewWords([['a1', 'a2', 'a3', 'shared'], ['b1', 'shared'], []], ['a1'])).toEqual(['a2', 'b1', 'a3', 'shared']);
+		expect(interleaveNewWords([['a1'], ['b1']], ['a1', 'b1'])).toEqual([]);
 	});
 
 	it('names learning stages without box jargon', () => {

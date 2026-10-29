@@ -124,6 +124,25 @@ export function buildDailyQueue<T extends ScheduledState>(
 	return [...reviews, ...newWords.map((senseId) => ({ kind: 'new' as const, senseId }))];
 }
 
+/**
+ * New words from every downloaded set, taking one word from each set in turn, so a set
+ * downloaded later starts in SRS the same day instead of waiting for earlier sets to run out.
+ * Words already scheduled are skipped before the turns are taken.
+ */
+export function interleaveNewWords(groups: string[][], scheduled: Iterable<string> = []): string[] {
+	const seen = new Set(scheduled);
+	const queues = groups.map((group) => group.filter((senseId) => {
+		if (seen.has(senseId)) return false;
+		seen.add(senseId);
+		return true;
+	}));
+	const pool: string[] = [];
+	for (let turn = 0; queues.some((queue) => turn < queue.length); turn += 1) {
+		for (const queue of queues) if (turn < queue.length) pool.push(queue[turn]!);
+	}
+	return pool;
+}
+
 /** Edit distance where swapping two neighbouring letters ("recieve") counts as one typo. */
 function editDistance(a: string, b: string): number {
 	const rows = Array.from({ length: a.length + 1 }, (_, i) => Array.from({ length: b.length + 1 }, (_, j) => (i === 0 ? j : j === 0 ? i : 0)));

@@ -2,7 +2,7 @@ import { cache } from 'react';
 import { prisma } from '@/lib/prisma';
 import { AppError } from '@/lib/appError';
 import { EN_HINT_MAX_BOX, EN_DAILY_DUE_LIMIT, EN_NEW_WORDS_DEFAULT, EN_ROUND_REVIEW_LIMIT, EN_TX_MAX_WAIT_MS, EN_TX_TIMEOUT_MS, EN_WEEKLY_DAYS_DEFAULT } from '@/lib/english/constants';
-import { buildDailyQueue, intervalChange, isLongTerm, isNearMiss, scheduleMove, vnDayStart, type ScheduledState } from '@/lib/english/schedule';
+import { buildDailyQueue, interleaveNewWords, intervalChange, isLongTerm, isNearMiss, scheduleMove, vnDayStart, type ScheduledState } from '@/lib/english/schedule';
 import { gradeEnglishAnswer } from '@/lib/english/grade';
 import { shiftVnDay, vnDayKey, vnWeekDays } from '@/lib/english/gapRule';
 import { streakStats } from '@/lib/english/streak';
@@ -67,20 +67,23 @@ async function scheduledStates(userId: string): Promise<ScheduledState[]> {
 	});
 }
 
-async function newWordPool(userId: string): Promise<{ pool: string[]; enrolledSets: number }> {
+/** Unscheduled words of each downloaded set, in the order the sets were downloaded. */
+async function newWordGroups(userId: string): Promise<{ groups: string[][]; enrolledSets: number }> {
 	const enrollments = await prisma.enEnrollment.findMany({
 		where: { userId, set: { status: 'published' } },
 		orderBy: { createdAt: 'asc' },
 		select: { setId: true },
 	});
 	const setIds = enrollments.map(({ setId }) => setId);
-	if (!setIds.length) return { pool: [], enrolledSets: 0 };
+	if (!setIds.length) return { groups: [], enrolledSets: 0 };
 	const items = await prisma.enSetItem.findMany({
 		where: { setId: { in: setIds }, sense: { status: 'published' } },
-		orderBy: [{ set: { sortOrder: 'asc' } }, { position: 'asc' }],
-		select: { senseId: true },
+		orderBy: [{ setId: 'asc' }, { position: 'asc' }],
+		select: { setId: true, senseId: true },
 	});
-	return { pool: [...new Set(items.flatMap(({ senseId }) => senseId ? [senseId] : []))], enrolledSets: setIds.length };
+	const bySet = new Map(setIds.map((setId) => [setId, [] as string[]]));
+	for (const { setId, senseId } of items) if (senseId) bySet.get(setId)?.push(senseId);
+	return { groups: [...bySet.values()], enrolledSets: setIds.length };
 }
 
 function countIntroducedToday(states: ScheduledState[], now: Date): number {
@@ -89,7 +92,8 @@ function countIntroducedToday(states: ScheduledState[], now: Date): number {
 }
 
 async function planToday(userId: string, now: Date) {
-	const [states, { pool, enrolledSets }] = await Promise.all([scheduledStates(userId), newWordPool(userId)]);
+	const [states, { groups, enrolledSets }] = await Promise.all([scheduledStates(userId), newWordGroups(userId)]);
+	const pool = interleaveNewWords(groups, states.map((state) => state.senseId));
 	const introducedToday = countIntroducedToday(states, now);
 	const queue = buildDailyQueue(states, pool, {
 		now,
