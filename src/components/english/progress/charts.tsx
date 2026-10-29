@@ -98,8 +98,8 @@ export function StatTile({ icon, value, label, note, tone = 'muted' }: { icon: I
 		<span className="shrink-0"><AdventureIcon name={icon} size={22} framed /></span>
 		<div className="min-w-0">
 			<p className="game-number text-lg leading-none tabular-nums sm:text-2xl">{value}</p>
-			<p className="mt-1 truncate text-xs font-bold leading-tight text-muted">{label}</p>
-			{note && <p className={`mt-0.5 hidden truncate text-[11px] font-bold leading-tight sm:block ${tone === 'up' ? 'text-success' : tone === 'down' ? 'text-error' : 'text-muted'}`}>{note}</p>}
+			<p className="mt-1 text-xs font-bold leading-tight text-muted">{label}</p>
+			{note && <p className={`mt-0.5 text-[11px] font-bold leading-tight ${tone === 'up' ? 'text-success' : tone === 'down' ? 'text-error' : 'text-muted'}`}>{note}</p>}
 		</div>
 	</div>;
 }

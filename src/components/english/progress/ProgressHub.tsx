@@ -38,8 +38,8 @@ function goalMessage(xp: number, goal: number): string {
 	return left <= 100 ? `Còn ${left} XP, chỉ vài câu nữa thôi.` : `Còn ${left} XP, khoảng ${Math.max(1, Math.ceil(left / (XP.srs * 3)))} phút ôn.`;
 }
 
-function signed(value: number, unit = ''): string {
-	return value > 0 ? `▲ +${value}${unit}` : value < 0 ? `▼ ${value}${unit}` : `không đổi`;
+function comparison(value: number, unit = ''): string {
+	return value > 0 ? `tăng ${value}${unit} so với tuần trước` : value < 0 ? `giảm ${Math.abs(value)}${unit} so với tuần trước` : 'bằng tuần trước';
 }
 
 /** The progress hub: a player card on top, then quests, charts and achievements as tabs. */
@@ -77,10 +77,10 @@ export default function ProgressHub({ board, weeks, wrong, stages, dueNext7Days,
 			</div>
 			<div className="mt-2.5 sm:mt-3"><LevelBar level={board.level} label={false} /></div>
 			<div className="mt-3.5 grid grid-cols-2 gap-2 sm:mt-4 sm:gap-3 lg:grid-cols-4">
-				<StatTile icon="spark" value={board.streak.current} label="Chuỗi ngày" note={`Kỷ lục ${board.streak.longest} ngày`} />
-				<StatTile icon="sprout" value={board.longTermCount} label="Nhớ lâu" note={`${signed(longTermDelta)} tuần này`} tone={longTermDelta > 0 ? 'up' : longTermDelta < 0 ? 'down' : 'muted'} />
-				<StatTile icon="target" value={thisWeek.percent === null ? '—' : `${thisWeek.percent}%`} label="Đúng tuần" note={accuracyDelta === null ? (thisWeek.answers ? `${thisWeek.correct}/${thisWeek.answers} câu đúng` : 'Chưa ôn tuần này') : `${signed(accuracyDelta, ' điểm')} so với tuần trước`} tone={accuracyDelta === null || accuracyDelta === 0 ? 'muted' : accuracyDelta > 0 ? 'up' : 'down'} />
-				<StatTile icon="trophy" value={`${unlocked}/${tierCount}`} label="Huy hiệu" note={board.unseenAchievements.length ? `${board.unseenAchievements.length} mới!` : undefined} tone="up" />
+				<StatTile icon="spark" value={board.streak.current} label="Chuỗi ngày học" note={`Kỷ lục ${board.streak.longest} ngày`} />
+				<StatTile icon="sprout" value={board.longTermCount} label="Từ nhớ lâu" note={comparison(longTermDelta)} tone={longTermDelta > 0 ? 'up' : longTermDelta < 0 ? 'down' : 'muted'} />
+				<StatTile icon="target" value={thisWeek.percent === null ? '—' : `${thisWeek.percent}%`} label="Trả lời đúng (tuần này)" note={accuracyDelta === null ? (thisWeek.answers ? `${thisWeek.correct}/${thisWeek.answers} câu đúng` : 'Chưa ôn tuần này') : comparison(accuracyDelta, ' điểm phần trăm')} tone={accuracyDelta === null || accuracyDelta === 0 ? 'muted' : accuracyDelta > 0 ? 'up' : 'down'} />
+				<StatTile icon="trophy" value={`${unlocked}/${tierCount}`} label="Huy hiệu đã mở" note={board.unseenAchievements.length ? `${board.unseenAchievements.length} mới!` : undefined} tone="up" />
 			</div>
 		</header>
 
@@ -123,7 +123,7 @@ function QuestsTab({ board, dayResetsIn, weekResetsIn, onGoal }: { board: GoalBo
 				<div className="min-w-0 flex-1">
 					<h2 className="flex items-center gap-1.5 text-xl">Mục tiêu ngày<InfoHint title={HINTS.xp.title}>{HINTS.xp.body}</InfoHint></h2>
 					<p className="text-sm">{goalMessage(board.today.xp, board.today.goal)}</p>
-					<button type="button" onClick={onGoal} className="mt-1 inline-flex min-h-11 items-center gap-1 rounded-control border border-border px-3 text-sm font-bold hover:border-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent">Mức: {goalLabel(board.dailyGoalXp)} ▾</button>
+					<button type="button" onClick={onGoal} className="mt-1 inline-flex min-h-11 items-center gap-1 rounded-control border border-border px-3 text-sm font-bold hover:border-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent">Đổi mục tiêu: {goalLabel(board.dailyGoalXp)} ▾</button>
 				</div>
 			</section>
 			<section aria-labelledby="daily-heading">
@@ -183,7 +183,7 @@ function StatsTab({ board, weeks, wrong, stages, dueNext7Days }: { board: GoalBo
 		tone: entry.percent !== null && entry.percent >= 80 ? 'success' : index === last ? 'accent' : 'soft',
 		highlight: index === last,
 		display: entry.percent === null ? undefined : `${entry.percent}`,
-		title: `Tuần ${shortDayLabel(entry.start)}: ${entry.percent === null ? 'chưa ôn' : `${entry.percent}% (${entry.correct}/${entry.answers} câu đúng)`}`,
+		title: `Tuần bắt đầu ${shortDayLabel(entry.start)}: ${entry.percent === null ? 'chưa ôn' : `${entry.percent}% (${entry.correct}/${entry.answers} câu đúng)`}`,
 	}));
 	const longTermBars: ChartBar[] = weeks.map((entry, index) => ({
 		key: entry.start,
@@ -192,31 +192,34 @@ function StatsTab({ board, weeks, wrong, stages, dueNext7Days }: { board: GoalBo
 		tone: index === last ? 'success' : 'soft',
 		highlight: index === last,
 		display: entry.longTerm ? String(entry.longTerm) : undefined,
-		title: `Tuần ${shortDayLabel(entry.start)}: ${entry.longTerm} từ nhớ lâu`,
+		title: `Tuần bắt đầu ${shortDayLabel(entry.start)}: ${entry.longTerm} từ nhớ lâu`,
 	}));
 
 	return <div className="grid gap-4 md:grid-cols-2">
-		<Card title="Tuần này" aside={<span className="xp-chip">{week.total} XP</span>}>
-			<p className="mt-1 text-xs text-muted"><strong className="text-foreground">{week.studiedDays}/7</strong> ngày có học · <strong className="text-foreground">{week.goalDays}</strong> ngày đạt mục tiêu · cao nhất <strong className="text-foreground">{week.best} XP</strong></p>
-			<MiniBarChart label="XP mỗi ngày trong tuần" bars={dayBars} goal={{ value: board.today.goal, label: `Mục tiêu ${board.today.goal}` }} height={104} />
-		</Card>
-
-		<Card title="Độ chính xác" aside={<span className="game-number text-2xl tabular-nums">{thisWeek.percent === null ? '—' : `${thisWeek.percent}%`}</span>}>
-			<p className="mt-1 text-xs text-muted">{thisWeek.answers ? `${thisWeek.correct}/${thisWeek.answers} câu ôn luân phiên đúng tuần này` : 'Tuần này chưa có lượt ôn luân phiên'} · 8 tuần gần nhất</p>
-			<MiniBarChart label="Độ chính xác 8 tuần" bars={accuracyBars} max={100} band={{ from: 80, label: '≥80% tốt' }} height={104} empty="Chưa có lượt ôn luân phiên nào trong 8 tuần." />
-		</Card>
-
-		<Card title={<>Từ nhớ lâu <InfoHint title={HINTS.stages.title}>{HINTS.stages.body}</InfoHint></>} aside={<span className="text-sm"><span className="game-number text-2xl tabular-nums">{longTerm}</span> {longTermDelta !== 0 && <span className={`font-bold ${longTermDelta > 0 ? 'text-success' : 'text-error'}`}>{signed(longTermDelta)}</span>}</span>}>
-			<p className="mt-1 text-xs text-muted">Số từ {STAGE_META.long_term.hint}, ước tính cuối mỗi tuần</p>
-			<MiniBarChart label="Số từ nhớ lâu 8 tuần" bars={longTermBars} height={104} empty="Chưa có từ nào lên mức nhớ lâu. Ôn đúng đều đặn để từ lên mức." />
-		</Card>
-
 		<Card title={<>Kho từ của bạn <InfoHint title={HINTS.stages.title}>{HINTS.stages.body}</InfoHint></>}>
 			<p className="mt-1 mb-3 text-xs text-muted">Từ càng ôn đúng nhiều lần thì lịch ôn càng giãn ra và lên mức cao hơn.</p>
 			<StageDonut stages={stages} />
 			<h3 className="mt-4 text-sm font-bold">Lịch ôn 7 ngày tới</h3>
+			<p className="text-xs text-muted">Mỗi cột là số từ đến hạn trong một ngày.</p>
 			<div className="mt-2"><DueForecast days={dueNext7Days} height="h-20" /></div>
 		</Card>
+
+		<Card title="Tuần này" aside={<span className="xp-chip">{week.total} XP</span>}>
+			<p className="mt-1 text-xs text-muted"><strong className="text-foreground">{week.studiedDays}/7</strong> ngày có học · <strong className="text-foreground">{week.goalDays}</strong> ngày đạt mục tiêu · cao nhất <strong className="text-foreground">{week.best} XP</strong>. Mỗi cột là một ngày.</p>
+			<MiniBarChart label="XP mỗi ngày trong tuần" bars={dayBars} goal={{ value: board.today.goal, label: `Mục tiêu ${board.today.goal}` }} height={104} />
+		</Card>
+
+		<Card title="Tỉ lệ trả lời đúng" aside={<span className="game-number text-2xl tabular-nums">{thisWeek.percent === null ? '—' : `${thisWeek.percent}%`}</span>}>
+			<p className="mt-1 text-xs text-muted">{thisWeek.answers ? `${thisWeek.correct}/${thisWeek.answers} câu ôn luân phiên đúng tuần này` : 'Tuần này chưa có lượt ôn luân phiên'} · Mỗi cột là một tuần, bắt đầu từ ngày ghi bên dưới.</p>
+			<MiniBarChart label="Tỉ lệ trả lời đúng 8 tuần" bars={accuracyBars} max={100} band={{ from: 80, label: '≥80% tốt' }} height={104} empty="Chưa có lượt ôn luân phiên nào trong 8 tuần." />
+		</Card>
+
+		<Card title={<>Từ nhớ lâu <InfoHint title={HINTS.stages.title}>{HINTS.stages.body}</InfoHint></>} aside={<span className="text-sm"><span className="game-number text-2xl tabular-nums">{longTerm}</span> {longTermDelta !== 0 && <span className={`font-bold ${longTermDelta > 0 ? 'text-success' : 'text-error'}`}>{comparison(longTermDelta)}</span>}</span>}>
+			<p className="mt-1 text-xs text-muted">Số từ {STAGE_META.long_term.hint}, ước tính cuối mỗi tuần. Mỗi cột là một tuần, bắt đầu từ ngày ghi bên dưới.</p>
+			<MiniBarChart label="Số từ nhớ lâu 8 tuần" bars={longTermBars} height={104} empty="Chưa có từ nào lên mức nhớ lâu. Ôn đúng đều đặn để từ lên mức." />
+		</Card>
+
+
 
 		<Card title="Từ hay sai" aside={<Link href="/review" className="inline-flex min-h-11 items-center text-sm font-bold text-accent">Ôn theo bộ →</Link>} className="md:col-span-2">
 			{wrong.length
