@@ -11,6 +11,7 @@ import { englishPost } from '@/components/english/englishApi';
 import QuestionView, { type PublicQuestion, type QuestionFeedback } from '@/components/english/quiz/QuestionView';
 import { EN_GUIDED_CHUNK_SIZE } from '@/lib/english/constants';
 import type { SenseBundle } from '@/lib/english/senseBundle';
+import { useAudioPreload } from '@/lib/useAudioPreload';
 import type { GoalReward } from '@/services/english/enGoalService';
 
 export type GuidedPublicQuestion = PublicQuestion & {
@@ -146,6 +147,7 @@ export default function GuidedReviewSession({ initial, onClose }: { initial: Gui
 		onClose();
 	}
 
+	useAudioPreload(session.words);
 	const word = session.words[viewedWord];
 	const questionWord = shownQuestion ? session.words.find((entry) => entry.sense.id === shownQuestion.senseId) : null;
 	const covered = session.poolSize - session.remainingCount;

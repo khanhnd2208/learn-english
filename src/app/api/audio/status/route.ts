@@ -1,4 +1,8 @@
 import { apiSuccess, withAuth } from '@/lib/apiUtils';
-import { serverTtsAvailable } from '@/services/english/enTtsService';
+import { prepareSpeechEngine, serverTtsAvailable } from '@/services/english/enTtsService';
 
-export const GET = withAuth(async () => apiSuccess({ serverTts: await serverTtsAvailable() }));
+export const GET = withAuth(async () => {
+	// Pages with speaker buttons ask this first, so the voice starts loading before any tap.
+	void prepareSpeechEngine();
+	return apiSuccess({ serverTts: await serverTtsAvailable() });
+});
