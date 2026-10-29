@@ -45,6 +45,17 @@ function rank(entry: PoolEntry, sense: SenseBundle, preferOutside: boolean): num
 	return score;
 }
 
+// Same ordering as `String#localeCompare`, without rebuilding a collator per comparison.
+const collator = new Intl.Collator();
+// Pools hold thousands of entries and are reused for every question in a chunk.
+const entryKeys = new WeakMap<PoolEntry, { lemma: string; meaning: string }>();
+
+function keysOf(entry: PoolEntry) {
+	let keys = entryKeys.get(entry);
+	if (!keys) entryKeys.set(entry, keys = { lemma: lemmaKeyOf(entry.lemma), meaning: normalizeLearnerText(entry.meaningVi) });
+	return keys;
+}
+
 /** Prefer authored distractors, then the same part of speech in the same set. Never a confusable or family member. */
 export function chooseDistractors(
 	sense: SenseBundle,
@@ -54,13 +65,24 @@ export function chooseDistractors(
 ): PoolEntry[] {
 	const blocked = blockedLemmas(sense);
 	const self = lemmaKeyOf(sense.word.lemma);
+	const selfMeaning = normalizeLearnerText(sense.sense.meaningVi);
 	const eligible = pool.entries.filter((entry) => {
-		const key = lemmaKeyOf(entry.lemma);
-		return entry.senseId !== sense.sense.id && key !== self && !blocked.has(key) && !entry.synonymKeys.includes(self) && normalizeLearnerText(entry.meaningVi) !== normalizeLearnerText(sense.sense.meaningVi);
+		const keys = keysOf(entry);
+		return entry.senseId !== sense.sense.id && keys.lemma !== self && !blocked.has(keys.lemma) && !entry.synonymKeys.includes(self) && keys.meaning !== selfMeaning;
 	});
 	const outside = eligible.filter((entry) => !entry.inTest);
 	const ranked = preferOutside && outside.length >= count ? outside : eligible;
-	return [...ranked]
-		.sort((a, b) => rank(b, sense, preferOutside) - rank(a, sense, preferOutside) || a.lemma.localeCompare(b.lemma))
-		.slice(0, count);
+	if (count <= 0) return [];
+	// The first `count` of a stable sort by rank, then lemma: equal entries keep pool order.
+	const top: Array<{ entry: PoolEntry; score: number }> = [];
+	const before = (a: { entry: PoolEntry; score: number }, b: { entry: PoolEntry; score: number }) => b.score - a.score || collator.compare(a.entry.lemma, b.entry.lemma);
+	for (const entry of ranked) {
+		const item = { entry, score: rank(entry, sense, preferOutside) };
+		if (top.length >= count && before(item, top[top.length - 1]!) >= 0) continue;
+		let at = top.length;
+		while (at > 0 && before(item, top[at - 1]!) < 0) at -= 1;
+		top.splice(at, 0, item);
+		if (top.length > count) top.pop();
+	}
+	return top.map((item) => item.entry);
 }

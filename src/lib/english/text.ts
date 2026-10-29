@@ -15,13 +15,15 @@ export function normalizeSequence(value: string): string {
 		.join('|');
 }
 
+const VN_OFFSET_MS = 7 * 60 * 60 * 1000;
+
+/**
+ * Vietnam has stayed on a fixed +07:00 with no daylight saving since 1975, matching `vnDayStart`.
+ * Plain arithmetic: building an `Intl.DateTimeFormat` per call dominated CPU and native memory
+ * when reward settling keys thousands of review rows per answer.
+ */
 export function studyDayKey(date: Date): string {
-	return new Intl.DateTimeFormat('en-CA', {
-		timeZone: 'Asia/Ho_Chi_Minh',
-		year: 'numeric',
-		month: '2-digit',
-		day: '2-digit',
-	}).format(date);
+	return new Date(date.getTime() + VN_OFFSET_MS).toISOString().slice(0, 10);
 }
 
 export function isFullVietnameseMeaning(meaningVi: string, gloss: string): boolean {

@@ -13,6 +13,10 @@ async function main() {
 	try {
 		if (values.truncate) await resetEnTables(prisma);
 		await seedWorld(prisma, opts);
+		// Same derivation as the 20261102000000_en_study_day backfill, so streak reads see seeded history.
+		await prisma.$executeRaw`INSERT INTO "EnStudyDay" ("userId", "day") SELECT DISTINCT "userId", to_char("at" + INTERVAL '7 hours', 'YYYY-MM-DD') FROM "EnReview" UNION SELECT s."userId", to_char(q."answeredAt" + INTERVAL '7 hours', 'YYYY-MM-DD') FROM "EnGuidedReviewQuestion" q JOIN "EnGuidedReviewSession" s ON s."id" = q."sessionId" WHERE q."kind" = 'main' AND q."answeredAt" IS NOT NULL ON CONFLICT DO NOTHING`;
+		// Fresh bulk inserts have no planner statistics; without them the live-word joins pick a nested loop 5x slower than production.
+		await prisma.$executeRaw`ANALYZE`;
 		const { Prisma } = await import('@prisma/client');
 		for (const model of Prisma.dmmf.datamodel.models.filter((model) => model.name.startsWith('En'))) {
 			const rows = await prisma.$queryRaw<Array<{ count: number }>>(Prisma.sql`SELECT count(*)::int AS count FROM ${Prisma.raw('"' + model.name + '"')}`);

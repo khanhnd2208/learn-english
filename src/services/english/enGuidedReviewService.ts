@@ -2,13 +2,14 @@ import { Prisma } from '@prisma/client';
 import { prisma } from '@/lib/prisma';
 import { AppError } from '@/lib/appError';
 import { activityByKey, randomRng, type ActivityItem } from '@/lib/english/activities';
-import { EN_GUIDED_CHUNK_SIZE } from '@/lib/english/constants';
+import { EN_GUIDED_CHUNK_SIZE, EN_TX_MAX_WAIT_MS, EN_TX_TIMEOUT_MS } from '@/lib/english/constants';
 import { buildGuidedQuestions, buildRetryQuestion, weightedOrder, type ReviewHistory } from '@/lib/english/guidedReview';
 import { vnDayKey } from '@/lib/english/gapRule';
 import { vnDayStart } from '@/lib/english/schedule';
 import { pacedEnough, XP } from '@/lib/english/xp';
 import { warmBundleSpeech } from '@/services/english/enAudioService';
 import { getSenseBundles, getDistractorPool } from '@/services/english/enContentService';
+import { createLimiter } from '@/lib/limiter';
 
 type QuestionRow = {
 	id: string;
@@ -168,8 +169,18 @@ export async function saveGuidedReviewSelection(userId: string, setIds: string[]
 	return getGuidedReviewOverview(userId);
 }
 
+/**
+ * Building a chunk holds the whole selection (thousands of ids, histories and distractors) in memory.
+ * A class pressing start together would otherwise stack those copies past the process memory limit.
+ */
+const chunkBuilds = createLimiter(4);
+
 /** Every start is a fresh run: a session left mid-way is closed, never resumed. */
-export async function startGuidedReview(userId: string, setIds: string[]) {
+export function startGuidedReview(userId: string, setIds: string[]) {
+	return chunkBuilds(() => startGuidedRun(userId, setIds));
+}
+
+async function startGuidedRun(userId: string, setIds: string[]) {
 	const active = await prisma.enGuidedReviewSession.findUnique({ where: { activeKey: userId }, select: { id: true } });
 	if (active) await abandonGuidedReview(userId, active.id);
 	const { selected, senses } = await selectedSenseIds(userId, setIds);
@@ -188,6 +199,7 @@ export async function startGuidedReview(userId: string, setIds: string[]) {
 				currentChunkSenseIds: chunk,
 				questions: { create: questions },
 			},
+			select: { id: true },
 		});
 	} catch (cause) {
 		if (cause instanceof Prisma.PrismaClientKnownRequestError && cause.code === 'P2002') {
@@ -255,8 +267,8 @@ export async function answerGuidedReview(userId: string, sessionId: string, ques
 			tx.enGuidedReviewQuestion.count({ where: { sessionId: session.id, chunkNumber: session.chunkNumber, kind: question.kind, answer: null } }),
 			tx.enGuidedReviewQuestion.count({ where: { sessionId: session.id, chunkNumber: session.chunkNumber, kind: question.kind } }),
 		]);
-		await tx.enGuidedReviewSession.update({ where: { id: session.id }, data: remaining === 0 ? { phase: 'summary', questionPosition: 0 } : { questionPosition: total - remaining } });
-	});
+		await tx.enGuidedReviewSession.update({ where: { id: session.id }, data: remaining === 0 ? { phase: 'summary', questionPosition: 0 } : { questionPosition: total - remaining }, select: { id: true } });
+	}, { timeout: EN_TX_TIMEOUT_MS, maxWait: EN_TX_MAX_WAIT_MS });
 	if (!persisted) {
 		const saved = await prisma.enGuidedReviewQuestion.findUnique({ where: { id: question.id } });
 		if (saved?.answer !== null && saved?.answer !== undefined) return { questionId, answer: saved.answer, correct: saved.correct === true, expected: saved.answerKey, xp: 0, session: await serializeSession(userId, session.id) };
@@ -264,9 +276,13 @@ export async function answerGuidedReview(userId: string, sessionId: string, ques
 	return { questionId, answer, correct, expected: question.answerKey, xp, session: await serializeSession(userId, session.id) };
 }
 
-export async function startGuidedRetry(userId: string, sessionId: string) {
+export function startGuidedRetry(userId: string, sessionId: string) {
+	return chunkBuilds(() => buildGuidedRetry(userId, sessionId));
+}
+
+async function buildGuidedRetry(userId: string, sessionId: string) {
 	const active = await activeSession(userId, sessionId);
-	const session = await prisma.enGuidedReviewSession.findFirstOrThrow({ where: { id: active.id, userId, endedAt: null } });
+	const session = await prisma.enGuidedReviewSession.findFirstOrThrow({ where: { id: active.id, userId, endedAt: null }, select: { id: true, phase: true, chunkNumber: true, poolSenseIds: true } });
 	if (session.phase !== 'summary') return serializeSession(userId, session.id);
 	const main = await prisma.enGuidedReviewQuestion.findMany({ where: { sessionId: session.id, chunkNumber: session.chunkNumber, kind: 'main', correct: false }, orderBy: { position: 'asc' } });
 	if (!main.length) return serializeSession(userId, session.id);
@@ -282,13 +298,17 @@ export async function startGuidedRetry(userId: string, sessionId: string) {
 		});
 		await prisma.enGuidedReviewQuestion.createMany({ data: retries.map(({ retry }, position) => ({ sessionId: session.id, chunkNumber: session.chunkNumber, kind: 'retry', position, senseId: retry.senseId, role: retry.role, activityKey: retry.activityKey, prompt: retry.prompt as Prisma.InputJsonValue, answerKey: retry.answerKey, accepted: retry.accepted, layout: retry.layout as unknown as Prisma.InputJsonValue })), skipDuplicates: true });
 	}
-	await prisma.enGuidedReviewSession.update({ where: { id: session.id }, data: { phase: 'retry', questionPosition: 0 } });
+	await prisma.enGuidedReviewSession.update({ where: { id: session.id }, data: { phase: 'retry', questionPosition: 0 }, select: { id: true } });
 	return serializeSession(userId, session.id);
 }
 
-export async function nextGuidedChunk(userId: string, sessionId: string, restart: boolean) {
+export function nextGuidedChunk(userId: string, sessionId: string, restart: boolean) {
+	return chunkBuilds(() => buildNextChunk(userId, sessionId, restart));
+}
+
+async function buildNextChunk(userId: string, sessionId: string, restart: boolean) {
 	const active = await activeSession(userId, sessionId);
-	const session = await prisma.enGuidedReviewSession.findFirstOrThrow({ where: { id: active.id, userId, endedAt: null } });
+	const session = await prisma.enGuidedReviewSession.findFirstOrThrow({ where: { id: active.id, userId, endedAt: null }, select: { id: true, phase: true, chunkNumber: true, remainingSenseIds: true, poolSenseIds: true } });
 	if (session.phase !== 'summary') return serializeSession(userId, session.id);
 	let remaining = session.remainingSenseIds;
 	if (!remaining.length) {
@@ -303,7 +323,7 @@ export async function nextGuidedChunk(userId: string, sessionId: string, restart
 		if (!updated.count) return false;
 		await tx.enGuidedReviewQuestion.createMany({ data: questions.map((input) => ({ ...input, sessionId: session.id })), skipDuplicates: true });
 		return true;
-	});
+	}, { timeout: EN_TX_TIMEOUT_MS, maxWait: EN_TX_MAX_WAIT_MS });
 	if (!advanced) return serializeSession(userId, session.id);
 	void warmNext(remaining.slice(chunk.length));
 	return serializeSession(userId, session.id);
@@ -314,7 +334,7 @@ export async function finishGuidedReview(userId: string, sessionId: string) {
 	if (!session) throw new AppError('Không tìm thấy phiên ôn tập', 404);
 	if (!session.endedAt) {
 		const sums = await prisma.enGuidedReviewQuestion.aggregate({ where: { sessionId: session.id }, _sum: { responseMs: true } });
-		await prisma.enGuidedReviewSession.update({ where: { id: session.id }, data: { activeKey: null, phase: 'finished', endedAt: new Date(), activeSeconds: Math.ceil((sums._sum.responseMs ?? 0) / 1000) } });
+		await prisma.enGuidedReviewSession.update({ where: { id: session.id }, data: { activeKey: null, phase: 'finished', endedAt: new Date(), activeSeconds: Math.ceil((sums._sum.responseMs ?? 0) / 1000) }, select: { id: true } });
 	}
 	return { ok: true as const };
 }

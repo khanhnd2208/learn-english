@@ -7,6 +7,7 @@ export DATABASE_URL='postgresql://localhost/learn_english_load'
 npx prisma migrate deploy --config scripts/prisma-test.config.ts
 npm run db:seed:load -- --users 200 --sets 10 --words 500 --days 90 --seed 42
 PG_POOL_MAX=5 npm run bench -- --concurrency 1,25,50,100,200 --scenario all --out docs/testing/load-baseline.md
+PG_POOL_MAX=10 NODE_OPTIONS=--max-old-space-size=512 npm run bench -- --concurrency 200 --scenario all --think-ms 4000 --out docs/testing/load-200-think.md
 TEST_DATABASE_URL='postgresql://localhost/learn_english_test' npm run test:db
 ```
 

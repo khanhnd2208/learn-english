@@ -130,14 +130,16 @@ export async function getSenseBundles(senseIds: string[], publishedOnly = false)
 
 /** Only the fields distractor builders use; example sentences stay scoped to the current chunk. */
 export async function getDistractorPool(senseIds: string[]): Promise<DistractorPool> {
-	const rows = await prisma.enSense.findMany({
-		where: { id: { in: senseIds }, status: 'published' },
-		select: { id: true, meaningVi: true, partOfSpeech: true, synonyms: true, word: { select: { lemma: true } } },
-	});
+	if (!senseIds.length) return { entries: [] };
+	// One array parameter and one join: a pool can hold every word of several 500-word sets.
+	const rows = await prisma.$queryRaw<Array<{ id: string; lemma: string; meaningVi: string; partOfSpeech: string; synonyms: string[] }>>`
+		SELECT se."id", w."lemma", se."meaningVi", se."partOfSpeech", se."synonyms"
+		FROM "EnSense" se JOIN "EnWord" w ON w."id" = se."wordId"
+		WHERE se."id" = ANY(${senseIds}::text[]) AND se."status" = 'published'`;
 	const byId = new Map(rows.map((row) => [row.id, row]));
 	return { entries: senseIds.flatMap((id) => {
 		const row = byId.get(id);
-		return row ? [{ senseId: row.id, lemma: row.word.lemma, meaningVi: row.meaningVi, partOfSpeech: row.partOfSpeech, sameSet: true, inTest: false, synonymKeys: row.synonyms.map(lemmaKeyOf) }] : [];
+		return row ? [{ senseId: row.id, lemma: row.lemma, meaningVi: row.meaningVi, partOfSpeech: row.partOfSpeech, sameSet: true, inTest: false, synonymKeys: row.synonyms.map(lemmaKeyOf) }] : [];
 	}) };
 }
 

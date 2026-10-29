@@ -13,8 +13,12 @@ type Sample = { ms: number; queries: number; bytes: number; error?: string };
 async function main() {
 	assertTestDatabase(process.env.DATABASE_URL);
 	process.env.PG_POOL_MAX ??= '5';
-	const { values } = parseArgs({ options: { legacy: { type: 'boolean', default: false }, concurrency: { type: 'string', default: '1,25,50,100,200' }, scenario: { type: 'string', default: 'all' }, out: { type: 'string', default: 'docs/testing/load-baseline.md' } } });
+	const { values } = parseArgs({ options: { legacy: { type: 'boolean', default: false }, concurrency: { type: 'string', default: '1,25,50,100,200' }, scenario: { type: 'string', default: 'all' }, out: { type: 'string', default: 'docs/testing/load-baseline.md' }, 'think-ms': { type: 'string', default: '0' } } });
 	const levels = values.concurrency!.split(',').map(Number);
+	const thinkMs = Number(values['think-ms']);
+	if (!Number.isFinite(thinkMs) || thinkMs < 0) throw new Error('think-ms must be >= 0');
+	// Learners pause between answers; jitter 50-150% so a wave does not stay in lockstep.
+	const think = (rng: { next(): number }) => thinkMs ? new Promise((resolve) => setTimeout(resolve, thinkMs * (0.5 + rng.next()))) : Promise.resolve();
 	if (levels.some((n) => !Number.isInteger(n) || n < 1 || n > 200)) throw new Error('Concurrency must be 1..200');
 	if (!['all', 'overview', 'srs-round', 'guided-round', 'catalog'].includes(values.scenario!)) throw new Error('Unknown scenario');
 	const base = new PrismaClient({ adapter: new PrismaPg(new Pool({ connectionString: process.env.DATABASE_URL, max: Number(process.env.PG_POOL_MAX) })) });
@@ -32,7 +36,7 @@ async function main() {
 	const { listEnglishSets } = values.legacy ? await import('../src/lib/__dbtests__/legacy/catalog') : await import('../src/services/english/enCatalogService');
 	const users = await base.enLearnerProfile.findMany({ where: { userId: { startsWith: 'load-user-' } }, orderBy: { userId: 'asc' }, select: { userId: true } });
 	if (users.length < Math.max(...levels)) throw new Error(`Need ${Math.max(...levels)} seeded learners, found ${users.length}`);
-	const lines = ['# Service load benchmark', '', `Date: ${new Date().toISOString()}`, `Host: ${platform()} ${release()}, ${cpus()[0]?.model}, ${cpus().length} CPUs, ${(totalmem() / 1024 ** 3).toFixed(1)} GiB RAM`, `Node: ${process.version}; PG_POOL_MAX=${process.env.PG_POOL_MAX}`, `Implementation: ${values.legacy ? 'frozen pre-optimization oracle' : 'current services'}. Local service calls, no HTTP/auth/network latency or think-time. One wave per level; not a production capacity guarantee.`, 'Each level mutates its own learners for round scenarios. Reseed before comparing revisions. React cache is inactive outside RSC.', '', '| Concurrency | Operation | N | p50 ms | p95 ms | max ms | Prisma ops avg | JSON max bytes | Errors |', '|---:|---|---:|---:|---:|---:|---:|---:|---:|'];
+	const lines = ['# Service load benchmark', '', `Date: ${new Date().toISOString()}`, `Host: ${platform()} ${release()}, ${cpus()[0]?.model}, ${cpus().length} CPUs, ${(totalmem() / 1024 ** 3).toFixed(1)} GiB RAM`, `Node: ${process.version}; PG_POOL_MAX=${process.env.PG_POOL_MAX}`, `Implementation: ${values.legacy ? 'frozen pre-optimization oracle' : 'current services'}. Local service calls, no HTTP/auth/network latency. One wave per level; not a production capacity guarantee.`, `Think time: ${thinkMs ? `${thinkMs} ms ±50% between answers` : 'none (every learner answers back to back)'}.`, 'Each level mutates its own learners for round scenarios. Reseed before comparing revisions. React cache is inactive outside RSC.', '', '| Concurrency | Operation | N | p50 ms | p95 ms | max ms | Prisma ops avg | JSON max bytes | Errors |', '|---:|---|---:|---:|---:|---:|---:|---:|---:|'];
 	let peakRss = 0, peakHeap = 0;
 	const sampleMemory = () => { const memory = process.memoryUsage(); peakRss = Math.max(peakRss, memory.rss); peakHeap = Math.max(peakHeap, memory.heapUsed); };
 	const timer = setInterval(sampleMemory, 200);
@@ -65,6 +69,7 @@ async function main() {
 							const session = await measure('startToday', () => daily.startToday(userId, now));
 							if (!session.sessionId) return;
 							for (const [n, item] of session.items.slice(0, 50).entries()) {
+								await think(rng);
 								const at = new Date(now.getTime() + (n + 1) * 4000);
 								await measure('answerToday+settleProgress', async () => {
 									const answer = await daily.answerToday(userId, { sessionId: session.sessionId!, senseId: item.senseId, answer: rng.next() < 0.75 ? item.bundle.word.lemma : '', giveUp: false }, at);
@@ -80,6 +85,7 @@ async function main() {
 								session = await measure('saveStudyPosition', () => guided.saveStudyPosition(userId, session.id, 5));
 								for (const question of session.questions) {
 									// Public payload intentionally hides keys. Read only this question's key for the harness.
+									await think(rng);
 									const row = await base.enGuidedReviewQuestion.findUniqueOrThrow({ where: { id: question.id }, select: { answerKey: true } });
 									await measure('answerGuidedReview+settleProgress', async () => {
 										const answer = await guided.answerGuidedReview(userId, session.id, question.id, rng.next() < 0.75 ? row.answerKey : '', 4000);
@@ -103,7 +109,7 @@ async function main() {
 		}
 	} finally {
 		clearInterval(timer);
-		lines.push('', `Peak RSS: ${(peakRss / 1024 ** 2).toFixed(1)} MiB; peak heapUsed: ${(peakHeap / 1024 ** 2).toFixed(1)} MiB.`, 'Guided answers use real server time and no think-time, so pacing may withhold XP. SRS advances its injected server clock by 4 seconds per answer.');
+		lines.push('', `Peak RSS: ${(peakRss / 1024 ** 2).toFixed(1)} MiB; peak heapUsed: ${(peakHeap / 1024 ** 2).toFixed(1)} MiB.`, 'Guided answers use real server time, so pacing may withhold XP without think time. SRS advances its injected server clock by 4 seconds per answer.');
 		await mkdir(dirname(values.out!), { recursive: true });
 		await writeFile(values.out!, lines.join('\n') + '\n');
 		await base.$disconnect();
