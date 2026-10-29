@@ -4,7 +4,7 @@ import { overviewCounts, studiedDays } from './enOverviewQueries';
 import { streakStats } from '@/lib/english/streak';
 import { prisma } from '@/lib/prisma';
 import { AppError } from '@/lib/appError';
-import { EN_WEEKLY_DAYS_DEFAULT } from '@/lib/english/constants';
+import { EN_WEEKLY_DAYS_DEFAULT, EN_TX_MAX_WAIT_MS, EN_TX_TIMEOUT_MS } from '@/lib/english/constants';
 import { shiftVnDay, vnDayKey, vnWeekDays } from '@/lib/english/gapRule';
 import { vnDayStart } from '@/lib/english/schedule';
 import { periodMetrics, type XpRow } from '@/lib/english/goalMetrics';
@@ -101,50 +101,62 @@ async function questContext(userId: string, now: Date, dailyGoalXp: number, week
 	return { tier: goalTierIndex(dailyGoalXp), weeklyDaysGoal, srsAvailable: counts.dueTotal + counts.newCount, enrolledSets: counts.enrolledSets };
 }
 
+/** Small scalar snapshot replaces several full-table reads and independent round trips. */
+async function rewardSnapshot(userId: string) {
+	const [row] = await prisma.$queryRaw<Array<{
+		dailyXpGoal: number | null; weeklyDaysGoal: number | null; dailyGoalChosenAt: Date | null; seenLevel: number | null;
+		totalXp: number; learned: number; longTerm: number; revived: number; goalDays: number; chests: number;
+		legacySessionsFinished: number; guidedSessionsFinished: number; enrolledSets: number;
+	}>>`
+		SELECT p."dailyXpGoal", p."weeklyDaysGoal", p."dailyGoalChosenAt", p."seenLevel",
+		(SELECT COALESCE(sum(x."xp"), 0)::int FROM "EnXpEvent" x WHERE x."userId" = ${userId}) AS "totalXp",
+		(SELECT count(*)::int FROM "EnWordState" w WHERE w."userId" = ${userId} AND w."box" > 0) AS learned,
+		(SELECT count(*)::int FROM "EnWordState" w WHERE w."userId" = ${userId} AND w."box" >= 4) AS "longTerm",
+		(SELECT count(*)::int FROM "EnWordState" w WHERE w."userId" = ${userId} AND w."box" > 0 AND w."lapses" > 0 AND w."box" >= 3) AS revived,
+		(SELECT count(*)::int FROM "EnXpEvent" x WHERE x."userId" = ${userId} AND x."kind" = 'goal') AS "goalDays",
+		(SELECT count(*)::int FROM "EnXpEvent" x WHERE x."userId" = ${userId} AND x."kind" = 'chest') AS chests,
+		(SELECT count(*)::int FROM "EnPracticeSession" s WHERE s."userId" = ${userId} AND s."mode" = 'review' AND s."endedAt" IS NOT NULL) AS "legacySessionsFinished",
+		(SELECT count(*)::int FROM "EnGuidedReviewSession" s WHERE s."userId" = ${userId} AND s."endedAt" IS NOT NULL) AS "guidedSessionsFinished",
+		(SELECT count(*)::int FROM "EnEnrollment" e JOIN "EnSet" st ON st."id" = e."setId" AND st."status" = 'published' WHERE e."userId" = ${userId}) AS "enrolledSets"
+		FROM (SELECT 1) seed LEFT JOIN "EnLearnerProfile" p ON p."userId" = ${userId}`;
+	return row!;
+}
+
 /** Everything the board and the reward step need, read in one pass. */
 export async function loadRewardState(userId: string, now: Date) {
 	const today = vnDayKey(now);
 	const weekDays = vnWeekDays(today);
 	const weekStart = weekDays[0]!;
-	const profile = await prisma.enLearnerProfile.findUnique({ where: { userId }, select: { dailyXpGoal: true, weeklyDaysGoal: true, dailyGoalChosenAt: true, seenLevel: true } });
+	const snapshot = await rewardSnapshot(userId);
+	const profile = snapshot.dailyXpGoal === null ? null : { dailyXpGoal: snapshot.dailyXpGoal, weeklyDaysGoal: snapshot.weeklyDaysGoal!, dailyGoalChosenAt: snapshot.dailyGoalChosenAt, seenLevel: snapshot.seenLevel! };
 	const dailyGoalXp = profile?.dailyXpGoal ?? DAILY_GOAL_DEFAULT;
 	const weeklyDaysGoal = profile?.weeklyDaysGoal ?? EN_WEEKLY_DAYS_DEFAULT;
 	let context: Promise<QuestContext> | undefined;
 	const ctx = () => context ??= questContext(userId, now, dailyGoalXp, weeklyDaysGoal);
 	const weekFrom = vnDayStart(weekStart);
-	const [daily, weeklyBoard, reviews, guidedReviews, xpRows, total, wordCounts, kindCounts, legacySessionsFinished, guidedSessionsFinished, achievements, studied, enrolledSets] = await Promise.all([
+	const [daily, weeklyBoard, reviews, guidedReviews, xpRows, achievements, studied] = await Promise.all([
 		ensureBoard(userId, 'daily', today, async () => dailyQuests(await ctx())),
 		ensureBoard(userId, 'weekly', weekStart, async () => weeklyQuests(await ctx())),
 		prisma.enReview.findMany({ where: { userId, at: { gte: weekFrom } }, select: { at: true, scheduled: true } }),
 		prisma.enGuidedReviewQuestion.findMany({ where: { kind: 'main', session: { userId, questions: { some: { kind: 'main', answeredAt: { gte: weekFrom } } } } }, select: { sessionId: true, chunkNumber: true, answer: true, answeredAt: true, correct: true } }),
 		prisma.enXpEvent.findMany({ where: { userId, day: { gte: weekStart } }, select: { day: true, xp: true, kind: true, sourceKey: true } }),
-		prisma.enXpEvent.aggregate({ where: { userId }, _sum: { xp: true } }),
-		prisma.$queryRaw<Array<{ learned: number; longTerm: number; revived: number }>>`
-			SELECT count(*)::int AS learned, count(*) FILTER (WHERE "box" >= 4)::int AS "longTerm",
-			count(*) FILTER (WHERE "lapses" > 0 AND "box" >= 3)::int AS revived
-			FROM "EnWordState" WHERE "userId" = ${userId} AND "box" > 0`,
-		prisma.enXpEvent.groupBy({ by: ['kind'], where: { userId, kind: { in: ['goal', 'chest'] } }, _count: { _all: true } }),
-		prisma.enPracticeSession.count({ where: { userId, mode: 'review', endedAt: { not: null } } }),
-		prisma.enGuidedReviewSession.count({ where: { userId, endedAt: { not: null } } }),
 		prisma.enAchievement.findMany({ where: { userId }, select: { key: true, seenAt: true } }),
 		studiedDays(userId, vnDayStart(shiftVnDay(today, -365))),
-		prisma.enEnrollment.count({ where: { userId, set: { status: 'published' } } }),
 	]);
 	const guidedRows = guidedReviews.map((row) => ({ sessionId: row.sessionId, chunkNumber: row.chunkNumber, answered: row.answer !== null && row.answeredAt !== null, answeredAt: row.answeredAt, correct: row.correct === true }));
 	// Boards stored before the chest became the only weekly reward still carry quest XP.
 	const weekly = weeklyBoard.map((quest) => ({ ...quest, xp: 0 }));
 	const base = { reviews, guided: guidedRows, xp: xpRows as XpRow[] };
-	const kindCount = (kind: string) => kindCounts.find((row) => row.kind === kind)?._count._all ?? 0;
 	const dayMetrics = periodMetrics({ ...base, days: new Set([today]) });
 	const lifetime: LifetimeMetrics = {
-		longTerm: wordCounts[0]!.longTerm,
-		learned: wordCounts[0]!.learned,
+		longTerm: snapshot.longTerm,
+		learned: snapshot.learned,
 		longestStreak: streakStats(studied, today).longest,
-		goalDays: kindCount('goal'),
-		chests: kindCount('chest'),
-		revived: wordCounts[0]!.revived,
-		sessionsFinished: legacySessionsFinished + guidedSessionsFinished,
-		enrolledSets,
+		goalDays: snapshot.goalDays,
+		chests: snapshot.chests,
+		revived: snapshot.revived,
+		sessionsFinished: snapshot.legacySessionsFinished + snapshot.guidedSessionsFinished,
+		enrolledSets: snapshot.enrolledSets,
 	};
 	return {
 		today,
@@ -158,7 +170,7 @@ export async function loadRewardState(userId: string, now: Date) {
 		weekMetrics: periodMetrics({ ...base, days: new Set(weekDays) }),
 		claimed: new Set(xpRows.map((row) => row.sourceKey)),
 		xpRows,
-		totalXp: total._sum.xp ?? 0,
+		totalXp: snapshot.totalXp,
 		lifetime,
 		achievements,
 	};
@@ -236,7 +248,7 @@ async function payRewards(userId: string, now: Date, state: RewardState) {
 			select: { xp: true },
 		});
 		return created.reduce((sum, row) => sum + row.xp, 0);
-	});
+	}, { timeout: EN_TX_TIMEOUT_MS, maxWait: Math.max(EN_TX_MAX_WAIT_MS, 30_000) });
 	return { ...pending, paid };
 }
 
