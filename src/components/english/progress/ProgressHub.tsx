@@ -68,15 +68,15 @@ export default function ProgressHub({ board, weeks, wrong, stages, dueNext7Days,
 		try { window.history.replaceState(null, '', `/progress?tab=${value}`); } catch { /* address bar is a convenience */ }
 	}
 
-	return <div className="mx-auto max-w-5xl space-y-5 px-4 py-5 sm:px-6 sm:py-8">
-		<header className="game-hero relative overflow-hidden rounded-panel border-2 p-4 sm:p-5" style={{ minHeight: 0 }}>
-			<div className="flex items-center gap-3">
-				<span className="level-badge px-2 py-1 text-lg">Lv {board.level.level}</span>
-				<h1 className="min-w-0 flex-1 truncate text-2xl">{board.level.title}</h1>
-				<span className="shrink-0 text-sm font-bold tabular-nums">{board.level.total} XP</span>
+	return <div className="mx-auto max-w-5xl space-y-4 px-4 py-4 sm:space-y-5 sm:px-6 sm:py-8">
+		<header className="game-hero relative overflow-hidden rounded-panel border-2 p-3.5 sm:p-5" style={{ minHeight: 0 }}>
+			<div className="flex items-center gap-2.5 sm:gap-3">
+				<span className="level-badge px-2 py-1 text-base sm:text-lg">Lv {board.level.level}</span>
+				<h1 className="min-w-0 flex-1 truncate text-xl sm:text-2xl">{board.level.title}</h1>
+				<span className="shrink-0 text-xs font-bold tabular-nums sm:text-sm">{board.level.total} XP</span>
 			</div>
-			<div className="mt-3"><LevelBar level={board.level} label={false} /></div>
-			<div className="mt-4 grid grid-cols-4 gap-1.5 sm:grid-cols-2 sm:gap-3 lg:grid-cols-4">
+			<div className="mt-2.5 sm:mt-3"><LevelBar level={board.level} label={false} /></div>
+			<div className="mt-3.5 grid grid-cols-2 gap-2 sm:mt-4 sm:gap-3 lg:grid-cols-4">
 				<StatTile icon="spark" value={board.streak.current} label="Chuỗi ngày" note={`Kỷ lục ${board.streak.longest} ngày`} />
 				<StatTile icon="sprout" value={board.longTermCount} label="Nhớ lâu" note={`${signed(longTermDelta)} tuần này`} tone={longTermDelta > 0 ? 'up' : longTermDelta < 0 ? 'down' : 'muted'} />
 				<StatTile icon="target" value={thisWeek.percent === null ? '—' : `${thisWeek.percent}%`} label="Đúng tuần" note={accuracyDelta === null ? (thisWeek.answers ? `${thisWeek.correct}/${thisWeek.answers} câu đúng` : 'Chưa ôn tuần này') : `${signed(accuracyDelta, ' điểm')} so với tuần trước`} tone={accuracyDelta === null || accuracyDelta === 0 ? 'muted' : accuracyDelta > 0 ? 'up' : 'down'} />
@@ -249,7 +249,7 @@ function AchievementList({ board, onOpen }: { board: GoalBoard; onOpen: (achieve
 			if (!entries.length) return null;
 			return <section key={group} aria-labelledby={`group-${group}`}>
 				<h2 id={`group-${group}`} className="text-xl">{ACHIEVEMENT_GROUPS[group]}</h2>
-				<ul className="mt-3 grid grid-cols-3 gap-2 sm:grid-cols-4 lg:grid-cols-6">{entries.map((entry) => <li key={entry.id}><AchievementBadge achievement={entry} onOpen={onOpen} /></li>)}</ul>
+				<ul className="mt-3 grid grid-cols-2 gap-2.5 sm:grid-cols-4 lg:grid-cols-6">{entries.map((entry) => <li key={entry.id}><AchievementBadge achievement={entry} onOpen={onOpen} /></li>)}</ul>
 			</section>;
 		})}
 	</>;

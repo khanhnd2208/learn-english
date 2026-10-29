@@ -2,7 +2,7 @@ import { cache } from 'react';
 import { prisma } from '@/lib/prisma';
 import { AppError } from '@/lib/appError';
 import { EN_HINT_MAX_BOX, EN_TX_MAX_WAIT_MS, EN_TX_TIMEOUT_MS, EN_WEEKLY_DAYS_DEFAULT } from '@/lib/english/constants';
-import { buildDailyQueue, interleaveNewWords, intervalChange, isLongTerm, isNearMiss, scheduleMove, vnDayStart, type ScheduledState } from '@/lib/english/schedule';
+import { buildDailyQueue, interleaveNewWords, intervalChange, isLongTerm, isNearMiss, randomRng, scheduleMove, vnDayStart, type ScheduledState } from '@/lib/english/schedule';
 import { gradeEnglishAnswer } from '@/lib/english/grade';
 import { shiftVnDay, vnDayKey, vnWeekDays } from '@/lib/english/gapRule';
 import { streakStats } from '@/lib/english/streak';
@@ -88,16 +88,17 @@ async function newWordGroups(userId: string): Promise<{ groups: string[][]; enro
 	return { groups: [...bySet.values()], enrolledSets: setIds.length };
 }
 
-async function planToday(userId: string, now: Date) {
+async function planToday(userId: string, now: Date, shuffle = false) {
+	const rng = shuffle ? randomRng() : undefined;
 	const [states, { groups, enrolledSets }] = await Promise.all([scheduledStates(userId), newWordGroups(userId)]);
-	const pool = interleaveNewWords(groups, states.map((state) => state.senseId));
-	const queue = buildDailyQueue(states, pool, now);
+	const pool = interleaveNewWords(groups, states.map((state) => state.senseId), rng);
+	const queue = buildDailyQueue(states, pool, now, rng);
 	const dueTotal = states.filter((state) => state.dueAt <= now).length;
 	return { states, queue, dueTotal, enrolledSets };
 }
 
 export async function startToday(userId: string, now = new Date()) {
-	const plan = await planToday(userId, now);
+	const plan = await planToday(userId, now, true);
 	const { dueTotal } = plan;
 	const queue = plan.queue;
 	const senseIds = queue.map((item) => item.kind === 'new' ? item.senseId : item.state.senseId);

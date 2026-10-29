@@ -28,10 +28,16 @@ export default function PracticeRunner({ detail, kind, seed }: { detail: English
 		const bundles = detail.words.map((word) => word.bundle);
 		return { rng: mulberry32(seed), bundles, pool: poolFromBundles(bundles) };
 	}, [detail.words, seed]);
-	const freshQueue = () => initialPracticeQueue(detail.words.filter((word) => (kind === 'mix' ? QUIZ_KINDS : [kind]).some((key) => quizItemFor(key, word.bundle, { pool: source.pool, rng: source.rng, allowSyntheticAudio: true }))).map((word) => word.bundle.sense.id));
+	const freshQueue = (runOffset = 0) => {
+		const queueRng = mulberry32((seed + Math.imul(runOffset + 1, 0x9e3779b1)) >>> 0);
+		const eligible = detail.words
+			.filter((word) => (kind === 'mix' ? QUIZ_KINDS : [kind]).some((key) => quizItemFor(key, word.bundle, { pool: source.pool, rng: mulberry32(seed), allowSyntheticAudio: true })))
+			.map((word) => word.bundle.sense.id);
+		return initialPracticeQueue(queueRng.shuffle(eligible));
+	};
 	useAudioPreload(source.bundles, { sentences: false });
 	const [run, setRun] = useState(0);
-	const [queue, setQueue] = useState<PracticeStep[]>(freshQueue);
+	const [queue, setQueue] = useState<PracticeStep[]>(() => freshQueue(0));
 	const [index, setIndex] = useState(0);
 	const [firstCorrect, setFirstCorrect] = useState(0);
 	const [seen, setSeen] = useState<string[]>([]);
@@ -79,14 +85,15 @@ export default function PracticeRunner({ detail, kind, seed }: { detail: English
 	}
 
 	function restart() {
-		setQueue(freshQueue());
+		const nextRun = run + 1;
+		setQueue(freshQueue(nextRun));
 		setIndex(0);
 		setFirstCorrect(0);
 		setSeen([]);
 		setWrong([]);
 		setFeedback(null);
 		setLast(null);
-		setRun((value) => value + 1);
+		setRun(nextRun);
 	}
 
 	const label = kind === 'mix' ? 'Trộn cả 3' : QUIZ_META[kind].label;

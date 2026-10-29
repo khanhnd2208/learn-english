@@ -54,7 +54,7 @@ export function TabsTrigger({ value, children, className }: TabTriggerProps) {
 			aria-selected={active}
 			onClick={() => ctx.setActive(value)}
 			className={cn(
-				'shrink-0 px-4 py-2.5 text-xs font-bold uppercase tracking-wide transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent',
+				'min-h-11 flex-1 shrink-0 px-3 py-2.5 text-center text-xs font-bold uppercase tracking-wide transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent sm:flex-initial sm:px-4',
 				active
 					? 'border-b-2 border-accent text-accent'
 					: 'text-muted hover:text-foreground-secondary',

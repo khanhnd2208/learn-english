@@ -366,8 +366,10 @@ h1, h2, .game-number {
 	box-shadow: 0 3px 0 color-mix(in srgb, var(--border) 78%, transparent), 0 8px 16px rgb(65 48 63 / 5%);
 }
 .mode-card, .word-row { border: 1px solid var(--border); background: var(--surface); border-radius: 14px; }
-.mode-card { padding: 20px; }
-.word-row { display: flex; align-items: center; gap: 12px; padding: 10px 14px; min-height: 60px; }
+.mode-card { padding: 16px; }
+@media (min-width: 640px) { .mode-card { padding: 20px; } }
+.word-row { display: flex; align-items: center; gap: 10px; padding: 10px 12px; min-height: 56px; }
+@media (min-width: 640px) { .word-row { gap: 12px; padding: 10px 14px; min-height: 60px; } }
 
 /* App chrome */
 .adventure-sidebar {
@@ -482,9 +484,9 @@ input:focus-visible, textarea:focus-visible, select:focus-visible { outline-colo
 .stat-tile { border: 2px solid var(--border); border-radius: 12px; background: var(--surface); box-shadow: 0 3px 0 var(--border); }
 
 @media (max-width: 640px) {
-	.game-hero { min-height: 200px; }
+	.game-hero { min-height: 0; }
 	.game-hero > .adventure-landscape { width: 86%; height: 75%; opacity: .13; }
-	.adventure-icon { width: 34px; height: 34px; }
+	.adventure-icon { width: 32px; height: 32px; }
 }
 
 /* Goals: level badge, XP chip, quest states. In a layer so size and spacing utilities can override them. */
