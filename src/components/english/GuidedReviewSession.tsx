@@ -185,8 +185,8 @@ export default function GuidedReviewSession({ initial, onClose }: { initial: Gui
 
 		{session.phase === 'study' && word && <SessionFooter>
 			<div className="flex gap-3">
-				<button type="button" disabled={viewedWord === 0 || busy} onClick={() => setViewedWord((current) => current - 1)} className="min-h-12 flex-1 rounded-control border border-border px-4 font-bold disabled:opacity-40">← Quay lại</button>
-				<button type="button" disabled={busy} onClick={() => void saveStudy(viewedWord + 1)} className="min-h-12 flex-[2] rounded-control bg-accent px-5 font-bold text-accent-foreground disabled:opacity-50">{viewedWord + 1 >= session.words.length ? 'Bắt đầu luyện →' : 'Từ tiếp theo →'}</button>
+				<button type="button" disabled={viewedWord === 0 || busy} onClick={() => setViewedWord((current) => current - 1)} className="min-h-12 flex-1 whitespace-nowrap rounded-control border border-border px-3 font-bold disabled:opacity-40 sm:px-4">← Quay lại</button>
+				<button type="button" disabled={busy} onClick={() => void saveStudy(viewedWord + 1)} className="min-h-12 flex-[2] whitespace-nowrap rounded-control bg-accent px-4 font-bold sm:px-5 text-accent-foreground disabled:opacity-50">{viewedWord + 1 >= session.words.length ? 'Bắt đầu luyện →' : 'Từ tiếp theo →'}</button>
 			</div>
 		</SessionFooter>}
 

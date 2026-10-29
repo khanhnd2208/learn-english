@@ -19,7 +19,7 @@ const VARIANT_CLASSES = {
 const SIZE_CLASSES = {
 	sm: 'h-8 px-3 text-xs',
 	md: 'h-10 px-4 text-xs',
-	lg: 'h-12 px-6 text-sm',
+	lg: 'h-12 px-4 text-sm sm:px-6',
 } as const;
 
 export type ButtonVariant = keyof typeof VARIANT_CLASSES;
@@ -59,7 +59,7 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(function Button(
 			type={type}
 			disabled={isDisabled}
 			className={cn(
-				'inline-flex items-center justify-center gap-2 font-bold uppercase tracking-widest transition-colors duration-fast focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50',
+				'inline-flex items-center justify-center gap-2 whitespace-nowrap font-bold uppercase tracking-wider sm:tracking-widest transition-colors duration-fast focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50',
 				!isLink && 'rounded-control',
 				!isLink && SIZE_CLASSES[size],
 				VARIANT_CLASSES[variant],

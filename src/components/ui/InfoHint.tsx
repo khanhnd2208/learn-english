@@ -10,7 +10,7 @@ import { placeHint } from '@/lib/hintPosition';
 export default function InfoHint({ title, children, className = '' }: { title: string; children: ReactNode; className?: string }) {
 	const id = useId();
 	const buttonRef = useRef<HTMLButtonElement>(null);
-	const bubbleRef = useRef<HTMLDivElement>(null);
+	const bubbleRef = useRef<HTMLSpanElement>(null);
 
 	useEffect(() => {
 		const bubble = bubbleRef.current;
@@ -48,9 +48,9 @@ export default function InfoHint({ title, children, className = '' }: { title: s
 			aria-describedby={id}
 			className={`relative inline-flex size-5 shrink-0 items-center justify-center rounded-full border border-current/40 align-middle font-sans text-xs leading-none font-bold text-muted normal-case tracking-normal hover:border-accent hover:text-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent after:absolute after:-inset-3 after:content-[''] ${className}`}
 		>i</button>
-		<div ref={bubbleRef} id={id} popover="auto" role="note" className="fixed inset-auto m-0 rounded-card border-2 border-border bg-surface p-3 text-left font-sans text-sm leading-snug font-normal text-foreground normal-case tracking-normal shadow-overlay">
-			<p className="font-bold">{title}</p>
-			<div className="mt-1 text-foreground-secondary">{children}</div>
-		</div>
+		<span ref={bubbleRef} id={id} popover="auto" role="note" className="fixed inset-auto m-0 rounded-card border-2 border-border bg-surface p-3 text-left font-sans text-sm leading-snug font-normal text-foreground normal-case tracking-normal shadow-overlay">
+			<span className="block font-bold">{title}</span>
+			<span className="mt-1 block text-foreground-secondary">{children}</span>
+		</span>
 	</>;
 }
