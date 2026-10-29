@@ -64,26 +64,28 @@ export default function EnglishShell({ children, goals, newLearner }: { children
 				</Link>
 				<div className="mx-4 mb-4 border-t border-border pt-3"><AccountMenu name={accountName} goals={goals} admin={admin} /></div>
 			</aside>
-			<header className="adventure-mobile-header sticky top-0 z-30 flex h-16 items-center justify-between border-b px-4 md:hidden">
-				<Link href="/" className="brand-wordmark flex items-center gap-2 text-lg font-black"><span className="brand-compass"><AdventureIcon name="compass" size={18} /></span><span>WORD<span className="brand-accent">QUEST</span></span></Link>
+			<header className="adventure-mobile-header sticky top-0 z-30 flex h-14 items-center justify-between border-b px-3.5 md:hidden">
+				<Link href="/" className="brand-wordmark flex items-center gap-2 text-base font-black"><span className="brand-compass !size-8"><AdventureIcon name="compass" size={16} /></span><span>WORD<span className="brand-accent">QUEST</span></span></Link>
 				<div className="flex items-center gap-1">
-					<Link href="/progress" aria-label={`Mục tiêu ngày ${goals.xp}/${goals.goal} XP`} className="flex min-h-11 items-center gap-1.5 rounded-control px-1.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent">
-						<GoalRing value={goals.xp} max={goals.goal} size={32} stroke={4} label="Mục tiêu ngày"><span className={`font-black tabular-nums ${goals.xp >= goals.goal ? 'text-sm text-success' : 'text-xs tracking-tight text-foreground'}`}>{goals.xp >= goals.goal ? '✓' : `${Math.round((goals.xp / Math.max(1, goals.goal)) * 100)}%`}</span></GoalRing>
+					<Link href="/progress" aria-label={`Mục tiêu ngày ${goals.xp}/${goals.goal} XP`} className="flex min-h-10 items-center gap-1.5 rounded-control px-1.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent">
+						<GoalRing value={goals.xp} max={goals.goal} size={30} stroke={4} label="Mục tiêu ngày"><span className={`font-black tabular-nums ${goals.xp >= goals.goal ? 'text-xs text-success' : 'text-[10px] tracking-tight text-foreground'}`}>{goals.xp >= goals.goal ? '✓' : `${Math.round((goals.xp / Math.max(1, goals.goal)) * 100)}%`}</span></GoalRing>
 						<span className="level-badge text-xs">Lv {goals.level}</span>
 					</Link>
 					<AccountMenu name={accountName} goals={goals} admin={admin} />
 				</div>
 			</header>
-			<main className="min-h-screen bg-background pb-24 md:pb-0">{children}</main>
+			<main className="min-h-screen bg-background pb-20 md:pb-0">{children}</main>
 			<RewardCenter goals={goals} /><OnboardingTour eligible={newLearner} />
-			<nav className="adventure-mobile-nav fixed bottom-0 z-50 flex h-[72px] w-full items-center justify-around border-t px-2 md:hidden">
+			<nav aria-label="Điều hướng chính" className="adventure-mobile-nav fixed bottom-0 z-50 flex min-h-16 w-full items-center justify-around border-t px-1.5 pb-safe md:hidden">
 				{ENGLISH_NAV.map((item) => {
 					const active = isNavActive(pathname, item.href);
 					return (
-						<Link key={item.href} href={item.href} aria-current={active ? 'page' : undefined} className="mobile-nav-link relative flex flex-1 flex-col items-center gap-1 text-xs font-bold">
-							<AdventureIcon name={navAdventureIcons[item.icon] ?? 'map'} size={21} />
-							{item.href === '/progress' && goals.unseen.length > 0 && <span aria-label="Có thành tựu mới" className="absolute top-0 right-[calc(50%-16px)] size-2 rounded-full bg-error" />}
-							{item.shortLabel}
+						<Link key={item.href} href={item.href} aria-current={active ? 'page' : undefined} className="mobile-nav-link relative flex min-h-12 flex-1 flex-col items-center justify-center gap-0.5 rounded-control py-1 text-[11px] font-bold">
+							<span className={`flex items-center justify-center rounded-full px-2.5 py-0.5 transition-colors ${active ? 'bg-accent-subtle text-accent' : ''}`}>
+								<AdventureIcon name={navAdventureIcons[item.icon] ?? 'map'} size={20} />
+							</span>
+							{item.href === '/progress' && goals.unseen.length > 0 && <span aria-label="Có thành tựu mới" className="absolute top-1 right-[calc(50%-16px)] size-2 rounded-full bg-error" />}
+							<span>{item.shortLabel}</span>
 						</Link>
 					);
 				})}

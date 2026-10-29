@@ -89,7 +89,7 @@ export default function EnglishAdmin({ sets, qaEnabled, pendingAppeals }: { sets
 				<h1 className="text-3xl font-black text-foreground">Nội dung tiếng Anh</h1>
 				<p className="mt-2 text-sm text-muted">Tạo prompt ở bước 1, đưa cho AI, rồi dán JSON AI trả về ở bước 2. Từ thiếu nghĩa Việt hoặc câu ví dụ hợp lệ không được xuất bản. File audio phải nằm trong thư mục ENGLISH_AUDIO_ROOT, ngoài thư mục release.</p>
 			</header>
-			<div className="flex gap-2">
+			<div className="flex flex-wrap gap-2">
 				<Button type="button" variant={panel === 'content' ? 'primary' : 'secondary'} onClick={() => setPanel('content')}>Nội dung</Button>
 				<Button type="button" variant={panel === 'appeals' ? 'primary' : 'secondary'} onClick={() => setPanel('appeals')}>Hòm thư{pending > 0 && <span className="ml-1.5 rounded-full bg-error px-1.5 text-xs font-black text-white">{pending}</span>}</Button>
 				{qaEnabled && <Button type="button" variant={panel === 'qa' ? 'primary' : 'secondary'} onClick={() => setPanel('qa')}>Công cụ test</Button>}
@@ -142,12 +142,12 @@ export default function EnglishAdmin({ sets, qaEnabled, pendingAppeals }: { sets
 				<h2 className="text-xl font-black">Bộ đã lưu</h2>
 				{sets.map((set) => (
 					<Card key={set.id}>
-						<CardContent className="flex items-center justify-between gap-3">
-							<div>
+						<CardContent className="flex flex-col items-start justify-between gap-3 sm:flex-row sm:items-center">
+							<div className="min-w-0">
 								<p className="font-black">{set.title}</p>
 								<p className="text-xs text-muted">{set.status === 'draft' ? 'Bản nháp' : 'Đã xuất bản'} · {set.items} mục · {set.learners} người học</p>
 							</div>
-							<div className="flex flex-wrap justify-end gap-2"><Link href={`/store`} className="inline-flex min-h-10 items-center rounded-control border border-border px-4 text-xs font-bold">Quản lý trên cửa hàng</Link><Button type="button" variant="secondary" disabled={busy} onClick={() => void publish(set.id)}>{set.status === 'draft' ? 'Xuất bản' : 'Xuất bản lại'}</Button></div>
+							<div className="flex flex-wrap gap-2 sm:justify-end"><Link href={`/store`} className="inline-flex min-h-10 items-center rounded-control border border-border px-4 text-xs font-bold">Quản lý trên cửa hàng</Link><Button type="button" variant="secondary" disabled={busy} onClick={() => void publish(set.id)}>{set.status === 'draft' ? 'Xuất bản' : 'Xuất bản lại'}</Button></div>
 						</CardContent>
 					</Card>
 				))}

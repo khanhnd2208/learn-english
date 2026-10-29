@@ -22,13 +22,16 @@ export default function TodayHero({ overview, xp, goal }: { overview: TodayOverv
 	const minutes = reviewMinutes(overview);
 
 	return <>
-		<section id="srs" aria-labelledby="today-heading" className="scroll-mt-6 rounded-panel border-2 border-accent bg-accent-subtle p-5 shadow-[0_3px_0_var(--nav-shadow-active)] sm:p-6">
-			<p className="label-caps text-accent">{state === 'start' ? 'Bắt đầu' : state === 'review' ? 'Ôn luân phiên' : 'Hôm nay'}</p>
+		<section id="srs" aria-labelledby="today-heading" className="scroll-mt-6 rounded-panel border-2 border-accent bg-accent-subtle p-4 shadow-[0_3px_0_var(--nav-shadow-active)] sm:p-6">
+			<div className="flex items-center justify-between gap-2">
+				<p className="label-caps text-accent">{state === 'start' ? 'Bắt đầu' : state === 'review' ? 'Ôn luân phiên' : 'Hôm nay'}</p>
+				{state === 'review' && <span className="xp-chip">≈ +{estimateReviewXp(overview.dueCount, overview.newCount)} XP</span>}
+			</div>
 
 			{state === 'start' && <>
 				<h2 id="today-heading" className="mt-1 text-2xl sm:text-3xl">Chọn bộ từ đầu tiên</h2>
 				<p className="mt-1 text-sm text-foreground-secondary">Tải một bộ, app sẽ lên lịch ôn cho từng từ.</p>
-				<Link href="/store" className={`${primary} mt-4`}>Chọn bộ từ <span aria-hidden="true">→</span></Link>
+				<Link href="/store" className={`${primary} mt-3.5`}>Chọn bộ từ <span aria-hidden="true">→</span></Link>
 			</>}
 
 			{state === 'review' && <>
@@ -39,9 +42,9 @@ export default function TodayHero({ overview, xp, goal }: { overview: TodayOverv
 					{overview.newCount > 0 && <span className="inline-flex items-center gap-1.5">{overview.newCount} từ mới <InfoHint title={HINTS.newWords.title}>{HINTS.newWords.body}</InfoHint></span>}
 					{minutes > 0 && <><span aria-hidden="true">·</span><span>~{minutes} phút</span></>}
 				</p>
-				<div className="mt-4 flex flex-wrap items-center gap-x-4 gap-y-2">
+				<div className="mt-3.5 flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-4">
 					<button type="button" onClick={() => setOpen(true)} className={primary}>Ôn luân phiên <span aria-hidden="true">→</span></button>
-					<span className="xp-chip">≈ +{estimateReviewXp(overview.dueCount, overview.newCount)} XP</span>
+					<Link href="/review" className="inline-flex min-h-10 items-center justify-center text-sm font-bold text-accent hover:underline sm:justify-start">Hoặc ôn theo bộ →</Link>
 				</div>
 			</>}
 
@@ -49,11 +52,9 @@ export default function TodayHero({ overview, xp, goal }: { overview: TodayOverv
 				<h2 id="today-heading" className="mt-1 text-2xl sm:text-3xl">{state === 'goal' ? 'Đạt mục tiêu hôm nay' : '✓ Xong phần ôn luân phiên'}</h2>
 				<p className="mt-1 text-sm text-foreground-secondary">{overview.tomorrowCount > 0 ? `Mai có ${overview.tomorrowCount} từ đến hạn.` : 'Mai chưa có từ đến hạn.'}{state === 'more' && ' Còn sức thì ôn theo bộ vài từ.'}</p>
 				{state === 'more'
-					? <Link href="/review" className={`${primary} mt-4`}>Ôn theo bộ <span aria-hidden="true">→</span></Link>
+					? <Link href="/review" className={`${primary} mt-3.5`}>Ôn theo bộ <span aria-hidden="true">→</span></Link>
 					: <Link href="/review" className={`${secondary} mt-2`}>Ôn theo bộ vài từ →</Link>}
 			</>}
-
-			{state === 'review' && <Link href="/review" className={`${secondary} mt-1`}>Hoặc ôn theo bộ từ mới →</Link>}
 		</section>
 		{open && <StudySession onClose={(studied) => { setOpen(false); if (studied) router.refresh(); }} />}
 	</>;

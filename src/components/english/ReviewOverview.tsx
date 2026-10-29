@@ -69,30 +69,31 @@ export default function ReviewOverview({ overview, guided: initial, mode }: { ov
 		}
 	}
 
-	return <div className="mx-auto max-w-2xl px-4 py-5 sm:px-6 sm:py-8">
-		<header className="mb-4 flex items-center justify-between gap-3 sm:mb-5"><h1 className="text-3xl sm:text-4xl">Ôn tập</h1><AdvancedToggle /></header>
-		<div role="group" aria-label="Chế độ ôn tập" className="mb-5 flex rounded-control border border-border bg-surface p-1">
+	return <div className="mx-auto max-w-2xl px-4 py-4 sm:px-6 sm:py-8">
+		<header className="mb-3.5 flex items-center justify-between gap-3 sm:mb-5"><h1 className="text-2xl sm:text-4xl">Ôn tập</h1><AdvancedToggle /></header>
+		<div role="group" aria-label="Chế độ ôn tập" className="mb-4 flex rounded-control border border-border bg-surface p-1">
 			{([['bo', 'Ôn theo bộ'], ['luan-phien', 'Ôn luân phiên']] as const).map(([value, label]) => <button key={value} type="button" aria-pressed={mode === value} onClick={() => router.replace(`/review?mode=${value}`)} className={`min-h-11 flex-1 rounded-control px-2 text-sm font-bold ${mode === value ? 'bg-accent text-accent-foreground' : 'text-muted'}`}>{label}</button>)}
 		</div>
 		{mode === 'luan-phien' ? <SrsPanel overview={overview} /> : <>
-		<div className="mb-4"><h2 className="flex items-center gap-2 text-2xl">Ôn theo bộ <InfoHint title={HINTS.guided.title}>{HINTS.guided.body}</InfoHint></h2><p className="mt-1 text-sm text-muted">Chọn bộ, học từng chặng {EN_GUIDED_CHUNK_SIZE} từ rồi làm {EN_GUIDED_CHUNK_SIZE} câu.</p></div>
-
 		{noSets ? <section className="mode-card text-center">
 			<h2 className="text-2xl">Chưa có bộ từ</h2>
 			<p className="mt-1 text-sm text-muted">Tải một bộ để có từ học thêm.</p>
 			<Link href="/store" className="mt-4 inline-flex min-h-12 items-center rounded-control bg-accent px-5 font-bold text-accent-foreground">Chọn bộ từ →</Link>
 		</section> : <section aria-label="Ôn theo bộ" className="mode-card space-y-4 p-4 sm:p-6">
 			<div>
-				<p className="mb-2 text-sm font-bold">Chọn bộ để học</p>
+				<div className="mb-2 flex items-center justify-between gap-2">
+					<p className="flex items-center gap-1.5 text-sm font-bold">Chọn bộ để học <InfoHint title={HINTS.guided.title}>{HINTS.guided.body}</InfoHint></p>
+					<span className="text-xs text-muted">{EN_GUIDED_CHUNK_SIZE} từ / chặng</span>
+				</div>
 				{guided.sets.length > 8 && <input value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Tìm bộ từ…" aria-label="Tìm bộ từ" className="mb-2 min-h-11 w-full rounded-control border border-border bg-background px-3 text-sm" />}
 				<div className="max-h-60 overflow-y-auto divide-y divide-border" aria-label="Chọn bộ từ để học">
 					<Checkbox label="Tất cả" checked={allSelected} disabled={busy} onChange={() => saveSelection(allSelected ? [] : allSetIds)} className="w-full px-2 font-bold" />
-					{filtered.map((set) => <div key={set.id} className="flex items-center justify-between gap-3"><Checkbox label={set.title} checked={selected.has(set.id)} disabled={busy} onChange={() => saveSelection(selected.has(set.id) ? guided.selectedSetIds.filter((id) => id !== set.id) : [...guided.selectedSetIds, set.id])} className="min-w-0 flex-1 px-2 font-bold" /><span className="shrink-0 text-sm text-muted">{set.words} từ</span></div>)}
+					{filtered.map((set) => <div key={set.id} className="flex items-center justify-between gap-3"><Checkbox label={set.title} checked={selected.has(set.id)} disabled={busy} onChange={() => saveSelection(selected.has(set.id) ? guided.selectedSetIds.filter((id) => id !== set.id) : [...guided.selectedSetIds, set.id])} className="min-w-0 flex-1 px-2 font-bold" /><span className="shrink-0 text-xs text-muted sm:text-sm">{set.words} từ</span></div>)}
 				</div>
 				{filtered.length === 0 && <p className="mt-2 text-sm text-muted">Không tìm thấy bộ từ phù hợp.</p>}
-				<div className="mt-2 flex items-center justify-between gap-3 text-sm">
-					<p className={`font-bold text-foreground-secondary ${saving ? 'opacity-60' : ''}`} aria-live="polite"><span className="tabular-nums">{guided.selectedSetIds.length}</span> bộ · <span className="tabular-nums">{guided.uniqueWords}</span> từ{guided.practicedToday > 0 && <> · hôm nay đã luyện <span className="tabular-nums">{guided.practicedToday}</span> câu</>}</p>
-					<Link href="/store" className="inline-flex min-h-11 shrink-0 items-center font-bold text-accent hover:underline">+ Thêm bộ</Link>
+				<div className="mt-2.5 flex flex-wrap items-center justify-between gap-2 text-sm">
+					<p className={`font-bold text-foreground-secondary ${saving ? 'opacity-60' : ''}`} aria-live="polite"><span className="tabular-nums">{guided.selectedSetIds.length}</span> bộ · <span className="tabular-nums">{guided.uniqueWords}</span> từ{guided.practicedToday > 0 && <> · đã luyện <span className="tabular-nums">{guided.practicedToday}</span> câu</>}</p>
+					<Link href="/store" className="inline-flex min-h-9 shrink-0 items-center font-bold text-accent hover:underline">+ Thêm bộ</Link>
 				</div>
 			</div>
 

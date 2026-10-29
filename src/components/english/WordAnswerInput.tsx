@@ -76,8 +76,9 @@ function SlottedInput({ layout, value, onChange, disabled = false, firstLetter, 
 	}
 
 	let letterIndex = 0;
-	return <div className="space-y-2">
-		<div className={`relative rounded-panel border-2 bg-background p-3 focus-within:border-accent ${disabled ? 'border-border opacity-65' : 'border-border'}`} onClick={(event) => {
+	const tileSize = layout.letterCount >= 8 ? 'h-9 w-7 text-base sm:size-10 sm:text-lg' : 'size-9 text-base sm:size-10 sm:text-lg';
+	return <div className="space-y-1.5">
+		<div className={`relative rounded-panel border-2 bg-background p-2.5 focus-within:border-accent sm:p-3 ${disabled ? 'border-border opacity-65' : 'border-border'}`} onClick={(event) => {
 			if (disabled) return;
 			const target = event.target as HTMLElement;
 			const slot = target.closest<HTMLElement>('[data-letter-index]');
@@ -92,12 +93,12 @@ function SlottedInput({ layout, value, onChange, disabled = false, firstLetter, 
 				autoComplete="off" autoCapitalize="none" autoCorrect="off" spellCheck={false} enterKeyHint="done"
 				className="pointer-events-none absolute h-px w-px opacity-0"
 			/>
-			<div aria-hidden="true" className="flex flex-wrap justify-center gap-x-3 gap-y-2">
+			<div aria-hidden="true" className="flex flex-wrap justify-center gap-x-2.5 gap-y-1.5 sm:gap-x-3 sm:gap-y-2">
 				{groups.map((group, groupIndex) => <span key={groupIndex} className="flex max-w-full flex-wrap justify-center gap-1">
 					{group.map(({ slot, index }) => {
-						if (slot.kind === 'fixed') return <span key={index} className="flex h-10 w-3 items-center justify-center text-lg font-bold">{slot.value}</span>;
+						if (slot.kind === 'fixed') return <span key={index} className="flex h-9 w-2.5 items-center justify-center text-base font-bold sm:h-10 sm:w-3 sm:text-lg">{slot.value}</span>;
 						const at = letterIndex++;
-						return <span key={index} data-letter-index={at} className={`flex size-10 shrink-0 items-center justify-center rounded-md border-2 text-lg font-bold uppercase ${focused && !disabled && cursor === at ? 'border-accent bg-accent-subtle ring-2 ring-accent/30' : letters[at] ? 'border-accent/60 bg-accent-subtle text-foreground' : 'border-border bg-surface text-muted'}`}>
+						return <span key={index} data-letter-index={at} className={`flex ${tileSize} shrink-0 items-center justify-center rounded-md border-2 font-bold uppercase ${focused && !disabled && cursor === at ? 'border-accent bg-accent-subtle ring-2 ring-accent/30' : letters[at] ? 'border-accent/60 bg-accent-subtle text-foreground' : 'border-border bg-surface text-muted'}`}>
 							{letters[at] ?? (at === 0 && firstLetter ? <span className="opacity-50">{firstLetter}</span> : '')}
 						</span>;
 					})}
@@ -105,7 +106,7 @@ function SlottedInput({ layout, value, onChange, disabled = false, firstLetter, 
 			</div>
 		</div>
 		<p id={`${id}-help`} className="text-center text-xs text-muted">{letters.length}/{layout.letterCount} chữ · Dấu cách và dấu câu đã có sẵn.</p>
-		<p id={`${id}-message`} role="status" className="min-h-5 text-center text-sm text-warning">{message || (!complete && letters.length > 0 ? 'Điền đủ các ô rồi kiểm tra.' : '')}</p>
+		{message && <p id={`${id}-message`} role="status" className="text-center text-xs font-bold text-warning sm:text-sm">{message}</p>}
 	</div>;
 }
 

@@ -263,11 +263,12 @@ export async function startGuidedRetry(userId: string, sessionId: string) {
 	if (!main.length) return serializeSession(userId, session.id);
 	const existing = await prisma.enGuidedReviewQuestion.count({ where: { sessionId: session.id, chunkNumber: session.chunkNumber, kind: 'retry' } });
 	if (!existing) {
+		const rng = randomRng();
 		const bundles = await getSenseBundles(session.poolSenseIds, true);
 		const byId = new Map(bundles.map((bundle) => [bundle.sense.id, bundle]));
-		const retries = main.flatMap((question) => {
+		const retries = rng.shuffle(main).flatMap((question) => {
 			const bundle = byId.get(question.senseId);
-			const retry = bundle && buildRetryQuestion(bundle, bundles, question.activityKey, randomRng());
+			const retry = bundle && buildRetryQuestion(bundle, bundles, question.activityKey, rng);
 			return retry ? [{ question, retry }] : [];
 		});
 		await prisma.enGuidedReviewQuestion.createMany({ data: retries.map(({ retry }, position) => ({ sessionId: session.id, chunkNumber: session.chunkNumber, kind: 'retry', position, senseId: retry.senseId, role: retry.role, activityKey: retry.activityKey, prompt: retry.prompt as Prisma.InputJsonValue, answerKey: retry.answerKey, accepted: retry.accepted, layout: retry.layout as unknown as Prisma.InputJsonValue })), skipDuplicates: true });

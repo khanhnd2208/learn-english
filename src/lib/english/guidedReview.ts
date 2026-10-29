@@ -15,7 +15,7 @@ export function reviewWeight(history: Pick<ReviewHistory, 'recentWrong' | 'recen
 
 export function weightedOrder(senseIds: string[], histories: ReviewHistory[], rng: Rng): string[] {
 	const stats = new Map(histories.map((history) => [history.senseId, history]));
-	const remaining = [...new Set(senseIds)];
+	const remaining = rng.shuffle([...new Set(senseIds)]);
 	const ordered: string[] = [];
 	while (remaining.length) {
 		const weights = remaining.map((senseId) => reviewWeight(stats.get(senseId) ?? { recentWrong: 0, recentTotal: 0 }));

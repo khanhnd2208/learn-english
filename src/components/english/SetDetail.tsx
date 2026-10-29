@@ -42,10 +42,10 @@ export default function SetDetail({ detail, isAdmin = false }: { detail: English
 	const longTerm = detail.words.filter((word) => isLongTerm(word.box)).length;
 	const percent = (count: number) => `${detail.wordCount ? (count / detail.wordCount) * 100 : 0}%`;
 
-	return <div className="mx-auto max-w-3xl space-y-5 px-4 py-6 sm:px-6 sm:py-10">
-		<Link href={detail.enrolled ? '/sets' : '/store'} className="inline-flex min-h-11 items-center text-sm font-bold text-accent">← {detail.enrolled ? 'Bộ từ' : 'Thư viện'}</Link>
-		<header className="mode-card space-y-4">
-			<div className="flex items-start justify-between gap-3"><div><h1 className="text-3xl sm:text-4xl">{detail.title}</h1><p className="mt-1 text-sm text-muted">{learned}/{detail.wordCount} từ đã học{longTerm > 0 ? ` · ${longTerm} nhớ lâu` : ''}</p>{detail.description && <p className="mt-2 text-sm text-muted">{detail.description}</p>}</div>{detail.enrolled && <details className="relative"><summary aria-label="Tùy chọn bộ từ" className="flex min-h-11 min-w-11 cursor-pointer items-center justify-center rounded-control border border-border text-xl">⋯</summary><div className="absolute right-0 z-20 mt-1 rounded-card border border-border bg-surface p-2 shadow-overlay"><RemoveSetButton setId={detail.id} setTitle={detail.title} locked={detail.locked} listed={detail.listed} /></div></details>}</div>
+	return <div className="mx-auto max-w-3xl space-y-4 px-4 py-4 sm:space-y-5 sm:px-6 sm:py-10">
+		<Link href={detail.enrolled ? '/sets' : '/store'} className="inline-flex min-h-10 items-center text-sm font-bold text-accent">← {detail.enrolled ? 'Bộ từ' : 'Thư viện'}</Link>
+		<header className="mode-card space-y-3.5 sm:space-y-4">
+			<div className="flex items-start justify-between gap-3"><div className="min-w-0"><h1 className="text-2xl sm:text-4xl">{detail.title}</h1><p className="mt-1 text-sm text-muted">{learned}/{detail.wordCount} từ đã học{longTerm > 0 ? ` · ${longTerm} nhớ lâu` : ''}</p>{detail.description && <p className="mt-1.5 text-sm text-muted">{detail.description}</p>}</div>{detail.enrolled && <details className="relative shrink-0"><summary aria-label="Tùy chọn bộ từ" className="flex min-h-10 min-w-10 cursor-pointer items-center justify-center rounded-control border border-border text-xl sm:min-h-11 sm:min-w-11">⋯</summary><div className="absolute right-0 z-20 mt-1 rounded-card border border-border bg-surface p-2 shadow-overlay"><RemoveSetButton setId={detail.id} setTitle={detail.title} locked={detail.locked} listed={detail.listed} /></div></details>}</div>
 			<div className="relative h-2 overflow-hidden rounded-full bg-surface-container" role="img" aria-label={`${learned} đã ôn, ${longTerm} nhớ lâu trên ${detail.wordCount} từ`}>
 				<div className="absolute inset-y-0 left-0 rounded-full bg-accent/40" style={{ width: percent(learned) }} />
 				<div className="absolute inset-y-0 left-0 rounded-full bg-success" style={{ width: percent(longTerm) }} />
@@ -58,13 +58,15 @@ export default function SetDetail({ detail, isAdmin = false }: { detail: English
 
 
 		<section className="space-y-3">
-			<div className="flex items-center justify-between gap-3"><h2 className="text-2xl">Danh sách từ <span className="text-base font-normal text-muted">({words.length})</span></h2></div>
-			<div className="flex flex-wrap gap-2">
-				<input type="search" aria-label="Tìm từ" placeholder="Tìm từ hoặc nghĩa…" value={search} onChange={(event) => setSearch(event.target.value)} className="min-h-11 min-w-48 flex-1 rounded-control border border-border bg-surface px-3 outline-none focus:border-accent" />
-				{detail.enrolled && <div className="flex gap-1 rounded-control border border-border bg-surface p-1" role="group" aria-label="Lọc từ">
-					{FILTERS.map(([value, label]) => <button key={value} type="button" aria-pressed={filter === value} onClick={() => setFilter(value)} className={`min-h-9 rounded-control px-3 text-sm font-bold ${filter === value ? 'bg-accent text-accent-foreground' : 'text-muted hover:text-foreground'}`}>{label}</button>)}
-				</div>}
-				<button type="button" aria-pressed={hideMeaning} onClick={() => setHideMeaning(!hideMeaning)} className="min-h-11 rounded-control border border-border px-3 text-sm font-bold">{hideMeaning ? 'Hiện nghĩa' : 'Che nghĩa'}</button>
+			<div className="flex items-center justify-between gap-3"><h2 className="text-xl sm:text-2xl">Danh sách từ <span className="text-sm font-normal text-muted sm:text-base">({words.length})</span></h2></div>
+			<div className="space-y-2 sm:flex sm:flex-wrap sm:gap-2 sm:space-y-0">
+				<input type="search" aria-label="Tìm từ" placeholder="Tìm từ hoặc nghĩa…" value={search} onChange={(event) => setSearch(event.target.value)} className="min-h-11 w-full rounded-control border border-border bg-surface px-3 text-sm outline-none focus:border-accent sm:min-w-48 sm:flex-1" />
+				<div className="flex items-center gap-2">
+					{detail.enrolled && <div className="flex min-w-0 flex-1 gap-0.5 rounded-control border border-border bg-surface p-1 sm:flex-initial sm:gap-1" role="group" aria-label="Lọc từ">
+						{FILTERS.map(([value, label]) => <button key={value} type="button" aria-pressed={filter === value} onClick={() => setFilter(value)} className={`min-h-9 flex-1 rounded-control px-2 text-xs font-bold sm:flex-initial sm:px-3 sm:text-sm ${filter === value ? 'bg-accent text-accent-foreground' : 'text-muted hover:text-foreground'}`}>{label}</button>)}
+					</div>}
+					<button type="button" aria-pressed={hideMeaning} onClick={() => setHideMeaning(!hideMeaning)} className="min-h-11 shrink-0 rounded-control border border-border bg-surface px-2.5 text-xs font-bold sm:px-3 sm:text-sm">{hideMeaning ? 'Hiện nghĩa' : 'Che nghĩa'}</button>
+				</div>
 			</div>
 			<ul className="space-y-2">
 				{words.map((word) => {
@@ -76,7 +78,7 @@ export default function SetDetail({ detail, isAdmin = false }: { detail: English
 							<span className="text-xs text-muted">{word.bundle.word.ipa}{word.bundle.sense.partOfSpeech && ` · ${word.bundle.sense.partOfSpeech}`}</span>
 							<span className="block text-sm text-muted">{hideMeaning ? '••••••' : word.bundle.sense.meaningVi}</span>
 						</button>
-						<span className={`shrink-0 rounded-full px-2 py-0.5 text-xs font-bold ${stage.className}`}>{stage.label}</span>
+						{word.box > 0 && <span className={`shrink-0 rounded-full px-2 py-0.5 text-[11px] font-bold sm:text-xs ${stage.className}`}>{stage.label}</span>}
 						<EnglishAudioButton compact senseId={word.bundle.sense.id} lemma={word.bundle.word.lemma} recordedAudioAvailable={audio} />
 					</li>;
 				})}

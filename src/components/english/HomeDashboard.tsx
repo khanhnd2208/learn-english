@@ -32,18 +32,18 @@ export default function HomeDashboard({ overview, sets, board, resetsIn, greetin
 	const stages = enrolled.reduce((sum, set) => ({ new: sum.new + set.stages.new, learning: sum.learning + set.stages.learning, remembering: sum.remembering + set.stages.remembering, longTerm: sum.longTerm + set.stages.longTerm }), { new: 0, learning: 0, remembering: 0, longTerm: 0 });
 	const hasSets = enrolled.length > 0;
 
-	return <div className="mx-auto max-w-5xl px-4 py-5 sm:px-6 sm:py-8">
-		<header className="mb-4 sm:mb-6"><h1 className="truncate text-2xl sm:text-3xl">{greeting}</h1><p className="mt-0.5 text-xs text-muted">{dateLabel}</p></header>
+	return <div className="mx-auto max-w-5xl px-4 py-4 sm:px-6 sm:py-8">
+		<header className="mb-3 flex flex-wrap items-baseline justify-between gap-x-3 gap-y-0.5 sm:mb-6 sm:block"><h1 className="truncate text-xl sm:text-3xl">{greeting}</h1><p className="text-xs text-muted sm:mt-0.5">{dateLabel}</p></header>
 
-		<div className="grid grid-cols-1 gap-4 lg:grid-cols-3 lg:items-start lg:gap-5">
+		<div className="grid grid-cols-1 gap-3.5 sm:gap-4 lg:grid-cols-3 lg:items-start lg:gap-5">
 			<div className="min-w-0 lg:col-span-2 lg:row-start-1"><TodayHero overview={overview} xp={board.today.xp} goal={board.today.goal} /></div>
-
-			<div className="min-w-0 lg:col-start-3 lg:row-start-1"><QuestNote board={board} resetsIn={resetsIn} hasSets={hasSets} /></div>
 
 			{hasSets && <div className="min-w-0 lg:col-start-3 lg:row-start-2"><ProgressStrip streak={overview.streakDays} longTerm={board.longTermCount} level={board.level} stages={stages} /></div>}
 
+			<div className="min-w-0 lg:col-start-3 lg:row-start-1"><QuestNote board={board} resetsIn={resetsIn} hasSets={hasSets} /></div>
+
 			{hasSets && <section id="your-sets" aria-labelledby="your-sets-heading" className="min-w-0 overflow-hidden rounded-panel border border-border bg-surface lg:col-span-2 lg:col-start-1 lg:row-span-2 lg:row-start-2">
-				<div className="flex items-center justify-between gap-3 border-b border-border px-4 py-2"><h2 id="your-sets-heading" className="text-lg">Đang học <span className="text-sm font-normal text-muted">({enrolled.length})</span></h2><Link href="/sets" className="inline-flex min-h-11 shrink-0 items-center text-sm font-bold text-accent">Xem tất cả →</Link></div>
+				<div className="flex items-center justify-between gap-3 border-b border-border px-4 py-2"><h2 id="your-sets-heading" className="text-base sm:text-lg">Đang học <span className="text-sm font-normal text-muted">({enrolled.length})</span></h2><Link href="/sets" className="inline-flex min-h-10 shrink-0 items-center text-sm font-bold text-accent">Xem tất cả →</Link></div>
 				<ul>{enrolled.slice(0, SETS_SHOWN).map((set) => <SetRow key={set.id} set={set} />)}</ul>
 
 			</section>}

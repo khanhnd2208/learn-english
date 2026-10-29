@@ -38,5 +38,8 @@ export function mulberry32(seed: number): Rng {
 }
 
 export function randomRng(): Rng {
-	return mulberry32((Date.now() ^ Math.floor(Math.random() * 0xffffffff)) >>> 0);
+	const buf = new Uint32Array(1);
+	if (typeof globalThis.crypto?.getRandomValues === 'function') globalThis.crypto.getRandomValues(buf);
+	const seed = (buf[0]! ^ Date.now() ^ Math.floor(Math.random() * 0xffffffff)) >>> 0;
+	return mulberry32(seed || 1);
 }

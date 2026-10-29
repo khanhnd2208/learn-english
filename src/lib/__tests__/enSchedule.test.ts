@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest';
+import { mulberry32 } from '@/lib/english/activities';
 import { buildDailyQueue, countStages, interleaveNewWords, dueAt, intervalChange, isDue, isNearMiss, nextBox, scheduleAnswer, scheduleMove, stageOf } from '@/lib/english/schedule';
 
 describe('Leitner schedule', () => {
@@ -70,6 +71,21 @@ describe('Leitner schedule', () => {
 
 	it('excludes scheduled or duplicate senses from new words', () => {
 		expect(buildDailyQueue([state('n2', 1, '2026-11-20T00:00:00Z')], ['n1', 'n1', 'n2', 'n3'], now)).toEqual([{ kind: 'new', senseId: 'n1' }, { kind: 'new', senseId: 'n3' }]);
+	});
+
+	it('shuffles due words within the same box and shuffles new words within each set when given an rng', () => {
+		const sameBoxStates = Array.from({ length: 20 }, (_, i) => state(`d${i}`, 1, '2026-10-20T00:00:00Z'));
+		const box2States = Array.from({ length: 5 }, (_, i) => state(`b${i}`, 2, '2026-10-20T00:00:00Z'));
+		const setWords = Array.from({ length: 20 }, (_, i) => `w${i}`);
+		const rng = mulberry32(42);
+		const pool = interleaveNewWords([setWords], [], rng);
+		expect(pool).toHaveLength(20);
+		expect(pool).not.toEqual(setWords);
+		const queue = buildDailyQueue([...box2States, ...sameBoxStates], pool, now, rng);
+		const reviewIds = queue.filter((item) => item.kind === 'review').map((item) => item.state.senseId);
+		expect(reviewIds.slice(0, 20).every((id) => id.startsWith('d'))).toBe(true);
+		expect(reviewIds.slice(20).every((id) => id.startsWith('b'))).toBe(true);
+		expect(reviewIds.slice(0, 20)).not.toEqual(sameBoxStates.map((s) => s.senseId));
 	});
 
 	it('names learning stages without box jargon', () => {

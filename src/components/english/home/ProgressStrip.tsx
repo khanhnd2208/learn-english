@@ -21,18 +21,17 @@ export default function ProgressStrip({ streak, longTerm, level, stages }: {
 	level: LevelInfo;
 	stages: Stages;
 }) {
-	return <section aria-labelledby="progress-heading" className="mode-card space-y-4">
+	return <section aria-labelledby="progress-heading" className="mode-card space-y-3">
 		<div className="flex items-center justify-between gap-2">
-			<h2 id="progress-heading" className="text-lg">Tiến bộ</h2>
-			<Link href="/progress" className="inline-flex min-h-11 items-center text-sm font-bold text-accent">Chi tiết →</Link>
+			<h2 id="progress-heading" className="text-base sm:text-lg">Tiến bộ</h2>
+			<Link href="/progress" className="inline-flex min-h-9 items-center text-sm font-bold text-accent">Chi tiết →</Link>
 		</div>
-		<dl className="grid grid-cols-3 gap-3">
-			<Stat value={streak} label="Ngày liên tiếp" />
+		<dl className="grid grid-cols-3 gap-2 sm:gap-3">
+			<Stat value={streak} label="Chuỗi ngày" />
 			<Stat value={longTerm} label="Nhớ lâu" hint={<InfoHint title={HINTS.stages.title}>{HINTS.stages.body}</InfoHint>} />
-			<Stat value={`Lv ${level.level}`} label={level.title} />
+			<Stat value={`Lv ${level.level}`} label="Cấp độ" />
 		</dl>
 		<div>
-			<p className="mb-1.5 text-xs font-bold text-muted">Mức nhớ các từ</p>
 			<StageBar stages={stages} />
 		</div>
 	</section>;

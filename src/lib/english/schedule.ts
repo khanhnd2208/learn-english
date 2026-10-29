@@ -1,4 +1,5 @@
 import { EN_LEITNER_INTERVALS } from '@/lib/english/constants';
+import { randomRng, type Rng } from '@/lib/english/activities/rng';
 import { shiftVnDay, vnDayKey } from '@/lib/english/gapRule';
 import { normalizeLearnerText } from '@/lib/english/text';
 
@@ -101,10 +102,17 @@ export function intervalDays(box: number): number {
  * Every due word, then every word of the downloaded sets that is not scheduled yet.
  * SRS has no daily cap: correct answers push words further out, so the queue shrinks on
  * its own, and a learner who cannot finish simply continues next time.
+ * Words within the same box are shuffled so they never appear in upload order.
  */
-export function buildDailyQueue<T extends ScheduledState>(states: T[], newPool: string[], now = new Date()): DailyQueueItem[] {
+export function buildDailyQueue<T extends ScheduledState>(states: T[], newPool: string[], now = new Date(), rng?: Rng): DailyQueueItem[] {
 	const dueStates = states.filter((state) => isDue(state, now));
-	dueStates.sort((a, b) => a.box - b.box || a.dueAt.getTime() - b.dueAt.getTime() || a.senseId.localeCompare(b.senseId));
+	if (rng) {
+		const shuffled = rng.shuffle(dueStates);
+		shuffled.sort((a, b) => a.box - b.box);
+		dueStates.splice(0, dueStates.length, ...shuffled);
+	} else {
+		dueStates.sort((a, b) => a.box - b.box || a.dueAt.getTime() - b.dueAt.getTime() || a.senseId.localeCompare(b.senseId));
+	}
 	const seen = new Set(states.map((state) => state.senseId));
 	const newWords = [...new Set(newPool)].filter((senseId) => !seen.has(senseId));
 	return [...dueStates.map((state) => ({ kind: 'review' as const, state })), ...newWords.map((senseId) => ({ kind: 'new' as const, senseId }))];
@@ -113,21 +121,28 @@ export function buildDailyQueue<T extends ScheduledState>(states: T[], newPool: 
 /**
  * New words from every downloaded set, taking one word from each set in turn, so every set
  * reaches the learner early instead of waiting behind the sets downloaded before it.
- * Words already scheduled are skipped before the turns are taken.
+ * Words already scheduled are skipped before the turns are taken, and each set's words are
+ * shuffled when an `rng` is given so learners never study in upload order.
  */
-export function interleaveNewWords(groups: string[][], scheduled: Iterable<string> = []): string[] {
+export function interleaveNewWords(groups: string[][], scheduled: Iterable<string> = [], rng?: Rng): string[] {
 	const seen = new Set(scheduled);
-	const queues = groups.map((group) => group.filter((senseId) => {
-		if (seen.has(senseId)) return false;
-		seen.add(senseId);
-		return true;
-	}));
+	const queues = groups.map((group) => {
+		const filtered = group.filter((senseId) => {
+			if (seen.has(senseId)) return false;
+			seen.add(senseId);
+			return true;
+		});
+		return rng ? rng.shuffle(filtered) : filtered;
+	});
 	const pool: string[] = [];
 	for (let turn = 0; queues.some((queue) => turn < queue.length); turn += 1) {
-		for (const queue of queues) if (turn < queue.length) pool.push(queue[turn]!);
+		const turnQueues = rng ? rng.shuffle(queues) : queues;
+		for (const queue of turnQueues) if (turn < queue.length) pool.push(queue[turn]!);
 	}
 	return pool;
 }
+
+export { randomRng };
 
 /** Edit distance where swapping two neighbouring letters ("recieve") counts as one typo. */
 function editDistance(a: string, b: string): number {

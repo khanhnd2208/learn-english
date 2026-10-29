@@ -32,8 +32,8 @@ export default function FocusFrame({ title, subtitle, progress, total, children,
 
 	return <div className="fixed inset-0 z-[90] overflow-y-auto bg-background">
 		<SessionHeader label={subtitle} progress={progress} total={total} onExit={leave} />
-		<div className="mx-auto max-w-3xl px-4 pt-4"><p className="truncate font-bold">{title}</p><p className="text-xs text-muted">{subtitle}</p></div>
-		<main className="mx-auto max-w-3xl px-4 py-8">{children}</main>
+		<div className="mx-auto flex max-w-2xl items-baseline justify-between gap-2 px-4 pt-2.5 sm:pt-4"><p className="truncate text-sm font-bold sm:text-base">{title}</p><p className="shrink-0 text-xs text-muted">{subtitle}</p></div>
+		<main className="mx-auto max-w-2xl px-4 py-3 sm:py-6">{children}</main>
 		<ConfirmExitDialog open={confirmExit} title="Thoát phiên học?" description={subtitle.startsWith('Luyện tập') ? 'Tiến trình luyện tập trong phiên này sẽ không được lưu.' : 'Các câu đã trả lời được lưu; bạn có thể tiếp tục sau.'} onStay={() => setConfirmExit(false)} onLeave={() => router.push(exitHref)} />
 	</div>;
 }
