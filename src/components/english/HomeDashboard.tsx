@@ -11,7 +11,7 @@ const SETS_SHOWN = 3;
 
 function SetRow({ set }: { set: EnglishSetSummary }) {
 	return <li className="border-b border-border last:border-b-0">
-		<Link href={`/sets/${set.id}`} className="group block px-4 py-3 hover:bg-accent-subtle focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-accent">
+		<Link href={`/review?mode=bo&set=${encodeURIComponent(set.id)}`} className="group block px-4 py-3 hover:bg-accent-subtle focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-accent">
 			<span className="flex items-center gap-3">
 				<span className="min-w-0 flex-1 truncate font-bold" title={set.title}>{set.title}</span>
 				{set.dueToday > 0 && <span className="shrink-0 rounded-full bg-accent-subtle px-2 py-0.5 text-xs font-bold text-accent">{set.dueToday} đến hạn</span>}
@@ -43,7 +43,7 @@ export default function HomeDashboard({ overview, sets, board, resetsIn, greetin
 			<div className="min-w-0 lg:col-start-3 lg:row-start-1"><QuestNote board={board} resetsIn={resetsIn} hasSets={hasSets} /></div>
 
 			{hasSets && <section id="your-sets" aria-labelledby="your-sets-heading" className="min-w-0 overflow-hidden rounded-panel border border-border bg-surface lg:col-span-2 lg:col-start-1 lg:row-span-2 lg:row-start-2">
-				<div className="flex items-center justify-between gap-3 border-b border-border px-4 py-2"><h2 id="your-sets-heading" className="text-base sm:text-lg">Đang học <span className="text-sm font-normal text-muted">({enrolled.length})</span></h2><Link href="/sets" className="inline-flex min-h-10 shrink-0 items-center text-sm font-bold text-accent">Xem tất cả →</Link></div>
+				<div className="flex items-center justify-between gap-3 border-b border-border px-4 py-2"><h2 id="your-sets-heading" className="text-base sm:text-lg">Đang học <span className="text-sm font-normal text-muted">({enrolled.length})</span></h2><Link href="/review?mode=bo" className="inline-flex min-h-10 shrink-0 items-center text-sm font-bold text-accent">Xem tất cả →</Link></div>
 				<ul>{enrolled.slice(0, SETS_SHOWN).map((set) => <SetRow key={set.id} set={set} />)}</ul>
 
 			</section>}

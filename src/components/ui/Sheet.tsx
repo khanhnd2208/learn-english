@@ -17,6 +17,8 @@ interface SheetProps {
 export default function Sheet({ open, onClose, title, children, className }: SheetProps) {
 	const titleId = useId();
 	const panelRef = useRef<HTMLDivElement>(null);
+	const onCloseRef = useRef(onClose);
+	useEffect(() => { onCloseRef.current = onClose; }, [onClose]);
 	const [mounted, setMounted] = useState(false);
 
 	useEffect(() => {
@@ -30,7 +32,7 @@ export default function Sheet({ open, onClose, title, children, className }: She
 		panelRef.current?.focus();
 
 		const onKey = (e: KeyboardEvent) => {
-			if (e.key === 'Escape') { onClose(); return; }
+			if (e.key === 'Escape') { onCloseRef.current(); return; }
 			if (e.key !== 'Tab' || !panelRef.current) return;
 			const focusable = [...panelRef.current.querySelectorAll<HTMLElement>('a[href], button:not(:disabled), input:not(:disabled), select:not(:disabled), textarea:not(:disabled), [tabindex]:not([tabindex="-1"])')].filter((node) => node.getClientRects().length > 0);
 			if (!focusable.length) { e.preventDefault(); panelRef.current.focus(); return; }
@@ -47,7 +49,7 @@ export default function Sheet({ open, onClose, title, children, className }: She
 			document.body.style.overflow = previousOverflow;
 			prev?.focus();
 		};
-	}, [open, onClose, mounted]);
+	}, [open, mounted]);
 
 	if (!open || !mounted) return null;
 
