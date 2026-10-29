@@ -50,6 +50,70 @@ npm run typecheck
 - Follow UI design tokens in `DESIGN.md` and primitives in `src/components/ui/`; user-facing copy is in Vietnamese.
 - Read the relevant Next.js 16 guide in `node_modules/next/dist/docs/` before changing framework behavior.
 
+## Plans handed to another agent
+
+The owner often has one agent write the plan, another (e.g. Codex) carry it out, and the first one review. The executor starts cold: it sees only this file, the plan and the code. Write every plan so it can be carried out without asking a question or guessing.
+
+A plan must contain, in this order:
+
+1. **Outcome**: what the learner or admin sees when it is done, in one to three sentences. No implementation words here.
+2. **Out of scope**: what must not change (files, behaviour, copy, schema).
+3. **Invariants touched**: name each rule from *Learning model invariants* and *Pitfalls* below that this change comes near, and say how it stays true (e.g. "Guided review still does not write `EnWordState`").
+4. **Changes per file**: exact paths, and the functions or components to change in each. Point to an existing pattern to copy (`path:line` or function name). Make every decision in the plan; never write "etc.", "as needed", "similar to", "handle edge cases" or "if appropriate".
+5. **Exact copy**: every new or changed Vietnamese string, written out word for word, plus which old strings are removed. The executor must not invent copy.
+6. **States**: for each screen or component touched, what shows in each state: loading, error, empty or zero, one item, many items, a new learner with no downloaded sets, admin vs student, and a 375px-wide phone.
+7. **Data**: schema changes (an additive migration, its folder name, any backfill), and new or changed API payloads with their Zod shape.
+8. **Tests**: the test file and each case written as input → expected output. Pure rules get tests without mocks.
+9. **Steps**: small, ordered, each checkable by itself.
+10. **Acceptance**: `npm run quality` passes, plus the manual checks (URL, the account state to use, what to look at).
+
+Save plans longer than a screen as `docs/plans/<slug>.md` and hand over the path.
+
+When carrying out a plan: follow it literally and do not widen the scope. If the plan contradicts the code or this file, stop and report the conflict instead of guessing. Report every deviation in the PR body. Before saying you are done, check the result against the plan's *States* and *Acceptance* sections.
+
+When reviewing a plan's result: review `git diff main...HEAD` against the plan, then go through the *Pitfalls* list below.
+
+## Pitfalls agents keep hitting
+
+Each of these has shipped as a bug at least once, or comes close to an invariant. Plans must say how they are avoided. Reviewers check them.
+
+**Days and time**
+- Never derive a day from `toISOString().slice(0, 10)`, `getDate()` or the browser's local time. Use `vnDayKey`, `shiftVnDay` and `vnWeekDays` (`src/lib/english/gapRule.ts`) and `vnDayStart` (`src/lib/english/schedule.ts`). Between 00:00 and 07:00 Vietnam time, the UTC day is still the day before.
+- Compute "today", due counts and streaks on the server. A client component that formats `new Date()` during render causes a hydration mismatch.
+
+**SRS, guided review and XP**
+- Only Ôn luân phiên (`enDailyService`) writes `EnWordState` and `EnReview`. Guided review and practice never do. Practice writes nothing at all.
+- The SRS queue has no caps: no daily quota of new words, no backlog pause, no round limit (#50). New words come one per downloaded set in turn (#49). Do not bring caps back as a "safety" measure.
+- `synonym` and `near` results never move the schedule.
+- Award XP only by inserting `EnXpEvent` rows with a deterministic `sourceKey` and `skipDuplicates: true`, inside the same transaction as the answer. Running the same request twice must not pay twice. Never keep a separate XP counter.
+- Pacing and anti-spam use server timestamps (`pacedEnough`). Client `responseMs` is stored for stats only and never decides XP.
+- Take `userId` only from the `withAuth` user. Never take it from the body or query, and scope every query by it.
+
+**Content and audio**
+- The card sentence (`role: 'study'`) never appears in a quiz. Cloze questions use only `role: 'grade'` sentences.
+- One broken quiz sentence must not block publishing a word (#41). A missing mp3 only warns, because `/api/audio` falls back to TTS (#40).
+- An autoplay block is not a broken recording. Never grade an answer wrong because audio could not play (e3376ba). Cache only real answers from the audio server, and let a failure expire (#46).
+
+**Randomness**
+- Use `randomRng()` or `mulberry32(seed)` from `src/lib/english/activities/rng.ts`, not `Math.random()`. Tests pass a seeded rng and assert on the exact order.
+
+**UI**
+- Never show zero noise like "0 đến hạn", "~0 phút" or an empty chip: hide it or say what it means ("Mai chưa có từ đến hạn") (2383b5d).
+- When rewording a screen, keep every hint and number that was there unless the plan says to remove it (2383b5d restored a dropped new-words hint).
+- Copy is short, natural Vietnamese: "%" rather than "điểm phần trăm", and no English left in learner-facing text.
+- Check at 375px: button labels stay on one line, footers don't wrap, and there are no cards inside cards (#52).
+- Keep HTML valid: no `<div>`, `<p>` or block components inside `<p>`. `InfoHint` renders a `<span>` for this reason (#52). Invalid nesting shows up as a hydration error.
+- Build from `src/components/ui/` primitives and the tokens in `DESIGN.md` and `globals.css`. No inline styles, raw hex colours or one-off spacing.
+
+**Prisma and migrations**
+- Migrations are additive. The new folder name must sort after the latest one in `prisma/migrations/`, whose timestamps run ahead of the calendar (e.g. `20261101000000_en_answer_appeal`). Pick a timestamp after the last folder, not today's date.
+- After a schema change, run `npx prisma generate`. Do multi-row writes that must agree in one `prisma.$transaction`.
+
+**Next.js 16 and checks**
+- `params` and `searchParams` are Promises. Route protection lives in `src/proxy.ts`; there is no `middleware.ts`.
+- `npm run quality` includes `next build`. Passing `typecheck` alone is not enough: server/client boundary errors only show up in the build.
+- Touch only the files the task needs. Do not reformat whole files or rename things on the side.
+
 ## Git and deploy (standing permission from the owner)
 
 - After a change passes `npm run quality`, commit, push, open or update the PR, merge it, and deploy without asking again.
