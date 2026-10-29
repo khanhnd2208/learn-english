@@ -59,8 +59,8 @@ export default function EnglishShell({ children, goals, newLearner }: { children
 					)}
 				</nav>
 				<Link href="/progress" aria-label={`Hôm nay ${goals.xp}/${goals.goal} XP, nhiệm vụ ${goals.questsDone}/${goals.questsTotal}`} className="mx-4 mb-2 flex items-center gap-3 rounded-card border border-border bg-surface p-3 text-foreground hover:border-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent">
-					<GoalRing value={goals.xp} max={goals.goal} size={46} stroke={5} label="Mục tiêu ngày"><span className="text-xs font-black tabular-nums">{Math.min(goals.xp, goals.goal)}</span><span className="text-xs tracking-tight text-muted">/{goals.goal}</span></GoalRing>
-					<span className="min-w-0 text-xs"><span className="flex items-center gap-1.5"><span className="level-badge text-xs">Lv {goals.level}</span><span className="truncate font-bold">{goals.levelTitle}</span></span><span className={`mt-1 block font-bold ${goals.questsDone === goals.questsTotal ? 'text-success' : 'text-muted'}`}>Nhiệm vụ {goals.questsDone}/{goals.questsTotal}</span></span>
+					<GoalRing value={goals.xp} max={goals.goal} size={36} stroke={4} label="Mục tiêu ngày">{goals.xp >= goals.goal && <span className="text-sm font-bold text-success">✓</span>}</GoalRing>
+					<span className="min-w-0"><span className="block text-sm font-bold tabular-nums">{goals.xp}/{goals.goal} XP</span><span className="block text-xs text-muted">Lv {goals.level} · Nhiệm vụ {goals.questsDone}/{goals.questsTotal}</span></span>
 				</Link>
 				<div className="mx-4 mb-4 border-t border-border pt-3"><AccountMenu name={accountName} goals={goals} admin={admin} /></div>
 			</aside>
@@ -68,7 +68,8 @@ export default function EnglishShell({ children, goals, newLearner }: { children
 				<Link href="/" className="brand-wordmark flex items-center gap-2 text-base font-black"><span className="brand-compass !size-8"><AdventureIcon name="compass" size={16} /></span><span>WORD<span className="brand-accent">QUEST</span></span></Link>
 				<div className="flex items-center gap-1">
 					<Link href="/progress" aria-label={`Mục tiêu ngày ${goals.xp}/${goals.goal} XP`} className="flex min-h-10 items-center gap-1.5 rounded-control px-1.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent">
-						<GoalRing value={goals.xp} max={goals.goal} size={30} stroke={4} label="Mục tiêu ngày"><span className={`font-black tabular-nums ${goals.xp >= goals.goal ? 'text-xs text-success' : 'text-[10px] tracking-tight text-foreground'}`}>{goals.xp >= goals.goal ? '✓' : `${Math.round((goals.xp / Math.max(1, goals.goal)) * 100)}%`}</span></GoalRing>
+						<GoalRing value={goals.xp} max={goals.goal} size={26} stroke={4} label="Mục tiêu ngày">{goals.xp >= goals.goal && <span className="text-xs font-bold text-success">✓</span>}</GoalRing>
+						<span className="rounded-full bg-accent-subtle px-2 py-1 text-xs font-bold tabular-nums">{goals.xp}/{goals.goal}</span>
 						<span className="level-badge text-xs">Lv {goals.level}</span>
 					</Link>
 					<AccountMenu name={accountName} goals={goals} admin={admin} />

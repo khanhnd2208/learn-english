@@ -430,7 +430,7 @@ h1, h2, .game-number {
 button { letter-spacing: .045em; }
 button:not(:disabled) { transition: transform 120ms steps(2, end), filter 120ms ease, box-shadow 120ms ease; }
 button:not(:disabled):active { transform: translateY(2px); }
-button.bg-accent {
+button.bg-accent, a.today-primary {
 	border: 2px solid var(--pixel-outline);
 	border-bottom-width: 4px;
 	border-radius: 8px;
@@ -438,7 +438,7 @@ button.bg-accent {
 	color: var(--btn-primary-fg);
 	box-shadow: 0 2px 0 var(--btn-primary-shadow);
 }
-button.bg-accent:hover { filter: brightness(1.07); }
+button.bg-accent:hover, a.today-primary:hover { filter: brightness(1.07); }
 input, textarea, select { border-radius: 8px !important; }
 input:focus-visible, textarea:focus-visible, select:focus-visible { outline-color: var(--focus-ring); }
 
