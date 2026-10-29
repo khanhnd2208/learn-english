@@ -27,6 +27,8 @@ export type DailyAnswerResult = {
 	toDays: number;
 	/** XP this answer earned. */
 	xp: number;
+	/** Saved review row; a wrong typed answer can be appealed with it. */
+	reviewId?: string;
 };
 
 export type TodayOverview = {
@@ -211,6 +213,7 @@ export async function answerToday(
 	const changed = next.scheduled;
 	const nextDue = next.dueAt;
 	let xp = 0;
+	let reviewId = '';
 	await prisma.$transaction(async (tx) => {
 		if (changed) {
 			const schedule = { box: next.box, lapses: next.lapses, dueAt: nextDue, lastReviewedAt: now };
@@ -223,6 +226,7 @@ export async function answerToday(
 		const last = await tx.enReview.findFirst({ where: { sessionId: session.id }, orderBy: { at: 'desc' }, select: { at: true } });
 			const paced = pacedEnough(last?.at ?? session.startedAt, now);
 			const review = await tx.enReview.create({ data: { sessionId: session.id, userId, senseId: input.senseId, at: now, prompt: before <= EN_HINT_MAX_BOX ? 'hinted' : 'free', correct, responseMs, boxBefore: before, boxAfter: next.box, scheduled: changed } });
+		reviewId = review.id;
 		const day = vnDayKey(now);
 		const extraToday = !changed && correct
 			? (await tx.enXpEvent.aggregate({ where: { userId, day, kind: 'extra' }, _sum: { xp: true } }))._sum.xp ?? 0
@@ -233,7 +237,7 @@ export async function answerToday(
 			xp = created.reduce((sum, row) => sum + row.xp, 0);
 		}
 	}, { timeout: EN_TX_TIMEOUT_MS, maxWait: EN_TX_MAX_WAIT_MS });
-	return { result: correct ? 'correct' : 'wrong', expected, boxBefore: before, boxAfter: next.box, scheduled: changed, nextDueAt: nextDue.toISOString(), ...intervalChange(before, next.box), xp };
+	return { result: correct ? 'correct' : 'wrong', expected, boxBefore: before, boxAfter: next.box, scheduled: changed, nextDueAt: nextDue.toISOString(), ...intervalChange(before, next.box), xp, reviewId };
 }
 
 export async function finishToday(userId: string, sessionId: string, now = new Date()) {

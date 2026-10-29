@@ -7,6 +7,7 @@ import Link from 'next/link';
 import { Card, CardContent } from '@/components/ui/Card';
 import EnglishAdminPromptCard from '@/components/english/EnglishAdminPromptCard';
 import EnglishAdminQaTools from '@/components/english/EnglishAdminQaTools';
+import EnglishAdminAppeals from '@/components/english/EnglishAdminAppeals';
 import type { EnglishPackPreview } from '@/lib/english/packPreview';
 import { sampleEnglishPack } from '@/lib/english/samplePack';
 import { publishEnglishSetRequest, publishSummary } from '@/lib/english/publishClient';
@@ -25,14 +26,15 @@ interface SetRow {
 	learners: number;
 }
 
-export default function EnglishAdmin({ sets, qaEnabled }: { sets: SetRow[]; qaEnabled: boolean }) {
+export default function EnglishAdmin({ sets, qaEnabled, pendingAppeals }: { sets: SetRow[]; qaEnabled: boolean; pendingAppeals: number }) {
 	const router = useRouter();
 	const [text, setText] = useState('');
 	const [issues, setIssues] = useState<Issue[]>([]);
 	const [preview, setPreview] = useState<EnglishPackPreview | null>(null);
 	const [message, setMessage] = useState('');
 	const [busy, setBusy] = useState(false);
-	const [panel, setPanel] = useState<'content' | 'qa'>('content');
+	const [panel, setPanel] = useState<'content' | 'appeals' | 'qa'>(pendingAppeals > 0 ? 'appeals' : 'content');
+	const [pending, setPending] = useState(pendingAppeals);
 
 	async function send(action: 'preview' | 'save', publishAfterSave = false) {
 		setBusy(true);
@@ -89,9 +91,11 @@ export default function EnglishAdmin({ sets, qaEnabled }: { sets: SetRow[]; qaEn
 			</header>
 			<div className="flex gap-2">
 				<Button type="button" variant={panel === 'content' ? 'primary' : 'secondary'} onClick={() => setPanel('content')}>Nội dung</Button>
+				<Button type="button" variant={panel === 'appeals' ? 'primary' : 'secondary'} onClick={() => setPanel('appeals')}>Hòm thư{pending > 0 && <span className="ml-1.5 rounded-full bg-error px-1.5 text-xs font-black text-white">{pending}</span>}</Button>
 				{qaEnabled && <Button type="button" variant={panel === 'qa' ? 'primary' : 'secondary'} onClick={() => setPanel('qa')}>Công cụ test</Button>}
 			</div>
 			{panel === 'qa' && <EnglishAdminQaTools sets={sets} />}
+			{panel === 'appeals' && <EnglishAdminAppeals onPendingChange={setPending} />}
 			{panel === 'content' && <>
 			<EnglishAdminPromptCard />
 			<Card>

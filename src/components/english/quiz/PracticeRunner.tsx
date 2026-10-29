@@ -57,13 +57,10 @@ export default function PracticeRunner({ detail, kind, seed }: { detail: English
 		setIndex((current) => current + 1);
 	}
 
+	// Right or wrong, the learner reads the result first and moves on with Enter or "Tiếp tục".
 	useEffect(() => {
 		if (!feedback) return;
-		if (feedback.correct) {
-			const timer = setTimeout(advance, 1000);
-			return () => clearTimeout(timer);
-		}
-		const onKey = (event: KeyboardEvent) => { if (event.key === 'Enter') { event.preventDefault(); advance(); } };
+		const onKey = (event: KeyboardEvent) => { if (event.key !== 'Enter' || event.isComposing || event.repeat || (event.target as HTMLElement | null)?.closest('button, a')) return; event.preventDefault(); advance(); };
 		window.addEventListener('keydown', onKey);
 		return () => window.removeEventListener('keydown', onKey);
 	});
@@ -106,7 +103,8 @@ export default function PracticeRunner({ detail, kind, seed }: { detail: English
 			{feedback && <AnswerFeedback correct={feedback.correct}>
 				{!feedback.correct && <p className="font-bold">Đáp án: {feedback.expected}</p>}
 				{bundle && <><div className="flex items-center justify-between gap-2"><p className="text-sm"><span className="font-bold">{bundle.word.lemma}</span> {bundle.word.ipa && <span className="font-mono text-muted">{bundle.word.ipa}</span>} · {bundle.sense.meaningVi}</p><EnglishAudioButton compact senseId={bundle.sense.id} lemma={bundle.word.lemma} recordedAudioAvailable={Boolean(bundle.word.audioPath)} /></div>{cardExample && <p className="text-sm text-muted">{cardExample.english.replace('___', cardExample.target)}</p>}</>}
-				{!feedback.correct && <><p className="text-xs text-muted">Từ này sẽ quay lại sau vài câu.</p><button type="button" autoFocus onClick={advance} className="min-h-11 w-full rounded-control bg-accent px-4 font-bold text-accent-foreground">Tiếp tục ↵</button></>}
+				{!feedback.correct && <p className="text-xs text-muted">Từ này sẽ quay lại sau vài câu.</p>}
+				<button type="button" autoFocus onClick={advance} className="min-h-11 w-full rounded-control bg-accent px-4 font-bold text-accent-foreground">Tiếp tục ↵</button>
 			</AnswerFeedback>}
 		</div>}
 		{step && !item && <div className="mode-card space-y-3 text-center">
