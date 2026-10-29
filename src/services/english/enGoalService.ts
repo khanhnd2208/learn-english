@@ -1,4 +1,5 @@
 import { cache } from 'react';
+import { requestNow } from '@/lib/requestNow';
 import { prisma } from '@/lib/prisma';
 import { AppError } from '@/lib/appError';
 import { EN_WEEKLY_DAYS_DEFAULT } from '@/lib/english/constants';
@@ -8,7 +9,7 @@ import { periodMetrics, type XpRow } from '@/lib/english/goalMetrics';
 import { dailyQuests, parseQuests, topUpQuests, questProgress, QUEST_META, weeklyQuests, type Quest, type QuestAction, type QuestContext, type QuestMetrics } from '@/lib/english/quests';
 import { achievementStatus, newlyEarned, nearestAchievements, parseAchievementKey, describeAchievement, TIER_NAMES, type LifetimeMetrics } from '@/lib/english/achievements';
 import { DAILY_GOAL_DEFAULT, goalTierIndex, isDailyGoalXp, levelFromXp, XP, type LevelInfo, type XpKind } from '@/lib/english/xp';
-import { getTodayOverview, type TodayOverview } from '@/services/english/enDailyService';
+import { getTodayOverview, computeTodayOverview, type TodayOverview } from '@/services/english/enDailyService';
 
 export type GoalQuest = Quest & {
 	title: string;
@@ -101,12 +102,12 @@ function questContext(overview: TodayOverview, dailyGoalXp: number, weeklyDaysGo
 }
 
 /** Everything the board and the reward step need, read in one pass. */
-async function loadState(userId: string, now: Date) {
+async function loadState(userId: string, now: Date, { cachedOverview = false } = {}) {
 	const today = vnDayKey(now);
 	const weekDays = vnWeekDays(today);
 	const weekStart = weekDays[0]!;
 	const [overview, profile] = await Promise.all([
-		getTodayOverview(userId, now),
+		cachedOverview ? getTodayOverview(userId) : computeTodayOverview(userId, now),
 		prisma.enLearnerProfile.findUnique({ where: { userId }, select: { dailyXpGoal: true, weeklyDaysGoal: true, dailyGoalChosenAt: true, seenLevel: true } }),
 	]);
 	const dailyGoalXp = profile?.dailyXpGoal ?? DAILY_GOAL_DEFAULT;
@@ -301,11 +302,13 @@ export async function settleProgress(userId: string, actionXp = 0, now = new Dat
 }
 
 /** Board for the learner, after paying any reward that became due. Cached per request. */
-export const getGoalBoard = cache(async (userId: string, now = new Date()): Promise<GoalBoard> => {
-	const state = await loadState(userId, now);
+export async function computeGoalBoard(userId: string, now: Date, cachedOverview = false): Promise<GoalBoard> {
+	const state = await loadState(userId, now, { cachedOverview });
 	const result = await payRewards(userId, now, state);
-	return boardView(result.xp.length ? await loadState(userId, now) : state);
-});
+	return boardView(result.xp.length ? await loadState(userId, now, { cachedOverview }) : state);
+}
+
+export const getGoalBoard = cache((userId: string) => computeGoalBoard(userId, requestNow(), true));
 
 export async function setDailyGoal(userId: string, xp: number, now = new Date()) {
 	if (!isDailyGoalXp(xp)) throw new AppError('Mục tiêu ngày không hợp lệ', 400);

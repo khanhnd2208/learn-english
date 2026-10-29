@@ -2,6 +2,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 const mocks = vi.hoisted(() => {
 	const tx = {
+		enStudyDay: { createMany: vi.fn() },
 		enReview: { findFirst: vi.fn(), create: vi.fn() },
 		enWordState: { upsert: vi.fn() },
 		enXpEvent: { aggregate: vi.fn(), createMany: vi.fn(), createManyAndReturn: vi.fn() },

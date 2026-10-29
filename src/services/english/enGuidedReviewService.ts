@@ -234,6 +234,7 @@ export async function answerGuidedReview(userId: string, sessionId: string, ques
 		const saved = await tx.enGuidedReviewQuestion.updateMany({ where: { id: question.id, answer: null }, data: { answer, correct, responseMs: Math.max(0, Math.min(120_000, Math.trunc(responseMs))), answeredAt: now } });
 		if (!saved.count) return;
 		persisted = true;
+		if (question.kind === 'main') await tx.enStudyDay.createMany({ data: [{ userId, day: vnDayKey(now) }], skipDuplicates: true });
 		if (question.kind === 'main' && correct && paced) {
 			const day = vnDayKey(now);
 			// Review and extra SRS rounds share one daily cap, both stored as kind `extra`.

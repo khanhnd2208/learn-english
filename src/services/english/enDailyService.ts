@@ -1,8 +1,10 @@
 import { cache } from 'react';
+import { requestNow } from '@/lib/requestNow';
+import { overviewCounts, studiedDays, recentReviewStats, recentLapseIds } from './enOverviewQueries';
 import { prisma } from '@/lib/prisma';
 import { AppError } from '@/lib/appError';
 import { EN_HINT_MAX_BOX, EN_TX_MAX_WAIT_MS, EN_TX_TIMEOUT_MS, EN_WEEKLY_DAYS_DEFAULT } from '@/lib/english/constants';
-import { buildDailyQueue, interleaveNewWords, intervalChange, isLongTerm, isNearMiss, randomRng, scheduleMove, vnDayStart, type ScheduledState } from '@/lib/english/schedule';
+import { buildDailyQueue, interleaveNewWords, intervalChange, isNearMiss, randomRng, scheduleMove, vnDayStart, type ScheduledState } from '@/lib/english/schedule';
 import { gradeEnglishAnswer } from '@/lib/english/grade';
 import { shiftVnDay, vnDayKey, vnWeekDays } from '@/lib/english/gapRule';
 import { streakStats } from '@/lib/english/streak';
@@ -124,61 +126,36 @@ export async function startToday(userId: string, now = new Date()) {
 	};
 }
 
-async function studiedDays(userId: string, from: Date): Promise<Set<string>> {
-	const [rows, guided] = await Promise.all([
-		prisma.enReview.findMany({ where: { userId, at: { gte: from } }, select: { at: true } }),
-		prisma.enGuidedReviewQuestion.findMany({ where: { kind: 'main', answeredAt: { gte: from }, session: { userId } }, select: { answeredAt: true } }),
-	]);
-	return new Set([...rows.map((row) => vnDayKey(row.at)), ...guided.flatMap((row) => row.answeredAt ? [vnDayKey(row.answeredAt)] : [])]);
-}
-
-/** Cached per request: the app layout and the page both read it. */
-export const getTodayOverview = cache(async (userId: string, now = new Date()): Promise<TodayOverview> => {
-	const { states, queue, dueTotal, enrolledSets } = await planToday(userId, now);
+/** Uncached entry for route handlers, tests and explicit server clocks. */
+export async function computeTodayOverview(userId: string, now: Date): Promise<TodayOverview> {
 	const today = vnDayKey(now);
-	const tomorrowEnd = vnDayStart(shiftVnDay(today, 2));
-	const days = vnWeekDays(today);
-	const [studied, profile, recentReviews, guidedToday, practiceItems] = await Promise.all([
+	const [counts, studied, profile, reviews, guidedToday, lapsedIds] = await Promise.all([
+		overviewCounts(userId, now),
 		studiedDays(userId, vnDayStart(shiftVnDay(today, -365))),
 		prisma.enLearnerProfile.findUnique({ where: { userId }, select: { weeklyDaysGoal: true } }),
-		prisma.enReview.findMany({ where: { userId, at: { gte: vnDayStart(shiftVnDay(today, -29)) } }, select: { at: true, correct: true, scheduled: true, boxBefore: true } }),
+		recentReviewStats(userId, today),
 		prisma.enGuidedReviewQuestion.count({ where: { kind: 'main', answeredAt: { gte: vnDayStart(today) }, session: { userId } } }),
-		prisma.enSetItem.findMany({ where: { set: { status: 'published', enrollments: { some: { userId } } }, sense: { status: 'published' } }, select: { senseId: true } }),
+		recentLapseIds(userId),
 	]);
-	const lapsed = states
-		.filter((state) => state.lapses > 0 && state.box <= 2)
-		.sort((a, b) => b.lapses - a.lapses || (b.lastReviewedAt?.getTime() ?? 0) - (a.lastReviewedAt?.getTime() ?? 0))
-		.slice(0, 6);
-	const lapsedBundles = await getSenseBundles(lapsed.map((state) => state.senseId), true);
+	const bundles = await getSenseBundles(lapsedIds, true);
+	const byId = new Map(bundles.map((bundle) => [bundle.sense.id, bundle]));
 	const streak = streakStats(studied, today);
-	const scheduled = recentReviews.filter((row) => row.scheduled && row.boxBefore > 0);
 	return {
-		reviewedToday: recentReviews.filter((row) => vnDayKey(row.at) === today).length,
-		practicedToday: guidedToday,
-		practiceAvailable: new Set(practiceItems.flatMap((item) => item.senseId ? [item.senseId] : [])).size,
-		streakDays: streak.current,
-		longestStreak: streak.longest,
-		lapsedDue: states.filter((state) => state.lapses > 0 && state.dueAt <= now).length,
-		rememberingCount: states.filter((state) => state.box >= 2 && !isLongTerm(state.box)).length,
-		accuracy30: scheduled.length ? scheduled.filter((row) => row.correct).length / scheduled.length : null,
-		dueNext7Days: Array.from({ length: 7 }, (_, offset) => {
-			const day = shiftVnDay(today, offset);
-			const start = vnDayStart(day);
-			const end = vnDayStart(shiftVnDay(day, 1));
-			return { day, count: states.filter((state) => offset === 0 ? state.dueAt < end : state.dueAt >= start && state.dueAt < end).length };
-		}),
-		dueTotal,
-		dueCount: queue.filter((item) => item.kind === 'review').length,
-		newCount: queue.filter((item) => item.kind === 'new').length,
-		enrolledSets,
-		tomorrowCount: states.filter((state) => state.dueAt > now && state.dueAt < tomorrowEnd).length,
-		longTermCount: states.filter((state) => isLongTerm(state.box)).length,
-		learnedCount: states.length,
-		week: days.map((day) => ({ day, studied: studied.has(day), isToday: day === today, isFuture: day > today })),
+		dueTotal: counts.dueTotal, dueCount: counts.dueTotal, newCount: counts.newCount,
+		enrolledSets: counts.enrolledSets, tomorrowCount: counts.tomorrowCount,
+		longTermCount: counts.longTermCount, learnedCount: counts.learnedCount,
+		week: vnWeekDays(today).map((day) => ({ day, studied: studied.has(day), isToday: day === today, isFuture: day > today })),
 		weeklyGoal: profile?.weeklyDaysGoal ?? EN_WEEKLY_DAYS_DEFAULT,
-		recentLapses: lapsedBundles.map((bundle) => ({ senseId: bundle.sense.id, lemma: bundle.word.lemma, meaningVi: bundle.sense.meaningVi })),
+		recentLapses: lapsedIds.flatMap((id) => { const bundle = byId.get(id); return bundle ? [{ senseId: id, lemma: bundle.word.lemma, meaningVi: bundle.sense.meaningVi }] : []; }),
+		reviewedToday: reviews.reviewedToday, practicedToday: guidedToday, practiceAvailable: counts.liveCount,
+		streakDays: streak.current, longestStreak: streak.longest, lapsedDue: counts.lapsedDue,
+		rememberingCount: counts.rememberingCount, dueNext7Days: counts.dueNext7Days,
+		accuracy30: reviews.scheduledTotal ? reviews.scheduledCorrect / reviews.scheduledTotal : null,
 	};
-});
+}
+
+/** Primitive cache key shared by the layout and page within one server render. */
+export const getTodayOverview = cache((userId: string) => computeTodayOverview(userId, requestNow()));
 
 function acceptedAnswers(bundle: SenseBundle): string[] { return bundle.word.forms; }
 
@@ -224,6 +201,7 @@ export async function answerToday(
 			const review = await tx.enReview.create({ data: { sessionId: session.id, userId, senseId: input.senseId, at: now, prompt: before <= EN_HINT_MAX_BOX ? 'hinted' : 'free', correct, responseMs, boxBefore: before, boxAfter: next.box, scheduled: changed } });
 		reviewId = review.id;
 		const day = vnDayKey(now);
+		await tx.enStudyDay.createMany({ data: [{ userId, day }], skipDuplicates: true });
 		const extraToday = !changed && correct
 			? (await tx.enXpEvent.aggregate({ where: { userId, day, kind: 'extra' }, _sum: { xp: true } }))._sum.xp ?? 0
 			: 0;
@@ -246,7 +224,7 @@ export async function finishToday(userId: string, sessionId: string, now = new D
 		await prisma.enPracticeSession.update({ where: { id: session.id }, data: { endedAt: now, activeSeconds: Math.min(measuredSeconds, elapsed) } });
 	}
 	const [overview, changes] = await Promise.all([
-		getTodayOverview(userId, now),
+		computeTodayOverview(userId, now),
 		prisma.enReview.findMany({ where: { sessionId: session.id, userId }, select: { boxBefore: true, boxAfter: true } }),
 	]);
 	return {

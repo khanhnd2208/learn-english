@@ -14,5 +14,10 @@ export async function seedSmallWorld(seed: number) {
 	await prisma.enWordState.upsert({ where: { userId_senseId: { userId: world.userIds[0]!, senseId: world.senseIds[2]! } }, create: { userId: world.userIds[0]!, senseId: world.senseIds[2]!, box: 0 }, update: { box: 0 } });
 	await prisma.enReview.createMany({ data: ['2026-10-29T16:59:59Z', '2026-10-29T17:00:00Z'].map((at) => ({ userId: world.userIds[0]!, senseId: world.senseIds[0]!, sessionId: 'boundary', at: new Date(at), correct: true, prompt: 'free', boxBefore: 1, boxAfter: 2 })) });
 	await prisma.enGuidedReviewQuestion.update({ where: { id: `${world.userIds[0]}-guided-0-q-0` }, data: { answer: null, answeredAt: null, correct: null } });
+	await prisma.$executeRaw`INSERT INTO "EnStudyDay" ("userId", "day")
+		SELECT DISTINCT "userId", to_char("at" + INTERVAL '7 hours', 'YYYY-MM-DD') FROM "EnReview"
+		UNION SELECT s."userId", to_char(q."answeredAt" + INTERVAL '7 hours', 'YYYY-MM-DD')
+		FROM "EnGuidedReviewQuestion" q JOIN "EnGuidedReviewSession" s ON s."id" = q."sessionId"
+		WHERE q."kind" = 'main' AND q."answeredAt" IS NOT NULL ON CONFLICT DO NOTHING`;
 	return world;
 }

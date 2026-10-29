@@ -1,3 +1,4 @@
+import { requestNow } from '@/lib/requestNow';
 import { redirect } from 'next/navigation';
 import HomeDashboard from '@/components/english/HomeDashboard';
 import { listEnglishSets } from '@/services/english/enCatalogService';
@@ -20,8 +21,8 @@ function greetingFor(now: Date, name: string | null | undefined): string {
 export default async function EnglishHomePage() {
 	const session = await auth();
 	if (!session?.user) redirect('/login');
-	const now = new Date();
-	const [overview, sets, board] = await Promise.all([getTodayOverview(session.user.id, now), listEnglishSets(session.user.id, false), getGoalBoard(session.user.id, now)]);
+	const now = requestNow();
+	const [overview, sets, board] = await Promise.all([getTodayOverview(session.user.id), listEnglishSets(session.user.id, false), getGoalBoard(session.user.id)]);
 	const dateLabel = new Intl.DateTimeFormat('vi-VN', { timeZone: VN_TIME_ZONE, weekday: 'long', day: 'numeric', month: 'long' }).format(now);
 	return <HomeDashboard overview={overview} sets={sets} board={board} resetsIn={timeLeftLabel(board.today.resetsAt, now)} greeting={greetingFor(now, session.user.name)} dateLabel={dateLabel.charAt(0).toUpperCase() + dateLabel.slice(1)} />;
 }
