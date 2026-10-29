@@ -3,140 +3,59 @@
 import { useEffect, useRef, useState } from 'react';
 import Button from '@/components/ui/Button';
 import MaterialIcon from '@/components/ui/MaterialIcon';
-import { audioFailureActive, classifyPlayError } from '@/lib/english/audioPlayback';
+import { playEnglishAudio, stopEnglishAudio, type PlaybackState } from '@/lib/englishAudio';
 import { useServerTts } from '@/lib/useServerTts';
-import { useSpeech } from '@/lib/useSpeech';
 
-/** When each word's audio file last failed. Old failures expire so a deploy or a slow request never mutes a word for good. */
-const failedAudioSenses = new Map<string, number>();
-
+/**
+ * Speaker for one word. Every tap plays the word from the start: the server file first
+ * (recorded or voiced by the server), browser speech when that file cannot play.
+ */
 export default function EnglishAudioButton({
 	senseId,
 	lemma = '',
-	allowTts = true,
 	recordedAudioAvailable = false,
 	autoPlay = false,
 	compact = false,
-	onUnavailable,
 }: {
 	senseId: string;
 	lemma?: string;
-	allowTts?: boolean;
 	recordedAudioAvailable?: boolean;
 	/** Play once on mount. Only use right after a learner gesture, or browsers block it. */
 	autoPlay?: boolean;
 	compact?: boolean;
-	/** Called once when neither the recorded file nor speech can play. */
-	onUnavailable?: () => void;
 }) {
-	const { supported, ready, speaking, failed: speechFailed, speak, stop, prime } = useSpeech();
 	const serverTts = useServerTts();
-	const audio = useRef<HTMLAudioElement | null>(null);
-	const [playing, setPlaying] = useState(false);
-	const [failed, setFailed] = useState(false);
-	/** The browser blocked playback without a recent tap; the file itself is fine. */
-	const [needsTap, setNeedsTap] = useState(false);
-	/** The audio file for this word failed recently; browser speech takes over until the cooldown ends. */
-	const [fileFailed, setFileFailed] = useState(() => failedAudioSenses.has(senseId));
-	// A real file plays through the media channel, so it works where browser speech is silent
-	// (iOS silent switch, no English voice installed). Without a recording the server speaks the word.
-	const playFile = !fileFailed && (recordedAudioAvailable || serverTts !== false);
-	const ttsOnly = !playFile;
+	const [state, setState] = useState<PlaybackState>('idle');
+	const owner = useRef({});
 	const autoPlayed = useRef(false);
-	const fallbackTimer = useRef<number | null>(null);
-
-	useEffect(() => () => {
-		if (audio.current) {
-			audio.current.onplay = null;
-			audio.current.onplaying = null;
-			audio.current.onended = null;
-			audio.current.onerror = null;
-			audio.current.pause();
-		}
-		if (fallbackTimer.current !== null) window.clearTimeout(fallbackTimer.current);
-		stop();
-	}, [stop]);
 
 	function play() {
-		if (speaking || playing) { audio.current?.pause(); stop(); setPlaying(false); return; }
-		setFailed(false);
-		setNeedsTap(false);
-		const stillFailed = audioFailureActive(failedAudioSenses.get(senseId), Date.now());
-		if (fileFailed && !stillFailed) {
-			failedAudioSenses.delete(senseId);
-			setFileFailed(false);
-		}
-		const tryFile = (recordedAudioAvailable || serverTts !== false) && !stillFailed;
-		if (!tryFile) {
-			if (!(allowTts && lemma && speak(lemma, 'en-US'))) setFailed(true);
-			return;
-		}
-		audio.current?.pause();
-		prime();
-		const element = new Audio(`/api/audio?senseId=${encodeURIComponent(senseId)}`);
-		audio.current = element;
-		element.preload = 'auto';
-		element.onended = () => {
-			if (audio.current === element) {
-				setPlaying(false);
-				if (fallbackTimer.current !== null) window.clearTimeout(fallbackTimer.current);
-				fallbackTimer.current = null;
-			}
-		};
-		let fallbackStarted = false;
-		let started = false;
-		element.onplaying = () => {
-			started = true;
-			setPlaying(true);
-		};
-		const fallback = () => {
-			if (fallbackStarted || audio.current !== element) return;
-			fallbackStarted = true;
-			failedAudioSenses.set(senseId, Date.now());
-			if (fallbackTimer.current !== null) window.clearTimeout(fallbackTimer.current);
-			fallbackTimer.current = null;
-			element.pause();
-			setPlaying(false);
-			setFileFailed(allowTts && Boolean(lemma));
-			if (!(allowTts && lemma && speak(lemma, 'en-US'))) setFailed(true);
-		};
-		element.onerror = fallback;
-		fallbackTimer.current = window.setTimeout(() => {
-			if (started || element.ended) return;
-			fallback();
-		// The first request for a synthesized word waits for the voice to be generated.
-		}, recordedAudioAvailable ? 4_000 : 10_000);
-		void element.play().catch((error: unknown) => {
-			if (classifyPlayError(error) === 'broken') { fallback(); return; }
-			if (audio.current !== element) return;
-			if (fallbackTimer.current !== null) window.clearTimeout(fallbackTimer.current);
-			fallbackTimer.current = null;
-			setPlaying(false);
-			setNeedsTap(true);
-		});
+		if (state === 'loading') return;
+		// Only a server that said it cannot speak skips the file; unknown still tries it.
+		const url = recordedAudioAvailable || serverTts !== false ? `/api/audio?senseId=${encodeURIComponent(senseId)}` : null;
+		playEnglishAudio({ url, text: lemma, owner: owner.current, onState: setState });
 	}
 
 	useEffect(() => {
-		if (!autoPlay || autoPlayed.current) return;
-		if (!recordedAudioAvailable && serverTts === null) return;
-		if (ttsOnly && !ready) return;
-		const timer = setTimeout(() => {
-			autoPlayed.current = true;
-			play();
-		}, 0);
-		return () => clearTimeout(timer);
-	// eslint-disable-next-line react-hooks/exhaustive-deps -- play once when audio becomes ready
-	}, [autoPlay, ready, serverTts]);
+		const self = owner.current;
+		return () => stopEnglishAudio(self);
+	}, []);
 
-	const unavailable = failed || speechFailed;
-	const onUnavailableRef = useRef(onUnavailable);
-	useEffect(() => { onUnavailableRef.current = onUnavailable; }, [onUnavailable]);
-	useEffect(() => { if (unavailable) onUnavailableRef.current?.(); }, [unavailable]);
+	useEffect(() => {
+		if (!autoPlay || autoPlayed.current) return;
+		autoPlayed.current = true;
+		const timer = setTimeout(play, 0);
+		return () => clearTimeout(timer);
+	// eslint-disable-next-line react-hooks/exhaustive-deps -- play once on mount
+	}, [autoPlay]);
+
+	const busy = state === 'loading' || state === 'playing';
+	const icon = state === 'loading' ? 'progress_activity' : state === 'playing' ? 'graphic_eq' : state === 'failed' ? 'volume_off' : 'volume_up';
+	const note = state === 'blocked' ? 'Bấm để nghe' : state === 'failed' ? 'Không phát được' : '';
 	if (compact) {
-		const note = needsTap ? 'Bấm để nghe' : unavailable ? 'Không phát được' : '';
-		const button = <button type="button" onClick={play} disabled={ttsOnly && (!ready || !supported)} aria-label={playing || speaking ? 'Dừng phát âm' : `Nghe phát âm ${lemma}`} title={unavailable ? 'Không phát được — kiểm tra âm lượng/công tắc im lặng' : 'Nghe phát âm'} className={`inline-flex size-11 shrink-0 items-center justify-center rounded-full border border-border bg-surface text-accent transition hover:border-accent hover:bg-accent-subtle focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent disabled:opacity-40 ${playing || speaking || needsTap ? 'border-accent bg-accent-subtle' : ''} ${needsTap ? 'animate-pulse motion-reduce:animate-none' : ''}`}><MaterialIcon name={playing || speaking ? 'graphic_eq' : unavailable && !needsTap ? 'volume_off' : 'volume_up'} size={22} /></button>;
+		const button = <button type="button" onClick={play} aria-busy={state === 'loading'} aria-label={`Nghe phát âm ${lemma}`} title={state === 'failed' ? 'Không phát được — kiểm tra âm lượng/công tắc im lặng' : 'Nghe phát âm'} className={`inline-flex size-11 shrink-0 items-center justify-center rounded-full border border-border bg-surface text-accent transition hover:border-accent hover:bg-accent-subtle focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent ${busy || state === 'blocked' ? 'border-accent bg-accent-subtle' : ''} ${state === 'blocked' ? 'animate-pulse motion-reduce:animate-none' : ''}`}><MaterialIcon name={icon} size={22} className={state === 'loading' ? 'animate-spin motion-reduce:animate-none' : ''} /></button>;
 		if (!note) return button;
-		return <span className="inline-flex shrink-0 flex-col items-center gap-0.5">{button}<span role="status" className={`text-xs font-bold leading-none ${needsTap ? 'text-accent' : 'text-warning'}`}>{note}</span></span>;
+		return <span className="inline-flex shrink-0 flex-col items-center gap-0.5">{button}<span role="status" className={`text-xs font-bold leading-none ${state === 'blocked' ? 'text-accent' : 'text-warning'}`}>{note}</span></span>;
 	}
-	return <div className="space-y-1"><Button type="button" variant="secondary" disabled={ttsOnly && (!ready || !supported)} onClick={play} leftIcon={<MaterialIcon name={playing || speaking ? 'stop' : 'volume_up'} size={20} />}>{playing || speaking ? 'Dừng' : ttsOnly ? 'Nghe phát âm' : 'Nghe mẫu'}</Button>{ready && ttsOnly && !supported && <p className="text-xs text-warning">Trình duyệt này không hỗ trợ đọc thành tiếng.</p>}{needsTap && <p className="text-xs font-bold text-accent">Bấm để nghe</p>}{unavailable && <p className="text-xs text-warning">Không phát được âm thanh trên trình duyệt này.</p>}</div>;
+	return <div className="space-y-1"><Button type="button" variant="secondary" onClick={play} aria-busy={state === 'loading'} leftIcon={<MaterialIcon name={icon} size={20} className={state === 'loading' ? 'animate-spin motion-reduce:animate-none' : ''} />}>Nghe phát âm</Button>{note && <p role="status" className={`text-xs font-bold ${state === 'blocked' ? 'text-accent' : 'text-warning'}`}>{note}</p>}</div>;
 }

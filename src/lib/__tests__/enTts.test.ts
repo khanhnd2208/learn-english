@@ -2,7 +2,7 @@ import fs from 'fs';
 import os from 'os';
 import path from 'path';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { normalizeTtsText, TTS_MAX_CHARS, ttsCacheName } from '@/lib/english/audioPath';
+import { normalizeTtsText, spokenText, TTS_MAX_CHARS, ttsCacheName } from '@/lib/english/audioPath';
 
 describe('normalizeTtsText', () => {
 	it('collapses whitespace and control characters', () => {
@@ -12,6 +12,20 @@ describe('normalizeTtsText', () => {
 	it('rejects empty and overly long text', () => {
 		expect(normalizeTtsText('   ')).toBe('');
 		expect(normalizeTtsText('a'.repeat(TTS_MAX_CHARS + 1))).toBe('');
+	});
+});
+
+describe('spokenText', () => {
+	it('reads words and phrases as finished statements', () => {
+		expect(spokenText(' thirsty ')).toBe('thirsty.');
+		expect(spokenText('look forward to')).toBe('look forward to.');
+	});
+
+	it('keeps sentences that already end', () => {
+		expect(spokenText('He ordered a coffee.')).toBe('He ordered a coffee.');
+		expect(spokenText('Are you hungry?')).toBe('Are you hungry?');
+		expect(spokenText('She said "wait!"')).toBe('She said "wait!"');
+		expect(spokenText('  ')).toBe('');
 	});
 });
 
@@ -58,6 +72,19 @@ describe('synthesizeSpeech', () => {
 		expect(second?.bytes.length).toBe(200);
 		expect(await synthesizeSpeech('intensity')).not.toBeNull();
 		expect(fs.readFileSync(calls, 'utf8').trim().split('\n')).toEqual(['intensity']);
+	});
+
+	it('lets a learner tap jump ahead of background warm-up', async () => {
+		// Each run takes a moment so the queue order is visible.
+		const bin = path.join(dir, 'piper');
+		fs.writeFileSync(bin, fs.readFileSync(bin, 'utf8').replace(`>> "${calls}"\n`, `>> "${calls}"\nsleep 0.2\n`));
+		const { synthesizeSpeech, warmSpeech } = await import('@/services/english/enTtsService');
+		warmSpeech(['first', 'second', 'third', 'first']);
+		await vi.waitFor(() => expect(fs.existsSync(calls)).toBe(true));
+		const tapped = await Promise.all([synthesizeSpeech('tapped'), synthesizeSpeech('third')]);
+		expect(tapped.map((file) => file?.bytes.length)).toEqual([200, 200]);
+		await vi.waitFor(() => expect(fs.readFileSync(calls, 'utf8').trim().split('\n')).toHaveLength(4));
+		expect(fs.readFileSync(calls, 'utf8').trim().split('\n')).toEqual(['first', 'tapped', 'third', 'second']);
 	});
 
 	it('returns null when the voice is missing', async () => {
