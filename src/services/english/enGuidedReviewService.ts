@@ -57,38 +57,27 @@ async function selectedSenseIds(userId: string, selectedSetIds: string[]) {
 	return { selected, senses };
 }
 
+/** SRS mistakes only: the first attempt of each word per daily session, newest 20 per word. */
 async function histories(userId: string, senseIds: string[]): Promise<ReviewHistory[]> {
-	const [guided, legacy] = await Promise.all([
-		prisma.enGuidedReviewQuestion.findMany({
-			where: { senseId: { in: senseIds }, kind: 'main', answer: { not: null }, session: { userId } },
-			orderBy: { answeredAt: 'desc' },
-			select: { senseId: true, correct: true, answeredAt: true },
-		}),
-		prisma.enReview.findMany({
-			where: { userId, senseId: { in: senseIds } },
-			orderBy: { at: 'asc' },
-			select: { sessionId: true, senseId: true, correct: true, at: true },
-		}),
-	]);
-	const legacyFirst = new Map<string, { senseId: string; correct: boolean; at: Date }>();
-	for (const row of legacy) {
+	const reviews = await prisma.enReview.findMany({
+		where: { userId, senseId: { in: senseIds } },
+		orderBy: { at: 'asc' },
+		select: { sessionId: true, senseId: true, correct: true, at: true },
+	});
+	const first = new Map<string, { senseId: string; correct: boolean; at: Date }>();
+	for (const row of reviews) {
 		const key = `${row.sessionId}:${row.senseId}`;
-		if (!legacyFirst.has(key)) legacyFirst.set(key, row);
+		if (!first.has(key)) first.set(key, row);
 	}
-	const combined = [
-		...guided.flatMap((row) => row.answeredAt ? [{ senseId: row.senseId, correct: row.correct === true, at: row.answeredAt }] : []),
-		...[...legacyFirst.values()].map((row) => ({ senseId: row.senseId, correct: row.correct, at: row.at })),
-	].sort((a, b) => b.at.getTime() - a.at.getTime());
 	const bySense = new Map<string, boolean[]>();
-	for (const row of combined) {
+	for (const row of [...first.values()].sort((x, y) => y.at.getTime() - x.at.getTime())) {
 		const values = bySense.get(row.senseId) ?? [];
-		values.push(row.correct === true);
+		values.push(row.correct);
 		bySense.set(row.senseId, values);
 	}
 	return senseIds.map((senseId) => {
-		const values = bySense.get(senseId) ?? [];
-		const recent = values.slice(0, 20);
-		return { senseId, attempts: values.length, recentWrong: recent.filter((correct) => !correct).length, recentTotal: recent.length };
+		const recent = (bySense.get(senseId) ?? []).slice(0, 20);
+		return { senseId, recentWrong: recent.filter((correct) => !correct).length, recentTotal: recent.length };
 	});
 }
 
@@ -140,10 +129,9 @@ async function serializeSession(userId: string, sessionId: string) {
 }
 
 export async function getGuidedReviewOverview(userId: string, now = new Date()) {
-	const [sets, preference, active, practicedToday] = await Promise.all([
+	const [sets, preference, practicedToday] = await Promise.all([
 		enrolledSets(userId),
 		prisma.enReviewPreference.findUnique({ where: { userId } }),
-		prisma.enGuidedReviewSession.findUnique({ where: { activeKey: userId }, select: { id: true } }),
 		prisma.enGuidedReviewQuestion.count({
 			where: { kind: 'main', answer: { not: null }, answeredAt: { gte: vnDayStart(vnDayKey(now)) }, session: { userId } },
 		}),
@@ -157,7 +145,6 @@ export async function getGuidedReviewOverview(userId: string, now = new Date()) 
 		selectedSetIds,
 		uniqueWords,
 		practicedToday,
-		activeSessionId: active?.id ?? null,
 	};
 }
 
@@ -173,6 +160,7 @@ export async function saveGuidedReviewSelection(userId: string, setIds: string[]
 	return getGuidedReviewOverview(userId);
 }
 
+/** Every start is a fresh run: a session left mid-way is closed, never resumed. */
 export async function startGuidedReview(userId: string, setIds: string[]) {
 	const active = await prisma.enGuidedReviewSession.findUnique({ where: { activeKey: userId } });
 	if (active) await abandonGuidedReview(userId, active.id);
@@ -208,11 +196,6 @@ async function activeSession(userId: string, sessionId: string) {
 	const session = await prisma.enGuidedReviewSession.findFirst({ where: { id: sessionId, userId, endedAt: null } });
 	if (!session) throw new AppError('Phiên ôn tập không còn hoạt động', 409);
 	return session;
-}
-
-export async function openGuidedReviewSession(userId: string, sessionId: string) {
-	await activeSession(userId, sessionId);
-	return serializeSession(userId, sessionId);
 }
 
 export async function saveStudyPosition(userId: string, sessionId: string, position: number) {

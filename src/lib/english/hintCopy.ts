@@ -15,7 +15,7 @@ export const HINTS = {
 	},
 	guided: {
 		title: 'Ôn theo bộ',
-		body: 'Xem thẻ vài từ rồi luyện ngay. Không ảnh hưởng lịch ôn, chọn bộ nào cũng được, bỏ chọn không xoá tiến độ.',
+		body: 'Mỗi chặng lấy ngẫu nhiên 5 từ trong các bộ đã chọn, ưu tiên từ bạn hay sai ở Ôn luân phiên. Không ảnh hưởng lịch ôn; thoát giữa chừng thì lần sau bắt đầu lại từ đầu.',
 	},
 	stages: {
 		title: '4 mức nhớ',

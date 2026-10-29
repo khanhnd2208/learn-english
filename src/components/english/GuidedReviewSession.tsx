@@ -40,7 +40,7 @@ export type GuidedSession = {
 
 type AnswerResult = { correct: boolean; expected: string; session: GuidedSession; reward?: GoalReward | null };
 
-export default function GuidedReviewSession({ initial, onClose }: { initial: GuidedSession; onClose: (finished: boolean) => void }) {
+export default function GuidedReviewSession({ initial, onClose }: { initial: GuidedSession; onClose: () => void }) {
 	const [session, setSession] = useState(initial);
 	const [viewedWord, setViewedWord] = useState(Math.min(initial.studyPosition, Math.max(0, initial.words.length - 1)));
 	const [shownQuestion, setShownQuestion] = useState<GuidedPublicQuestion | null>(initial.questions.find((question) => question.answer === null) ?? null);
@@ -129,17 +129,22 @@ export default function GuidedReviewSession({ initial, onClose }: { initial: Gui
 		setError('');
 		try {
 			await englishPost('/api/review', { action: 'finish', sessionId: session.id });
-			onClose(true);
+			onClose();
 		} catch (cause) {
 			setError(cause instanceof Error ? cause.message : 'Không kết thúc được phiên.');
 			setBusy(false);
 		}
 	}
 
-	/** Leaving keeps the session open on the server, so the overview can offer "Tiếp tục". */
 	function leave() {
 		if (session.phase === 'summary') { void finish(); return; }
 		setConfirmExit(true);
+	}
+
+	/** Leaving mid-chunk ends the session; the next run starts fresh with 5 new random words. */
+	function quit() {
+		void englishPost('/api/review', { action: 'abandon', sessionId: session.id }).catch(() => undefined);
+		onClose();
 	}
 
 	const word = session.words[viewedWord];
@@ -185,7 +190,7 @@ export default function GuidedReviewSession({ initial, onClose }: { initial: Gui
 					</div>
 				</SessionSummary>}
 			</main>
-			<ConfirmExitDialog open={confirmExit} title="Tạm dừng Ôn theo bộ?" description="Câu đã trả lời được giữ. Bạn có thể bấm “Tiếp tục” ở trang Ôn theo bộ để học tiếp đúng chỗ này." leaveLabel="Tạm dừng" onStay={() => setConfirmExit(false)} onLeave={() => onClose(false)} />
+			<ConfirmExitDialog open={confirmExit} title="Thoát Ôn theo bộ?" description="Chặng này sẽ không được lưu. Lần sau bạn bắt đầu lại với 5 từ mới." leaveLabel="Thoát" onStay={() => setConfirmExit(false)} onLeave={quit} />
 			{error && <div role="alert" className="sticky bottom-3 rounded-panel border border-error/40 bg-surface p-3 text-sm text-error">{error} <button type="button" onClick={() => setError('')} className="ml-2 font-bold underline">Đóng</button></div>}
 		</div>
 	</div>;

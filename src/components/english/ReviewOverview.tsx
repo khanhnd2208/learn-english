@@ -3,7 +3,6 @@
 import Link from 'next/link';
 import { useMemo, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import ConfirmExitDialog from '@/components/english/ConfirmExitDialog';
 import GuidedReviewSession, { type GuidedSession } from '@/components/english/GuidedReviewSession';
 import SrsPanel from '@/components/english/SrsPanel';
 import Checkbox from '@/components/ui/Checkbox';
@@ -19,17 +18,14 @@ export type GuidedReviewOverview = {
 	selectedSetIds: string[];
 	uniqueWords: number;
 	practicedToday: number;
-	activeSessionId: string | null;
 };
 
 const solidButton = 'min-h-12 w-full rounded-control bg-accent px-5 font-bold text-accent-foreground disabled:opacity-50';
-const outlineButton = 'min-h-12 w-full rounded-control border-2 border-accent bg-surface px-5 font-bold text-accent disabled:opacity-50';
 
 export default function ReviewOverview({ overview, guided: initial, mode }: { overview: TodayOverview; guided: GuidedReviewOverview; mode: 'bo' | 'luan-phien' }) {
 	const router = useRouter();
 	const [guided, setGuided] = useState(initial);
 	const [session, setSession] = useState<GuidedSession | null>(null);
-	const [confirmRestart, setConfirmRestart] = useState(false);
 	const [search, setSearch] = useState('');
 	const [busy, setBusy] = useState(false);
 	const [saving, setSaving] = useState(false);
@@ -61,29 +57,13 @@ export default function ReviewOverview({ overview, guided: initial, mode }: { ov
 	}
 
 	async function start() {
-		setConfirmRestart(false);
 		setBusy(true);
 		setError('');
 		try {
 			const started = await englishPost<GuidedSession>('/api/review', { action: 'start', setIds: guided.selectedSetIds });
-			setGuided((current) => ({ ...current, activeSessionId: started.id }));
 			setSession(started);
 		} catch (cause) {
 			setError(cause instanceof Error ? cause.message : 'Không bắt đầu được phiên học.');
-		} finally {
-			setBusy(false);
-		}
-	}
-
-	async function resume() {
-		if (!guided.activeSessionId) return;
-		setBusy(true);
-		setError('');
-		try {
-			setSession(await englishPost<GuidedSession>('/api/review', { action: 'open', sessionId: guided.activeSessionId }));
-		} catch (cause) {
-			setGuided((current) => ({ ...current, activeSessionId: null }));
-			setError(cause instanceof Error ? cause.message : 'Phiên cũ không còn, hãy bắt đầu phiên mới.');
 		} finally {
 			setBusy(false);
 		}
@@ -102,8 +82,6 @@ export default function ReviewOverview({ overview, guided: initial, mode }: { ov
 			<p className="mt-1 text-sm text-muted">Tải một bộ để có từ học thêm.</p>
 			<Link href="/store" className="mt-4 inline-flex min-h-12 items-center rounded-control bg-accent px-5 font-bold text-accent-foreground">Chọn bộ từ →</Link>
 		</section> : <section aria-label="Ôn theo bộ" className="mode-card space-y-4 p-4 sm:p-6">
-			{guided.activeSessionId && <div className="flex flex-wrap items-center justify-between gap-2 rounded-card border border-accent/40 bg-accent-subtle px-3 py-2 text-sm"><span className="font-bold">Bạn có phiên đang dở</span><button type="button" disabled={busy} onClick={() => void resume()} className="min-h-11 rounded-control bg-accent px-4 font-bold text-accent-foreground disabled:opacity-50">Tiếp tục →</button></div>}
-
 			<div>
 				<p className="mb-2 text-sm font-bold">Chọn bộ để học</p>
 				{guided.sets.length > 8 && <input value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Tìm bộ từ…" aria-label="Tìm bộ từ" className="mb-2 min-h-11 w-full rounded-control border border-border bg-background px-3 text-sm" />}
@@ -119,13 +97,12 @@ export default function ReviewOverview({ overview, guided: initial, mode }: { ov
 			</div>
 
 			<div>
-				<button type="button" disabled={busy || saving || guided.selectedSetIds.length === 0 || guided.uniqueWords === 0} onClick={() => guided.activeSessionId ? setConfirmRestart(true) : void start()} className={guided.activeSessionId ? outlineButton : solidButton}>{guided.activeSessionId ? 'Bắt đầu phiên mới' : 'Bắt đầu học'} <span aria-hidden="true">→</span></button>
+				<button type="button" disabled={busy || saving || guided.selectedSetIds.length === 0 || guided.uniqueWords === 0} onClick={() => void start()} className={solidButton}>Bắt đầu học <span aria-hidden="true">→</span></button>
 				{error && <p role="alert" className="mt-2 text-sm text-error">{error}</p>}
 			</div>
 		</section>}
 
 		</>}
-		{session && <GuidedReviewSession initial={session} onClose={(finished) => { setGuided((current) => ({ ...current, activeSessionId: finished ? null : session.id })); setSession(null); router.refresh(); }} />}
-		<ConfirmExitDialog open={confirmRestart} busy={busy} title="Bắt đầu phiên mới?" description="Phiên đang dở sẽ kết thúc. Các câu bạn đã trả lời vẫn được giữ." stayLabel="Huỷ" leaveLabel="Bắt đầu mới" onStay={() => setConfirmRestart(false)} onLeave={() => void start()} />
+		{session && <GuidedReviewSession initial={session} onClose={() => { setSession(null); router.refresh(); }} />}
 	</div>;
 }

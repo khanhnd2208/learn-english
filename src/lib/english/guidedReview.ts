@@ -3,12 +3,14 @@ import { activityByKey, poolFromBundles, type ActivityItem, type ActivityKey } f
 import type { Rng } from '@/lib/english/activities/rng';
 import type { SenseBundle } from '@/lib/english/senseBundle';
 
-export type ReviewHistory = { senseId: string; attempts: number; recentWrong: number; recentTotal: number };
+/** Recent first-attempt results of a word in Ôn luân phiên (SRS). */
+export type ReviewHistory = { senseId: string; recentWrong: number; recentTotal: number };
 export type GuidedQuestion = ActivityItem & { layout: AnswerLayout | null };
 
-export function reviewWeight(history: Pick<ReviewHistory, 'attempts' | 'recentWrong' | 'recentTotal'>): number {
+/** Random pick with a boost only for words often missed in SRS; unseen words weigh the same as well-known ones. */
+export function reviewWeight(history: Pick<ReviewHistory, 'recentWrong' | 'recentTotal'>): number {
 	const wrongRate = history.recentTotal > 0 ? history.recentWrong / history.recentTotal : 0;
-	return 1 + 3 / Math.sqrt(1 + Math.max(0, history.attempts)) + 3 * wrongRate;
+	return 1 + 3 * wrongRate + 0.5 * Math.min(4, Math.max(0, history.recentWrong));
 }
 
 export function weightedOrder(senseIds: string[], histories: ReviewHistory[], rng: Rng): string[] {
@@ -16,7 +18,7 @@ export function weightedOrder(senseIds: string[], histories: ReviewHistory[], rn
 	const remaining = [...new Set(senseIds)];
 	const ordered: string[] = [];
 	while (remaining.length) {
-		const weights = remaining.map((senseId) => reviewWeight(stats.get(senseId) ?? { attempts: 0, recentWrong: 0, recentTotal: 0 }));
+		const weights = remaining.map((senseId) => reviewWeight(stats.get(senseId) ?? { recentWrong: 0, recentTotal: 0 }));
 		const total = weights.reduce((sum, weight) => sum + weight, 0);
 		let cursor = rng.next() * total;
 		let picked = 0;
