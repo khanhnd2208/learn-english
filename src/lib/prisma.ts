@@ -33,7 +33,7 @@ function intEnv(name: string, fallback: number, min: number, max: number): numbe
 
 function createPrismaClient(): PrismaClient {
 	const connectionString = process.env.DATABASE_URL;
-	const poolMax = intEnv('PG_POOL_MAX', process.env.NODE_ENV === 'production' ? 5 : 10, 1, 50);
+	const poolMax = intEnv('PG_POOL_MAX', 10, 1, 50);
 	const idleTimeoutMillis = intEnv('PG_IDLE_TIMEOUT_MS', 30_000, 1_000, 300_000);
 	const pool = new Pool(
 		connectionString

@@ -4,7 +4,7 @@ import { pendingRewards, setDailyGoal } from '@/services/english/enGoalService';
 
 const mocks = vi.hoisted(() => ({ upsert: vi.fn() }));
 vi.mock('@/lib/prisma', () => ({ prisma: { enLearnerProfile: { upsert: mocks.upsert } } }));
-vi.mock('@/services/english/enDailyService', () => ({ getTodayOverview: vi.fn() }));
+vi.mock('@/services/english/enDailyService', () => ({ getTodayOverview: vi.fn(), computeTodayOverview: vi.fn() }));
 
 const lifetime = { longTerm: 0, learned: 0, longestStreak: 0, goalDays: 0, chests: 0, revived: 0, sessionsFinished: 0, enrolledSets: 0 };
 const base = {

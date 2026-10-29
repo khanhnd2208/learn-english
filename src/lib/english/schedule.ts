@@ -1,4 +1,4 @@
-import { EN_LEITNER_INTERVALS } from '@/lib/english/constants';
+import { EN_LEITNER_INTERVALS, EN_SRS_SESSION_SIZE, EN_SRS_DUE_MIN_SHARE } from '@/lib/english/constants';
 import { randomRng, type Rng } from '@/lib/english/activities/rng';
 import { shiftVnDay, vnDayKey } from '@/lib/english/gapRule';
 import { normalizeLearnerText } from '@/lib/english/text';
@@ -98,48 +98,20 @@ export function intervalDays(box: number): number {
 	return EN_LEITNER_INTERVALS[Math.min(EN_LEITNER_INTERVALS.length - 1, Math.max(0, box))] ?? 0;
 }
 
-/**
- * Every due word, then every word of the downloaded sets that is not scheduled yet.
- * SRS has no daily cap: correct answers push words further out, so the queue shrinks on
- * its own, and a learner who cannot finish simply continues next time.
- * Words within the same box are shuffled so they never appear in upload order.
- */
-export function buildDailyQueue<T extends ScheduledState>(states: T[], newPool: string[], now = new Date(), rng?: Rng): DailyQueueItem[] {
-	const dueStates = states.filter((state) => isDue(state, now));
-	if (rng) {
-		const shuffled = rng.shuffle(dueStates);
-		shuffled.sort((a, b) => a.box - b.box);
-		dueStates.splice(0, dueStates.length, ...shuffled);
-	} else {
-		dueStates.sort((a, b) => a.box - b.box || a.dueAt.getTime() - b.dueAt.getTime() || a.senseId.localeCompare(b.senseId));
-	}
-	const seen = new Set(states.map((state) => state.senseId));
-	const newWords = [...new Set(newPool)].filter((senseId) => !seen.has(senseId));
-	return [...dueStates.map((state) => ({ kind: 'review' as const, state })), ...newWords.map((senseId) => ({ kind: 'new' as const, senseId }))];
-}
-
-/**
- * New words from every downloaded set, taking one word from each set in turn, so every set
- * reaches the learner early instead of waiting behind the sets downloaded before it.
- * Words already scheduled are skipped before the turns are taken, and each set's words are
- * shuffled when an `rng` is given so learners never study in upload order.
- */
-export function interleaveNewWords(groups: string[][], scheduled: Iterable<string> = [], rng?: Rng): string[] {
-	const seen = new Set(scheduled);
-	const queues = groups.map((group) => {
-		const filtered = group.filter((senseId) => {
-			if (seen.has(senseId)) return false;
-			seen.add(senseId);
-			return true;
-		});
-		return rng ? rng.shuffle(filtered) : filtered;
-	});
-	const pool: string[] = [];
-	for (let turn = 0; queues.some((queue) => turn < queue.length); turn += 1) {
-		const turnQueues = rng ? rng.shuffle(queues) : queues;
-		for (const queue of turnQueues) if (turn < queue.length) pool.push(queue[turn]!);
-	}
-	return pool;
+/** Uniform selection without replacement; due words keep a minimum share and appear first by box. */
+export function pickSessionWords<T extends ScheduledState>(due: T[], newIds: string[], rng: Rng, size = EN_SRS_SESSION_SIZE, dueMinShare = EN_SRS_DUE_MIN_SHARE): DailyQueueItem[] {
+	const limit = Math.max(0, Math.floor(size));
+	const uniqueDue = [...new Map(due.map((state) => [state.senseId, state])).values()];
+	const dueIds = new Set(uniqueDue.map((state) => state.senseId));
+	const reserved = Math.min(uniqueDue.length, Math.ceil(limit * Math.max(0, Math.min(1, dueMinShare))));
+	const picked = rng.shuffle(uniqueDue).slice(0, reserved);
+	const pickedIds = new Set(picked.map((state) => state.senseId));
+	const rest: DailyQueueItem[] = [
+		...uniqueDue.filter((state) => !pickedIds.has(state.senseId)).map((state) => ({ kind: 'review' as const, state })),
+		...[...new Set(newIds)].filter((id) => !dueIds.has(id)).map((senseId) => ({ kind: 'new' as const, senseId })),
+	];
+	const chosen: DailyQueueItem[] = [...picked.map((state) => ({ kind: 'review' as const, state })), ...rng.shuffle(rest).slice(0, limit - reserved)];
+	return [...chosen.filter((item) => item.kind === 'review').sort((a, b) => a.state.box - b.state.box), ...chosen.filter((item) => item.kind === 'new')];
 }
 
 export { randomRng };

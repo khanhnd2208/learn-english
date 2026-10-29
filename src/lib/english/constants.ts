@@ -19,3 +19,8 @@ export const EN_PACK_TX_TIMEOUT_MS = 120_000;
 /** Highest SRS box that shows the first letter and letter count. */
 export const EN_HINT_MAX_BOX = 2;
 export const EN_MAX_SYNONYMS = 8;
+
+/** Words in one round. The learner can start another round while any words remain. */
+export const EN_SRS_SESSION_SIZE = 50;
+/** Reserve this share for due words when enough are available. */
+export const EN_SRS_DUE_MIN_SHARE = 0.6;

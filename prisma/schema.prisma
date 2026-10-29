@@ -349,3 +349,12 @@ model EnTestItem {
   @@unique([attemptId, position])
   @@index([attemptId, senseId])
 }
+
+/// Vietnam calendar days with at least one SRS or guided main answer. Drives streaks.
+model EnStudyDay {
+  userId String
+  /// YYYY-MM-DD in Asia/Ho_Chi_Minh.
+  day String
+
+  @@id([userId, day])
+}

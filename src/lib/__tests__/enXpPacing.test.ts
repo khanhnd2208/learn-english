@@ -2,6 +2,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 const mocks = vi.hoisted(() => {
 	const tx = {
+		enStudyDay: { createMany: vi.fn() },
 		enReview: { findFirst: vi.fn(), create: vi.fn() },
 		enWordState: { upsert: vi.fn() },
 		enXpEvent: { aggregate: vi.fn(), createMany: vi.fn(), createManyAndReturn: vi.fn() },
@@ -11,6 +12,7 @@ const mocks = vi.hoisted(() => {
 	return {
 		tx,
 		prisma: {
+			$queryRaw: vi.fn(async () => [{ poolSize: 0, remainingCount: 0 }]),
 			$transaction: vi.fn(async (run: (client: typeof tx) => Promise<unknown>) => run(tx)),
 			enPracticeSession: { findFirst: vi.fn() },
 			enWordState: { findUnique: vi.fn() },

@@ -36,6 +36,7 @@ export async function shiftEnglishQaDataOneDay(userId: string, setId: string) {
 	return { shiftedStates: states.length, shiftedReviews: reviews.length, shiftedTests: attempts.length };
 }
 
+// Study days survive per-set QA resets: a study day belongs to the learner, not a set.
 export async function resetEnglishQaProgress(userId: string, setId: string) {
 	const senseIds = await sensesInSet(setId);
 	const [states, reviews, attempts] = await prisma.$transaction([

@@ -1,8 +1,9 @@
 import fs from 'fs';
+import { randomUUID } from 'node:crypto';
 import path from 'path';
 import { spawn, type ChildProcess } from 'child_process';
 import readline from 'readline';
-import { englishAudioRoot, normalizeTtsText, resolveAudioFile, ttsCacheName } from '@/lib/english/audioPath';
+import { audioContentType, englishAudioRoot, normalizeTtsText, resolveAudioFile, ttsCacheName } from '@/lib/english/audioPath';
 
 /**
  * Server-side speech for words without a recorded file. Piper runs as its own process
@@ -129,7 +130,7 @@ async function startWorker(config: TtsConfig): Promise<Worker | null> {
 	const script = path.join(process.cwd(), 'scripts', 'piper_worker.py');
 	if (!await readable(python) || !await readable(script)) return null;
 	if (worker) return worker;
-	const child = spawn(python, [script, config.model], { stdio: ['pipe', 'pipe', 'pipe'] });
+	const child = spawn(process.platform === 'linux' && fs.existsSync('/usr/bin/nice') ? '/usr/bin/nice' : python, process.platform === 'linux' && fs.existsSync('/usr/bin/nice') ? ['-n', '10', python, script, config.model] : [script, config.model], { stdio: ['pipe', 'pipe', 'pipe'] });
 	let markReady: (ok: boolean) => void = () => {};
 	const target: Worker = { child, ready: new Promise((settle) => { markReady = settle; }), pending: new Map(), nextId: 1, idle: null };
 	worker = target;
@@ -217,40 +218,91 @@ function runPiper(config: TtsConfig, text: string, output: string): Promise<bool
 	});
 }
 
+function ffmpegBin() { return process.env.FFMPEG_BIN?.trim() || 'ffmpeg'; }
+let ffmpegStatus: { available: boolean; at: number; bin: string } | null = null;
+async function ffmpegAvailable() {
+	const bin = ffmpegBin();
+	if (ffmpegStatus?.bin === bin && Date.now() - ffmpegStatus.at < 60_000) return ffmpegStatus.available;
+	const available = await new Promise<boolean>((resolve) => {
+		const child = spawn(bin, ['-version'], { stdio: 'ignore' });
+		child.once('error', () => resolve(false));
+		child.once('close', (code) => resolve(code === 0));
+	});
+	ffmpegStatus = { available, at: Date.now(), bin };
+	return available;
+}
+
+async function encode(source: string, target: string, format: 'ogg' | 'mp3'): Promise<boolean> {
+	if (!await ffmpegAvailable()) return false;
+	const temp = `${target}.${process.pid}.${randomUUID()}.tmp.${format}`;
+	const args = format === 'ogg' ? ['-ac', '1', '-c:a', 'libopus', '-b:a', '24k', '-application', 'voip'] : ['-ac', '1', '-c:a', 'libmp3lame', '-b:a', '64k'];
+	try {
+		const ok = await new Promise<boolean>((resolve) => {
+			const child = spawn(ffmpegBin(), ['-hide_banner', '-loglevel', 'error', '-y', '-i', source, ...args, temp], { stdio: 'ignore' });
+			child.once('error', () => resolve(false));
+			child.once('close', (code) => resolve(code === 0));
+		});
+		if (!ok || ((await fs.promises.stat(temp).catch(() => null))?.size ?? 0) === 0) return false;
+		await fs.promises.rename(temp, target);
+		return true;
+	} finally { await fs.promises.rm(temp, { force: true }); }
+}
+
 async function synthesizeTo(config: TtsConfig, text: string, file: string): Promise<boolean> {
 	await fs.promises.mkdir(path.dirname(file), { recursive: true });
-	const temp = `${file}.${process.pid}.${Date.now()}.tmp.wav`;
+	const wav = file.replace(/\.(ogg|mp3|wav)$/, '.wav');
+	if (file.endsWith('.mp3')) {
+		const ogg = file.replace(/\.mp3$/, '.ogg');
+		const source = await readable(ogg) ? ogg : wav;
+		return await readable(source) && await encode(source, file, 'mp3');
+	}
+	const temp = `${wav}.${process.pid}.${randomUUID()}.tmp.wav`;
 	try {
 		const ok = await workerSynthesize(config, text, temp) || await runPiper(config, text, temp);
 		const size = ok ? (await fs.promises.stat(temp).catch(() => null))?.size ?? 0 : 0;
-		// A WAV header alone is 44 bytes; anything that small has no speech in it.
 		if (size <= 44) return false;
-		await fs.promises.rename(temp, file);
+		if (file.endsWith('.ogg')) {
+			if (await encode(temp, file, 'ogg')) return true;
+			console.error('[TTS] encode failed; serving WAV');
+			await fs.promises.rename(temp, wav);
+			return true;
+		}
+		await fs.promises.rename(temp, wav);
 		return true;
-	} finally {
-		await fs.promises.rm(temp, { force: true });
-	}
+	} finally { await fs.promises.rm(temp, { force: true }); }
 }
 
-/** Path of the cached WAV for `text`, synthesizing it first when missing. Null when TTS is off or fails. */
-async function speechFile(rawText: string, priority: 'urgent' | 'background', config = ttsConfig()): Promise<string | null> {
+export async function speechFile(rawText: string, priority: 'urgent' | 'background', format: 'opus' | 'mp3' = 'opus', config = ttsConfig()): Promise<string | null> {
 	const text = normalizeTtsText(rawText);
 	if (!text || !config || !await serverTtsAvailable()) return null;
-	const file = resolveAudioFile(config.root, ttsCacheName(text, config.model));
-	if (!file) return null;
-	if (await readable(file)) return file;
-	return await enqueue(config, text, file, priority) ? file : null;
+	const pathFor = (ext: 'ogg' | 'mp3' | 'wav') => resolveAudioFile(config.root, ttsCacheName(text, config.model, ext))!;
+	const wav = pathFor('wav'), ogg = pathFor('ogg'), mp3 = pathFor('mp3');
+	const opus = process.env.TTS_FORMAT !== 'wav' && await ffmpegAvailable();
+	if (format === 'mp3' && opus) {
+		if (await readable(mp3)) return mp3;
+		if (await readable(ogg) || await readable(wav)) return await enqueue(config, text, mp3, 'urgent') && await readable(mp3) ? mp3 : await readable(wav) ? wav : ogg;
+	}
+	if (opus && await readable(ogg)) return ogg;
+	if (await readable(wav)) {
+		if (opus) void encode(wav, ogg, 'ogg').catch(() => undefined);
+		if (format === 'mp3' && opus) return await enqueue(config, text, mp3, 'urgent') && await readable(mp3) ? mp3 : wav;
+		return wav;
+	}
+	const target = opus ? ogg : wav;
+	if (!await enqueue(config, text, target, priority)) return null;
+	if (format === 'mp3' && opus && await readable(ogg)) return await enqueue(config, text, mp3, 'urgent') && await readable(mp3) ? mp3 : ogg;
+	return await readable(target) ? target : await readable(wav) ? wav : null;
 }
 
-/** Speech for `text` as a WAV file, synthesized on first use and cached. Null when TTS is off or fails. */
+export async function synthesizeSpeechFile(rawText: string, format: 'opus' | 'mp3' = 'opus'): Promise<string | null> {
+	return speechFile(rawText, 'urgent', format);
+}
+
+/** Compatibility for callers that need bytes; the streaming route uses synthesizeSpeechFile. */
 export async function synthesizeSpeech(rawText: string): Promise<{ bytes: Buffer; type: string } | null> {
-	const file = await speechFile(rawText, 'urgent');
+	const file = await synthesizeSpeechFile(rawText);
 	if (!file) return null;
-	try {
-		return { bytes: await fs.promises.readFile(file), type: 'audio/wav' };
-	} catch {
-		return null;
-	}
+	try { return { bytes: await fs.promises.readFile(file), type: audioContentType(file) }; } catch { return null; }
 }
 
 /** Synthesize missing speech in the background, in order, so the learner's first tap plays at once. */
@@ -258,6 +310,6 @@ export function warmSpeech(texts: string[]): void {
 	const config = ttsConfig();
 	if (!config) return;
 	void (async () => {
-		for (const text of new Set(texts)) await speechFile(text, 'background', config).catch(() => null);
+		for (const text of new Set(texts)) await speechFile(text, 'background', 'opus', config).catch(() => null);
 	})();
 }

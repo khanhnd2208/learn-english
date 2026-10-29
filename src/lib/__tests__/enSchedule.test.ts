@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { mulberry32 } from '@/lib/english/activities';
-import { buildDailyQueue, countStages, interleaveNewWords, dueAt, intervalChange, isDue, isNearMiss, nextBox, scheduleAnswer, scheduleMove, stageOf } from '@/lib/english/schedule';
+import { pickSessionWords, countStages, dueAt, intervalChange, isDue, isNearMiss, nextBox, scheduleAnswer, scheduleMove, stageOf } from '@/lib/english/schedule';
 
 describe('Leitner schedule', () => {
 	const now = new Date('2026-10-26T10:00:00+07:00');
@@ -52,40 +52,23 @@ describe('Leitner schedule', () => {
 		expect(isDue({ dueAt: dueAt(1, now) }, now)).toBe(false);
 	});
 
-	it('orders due reviews by box then overdue date, then adds every new word', () => {
-		const queue = buildDailyQueue([
-			state('s2', 2, '2026-10-20T00:00:00Z'),
-			state('s1', 1, '2026-10-25T00:00:00Z'),
-			state('later', 3, '2026-11-20T00:00:00Z'),
-		], ['n1', 'n2'], now);
-		expect(queue.map((item) => item.kind === 'review' ? item.state.senseId : item.senseId)).toEqual(['s1', 's2', 'n1', 'n2']);
+	it.each([[40, 3000, 50, 30], [10, 3000, 50, 10], [0, 3000, 50, 0], [100, 0, 50, 50], [3, 4, 7, 3]])('selects a bounded round from %i due and %i new words', (due, fresh, total, minDue) => {
+		const states = Array.from({ length: due }, (_, i) => state(`d${i}`, 1 + i % 5, '2026-10-20T00:00:00Z'));
+		const newIds = Array.from({ length: fresh }, (_, i) => `n${i}`);
+		const queue = pickSessionWords([...states, ...states], [...newIds, ...newIds, ...states.map((s) => s.senseId)], mulberry32(42));
+		expect(queue).toHaveLength(total);
+		expect(queue.filter((item) => item.kind === 'review').length).toBeGreaterThanOrEqual(minDue);
+		const ids = queue.map((item) => item.kind === 'review' ? item.state.senseId : item.senseId);
+		expect(new Set(ids).size).toBe(total);
+		const boxes = queue.map((item) => item.kind === 'review' ? item.state.box : Infinity);
+		expect(boxes).toEqual([...boxes].sort((a,b) => a - b));
 	});
 
-	it('has no cap on due or new words, even with a large backlog', () => {
-		const states = Array.from({ length: 400 }, (_, index) => state(`s${index}`, 2, '2026-10-20T00:00:00Z'));
-		const pool = Array.from({ length: 300 }, (_, index) => `n${index}`);
-		const queue = buildDailyQueue(states, pool, now);
-		expect(queue.filter((item) => item.kind === 'review')).toHaveLength(400);
-		expect(queue.filter((item) => item.kind === 'new')).toHaveLength(300);
-	});
-
-	it('excludes scheduled or duplicate senses from new words', () => {
-		expect(buildDailyQueue([state('n2', 1, '2026-11-20T00:00:00Z')], ['n1', 'n1', 'n2', 'n3'], now)).toEqual([{ kind: 'new', senseId: 'n1' }, { kind: 'new', senseId: 'n3' }]);
-	});
-
-	it('shuffles due words within the same box and shuffles new words within each set when given an rng', () => {
-		const sameBoxStates = Array.from({ length: 20 }, (_, i) => state(`d${i}`, 1, '2026-10-20T00:00:00Z'));
-		const box2States = Array.from({ length: 5 }, (_, i) => state(`b${i}`, 2, '2026-10-20T00:00:00Z'));
-		const setWords = Array.from({ length: 20 }, (_, i) => `w${i}`);
-		const rng = mulberry32(42);
-		const pool = interleaveNewWords([setWords], [], rng);
-		expect(pool).toHaveLength(20);
-		expect(pool).not.toEqual(setWords);
-		const queue = buildDailyQueue([...box2States, ...sameBoxStates], pool, now, rng);
-		const reviewIds = queue.filter((item) => item.kind === 'review').map((item) => item.state.senseId);
-		expect(reviewIds.slice(0, 20).every((id) => id.startsWith('d'))).toBe(true);
-		expect(reviewIds.slice(20).every((id) => id.startsWith('b'))).toBe(true);
-		expect(reviewIds.slice(0, 20)).not.toEqual(sameBoxStates.map((s) => s.senseId));
+	it('samples the whole population evenly with no reserved share', () => {
+		const first = state('d', 1, '2026-10-20T00:00:00Z');
+		let dueHits = 0;
+		for (let seed = 0; seed < 10_000; seed++) if (pickSessionWords([first], ['n'], mulberry32(seed), 1, 0)[0]?.kind === 'review') dueHits++;
+		expect(dueHits / 10_000).toBeCloseTo(0.5, 1);
 	});
 
 	it('names learning stages without box jargon', () => {
