@@ -85,6 +85,13 @@ export type WrappedRouteHandler = {
 	(request: NextRequest): Promise<NextResponse>;
 };
 
+function logSlowRequest(request: NextRequest, started: number) {
+	const configured = Number(process.env.SLOW_REQUEST_MS ?? 1000);
+	const threshold = Number.isFinite(configured) && configured >= 0 ? configured : 1000;
+	const elapsed = performance.now() - started;
+	if (elapsed > threshold) console.warn('[slow]', request.method, new URL(request.url).pathname, Math.round(elapsed));
+}
+
 // ─── Wrapper Functions ─────────────────────────────────────────────────────────
 
 /**
@@ -103,6 +110,7 @@ export function withAuth(handler: AuthenticatedHandler): WrappedRouteHandler {
 		request: NextRequest,
 		context: RouteContext = DEFAULT_ROUTE_CONTEXT
 	): Promise<NextResponse> => {
+		const started = performance.now();
 		try {
 			const user = await getApiUser(request);
 			if (!user) {
@@ -111,6 +119,8 @@ export function withAuth(handler: AuthenticatedHandler): WrappedRouteHandler {
 			return await handler(request, user, context);
 		} catch (error) {
 			return handleCaughtError(error);
+		} finally {
+			logSlowRequest(request, started);
 		}
 	}) as WrappedRouteHandler;
 }
@@ -127,6 +137,7 @@ export function withAdmin(handler: AuthenticatedHandler): WrappedRouteHandler {
 		request: NextRequest,
 		context: RouteContext = DEFAULT_ROUTE_CONTEXT
 	): Promise<NextResponse> => {
+		const started = performance.now();
 		try {
 			const user = await getApiUser(request);
 			if (!user) {
@@ -138,6 +149,8 @@ export function withAdmin(handler: AuthenticatedHandler): WrappedRouteHandler {
 			return await handler(request, user, context);
 		} catch (error) {
 			return handleCaughtError(error);
+		} finally {
+			logSlowRequest(request, started);
 		}
 	}) as WrappedRouteHandler;
 }
@@ -152,10 +165,13 @@ export function withErrorHandling(handler: PublicHandler): WrappedRouteHandler {
 		request: NextRequest,
 		context: RouteContext = DEFAULT_ROUTE_CONTEXT
 	): Promise<NextResponse> => {
+		const started = performance.now();
 		try {
 			return await handler(request, context);
 		} catch (error) {
 			return handleCaughtError(error);
+		} finally {
+			logSlowRequest(request, started);
 		}
 	}) as WrappedRouteHandler;
 }

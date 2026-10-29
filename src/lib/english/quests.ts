@@ -1,6 +1,9 @@
 import { EN_GUIDED_CHUNK_SIZE } from '@/lib/english/constants';
 import { XP } from '@/lib/english/xp';
 
+export const DAILY_QUEST_KEYS = ['srs_words', 'chunk_done'] as const;
+export const WEEKLY_QUEST_KEYS = ['week_days'] as const;
+
 export type DailyQuestKey = 'srs_words' | 'chunk_done';
 export type WeeklyQuestKey = 'week_days';
 export type QuestKey = DailyQuestKey | WeeklyQuestKey;
