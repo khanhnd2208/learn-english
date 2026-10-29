@@ -455,7 +455,7 @@ input:focus-visible, textarea:focus-visible, select:focus-visible { outline-colo
 }
 .game-progress-fill { border-radius: 2px; background: var(--progress-fill); }
 
-.choice-btn { display: block; width: 100%; min-height: 52px; padding: 12px 16px; text-align: left; border: 2px solid var(--border); border-radius: 12px; background: var(--surface); color: var(--foreground); }
+.choice-btn { display: block; width: 100%; min-height: 48px; padding: 10px 14px; text-align: left; border: 2px solid var(--border); border-radius: 12px; background: var(--surface); color: var(--foreground); }
 .choice-btn:hover, .choice-btn:focus-visible { border-color: var(--accent); outline: none; }
 .choice-btn[data-state="selected"] { border-color: var(--accent); background: var(--accent-subtle); }
 .choice-btn[data-state="correct"] { border-color: var(--success); background: var(--success-subtle); }

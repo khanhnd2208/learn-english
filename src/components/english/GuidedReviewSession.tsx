@@ -4,14 +4,13 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import ConfirmExitDialog from '@/components/english/ConfirmExitDialog';
 import SessionHeader from '@/components/english/session/SessionHeader';
 import SessionSummary from '@/components/english/session/SessionSummary';
-import AnswerFeedback from '@/components/english/session/AnswerFeedback';
-import EnglishAudioButton from '@/components/english/EnglishAudioButton';
+import SessionFooter, { ResultLine } from '@/components/english/session/SessionFooter';
 import EnglishWordCard from '@/components/english/EnglishWordCard';
 import { useRewardToasts } from '@/components/english/goals/useRewardToasts';
 import { englishPost } from '@/components/english/englishApi';
 import QuestionView, { type PublicQuestion, type QuestionFeedback } from '@/components/english/quiz/QuestionView';
 import { EN_GUIDED_CHUNK_SIZE } from '@/lib/english/constants';
-import { cardExampleOf, type SenseBundle } from '@/lib/english/senseBundle';
+import type { SenseBundle } from '@/lib/english/senseBundle';
 import type { GoalReward } from '@/services/english/enGoalService';
 
 export type GuidedPublicQuestion = PublicQuestion & {
@@ -149,7 +148,6 @@ export default function GuidedReviewSession({ initial, onClose }: { initial: Gui
 
 	const word = session.words[viewedWord];
 	const questionWord = shownQuestion ? session.words.find((entry) => entry.sense.id === shownQuestion.senseId) : null;
-	const questionExample = questionWord ? cardExampleOf(questionWord.examples) : null;
 	const covered = session.poolSize - session.remainingCount;
 	const lapChunks = Math.max(1, Math.ceil(session.poolSize / EN_GUIDED_CHUNK_SIZE));
 	const lapChunk = Math.min(lapChunks, Math.max(1, Math.ceil(covered / EN_GUIDED_CHUNK_SIZE)));
@@ -157,28 +155,18 @@ export default function GuidedReviewSession({ initial, onClose }: { initial: Gui
 	const stepDone = session.phase === 'summary' ? stepTotal : session.phase === 'study' ? viewedWord : session.questionPosition;
 	const stepLabel = session.phase === 'study' ? `Xem thẻ ${viewedWord + 1}/${session.words.length}` : session.phase === 'summary' ? 'Kết quả chặng' : `${session.phase === 'retry' ? 'Luyện lại từ sai' : 'Luyện'} · câu ${Math.min(session.questionPosition + 1, session.questions.length)}/${session.questions.length}`;
 
-	return <div role="dialog" aria-modal="true" aria-label="Ôn theo bộ" className="fixed inset-0 z-overlay overflow-y-auto bg-background">
+	const inQuiz = ['quiz', 'retry'].includes(session.phase) && Boolean(shownQuestion);
+
+	return <div role="dialog" aria-modal="true" aria-label="Ôn theo bộ" className="fixed inset-0 z-overlay flex flex-col bg-background">
 		<SessionHeader label="Ôn theo bộ" progress={stepDone} total={stepTotal} onExit={leave} busy={busy} xpPop={xpPop} />
-		<div className="mx-auto flex min-h-full max-w-3xl flex-col px-4 py-4 sm:px-6 sm:py-7">
-			<div className="border-b border-border pb-3"><p className="text-xs font-bold uppercase tracking-wide text-accent">Chặng {lapChunk}/{lapChunks} · đã đi {covered}/{session.poolSize} từ</p><p className="font-bold">{stepLabel}</p></div>
+		{/* Keyed per card/question so a long card never leaves the next one scrolled halfway down. */}
+		<div key={`${session.phase}-${viewedWord}-${shownQuestion?.id ?? ''}`} className="min-h-0 flex-1 overflow-y-auto">
+			<div className="mx-auto max-w-2xl px-4 py-3 sm:py-5">
+				<div className="mb-3 flex items-baseline justify-between gap-3"><p className="font-bold">{stepLabel}</p><p className="shrink-0 text-xs font-bold uppercase tracking-wide text-accent">Chặng {lapChunk}/{lapChunks} · {covered}/{session.poolSize} từ</p></div>
 
-			<main className="flex flex-1 flex-col justify-center py-5">
-				{session.phase === 'study' && word && <div className="mode-card mx-auto w-full max-w-2xl p-5 sm:p-8">
-					<EnglishWordCard key={word.sense.id} bundle={word} />
-					<div className="mt-7 flex justify-between gap-3">
-						<button type="button" disabled={viewedWord === 0 || busy} onClick={() => setViewedWord((current) => current - 1)} className="min-h-11 rounded-control border border-border px-4 font-bold disabled:opacity-40">← Quay lại</button>
-						<button type="button" disabled={busy} onClick={() => void saveStudy(viewedWord + 1)} className="min-h-11 rounded-control bg-accent px-5 font-bold text-accent-foreground disabled:opacity-50">{viewedWord + 1 >= session.words.length ? 'Bắt đầu luyện →' : 'Từ tiếp theo →'}</button>
-					</div>
-				</div>}
+				{session.phase === 'study' && word && <div key={word.sense.id} className="mode-card p-4 sm:p-6"><EnglishWordCard bundle={word} /></div>}
 
-				{['quiz', 'retry'].includes(session.phase) && shownQuestion && <div className="mx-auto w-full max-w-2xl space-y-4">
-					<QuestionView key={shownQuestion.id} item={shownQuestion} disabled={busy} feedback={feedback} onAnswer={(value) => void answer(value)} audioText={questionWord?.word.lemma} recordedAudioAvailable={Boolean(questionWord && (questionWord.word.audioPath))} />
-					{feedback ? <AnswerFeedback correct={feedback.correct}>
-						{!feedback.correct && <p className="font-bold">Đáp án: {feedback.expected}</p>}
-						{questionWord && <><div className="flex items-center justify-between gap-2"><p className="font-bold">{questionWord.word.lemma} <span className="font-normal text-muted">{questionWord.word.ipa}</span></p><EnglishAudioButton compact senseId={questionWord.sense.id} lemma={questionWord.word.lemma} recordedAudioAvailable={Boolean(questionWord.word.audioPath)} /></div><p>{questionWord.sense.meaningVi}</p>{questionExample && <p className="text-sm text-muted">{questionExample.english.replace('___', questionExample.target)}<br />{questionExample.meaningVi}</p>}</>}
-						<button type="button" autoFocus onClick={continueAfterFeedback} className="min-h-11 w-full rounded-control bg-accent px-5 font-bold text-accent-foreground">Tiếp tục →</button>
-					</AnswerFeedback> : <button type="button" disabled={busy} onClick={() => void answer('')} className="min-h-11 w-full rounded-control border border-border px-4 font-bold">Chưa nhớ</button>}
-				</div>}
+				{inQuiz && shownQuestion && <QuestionView key={shownQuestion.id} item={shownQuestion} disabled={busy} feedback={feedback} onAnswer={(value) => void answer(value)} audioText={questionWord?.word.lemma} recordedAudioAvailable={Boolean(questionWord && (questionWord.word.audioPath))} />}
 
 				{session.phase === 'summary' && <SessionSummary title={`Hoàn thành chặng ${session.chunkNumber}`} correct={correctCount} total={session.mainResults.length} xp={sessionXp}>
 					<p className="text-center text-sm text-muted">Đã đi {covered}/{session.poolSize} từ trong các bộ đã chọn.</p>
@@ -189,9 +177,24 @@ export default function GuidedReviewSession({ initial, onClose }: { initial: Gui
 						<button type="button" disabled={busy} onClick={() => void finish()} className="min-h-12 rounded-control border border-border px-5 font-bold sm:col-span-2">Kết thúc phiên</button>
 					</div>
 				</SessionSummary>}
-			</main>
-			<ConfirmExitDialog open={confirmExit} title="Thoát Ôn theo bộ?" description="Chặng này sẽ không được lưu. Lần sau bạn bắt đầu lại với 5 từ mới." leaveLabel="Thoát" onStay={() => setConfirmExit(false)} onLeave={quit} />
-			{error && <div role="alert" className="sticky bottom-3 rounded-panel border border-error/40 bg-surface p-3 text-sm text-error">{error} <button type="button" onClick={() => setError('')} className="ml-2 font-bold underline">Đóng</button></div>}
+				{error && <div role="alert" className="mt-3 rounded-panel border border-error/40 bg-surface p-3 text-sm text-error">{error} <button type="button" onClick={() => setError('')} className="ml-2 font-bold underline">Đóng</button></div>}
+			</div>
 		</div>
+
+		{session.phase === 'study' && word && <SessionFooter>
+			<div className="flex gap-3">
+				<button type="button" disabled={viewedWord === 0 || busy} onClick={() => setViewedWord((current) => current - 1)} className="min-h-12 flex-1 rounded-control border border-border px-4 font-bold disabled:opacity-40">← Quay lại</button>
+				<button type="button" disabled={busy} onClick={() => void saveStudy(viewedWord + 1)} className="min-h-12 flex-[2] rounded-control bg-accent px-5 font-bold text-accent-foreground disabled:opacity-50">{viewedWord + 1 >= session.words.length ? 'Bắt đầu luyện →' : 'Từ tiếp theo →'}</button>
+			</div>
+		</SessionFooter>}
+
+		{/* Quiz feedback is only right/wrong and the right answer: the word was just studied on its card. */}
+		{inQuiz && <SessionFooter tone={feedback ? (feedback.correct ? 'correct' : 'wrong') : undefined}>
+			<ResultLine correct={feedback?.correct} expected={feedback?.expected} idle={shownQuestion?.activityKey === 'listen_type' ? 'Gõ từ bạn nghe được, hoặc bấm “Chưa nhớ”.' : 'Chọn đáp án, hoặc bấm “Chưa nhớ” nếu bạn quên.'} />
+			{feedback
+				? <button key="continue" type="button" autoFocus onClick={continueAfterFeedback} className="min-h-12 w-full rounded-control bg-accent px-5 font-bold text-accent-foreground">Tiếp tục →</button>
+				: <button key="skip" type="button" disabled={busy} onClick={() => void answer('')} className="min-h-12 w-full rounded-control border border-border bg-surface px-4 font-bold disabled:opacity-50">Chưa nhớ</button>}
+		</SessionFooter>}
+		<ConfirmExitDialog open={confirmExit} title="Thoát Ôn theo bộ?" description="Chặng này sẽ không được lưu. Lần sau bạn bắt đầu lại với 5 từ mới." leaveLabel="Thoát" onStay={() => setConfirmExit(false)} onLeave={quit} />
 	</div>;
 }
