@@ -5,7 +5,7 @@ import MaterialIcon from '@/components/ui/MaterialIcon';
 import EnglishAudioButton from '@/components/english/EnglishAudioButton';
 import AdvancedNotes from '@/components/english/advanced/AdvancedNotes';
 import WordFamily from '@/components/english/WordFamily';
-import { playEnglishAudio, stopEnglishAudio, type PlaybackState } from '@/lib/englishAudio';
+import { exampleAudioUrl, playEnglishAudio, stopEnglishAudio, type PlaybackState } from '@/lib/englishAudio';
 import { cardExampleOf, exampleParts, type BundleExample, type SenseBundle } from '@/lib/english/senseBundle';
 
 /** Shared pieces of a word card, so study, review feedback and the set list read the same way. */
@@ -20,7 +20,7 @@ function ExampleAudioButton({ example }: { example: BundleExample }) {
 	}, []);
 	const play = () => {
 		if (state === 'loading') return;
-		playEnglishAudio({ url: `/api/audio?exampleId=${encodeURIComponent(example.id)}`, text: example.english.replace(/_{3,}/, example.target), owner: owner.current, onState: setState });
+		playEnglishAudio({ url: exampleAudioUrl(example.id), text: example.english.replace(/_{3,}/, example.target), owner: owner.current, onState: setState });
 	};
 	const icon = state === 'loading' ? 'progress_activity' : state === 'playing' ? 'graphic_eq' : state === 'failed' ? 'volume_off' : 'volume_up';
 	return <button type="button" onClick={play} aria-busy={state === 'loading'} aria-label="Nghe câu ví dụ" title={state === 'failed' ? 'Không phát được — kiểm tra âm lượng/công tắc im lặng' : 'Nghe câu ví dụ'} className={`-mr-1 inline-flex size-9 shrink-0 items-center justify-center rounded-full hover:bg-surface-container hover:text-accent ${state === 'idle' ? 'text-muted' : 'text-accent'}`}><MaterialIcon name={icon} size={18} className={state === 'loading' ? 'animate-spin motion-reduce:animate-none' : ''} /></button>;

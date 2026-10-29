@@ -87,6 +87,31 @@ describe('synthesizeSpeech', () => {
 		expect(fs.readFileSync(calls, 'utf8').trim().split('\n')).toEqual(['first', 'tapped', 'third', 'second']);
 	});
 
+	it('keeps one worker with the voice loaded instead of starting Piper per word', async () => {
+		const starts = path.join(dir, 'starts.log');
+		// Stand-in for the Python worker: same line protocol, logs each start and request.
+		fs.writeFileSync(path.join(dir, 'python'), [
+			'#!/bin/sh',
+			`echo start >> "${starts}"`,
+			'echo \'{"ready": true}\'',
+			'while IFS= read -r line; do',
+			'  id=$(printf "%s" "$line" | sed -E \'s/.*"id":([0-9]+).*/\\1/\')',
+			'  out=$(printf "%s" "$line" | sed -E \'s/.*"out":"([^"]*)".*/\\1/\')',
+			'  text=$(printf "%s" "$line" | sed -E \'s/.*"text":"([^"]*)".*/\\1/\')',
+			`  echo "worker $text" >> "${calls}"`,
+			'  head -c 300 /dev/zero > "$out"',
+			'  echo "{\\"id\\": $id, \\"ok\\": true}"',
+			'done',
+			'',
+		].join('\n'), { mode: 0o755 });
+		const { synthesizeSpeech, prepareSpeechEngine } = await import('@/services/english/enTtsService');
+		await prepareSpeechEngine();
+		expect((await synthesizeSpeech('thirsty.'))?.bytes.length).toBe(300);
+		expect((await synthesizeSpeech('order.'))?.bytes.length).toBe(300);
+		expect(fs.readFileSync(calls, 'utf8').trim().split('\n')).toEqual(['worker thirsty.', 'worker order.']);
+		expect(fs.readFileSync(starts, 'utf8').trim().split('\n')).toEqual(['start']);
+	});
+
 	it('returns null when the voice is missing', async () => {
 		fs.rmSync(path.join(dir, 'voice.onnx.json'));
 		const { synthesizeSpeech, serverTtsAvailable } = await import('@/services/english/enTtsService');

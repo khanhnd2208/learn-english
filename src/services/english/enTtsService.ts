@@ -1,6 +1,7 @@
 import fs from 'fs';
 import path from 'path';
-import { spawn } from 'child_process';
+import { spawn, type ChildProcess } from 'child_process';
+import readline from 'readline';
 import { englishAudioRoot, normalizeTtsText, resolveAudioFile, ttsCacheName } from '@/lib/english/audioPath';
 
 /**
@@ -11,6 +12,12 @@ import { englishAudioRoot, normalizeTtsText, resolveAudioFile, ttsCacheName } fr
  */
 
 const SYNTH_TIMEOUT_MS = 20_000;
+/** Loading the voice takes ~5 s on the VPS; allow for a busy machine. */
+const WORKER_READY_TIMEOUT_MS = 60_000;
+/** An idle worker is closed to give its memory back; the next session starts it again. */
+const WORKER_IDLE_MS = 30 * 60_000;
+/** After the worker fails, use the one-shot Piper CLI for a while before trying again. */
+const WORKER_RETRY_MS = 5 * 60_000;
 
 type TtsConfig = { bin: string; model: string; root: string };
 
@@ -91,6 +98,105 @@ function enqueue(config: TtsConfig, text: string, file: string, priority: 'urgen
 	return done;
 }
 
+/**
+ * A long-lived Piper process (`scripts/piper_worker.py`) that keeps the voice loaded, so a word
+ * takes about 0.1 s instead of the ~5 s the CLI spends loading the voice for every request.
+ * Uses the Python next to `PIPER_BIN` (or `PIPER_PYTHON`); without it the CLI is used.
+ */
+type Worker = {
+	child: ChildProcess;
+	ready: Promise<boolean>;
+	pending: Map<number, (ok: boolean) => void>;
+	nextId: number;
+	idle: NodeJS.Timeout | null;
+};
+let worker: Worker | null = null;
+let workerFailedAt = 0;
+
+function stopWorker(target: Worker, failed: boolean) {
+	if (worker === target) worker = null;
+	if (failed) workerFailedAt = Date.now();
+	if (target.idle) clearTimeout(target.idle);
+	for (const settle of target.pending.values()) settle(false);
+	target.pending.clear();
+	if (target.child.exitCode === null) target.child.kill('SIGKILL');
+}
+
+async function startWorker(config: TtsConfig): Promise<Worker | null> {
+	if (worker) return worker;
+	if (Date.now() - workerFailedAt < WORKER_RETRY_MS) return null;
+	const python = process.env.PIPER_PYTHON?.trim() || path.join(path.dirname(config.bin), 'python');
+	const script = path.join(process.cwd(), 'scripts', 'piper_worker.py');
+	if (!await readable(python) || !await readable(script)) return null;
+	if (worker) return worker;
+	const child = spawn(python, [script, config.model], { stdio: ['pipe', 'pipe', 'pipe'] });
+	let markReady: (ok: boolean) => void = () => {};
+	const target: Worker = { child, ready: new Promise((settle) => { markReady = settle; }), pending: new Map(), nextId: 1, idle: null };
+	worker = target;
+	const readyTimer = setTimeout(() => {
+		console.error('[TTS] Piper worker did not load the voice in time');
+		markReady(false);
+		stopWorker(target, true);
+	}, WORKER_READY_TIMEOUT_MS);
+	let stderr = '';
+	child.stderr?.on('data', (chunk: Buffer) => { stderr = (stderr + chunk.toString()).slice(-2_000); });
+	child.on('error', (error) => {
+		console.error('[TTS] Piper worker could not start', error);
+		clearTimeout(readyTimer);
+		markReady(false);
+		stopWorker(target, true);
+	});
+	child.on('exit', (code) => {
+		clearTimeout(readyTimer);
+		markReady(false);
+		const expected = worker !== target;
+		if (!expected) console.error(`[TTS] Piper worker exited with ${code}`, stderr);
+		stopWorker(target, !expected);
+	});
+	readline.createInterface({ input: child.stdout! }).on('line', (line) => {
+		let message: { ready?: boolean; id?: number; ok?: boolean; error?: string };
+		try { message = JSON.parse(line); } catch { return; }
+		if (message.ready) {
+			clearTimeout(readyTimer);
+			markReady(true);
+			return;
+		}
+		if (typeof message.id !== 'number') return;
+		if (!message.ok) console.error('[TTS] Piper worker failed a request', message.error);
+		target.pending.get(message.id)?.(message.ok === true);
+		target.pending.delete(message.id);
+	});
+	return target;
+}
+
+/** Voice `text` into `output` with the worker. Null when the worker is not available. */
+async function workerSynthesize(config: TtsConfig, text: string, output: string): Promise<boolean | null> {
+	const target = await startWorker(config);
+	if (!target || !await target.ready || worker !== target) return null;
+	if (target.idle) clearTimeout(target.idle);
+	const id = target.nextId++;
+	const ok = await new Promise<boolean>((settle) => {
+		const timer = setTimeout(() => {
+			console.error('[TTS] Piper worker timed out');
+			stopWorker(target, true);
+		}, SYNTH_TIMEOUT_MS);
+		target.pending.set(id, (result) => { clearTimeout(timer); settle(result); });
+		target.child.stdin?.write(`${JSON.stringify({ id, text, out: output })}\n`);
+	});
+	if (worker === target) target.idle = setTimeout(() => stopWorker(target, false), WORKER_IDLE_MS).unref();
+	return ok;
+}
+
+/** Load the voice ahead of the first request, e.g. when a learner opens a page with audio. */
+export async function prepareSpeechEngine(): Promise<void> {
+	const config = ttsConfig();
+	if (!config || !await serverTtsAvailable()) return;
+	const target = await startWorker(config);
+	if (target && await target.ready && worker === target && !target.idle && target.pending.size === 0) {
+		target.idle = setTimeout(() => stopWorker(target, false), WORKER_IDLE_MS).unref();
+	}
+}
+
 function runPiper(config: TtsConfig, text: string, output: string): Promise<boolean> {
 	return new Promise((resolve) => {
 		const child = spawn(config.bin, ['-m', config.model, '-f', output], { stdio: ['pipe', 'ignore', 'pipe'] });
@@ -115,7 +221,7 @@ async function synthesizeTo(config: TtsConfig, text: string, file: string): Prom
 	await fs.promises.mkdir(path.dirname(file), { recursive: true });
 	const temp = `${file}.${process.pid}.${Date.now()}.tmp.wav`;
 	try {
-		const ok = await runPiper(config, text, temp);
+		const ok = await workerSynthesize(config, text, temp) || await runPiper(config, text, temp);
 		const size = ok ? (await fs.promises.stat(temp).catch(() => null))?.size ?? 0 : 0;
 		// A WAV header alone is 44 bytes; anything that small has no speech in it.
 		if (size <= 44) return false;
@@ -127,9 +233,8 @@ async function synthesizeTo(config: TtsConfig, text: string, file: string): Prom
 }
 
 /** Path of the cached WAV for `text`, synthesizing it first when missing. Null when TTS is off or fails. */
-async function speechFile(rawText: string, priority: 'urgent' | 'background'): Promise<string | null> {
+async function speechFile(rawText: string, priority: 'urgent' | 'background', config = ttsConfig()): Promise<string | null> {
 	const text = normalizeTtsText(rawText);
-	const config = ttsConfig();
 	if (!text || !config || !await serverTtsAvailable()) return null;
 	const file = resolveAudioFile(config.root, ttsCacheName(text, config.model));
 	if (!file) return null;
@@ -150,7 +255,9 @@ export async function synthesizeSpeech(rawText: string): Promise<{ bytes: Buffer
 
 /** Synthesize missing speech in the background, in order, so the learner's first tap plays at once. */
 export function warmSpeech(texts: string[]): void {
+	const config = ttsConfig();
+	if (!config) return;
 	void (async () => {
-		for (const text of new Set(texts)) await speechFile(text, 'background').catch(() => null);
+		for (const text of new Set(texts)) await speechFile(text, 'background', config).catch(() => null);
 	})();
 }

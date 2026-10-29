@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from 'react';
 import Button from '@/components/ui/Button';
 import MaterialIcon from '@/components/ui/MaterialIcon';
-import { playEnglishAudio, stopEnglishAudio, type PlaybackState } from '@/lib/englishAudio';
+import { playEnglishAudio, senseAudioUrl, stopEnglishAudio, type PlaybackState } from '@/lib/englishAudio';
 import { useServerTts } from '@/lib/useServerTts';
 
 /**
@@ -32,7 +32,7 @@ export default function EnglishAudioButton({
 	function play() {
 		if (state === 'loading') return;
 		// Only a server that said it cannot speak skips the file; unknown still tries it.
-		const url = recordedAudioAvailable || serverTts !== false ? `/api/audio?senseId=${encodeURIComponent(senseId)}` : null;
+		const url = recordedAudioAvailable || serverTts !== false ? senseAudioUrl(senseId) : null;
 		playEnglishAudio({ url, text: lemma, owner: owner.current, onState: setState });
 	}
 

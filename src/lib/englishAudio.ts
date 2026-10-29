@@ -14,6 +14,54 @@ export type PlaybackState = 'idle' | 'loading' | 'playing' | 'blocked' | 'failed
 const FILE_TIMEOUT_MS = 25_000;
 const SPEECH_START_TIMEOUT_MS = 4_000;
 
+/**
+ * Audio already downloaded for the session, as object URLs: a tap plays it with no network
+ * round trip. Downloads run one at a time in the order the learner will meet them.
+ */
+const PRELOAD_LIMIT = 80;
+const preloaded = new Map<string, string>();
+const preloadQueue: string[] = [];
+let preloading = false;
+
+async function drainPreloads() {
+	if (preloading) return;
+	preloading = true;
+	try {
+		for (let url = preloadQueue.shift(); url; url = preloadQueue.shift()) {
+			if (preloaded.has(url)) continue;
+			try {
+				const response = await fetch(url, { credentials: 'same-origin' });
+				if (!response.ok) continue;
+				preloaded.set(url, URL.createObjectURL(await response.blob()));
+				for (const [oldest, objectUrl] of preloaded) {
+					if (preloaded.size <= PRELOAD_LIMIT) break;
+					preloaded.delete(oldest);
+					URL.revokeObjectURL(objectUrl);
+				}
+			} catch {
+				// A failed preload only means the tap fetches the file itself.
+			}
+		}
+	} finally {
+		preloading = false;
+	}
+}
+
+/** Download these audio URLs in the background so the speaker buttons play at once. */
+export function preloadEnglishAudio(urls: string[]): void {
+	if (typeof window === 'undefined') return;
+	for (const url of urls) if (!preloaded.has(url) && !preloadQueue.includes(url)) preloadQueue.push(url);
+	void drainPreloads();
+}
+
+export function senseAudioUrl(senseId: string): string {
+	return `/api/audio?senseId=${encodeURIComponent(senseId)}`;
+}
+
+export function exampleAudioUrl(exampleId: string): string {
+	return `/api/audio?exampleId=${encodeURIComponent(exampleId)}`;
+}
+
 type Playback = { owner: object; stop: () => void };
 let current: Playback | null = null;
 
@@ -75,7 +123,7 @@ export function playEnglishAudio({ url, text, owner, onState }: {
 		speakText(text, owner, onState);
 		return;
 	}
-	const audio = new Audio(url);
+	const audio = new Audio(preloaded.get(url) ?? url);
 	audio.preload = 'auto';
 	let settled = false;
 	let timer: number | null = null;

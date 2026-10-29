@@ -12,6 +12,7 @@ import EnglishAudioButton from '@/components/english/EnglishAudioButton';
 import QuestionView, { type QuestionFeedback } from '@/components/english/quiz/QuestionView';
 import { answerLayout } from '@/lib/english/answerLayout';
 import { cardExampleOf } from '@/lib/english/senseBundle';
+import { useAudioPreload } from '@/lib/useAudioPreload';
 
 export type PracticeKind = QuizKind | 'mix';
 
@@ -28,6 +29,7 @@ export default function PracticeRunner({ detail, kind, seed }: { detail: English
 		return { rng: mulberry32(seed), bundles, pool: poolFromBundles(bundles) };
 	}, [detail.words, seed]);
 	const freshQueue = () => initialPracticeQueue(detail.words.filter((word) => (kind === 'mix' ? QUIZ_KINDS : [kind]).some((key) => quizItemFor(key, word.bundle, { pool: source.pool, rng: source.rng, allowSyntheticAudio: true }))).map((word) => word.bundle.sense.id));
+	useAudioPreload(source.bundles, { sentences: false });
 	const [run, setRun] = useState(0);
 	const [queue, setQueue] = useState<PracticeStep[]>(freshQueue);
 	const [index, setIndex] = useState(0);
