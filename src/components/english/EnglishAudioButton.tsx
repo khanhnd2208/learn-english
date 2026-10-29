@@ -3,11 +3,12 @@
 import { useEffect, useRef, useState } from 'react';
 import Button from '@/components/ui/Button';
 import MaterialIcon from '@/components/ui/MaterialIcon';
-import { classifyPlayError } from '@/lib/english/audioPlayback';
+import { audioFailureActive, classifyPlayError } from '@/lib/english/audioPlayback';
 import { useServerTts } from '@/lib/useServerTts';
 import { useSpeech } from '@/lib/useSpeech';
 
-const failedAudioSenses = new Set<string>();
+/** When each word's audio file last failed. Old failures expire so a deploy or a slow request never mutes a word for good. */
+const failedAudioSenses = new Map<string, number>();
 
 export default function EnglishAudioButton({
 	senseId,
@@ -35,8 +36,8 @@ export default function EnglishAudioButton({
 	const [failed, setFailed] = useState(false);
 	/** The browser blocked playback without a recent tap; the file itself is fine. */
 	const [needsTap, setNeedsTap] = useState(false);
-	/** The audio file for this word failed once; browser speech takes over. */
-	const [fileFailed, setFileFailed] = useState(failedAudioSenses.has(senseId));
+	/** The audio file for this word failed recently; browser speech takes over until the cooldown ends. */
+	const [fileFailed, setFileFailed] = useState(() => failedAudioSenses.has(senseId));
 	// A real file plays through the media channel, so it works where browser speech is silent
 	// (iOS silent switch, no English voice installed). Without a recording the server speaks the word.
 	const playFile = !fileFailed && (recordedAudioAvailable || serverTts !== false);
@@ -60,7 +61,13 @@ export default function EnglishAudioButton({
 		if (speaking || playing) { audio.current?.pause(); stop(); setPlaying(false); return; }
 		setFailed(false);
 		setNeedsTap(false);
-		if (ttsOnly) {
+		const stillFailed = audioFailureActive(failedAudioSenses.get(senseId), Date.now());
+		if (fileFailed && !stillFailed) {
+			failedAudioSenses.delete(senseId);
+			setFileFailed(false);
+		}
+		const tryFile = (recordedAudioAvailable || serverTts !== false) && !stillFailed;
+		if (!tryFile) {
 			if (!(allowTts && lemma && speak(lemma, 'en-US'))) setFailed(true);
 			return;
 		}
@@ -85,7 +92,7 @@ export default function EnglishAudioButton({
 		const fallback = () => {
 			if (fallbackStarted || audio.current !== element) return;
 			fallbackStarted = true;
-			failedAudioSenses.add(senseId);
+			failedAudioSenses.set(senseId, Date.now());
 			if (fallbackTimer.current !== null) window.clearTimeout(fallbackTimer.current);
 			fallbackTimer.current = null;
 			element.pause();
