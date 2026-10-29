@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Button from '@/components/ui/Button';
 import Link from 'next/link';
@@ -24,6 +24,26 @@ interface SetRow {
 	status: string;
 	items: number;
 	learners: number;
+}
+
+function AudioStatus({ setId }: { setId: string }) {
+	const [coverage, setCoverage] = useState<{ total: number; ready: number } | null>(null);
+	const [working, setWorking] = useState(false);
+	useEffect(() => {
+		let active = true;
+		void fetch(`/api/admin/audio?setId=${encodeURIComponent(setId)}`).then((response) => response.json()).then((body) => { if (active && body.ok) setCoverage(body.data); }).catch(() => undefined);
+		return () => { active = false; };
+	}, [setId]);
+	async function generate() {
+		setWorking(true);
+		try {
+			await fetch('/api/admin/audio', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ setId }) });
+			const response = await fetch(`/api/admin/audio?setId=${encodeURIComponent(setId)}`);
+			const body = await response.json();
+			if (body.ok) setCoverage(body.data);
+		} finally { setWorking(false); }
+	}
+	return <div className="flex items-center gap-2"><span className="text-xs text-muted">Audio: {coverage ? `${coverage.ready}/${coverage.total}` : '…'}</span><Button type="button" variant="secondary" disabled={working} onClick={() => void generate()}>Tạo audio</Button></div>;
 }
 
 export default function EnglishAdmin({ sets, qaEnabled, pendingAppeals }: { sets: SetRow[]; qaEnabled: boolean; pendingAppeals: number }) {
@@ -147,7 +167,7 @@ export default function EnglishAdmin({ sets, qaEnabled, pendingAppeals }: { sets
 								<p className="font-black">{set.title}</p>
 								<p className="text-xs text-muted">{set.status === 'draft' ? 'Bản nháp' : 'Đã xuất bản'} · {set.items} mục · {set.learners} người học</p>
 							</div>
-							<div className="flex flex-wrap gap-2 sm:justify-end"><Link href={`/store`} className="inline-flex min-h-10 items-center rounded-control border border-border px-4 text-xs font-bold">Quản lý trên cửa hàng</Link><Button type="button" variant="secondary" disabled={busy} onClick={() => void publish(set.id)}>{set.status === 'draft' ? 'Xuất bản' : 'Xuất bản lại'}</Button></div>
+							<div className="flex flex-wrap gap-2 sm:justify-end">{set.status === 'published' && <AudioStatus setId={set.id} />}<Link href={`/store`} className="inline-flex min-h-10 items-center rounded-control border border-border px-4 text-xs font-bold">Quản lý trên cửa hàng</Link><Button type="button" variant="secondary" disabled={busy} onClick={() => void publish(set.id)}>{set.status === 'draft' ? 'Xuất bản' : 'Xuất bản lại'}</Button></div>
 						</CardContent>
 					</Card>
 				))}

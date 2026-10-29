@@ -54,12 +54,20 @@ export function preloadEnglishAudio(urls: string[]): void {
 	void drainPreloads();
 }
 
+let chosenFormat: 'opus' | 'mp3' | null = null;
+export function preferredAudioFormat(): 'opus' | 'mp3' {
+	if (chosenFormat) return chosenFormat;
+	if (typeof Audio === 'undefined') return 'opus';
+	chosenFormat = new Audio().canPlayType('audio/ogg; codecs=opus') ? 'opus' : 'mp3';
+	return chosenFormat;
+}
+
 export function senseAudioUrl(senseId: string): string {
-	return `/api/audio?senseId=${encodeURIComponent(senseId)}`;
+	return `/api/audio?senseId=${encodeURIComponent(senseId)}${preferredAudioFormat() === 'mp3' ? '&format=mp3' : ''}`;
 }
 
 export function exampleAudioUrl(exampleId: string): string {
-	return `/api/audio?exampleId=${encodeURIComponent(exampleId)}`;
+	return `/api/audio?exampleId=${encodeURIComponent(exampleId)}${preferredAudioFormat() === 'mp3' ? '&format=mp3' : ''}`;
 }
 
 type Playback = { owner: object; stop: () => void };
@@ -123,7 +131,8 @@ export function playEnglishAudio({ url, text, owner, onState }: {
 		speakText(text, owner, onState);
 		return;
 	}
-	const audio = new Audio(preloaded.get(url) ?? url);
+	let audio = new Audio(preloaded.get(url) ?? url);
+	let retriedMp3 = false;
 	audio.preload = 'auto';
 	let settled = false;
 	let timer: number | null = null;
@@ -137,6 +146,16 @@ export function playEnglishAudio({ url, text, owner, onState }: {
 	const playback: Playback = { owner, stop: () => { clear(); audio.pause(); onState('idle'); } };
 	current = playback;
 	const fallback = () => {
+		if (!retriedMp3 && !url.includes('format=mp3') && url.startsWith('/api/audio?')) {
+			retriedMp3 = true;
+			audio.pause();
+			audio = new Audio(`${url}&format=mp3`);
+			audio.onerror = fallback;
+			audio.onplaying = () => { if (!settled) onState('playing'); };
+			audio.onended = () => { clear(); if (current === playback) current = null; onState('idle'); };
+			void audio.play().catch(() => fallback());
+			return;
+		}
 		if (settled || current !== playback) return;
 		clear();
 		audio.pause();

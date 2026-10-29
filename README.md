@@ -32,3 +32,7 @@ Point nginx or Caddy at port 3002 and terminate TLS there. Keep PostgreSQL and M
 ## Data migration
 
 See [`docs/migration.md`](docs/migration.md). Content can be copied independently because the `En*` schema has no relation to Chinese tables. Learner progress should only be copied together with MongoDB user IDs.
+
+### Audio prerequisites
+
+Local macOS: `brew install ffmpeg`. Production Docker installs ffmpeg in the runner image. `TTS_FORMAT=opus` is the default; set `TTS_FORMAT=wav` to use WAV, and `FFMPEG_BIN` to override the encoder path. When ffmpeg is unavailable, the server serves WAV. `TTS_SWEEP_ON_BOOT=1` queues published sets for audio preparation 60 seconds after the Node server starts. On a VPS, install ffmpeg and check available CPU before enabling the sweep.

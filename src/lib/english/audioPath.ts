@@ -67,7 +67,7 @@ export function spokenText(text: string): string {
 }
 
 /** Cache file for synthesized speech, keyed by the voice model and the exact text. */
-export function ttsCacheName(text: string, model: string): string {
+export function ttsCacheName(text: string, model: string, ext: 'ogg' | 'mp3' | 'wav' = 'ogg'): string {
 	const hash = createHash('sha256').update(`${path.basename(model)}\n${text}`).digest('hex').slice(0, 32);
-	return path.join('tts', `${hash}.wav`);
+	return path.join('tts', `${hash}.${ext}`);
 }

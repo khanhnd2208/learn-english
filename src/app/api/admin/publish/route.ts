@@ -1,5 +1,6 @@
 import { z } from 'zod';
 import { withAdmin, apiSuccess, apiError } from '@/lib/apiUtils';
+import { warmSet } from '@/services/english/enAudioService';
 import { publishEnglishSet } from '@/services/english/enContentService';
 
 const bodySchema = z.object({ setId: z.string().min(1) }).strict();
@@ -8,5 +9,6 @@ export const POST = withAdmin(async (request) => {
 	const parsed = bodySchema.safeParse(await request.json().catch(() => null));
 	if (!parsed.success) return apiError('Thiếu bộ học', 400);
 	const result = await publishEnglishSet(parsed.data.setId);
+	if (result.status === 'published') void warmSet(parsed.data.setId).catch((error) => console.error('[TTS] warm set failed', error));
 	return apiSuccess(result);
 });

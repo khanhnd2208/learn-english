@@ -32,7 +32,8 @@ describe('spokenText', () => {
 describe('ttsCacheName', () => {
 	it('stays inside the tts folder and depends on voice and text', () => {
 		const name = ttsCacheName('intensity', '/opt/piper/en_US-lessac-medium.onnx');
-		expect(name).toMatch(/^tts[/\\][0-9a-f]{32}\.wav$/);
+		expect(name).toMatch(/^tts[/\\][0-9a-f]{32}\.ogg$/);
+		expect(ttsCacheName('intensity', '/opt/piper/en_US-lessac-medium.onnx', 'wav')).toBe(name.replace('.ogg', '.wav'));
 		expect(ttsCacheName('intensity', '/other/en_US-lessac-medium.onnx')).toBe(name);
 		expect(ttsCacheName('intensity', '/opt/piper/en_US-amy-low.onnx')).not.toBe(name);
 		expect(ttsCacheName('intense', '/opt/piper/en_US-lessac-medium.onnx')).not.toBe(name);
@@ -55,6 +56,7 @@ describe('synthesizeSpeech', () => {
 		vi.stubEnv('PIPER_BIN', bin);
 		vi.stubEnv('PIPER_MODEL', model);
 		vi.stubEnv('ENGLISH_AUDIO_ROOT', path.join(dir, 'audio'));
+		vi.stubEnv('TTS_FORMAT', 'wav');
 		vi.resetModules();
 	});
 
@@ -117,5 +119,20 @@ describe('synthesizeSpeech', () => {
 		const { synthesizeSpeech, serverTtsAvailable } = await import('@/services/english/enTtsService');
 		expect(await serverTtsAvailable()).toBe(false);
 		expect(await synthesizeSpeech('intensity')).toBeNull();
+	});
+});
+
+describe('Opus fallback without ffmpeg', () => {
+	it('continues to serve a WAV when the encoder is unavailable', async () => {
+		const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'en-tts-fallback-'));
+		try {
+			const bin = path.join(dir, 'piper');
+			fs.writeFileSync(bin, '#!/bin/sh\nwhile [ "$#" -gt 0 ]; do if [ "$1" = "-f" ]; then out="$2"; fi; shift; done\nhead -c 200 /dev/zero > "$out"\n', { mode: 0o755 });
+			const model = path.join(dir, 'voice.onnx'); fs.writeFileSync(model, ''); fs.writeFileSync(`${model}.json`, '{}');
+			vi.stubEnv('PIPER_BIN', bin); vi.stubEnv('PIPER_MODEL', model); vi.stubEnv('ENGLISH_AUDIO_ROOT', path.join(dir, 'audio'));
+			vi.stubEnv('FFMPEG_BIN', '/nonexistent'); vi.stubEnv('TTS_FORMAT', 'opus'); vi.resetModules();
+			const { synthesizeSpeech } = await import('@/services/english/enTtsService');
+			expect((await synthesizeSpeech('hello'))?.type).toBe('audio/wav');
+		} finally { vi.unstubAllEnvs(); fs.rmSync(dir, { recursive: true, force: true }); }
 	});
 });
