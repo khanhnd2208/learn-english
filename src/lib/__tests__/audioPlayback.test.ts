@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { AUDIO_FAILURE_COOLDOWN_MS, audioFailureActive, classifyPlayError, parseServerTtsStatus, pickSpeechVoice } from '@/lib/english/audioPlayback';
+import { classifyPlayError, parseServerTtsStatus, pickSpeechVoice } from '@/lib/english/audioPlayback';
 
 describe('classifyPlayError', () => {
 	it('treats an autoplay block as blocked, not broken', () => {
@@ -26,14 +26,6 @@ describe('parseServerTtsStatus', () => {
 		expect(parseServerTtsStatus(true, null)).toBeNull();
 		expect(parseServerTtsStatus(true, { ok: false, error: 'Unauthorized' })).toBeNull();
 		expect(parseServerTtsStatus(true, { ok: true, data: {} })).toBeNull();
-	});
-});
-
-describe('audioFailureActive', () => {
-	it('keeps a fresh failure and lets an old one expire', () => {
-		expect(audioFailureActive(undefined, 1_000)).toBe(false);
-		expect(audioFailureActive(1_000, 1_000 + AUDIO_FAILURE_COOLDOWN_MS - 1)).toBe(true);
-		expect(audioFailureActive(1_000, 1_000 + AUDIO_FAILURE_COOLDOWN_MS)).toBe(false);
 	});
 });
 

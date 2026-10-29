@@ -56,6 +56,16 @@ export function normalizeTtsText(text: string): string {
 	return clean.length > 0 && clean.length <= TTS_MAX_CHARS ? clean : '';
 }
 
+/**
+ * Text as the voice should read it: always a finished statement. A bare word ("thirsty")
+ * can end on a level, unfinished pitch; with a full stop it gets the natural falling ending
+ * of a dictionary reading. Stress itself comes from the voice's phoneme dictionary.
+ */
+export function spokenText(text: string): string {
+	const clean = text.trim();
+	return !clean || /[.!?…]["'”’)]*$/.test(clean) ? clean : `${clean}.`;
+}
+
 /** Cache file for synthesized speech, keyed by the voice model and the exact text. */
 export function ttsCacheName(text: string, model: string): string {
 	const hash = createHash('sha256').update(`${path.basename(model)}\n${text}`).digest('hex').slice(0, 32);

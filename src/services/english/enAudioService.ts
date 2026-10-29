@@ -1,8 +1,9 @@
 import fs from 'fs';
 import { prisma } from '@/lib/prisma';
 import { AppError } from '@/lib/appError';
-import { audioContentType, englishAudioRoot, resolveAudioFile } from '@/lib/english/audioPath';
-import { synthesizeSpeech } from '@/services/english/enTtsService';
+import { audioContentType, englishAudioRoot, resolveAudioFile, spokenText } from '@/lib/english/audioPath';
+import { cardExampleOf, type SenseBundle } from '@/lib/english/senseBundle';
+import { synthesizeSpeech, warmSpeech } from '@/services/english/enTtsService';
 
 export async function audioFileExists(relativeName: string): Promise<boolean> {
 	const root = englishAudioRoot();
@@ -50,7 +51,7 @@ export async function readEnglishAudio(query: {
 		});
 		const audioName = sense?.word.audioPath || '';
 		// A recorded file wins; otherwise the server speaks the word itself.
-		const file = sense ? await readInsideRoot(audioName) ?? await synthesizeSpeech(sense.word.lemma) : null;
+		const file = sense ? await readInsideRoot(audioName) ?? await synthesizeSpeech(spokenText(sense.word.lemma)) : null;
 		if (!file) throw new AppError('Chưa có audio cho từ này', 404);
 		return file;
 	}
@@ -59,9 +60,24 @@ export async function readEnglishAudio(query: {
 			where: { id: query.exampleId, status: 'published', sense: audibleSense(viewer) },
 			select: { english: true, target: true },
 		});
-		const file = example ? await synthesizeSpeech(example.english.replace('___', example.target)) : null;
+		const file = example ? await synthesizeSpeech(exampleSpeechText(example)) : null;
 		if (!file) throw new AppError('Chưa có audio cho câu ví dụ', 404);
 		return file;
 	}
 	throw new AppError('Thiếu nội dung audio', 400);
+}
+
+function exampleSpeechText(example: { english: string; target: string }): string {
+	return spokenText(example.english.replace('___', example.target));
+}
+
+/** Prepare the word and card sentence of each bundle, in study order, before the learner taps them. */
+export function warmBundleSpeech(bundles: SenseBundle[]): void {
+	warmSpeech(bundles.flatMap((bundle) => {
+		const example = cardExampleOf(bundle.examples);
+		return [
+			...(bundle.word.audioPath.trim() ? [] : [spokenText(bundle.word.lemma)]),
+			...(example ? [exampleSpeechText(example)] : []),
+		];
+	}));
 }

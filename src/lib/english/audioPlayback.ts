@@ -21,14 +21,6 @@ export function parseServerTtsStatus(responseOk: boolean, body: unknown): boolea
 	return data.serverTts;
 }
 
-/** How long a word whose audio file just failed goes straight to browser speech before the file is tried again. */
-export const AUDIO_FAILURE_COOLDOWN_MS = 60_000;
-
-/** Whether a failure recorded at `failedAt` still keeps the word on browser speech at `now`. */
-export function audioFailureActive(failedAt: number | undefined, now: number): boolean {
-	return failedAt !== undefined && now - failedAt < AUDIO_FAILURE_COOLDOWN_MS;
-}
-
 type VoiceLike = { lang: string; localService: boolean };
 
 /**

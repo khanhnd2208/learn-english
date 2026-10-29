@@ -44,9 +44,52 @@ export async function serverTtsAvailable(): Promise<boolean> {
 	return value;
 }
 
-/** One Piper process at a time keeps the CPU and memory of the shared VPS predictable. */
-let queue: Promise<unknown> = Promise.resolve();
-const inFlight = new Map<string, Promise<boolean>>();
+/**
+ * One Piper process at a time keeps the CPU and memory of the shared VPS predictable.
+ * A learner's tap goes ahead of background warm-up, so warming a whole chunk never delays it.
+ */
+type Job = { config: TtsConfig; text: string; file: string; done: Promise<boolean>; resolve: (ok: boolean) => void };
+const urgent: Job[] = [];
+const background: Job[] = [];
+const jobs = new Map<string, Job>();
+let running = false;
+
+async function pump(): Promise<void> {
+	if (running) return;
+	running = true;
+	try {
+		for (let job = urgent.shift() ?? background.shift(); job; job = urgent.shift() ?? background.shift()) {
+			const ok = await synthesizeTo(job.config, job.text, job.file).catch((error: unknown) => {
+				console.error('[TTS] Synthesis failed', error);
+				return false;
+			});
+			jobs.delete(job.file);
+			job.resolve(ok);
+		}
+	} finally {
+		running = false;
+	}
+}
+
+/** Queue synthesis of `file`, or join the job already queued for it. An urgent request moves a waiting background job to the front. */
+function enqueue(config: TtsConfig, text: string, file: string, priority: 'urgent' | 'background'): Promise<boolean> {
+	const queued = jobs.get(file);
+	if (queued) {
+		const waiting = background.indexOf(queued);
+		if (priority === 'urgent' && waiting >= 0) {
+			background.splice(waiting, 1);
+			urgent.push(queued);
+		}
+		return queued.done;
+	}
+	let resolve: (ok: boolean) => void = () => {};
+	const done = new Promise<boolean>((settle) => { resolve = settle; });
+	const job: Job = { config, text, file, done, resolve };
+	jobs.set(file, job);
+	(priority === 'urgent' ? urgent : background).push(job);
+	void pump();
+	return done;
+}
 
 function runPiper(config: TtsConfig, text: string, output: string): Promise<boolean> {
 	return new Promise((resolve) => {
@@ -83,30 +126,31 @@ async function synthesizeTo(config: TtsConfig, text: string, file: string): Prom
 	}
 }
 
-/** Speech for `text` as a WAV file, synthesized on first use and cached. Null when TTS is off or fails. */
-export async function synthesizeSpeech(rawText: string): Promise<{ bytes: Buffer; type: string } | null> {
+/** Path of the cached WAV for `text`, synthesizing it first when missing. Null when TTS is off or fails. */
+async function speechFile(rawText: string, priority: 'urgent' | 'background'): Promise<string | null> {
 	const text = normalizeTtsText(rawText);
 	const config = ttsConfig();
 	if (!text || !config || !await serverTtsAvailable()) return null;
 	const file = resolveAudioFile(config.root, ttsCacheName(text, config.model));
 	if (!file) return null;
+	if (await readable(file)) return file;
+	return await enqueue(config, text, file, priority) ? file : null;
+}
 
-	if (!await readable(file)) {
-		let job = inFlight.get(file);
-		if (!job) {
-			job = queue.then(() => synthesizeTo(config, text, file)).catch((error: unknown) => {
-				console.error('[TTS] Synthesis failed', error);
-				return false;
-			});
-			queue = job;
-			inFlight.set(file, job);
-			void job.finally(() => inFlight.delete(file));
-		}
-		if (!await job) return null;
-	}
+/** Speech for `text` as a WAV file, synthesized on first use and cached. Null when TTS is off or fails. */
+export async function synthesizeSpeech(rawText: string): Promise<{ bytes: Buffer; type: string } | null> {
+	const file = await speechFile(rawText, 'urgent');
+	if (!file) return null;
 	try {
 		return { bytes: await fs.promises.readFile(file), type: 'audio/wav' };
 	} catch {
 		return null;
 	}
+}
+
+/** Synthesize missing speech in the background, in order, so the learner's first tap plays at once. */
+export function warmSpeech(texts: string[]): void {
+	void (async () => {
+		for (const text of new Set(texts)) await speechFile(text, 'background').catch(() => null);
+	})();
 }

@@ -8,6 +8,7 @@ import { shiftVnDay, vnDayKey, vnWeekDays } from '@/lib/english/gapRule';
 import { streakStats } from '@/lib/english/streak';
 import { pacedEnough, reviewXpEvents } from '@/lib/english/xp';
 import { type SenseBundle } from '@/lib/english/senseBundle';
+import { warmBundleSpeech } from '@/services/english/enAudioService';
 import { getSenseBundles } from '@/services/english/enContentService';
 import { answerLayout, type AnswerLayout } from '@/lib/english/answerLayout';
 import { hintFor } from '@/lib/english/srsPrompt';
@@ -112,6 +113,7 @@ export async function startToday(userId: string, now = new Date()) {
 	});
 	const bundles = await getSenseBundles(senseIds, true);
 	const bySense = new Map(bundles.map((bundle) => [bundle.sense.id, bundle]));
+	warmBundleSpeech(senseIds.flatMap((senseId) => bySense.get(senseId) ?? []));
 	const items = queue.flatMap((item): DailyItem[] => {
 		const senseId = item.kind === 'new' ? item.senseId : item.state.senseId;
 		const bundle = bySense.get(senseId);

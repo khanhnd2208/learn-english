@@ -7,6 +7,7 @@ import { buildGuidedQuestions, buildRetryQuestion, weightedOrder, type ReviewHis
 import { vnDayKey } from '@/lib/english/gapRule';
 import { vnDayStart } from '@/lib/english/schedule';
 import { pacedEnough, XP } from '@/lib/english/xp';
+import { warmBundleSpeech } from '@/services/english/enAudioService';
 import { getSenseBundles } from '@/services/english/enContentService';
 
 type QuestionRow = {
@@ -109,6 +110,7 @@ async function serializeSession(userId: string, sessionId: string) {
 		orderBy: [{ kind: 'asc' }, { position: 'asc' }],
 	});
 	const bundles = await getSenseBundles(session.currentChunkSenseIds, true);
+	if (!session.endedAt) warmBundleSpeech(bundles);
 	const main = questions.filter((question) => question.kind === 'main');
 	const retry = questions.filter((question) => question.kind === 'retry');
 	return {
@@ -189,7 +191,10 @@ export async function startGuidedReview(userId: string, setIds: string[]) {
 		throw cause;
 	}
 	await prisma.enReviewPreference.upsert({ where: { userId }, create: { userId, selectedSetIds: selected }, update: { selectedSetIds: selected } });
-	return serializeSession(userId, session.id);
+	const serialized = await serializeSession(userId, session.id);
+	// After the current chunk, prepare the rest of the selection in the order it will be studied.
+	void getSenseBundles(order, true).then(warmBundleSpeech).catch(() => undefined);
+	return serialized;
 }
 
 async function activeSession(userId: string, sessionId: string) {

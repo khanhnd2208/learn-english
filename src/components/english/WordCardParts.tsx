@@ -1,24 +1,29 @@
 'use client';
 
+import { useEffect, useRef, useState } from 'react';
 import MaterialIcon from '@/components/ui/MaterialIcon';
 import EnglishAudioButton from '@/components/english/EnglishAudioButton';
 import AdvancedNotes from '@/components/english/advanced/AdvancedNotes';
 import WordFamily from '@/components/english/WordFamily';
+import { playEnglishAudio, stopEnglishAudio, type PlaybackState } from '@/lib/englishAudio';
 import { cardExampleOf, exampleParts, type BundleExample, type SenseBundle } from '@/lib/english/senseBundle';
 
 /** Shared pieces of a word card, so study, review feedback and the set list read the same way. */
 function ipaOf(bundle: SenseBundle): string { const ipa = bundle.word.ipa.trim(); return ipa ? (ipa.startsWith('/') ? ipa : `/${ipa}/`) : ''; }
 
-function playSentence(example: BundleExample) {
-	const text = example.english.replace(/_{3,}/, example.target);
-	const audio = new Audio(`/api/audio?exampleId=${encodeURIComponent(example.id)}`);
-	audio.play().catch(() => {
-		if (typeof window === 'undefined' || !('speechSynthesis' in window)) return;
-		const utterance = new SpeechSynthesisUtterance(text);
-		utterance.lang = 'en-US';
-		window.speechSynthesis.cancel();
-		window.speechSynthesis.speak(utterance);
-	});
+function ExampleAudioButton({ example }: { example: BundleExample }) {
+	const [state, setState] = useState<PlaybackState>('idle');
+	const owner = useRef({});
+	useEffect(() => {
+		const self = owner.current;
+		return () => stopEnglishAudio(self);
+	}, []);
+	const play = () => {
+		if (state === 'loading') return;
+		playEnglishAudio({ url: `/api/audio?exampleId=${encodeURIComponent(example.id)}`, text: example.english.replace(/_{3,}/, example.target), owner: owner.current, onState: setState });
+	};
+	const icon = state === 'loading' ? 'progress_activity' : state === 'playing' ? 'graphic_eq' : state === 'failed' ? 'volume_off' : 'volume_up';
+	return <button type="button" onClick={play} aria-busy={state === 'loading'} aria-label="Nghe câu ví dụ" title={state === 'failed' ? 'Không phát được — kiểm tra âm lượng/công tắc im lặng' : 'Nghe câu ví dụ'} className={`-mr-1 inline-flex size-9 shrink-0 items-center justify-center rounded-full hover:bg-surface-container hover:text-accent ${state === 'idle' ? 'text-muted' : 'text-accent'}`}><MaterialIcon name={icon} size={18} className={state === 'loading' ? 'animate-spin motion-reduce:animate-none' : ''} /></button>;
 }
 
 function Example({ example }: { example: BundleExample }) {
@@ -28,7 +33,7 @@ function Example({ example }: { example: BundleExample }) {
 			<p className="text-[15px] leading-relaxed text-foreground">{parts ? <>{parts.before}<mark className="rounded bg-accent-subtle px-0.5 font-bold text-accent">{parts.answer}</mark>{parts.after}</> : example.english}</p>
 			{example.meaningVi && <p className="mt-1 text-sm text-muted">{example.meaningVi}</p>}
 		</div>
-		<button type="button" onClick={() => playSentence(example)} aria-label="Nghe câu ví dụ" className="-mr-1 inline-flex size-9 shrink-0 items-center justify-center rounded-full text-muted hover:bg-surface-container hover:text-accent"><MaterialIcon name="volume_up" size={18} /></button>
+		<ExampleAudioButton example={example} />
 	</div>;
 }
 
