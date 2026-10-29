@@ -1,9 +1,10 @@
+import { Prisma } from '@prisma/client';
 import { createHash, timingSafeEqual } from 'node:crypto';
 import { prisma } from '@/lib/prisma';
 import { AppError } from '@/lib/appError';
 import { getSenseBundles } from '@/services/english/enContentService';
 import { EN_LOCKED_PREVIEW_WORDS } from '@/lib/english/constants';
-import { countStages, isLongTerm } from '@/lib/english/schedule';
+import { countStages } from '@/lib/english/schedule';
 import type { SenseBundle } from '@/lib/english/senseBundle';
 
 export interface EnglishSetSummary {
@@ -52,38 +53,29 @@ export async function listEnglishSets(userId: string, includeDrafts: boolean, op
 	const sets = await prisma.enSet.findMany({
 		where: { ...(includeDrafts ? {} : { status: 'published' }), ...(opts.storeOnly ? { listed: true } : {}) },
 		orderBy: [{ sortOrder: 'asc' }, { title: 'asc' }],
-		include: {
-			items: { select: { senseId: true, sense: { select: { status: true } } } },
-			enrollments: { where: { userId }, select: { id: true } },
-		_count: { select: { enrollments: true } },
-		},
+		select: { id: true, title: true, description: true, status: true, listed: true, accessCode: true,
+			enrollments: { where: { userId }, select: { id: true } }, _count: { select: { enrollments: true } } },
 	});
-	const visible = (item: (typeof sets)[number]['items'][number]) => (
-		item.senseId && (includeDrafts || item.sense?.status === 'published') ? [item.senseId] : []
-	);
-	const senseIds = sets.flatMap((set) => set.items.flatMap(visible));
-	const states = await (
-		senseIds.length === 0
-			? []
-			: prisma.enWordState.findMany({ where: { userId, senseId: { in: senseIds } }, select: { senseId: true, box: true, dueAt: true } })
-	);
-	const boxOf = new Map(states.map((state) => [state.senseId, state.box]));
-	const stateOf = new Map(states.map((state) => [state.senseId, state]));
+	const setIds = sets.map((set) => set.id);
+	if (!setIds.length) return [];
+	// The legacy view counts items, including a sense repeated within a set.
+	const counts = await prisma.$queryRaw<Array<{ setId: string; words: number; learned: number; longTerm: number; learning: number; remembering: number; dueToday: number }>>(Prisma.sql`
+		SELECT i."setId", count(i."senseId")::int AS words,
+		count(i."senseId") FILTER (WHERE ws."box" >= 1)::int AS learned,
+		count(i."senseId") FILTER (WHERE ws."box" >= 4)::int AS "longTerm",
+		count(i."senseId") FILTER (WHERE ws."box" = 1)::int AS learning,
+		count(i."senseId") FILTER (WHERE ws."box" IN (2, 3))::int AS remembering,
+		count(i."senseId") FILTER (WHERE ws."box" >= 1 AND ws."dueAt" <= ${now})::int AS "dueToday"
+		FROM "EnSetItem" i JOIN "EnSense" se ON se."id" = i."senseId" ${includeDrafts ? Prisma.empty : Prisma.sql`AND se."status" = 'published'`}
+		LEFT JOIN "EnWordState" ws ON ws."senseId" = i."senseId" AND ws."userId" = ${userId}
+		WHERE i."setId" = ANY(${setIds}::text[]) GROUP BY i."setId"`);
+	const bySet = new Map(counts.map((row) => [row.setId, row]));
 	return sets.map((set) => {
-		const published = set.items.flatMap(visible);
-		return {
-			id: set.id,
-			title: set.title,
-			description: set.description,
-			status: set.status,
-			words: published.length,
-			enrolled: set.enrollments.length > 0,
-			learned: published.filter((id) => (boxOf.get(id) ?? 0) >= 1).length,
-			longTerm: published.filter((id) => isLongTerm(boxOf.get(id) ?? 0)).length,
-			stages: countStages(published.map((id) => boxOf.get(id))),
-			dueToday: published.filter((id) => { const state = stateOf.get(id); return state && state.box >= 1 && state.dueAt <= now; }).length,
-			locked: set.accessCode != null,
-			listed: set.listed,
+		const row = bySet.get(set.id) ?? { words: 0, learned: 0, longTerm: 0, learning: 0, remembering: 0, dueToday: 0 };
+		return { id: set.id, title: set.title, description: set.description, status: set.status,
+			words: row.words, enrolled: set.enrollments.length > 0, learned: row.learned, longTerm: row.longTerm,
+			stages: { new: row.words - row.learning - row.remembering - row.longTerm, learning: row.learning, remembering: row.remembering, longTerm: row.longTerm },
+			dueToday: row.dueToday, locked: set.accessCode != null, listed: set.listed,
 			...(includeDrafts ? { accessCode: set.accessCode, learners: set._count.enrollments } : {}),
 		};
 	});
