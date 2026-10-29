@@ -19,6 +19,8 @@ export const viewport: Viewport = {
 	width: 'device-width',
 	initialScale: 1,
 	viewportFit: 'cover',
+	// Android keeps the pinned session buttons above the on-screen keyboard.
+	interactiveWidget: 'resizes-content',
 	themeColor: '#fbf2e8',
 };
 

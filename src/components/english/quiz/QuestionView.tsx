@@ -29,22 +29,22 @@ function Prompt({ item, audioText, recordedAudioAvailable }: {
 	if (item.activityKey === 'listen_type') {
 		return <>
 			<div className="flex justify-center"><EnglishAudioButton key={item.position} compact autoPlay senseId={audio.senseId} lemma={audio.lemma} recordedAudioAvailable={audio.recordedAudioAvailable} /></div>
-			<p className="mt-3 text-sm text-muted">Nghe và gõ lại từ tiếng Anh</p><p className="mt-2 text-sm text-muted">{text(prompt.meaningVi)}</p>
+			<p className="mt-2 text-sm text-muted">Nghe và gõ lại từ tiếng Anh</p><p className="mt-1 text-sm text-muted">{text(prompt.meaningVi)}</p>
 		</>;
 	}
 	if (item.activityKey === 'cloze_choice') {
 		return <>
 			<p className="text-sm text-muted">Chọn từ còn thiếu</p>
-			<p className="mt-3 text-2xl font-bold">{text(prompt.before)} ____ {text(prompt.after)}</p>
+			<p className="mt-2 text-xl font-bold leading-snug sm:text-2xl">{text(prompt.before)} ____ {text(prompt.after)}</p>
 			<p className="mt-2 text-sm text-muted">{text(prompt.meaningVi)}</p>
 		</>;
 	}
 	if (item.activityKey === 'meaning_choice') {
 		return <>
 			<p className="text-sm text-muted">Chọn nghĩa đúng</p>
-			<p role="heading" aria-level={2} className="mt-3 text-4xl font-black">{text(prompt.lemma)}</p>
+			<p role="heading" aria-level={2} className="mt-2 text-3xl font-black sm:text-4xl">{text(prompt.lemma)}</p>
 			{text(prompt.ipa) && <p className="mt-1 font-mono text-sm text-muted">{text(prompt.ipa)}</p>}
-			<div className="mt-3 flex justify-center"><EnglishAudioButton compact senseId={audio.senseId} lemma={audio.lemma} recordedAudioAvailable={audio.recordedAudioAvailable} /></div>
+			<div className="mt-2 flex justify-center"><EnglishAudioButton compact senseId={audio.senseId} lemma={audio.lemma} recordedAudioAvailable={audio.recordedAudioAvailable} /></div>
 		</>;
 	}
 	return <p>Câu hỏi này không còn được hỗ trợ</p>;
@@ -94,7 +94,7 @@ export default function QuestionView({
 		return option === feedback.answer ? 'wrong' : undefined;
 	};
 
-	return <div className="space-y-6 rounded-panel border border-border bg-surface p-5 sm:p-8">
+	return <div className="space-y-4 rounded-panel border border-border bg-surface p-4 sm:p-6">
 		<div className="text-center"><Prompt item={item} audioText={audioText} recordedAudioAvailable={recordedAudioAvailable} /></div>
 		{!['meaning_choice', 'cloze_choice', 'listen_type'].includes(item.activityKey) ? null : isChoice
 			? <div className="grid gap-2">
