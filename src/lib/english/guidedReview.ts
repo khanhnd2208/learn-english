@@ -24,6 +24,7 @@ export function weightedOrder(senseIds: string[], histories: ReviewHistory[], rn
 
 export const REVIEW_KEYS: ActivityKey[] = ['meaning_choice', 'cloze_choice', 'listen_type'];
 export type GuidedQuestionMode = 'mix' | ActivityKey;
+export const GUIDED_MODE_LABEL: Record<string, string> = { mix: 'Trộn lẫn', meaning_choice: 'Chọn nghĩa', cloze_choice: 'Điền câu', listen_type: 'Nghe viết' };
 function buildOne(bundle: SenseBundle, pool: DistractorPool, keys: ActivityKey[], rng: Rng): GuidedQuestion | null {
  for (const key of keys) {
   const item = activityByKey(key)?.build(bundle, { pool, rng, allowSyntheticAudio: true });
