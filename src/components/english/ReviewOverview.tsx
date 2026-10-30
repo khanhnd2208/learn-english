@@ -9,10 +9,9 @@ import Checkbox from '@/components/ui/Checkbox';
 import { englishPost } from '@/components/english/englishApi';
 import InfoHint from '@/components/ui/InfoHint';
 import AdvancedToggle from '@/components/english/advanced/AdvancedToggle';
-import Radio from '@/components/ui/Radio';
 import MaterialIcon from '@/components/ui/MaterialIcon';
 import SetWordListDialog from '@/components/english/SetWordListDialog';
-import type { GuidedQuestionMode } from '@/lib/english/guidedReview';
+import { GUIDED_MODE_LABEL, type GuidedQuestionMode } from '@/lib/english/guidedReview';
 import { EN_GUIDED_CHUNK_SIZE } from '@/lib/english/constants';
 import { HINTS } from '@/lib/english/hintCopy';
 import type { TodayOverview } from '@/services/english/enDailyService';
@@ -23,6 +22,13 @@ export type GuidedReviewOverview = {
 	uniqueWords: number;
 	practicedToday: number;
 };
+
+const QUESTION_MODES: Array<[GuidedQuestionMode, string, string]> = [
+	['mix', 'shuffle', 'Kết hợp chọn nghĩa, điền câu và nghe viết.'],
+	['meaning_choice', 'translate', 'Nhìn từ tiếng Anh và chọn nghĩa đúng.'],
+	['cloze_choice', 'edit_note', 'Chọn từ đúng để điền vào câu.'],
+	['listen_type', 'headphones', 'Nghe phát âm và gõ từ bạn nghe được.'],
+];
 
 const solidButton = 'min-h-12 w-full rounded-control bg-accent px-5 font-bold text-accent-foreground disabled:opacity-50';
 
@@ -94,7 +100,7 @@ export default function ReviewOverview({ overview, guided: initial, mode }: { ov
 				{guided.sets.length > 8 && <input value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Tìm bộ từ…" aria-label="Tìm bộ từ" className="mb-2 min-h-11 w-full rounded-control border border-border bg-background px-3 text-sm" />}
 				<div className="max-h-60 overflow-y-auto divide-y divide-border" aria-label="Chọn bộ từ để học">
 					<Checkbox label="Tất cả" checked={allSelected} disabled={busy} onChange={() => saveSelection(allSelected ? [] : allSetIds)} className="w-full px-2 font-bold" />
-					{filtered.map((set) => <div key={set.id} className="flex items-center justify-between gap-2"><Checkbox label={set.title} checked={selected.has(set.id)} disabled={busy} onChange={() => saveSelection(selected.has(set.id) ? guided.selectedSetIds.filter((id) => id !== set.id) : [...guided.selectedSetIds, set.id])} className="min-w-0 flex-1 px-2 font-bold" /><span className="shrink-0 text-xs text-muted sm:text-sm">{set.words} từ</span><button type="button" title="Xem từ trong bộ" aria-label={`Xem từ trong bộ ${set.title}`} onClick={() => setOpenSet({ id: set.id, title: set.title })} className="flex size-11 shrink-0 items-center justify-center rounded-control text-accent hover:bg-accent-subtle focus-visible:ring-2 focus-visible:ring-accent"><MaterialIcon name="menu_book" size={20} /></button></div>)}
+					{filtered.map((set) => <div key={set.id} className="flex items-center justify-between gap-2"><Checkbox label={set.title} checked={selected.has(set.id)} disabled={busy} onChange={() => saveSelection(selected.has(set.id) ? guided.selectedSetIds.filter((id) => id !== set.id) : [...guided.selectedSetIds, set.id])} className="min-w-0 flex-1 px-2 font-bold" /><span className="shrink-0 text-xs text-muted sm:text-sm">{set.words} từ</span><button type="button" title="Xem từ trong bộ" aria-label={`Xem từ trong bộ ${set.title}`} onClick={() => setOpenSet({ id: set.id, title: set.title })} className="flex size-11 shrink-0 items-center justify-center rounded-control text-accent hover:bg-accent-subtle focus-visible:ring-2 focus-visible:ring-accent"><MaterialIcon name="menu_book" size={22} /></button></div>)}
 				</div>
 				{filtered.length === 0 && <p className="mt-2 text-sm text-muted">Không tìm thấy bộ từ phù hợp.</p>}
 				<div className="mt-2.5 flex flex-wrap items-center justify-between gap-2 text-sm">
@@ -103,7 +109,21 @@ export default function ReviewOverview({ overview, guided: initial, mode }: { ov
 				</div>
 			</div>
 
-			<div className="space-y-3"><fieldset disabled={busy}><legend className="mb-2 font-bold">Dạng câu hỏi</legend><div className="grid grid-cols-2 gap-2 sm:grid-cols-4">{([['mix', 'Trộn lẫn', 'Kết hợp chọn nghĩa, điền câu và nghe viết.'], ['meaning_choice', 'Chọn nghĩa', 'Nhìn từ tiếng Anh và chọn nghĩa đúng.'], ['cloze_choice', 'Điền câu', 'Chọn từ đúng để điền vào câu.'], ['listen_type', 'Nghe viết', 'Nghe phát âm và gõ từ bạn nghe được.']] as const).map(([value, label, hint]) => <div key={value} title={hint} className="min-w-0 rounded-control border border-border px-2"><Radio name="guided-question-mode" value={value} label={label} checked={questionMode === value} onChange={() => setQuestionMode(value)} className="whitespace-nowrap font-bold" /></div>)}</div></fieldset><div><AdvancedToggle disabled={busy} /><p className="text-xs text-muted">Hiện thêm cụm từ và cách dùng trên thẻ học.</p></div></div>
+			<fieldset disabled={busy} className="border-t border-border pt-4">
+				<legend className="float-left mb-2 w-full text-sm font-bold">Dạng câu hỏi</legend>
+				<div className="clear-both grid grid-cols-2 gap-2 sm:grid-cols-4">
+					{QUESTION_MODES.map(([value, icon]) => <label key={value} className={`flex min-h-12 min-w-0 cursor-pointer items-center gap-2 rounded-control border px-3 py-2 text-sm font-bold transition-colors has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-accent has-[:disabled]:cursor-not-allowed has-[:disabled]:opacity-60 ${questionMode === value ? 'border-accent bg-accent-subtle text-foreground' : 'border-border text-foreground-secondary hover:border-accent/60'}`}>
+						<input type="radio" name="guided-question-mode" value={value} checked={questionMode === value} onChange={() => setQuestionMode(value)} className="sr-only" />
+						<MaterialIcon name={icon} size={20} className={questionMode === value ? 'text-accent' : 'text-muted'} />
+						<span className="whitespace-nowrap">{GUIDED_MODE_LABEL[value]}</span>
+					</label>)}
+				</div>
+				<p className="mt-2 text-xs text-muted" aria-live="polite">{QUESTION_MODES.find(([value]) => value === questionMode)?.[2]}</p>
+			</fieldset>
+			<div className="flex flex-wrap items-center gap-x-3 gap-y-1 border-t border-border pt-4">
+				<AdvancedToggle disabled={busy} className="min-h-11 shrink-0" />
+				<p className="min-w-0 text-xs text-muted">Hiện thêm cụm từ và cách dùng trên thẻ học.</p>
+			</div>
 			<div>
 				<button type="button" disabled={busy || saving || guided.selectedSetIds.length === 0 || guided.uniqueWords === 0} onClick={() => void start()} className={solidButton}>{busy ? 'Đang chuẩn bị…' : 'Bắt đầu học'} <span aria-hidden="true">→</span></button>
 				{error && <p role="alert" className="mt-2 text-sm text-error">{error}</p>}

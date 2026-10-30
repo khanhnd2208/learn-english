@@ -14,7 +14,8 @@ import type { SenseBundle } from '@/lib/english/senseBundle';
 import { useAudioPreload } from '@/lib/useAudioPreload';
 import type { GoalReward } from '@/services/english/enGoalService';
 import { useAdvancedMode } from '@/components/english/advanced/useAdvancedMode';
-import type { GuidedQuestionMode } from '@/lib/english/guidedReview';
+import MaterialIcon from '@/components/ui/MaterialIcon';
+import { GUIDED_MODE_LABEL, type GuidedQuestionMode } from '@/lib/english/guidedReview';
 
 export type GuidedPublicQuestion = PublicQuestion & {
 	id: string;
@@ -169,9 +170,8 @@ export default function GuidedReviewSession({ initial, onClose }: { initial: Gui
 		{/* Keyed per card/question so a long card never leaves the next one scrolled halfway down. */}
 		<div key={`${session.phase}-${viewedWord}-${shownQuestion?.id ?? ''}`} className="min-h-0 flex-1 overflow-y-auto">
 			<div className="mx-auto max-w-2xl px-4 py-3 sm:py-5">
-				<div className="mb-3 flex items-baseline justify-between gap-3"><p className="font-bold">{stepLabel}</p><p className="shrink-0 text-xs font-bold uppercase tracking-wide text-accent">Chặng {lapChunk}/{lapChunks} · {covered}/{session.poolSize} từ</p></div>
-				<p className="mb-2 text-sm text-muted">Dạng câu hỏi: {{ mix: 'Trộn lẫn', meaning_choice: 'Chọn nghĩa', cloze_choice: 'Điền câu', listen_type: 'Nghe viết' }[session.questionMode]}</p>
-				{session.phase === 'study' && session.chunkNumber === 1 && viewedWord === 0 && session.excludedWordCount > 0 && <p className="mb-2 text-sm text-muted">Ôn {session.poolSize} từ phù hợp. Bỏ qua {session.excludedWordCount} từ chưa đủ dữ liệu cho dạng này.</p>}
+				<div className="mb-3 flex items-baseline justify-between gap-3"><div className="min-w-0"><p className="font-bold">{stepLabel}</p><p className="text-xs text-muted">Dạng câu hỏi: {GUIDED_MODE_LABEL[session.questionMode]}</p></div><p className="shrink-0 text-xs font-bold uppercase tracking-wide text-accent">Chặng {lapChunk}/{lapChunks} · {covered}/{session.poolSize} từ</p></div>
+				{session.phase === 'study' && session.chunkNumber === 1 && viewedWord === 0 && session.excludedWordCount > 0 && <p className="mb-3 flex gap-2 rounded-panel border border-warning/30 bg-warning/5 px-3 py-2 text-sm text-foreground-secondary"><MaterialIcon name="info" size={18} className="mt-0.5 shrink-0 text-warning" /><span>Ôn {session.poolSize} từ phù hợp. Bỏ qua {session.excludedWordCount} từ chưa đủ dữ liệu cho dạng này.</span></p>}
 
 				{session.phase === 'study' && word && <div key={word.sense.id} className="mode-card p-4 sm:p-6"><EnglishWordCard bundle={word} showAdvanced={showAdvanced} /></div>}
 
