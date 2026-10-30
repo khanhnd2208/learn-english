@@ -1,6 +1,6 @@
 import type { SVGProps } from 'react';
 
-type IconName = 'compass' | 'trophy' | 'map' | 'book' | 'search' | 'target' | 'sprout' | 'sword' | 'chest' | 'flag' | 'spark' | 'mountain' | 'shield' | 'star';
+type IconName = 'compass' | 'trophy' | 'map' | 'book' | 'search' | 'target' | 'sprout' | 'sword' | 'chest' | 'flag' | 'spark' | 'mountain' | 'shield' | 'star' | 'repeat';
 
 const paths: Record<IconName, React.ReactNode> = {
 	compass: <><circle cx="12" cy="12" r="9" /><path d="m15.5 8.5-2.2 4.8-4.8 2.2 2.2-4.8 4.8-2.2Z" /><path d="M12 2v2m0 16v2M2 12h2m16 0h2" /></>,
@@ -17,14 +17,15 @@ const paths: Record<IconName, React.ReactNode> = {
 	mountain: <><path d="m2 20 7-13 4 7 2-4 7 10H2Z" /><path d="m7 10 2 2 2-2m3 4 1 1 1-1" /></>,
 	shield: <><path d="M12 22s8-4 8-11V5l-8-3-8 3v6c0 7 8 11 8 11Z" /><path d="m9 12 2 2 4-4" /></>,
 	star: <><path d="m12 2 3 6.2 6.8 1-4.9 4.8 1.2 6.8-6.1-3.2-6.1 3.2 1.2-6.8-4.9-4.8 6.8-1L12 2Z" /></>,
+	repeat: <><path d="M4 11V9a3 3 0 0 1 3-3h12m-3-3 3 3-3 3" /><path d="M20 13v2a3 3 0 0 1-3 3H5m3 3-3-3 3-3" /></>,
 };
 
 const tones: Record<string, string> = {
-	compass: 'text-sky-700 bg-sky-100', trophy: 'text-amber-700 bg-amber-100', map: 'text-emerald-700 bg-emerald-100',
-	book: 'text-indigo-700 bg-indigo-100', search: 'text-cyan-700 bg-cyan-100', target: 'text-rose-700 bg-rose-100',
-	sprout: 'text-lime-700 bg-lime-100', sword: 'text-orange-700 bg-orange-100', chest: 'text-amber-800 bg-amber-100',
-	flag: 'text-violet-700 bg-violet-100', spark: 'text-yellow-700 bg-yellow-100', mountain: 'text-teal-700 bg-teal-100',
-	shield: 'text-blue-700 bg-blue-100', star: 'text-amber-700 bg-amber-100',
+	compass: 'text-sky-700 bg-sky-100 dark:text-sky-200 dark:bg-sky-400/15', trophy: 'text-amber-700 bg-amber-100 dark:text-amber-200 dark:bg-amber-400/15', map: 'text-emerald-700 bg-emerald-100 dark:text-emerald-200 dark:bg-emerald-400/15',
+	book: 'text-indigo-700 bg-indigo-100 dark:text-indigo-200 dark:bg-indigo-400/15', search: 'text-cyan-700 bg-cyan-100 dark:text-cyan-200 dark:bg-cyan-400/15', target: 'text-rose-700 bg-rose-100 dark:text-rose-200 dark:bg-rose-400/15',
+	sprout: 'text-lime-700 bg-lime-100 dark:text-lime-200 dark:bg-lime-400/15', sword: 'text-orange-700 bg-orange-100 dark:text-orange-200 dark:bg-orange-400/15', chest: 'text-amber-800 bg-amber-100 dark:text-amber-200 dark:bg-amber-400/15',
+	flag: 'text-violet-700 bg-violet-100 dark:text-violet-200 dark:bg-violet-400/15', spark: 'text-yellow-700 bg-yellow-100 dark:text-yellow-200 dark:bg-yellow-400/15', mountain: 'text-teal-700 bg-teal-100 dark:text-teal-200 dark:bg-teal-400/15',
+	shield: 'text-blue-700 bg-blue-100 dark:text-blue-200 dark:bg-blue-400/15', star: 'text-amber-700 bg-amber-100 dark:text-amber-200 dark:bg-amber-400/15', repeat: 'text-violet-700 bg-violet-100 dark:text-violet-200 dark:bg-violet-400/15',
 };
 
 export function AdventureIcon({ name, size = 24, className = '', framed = false, ...props }: SVGProps<SVGSVGElement> & { name: IconName; size?: number; framed?: boolean }) {

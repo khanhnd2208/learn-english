@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import QuestItem from '@/components/english/goals/QuestItem';
+import MaterialIcon from '@/components/ui/MaterialIcon';
 import { todayQuestCount } from '@/lib/english/quests';
 import type { GoalBoard } from '@/services/english/enGoalService';
 
@@ -15,7 +16,7 @@ export default function QuestNote({ board, resetsIn, hasSets }: { board: GoalBoa
 
 	return <section aria-labelledby="quest-note-heading" className="quest-note px-4 pt-4 pb-3.5 sm:pt-5 sm:pb-4">
 		<div className="flex items-baseline justify-between gap-2">
-			<h2 id="quest-note-heading" className="text-base sm:text-lg">📌 Nhiệm vụ hôm nay</h2>
+			<h2 id="quest-note-heading" className="text-base sm:text-lg">Nhiệm vụ hôm nay</h2>
 			<span className={`rounded-full px-2 py-0.5 text-xs font-black tabular-nums sm:text-sm ${done === total ? 'bg-success text-white' : 'bg-surface text-foreground'}`}>{done}/{total}</span>
 		</div>
 		<p className="text-xs text-muted">Làm mới sau {resetsIn}</p>
@@ -35,7 +36,7 @@ export default function QuestNote({ board, resetsIn, hasSets }: { board: GoalBoa
 		{hasSets ? (
 			week ? (
 				<Link href="/progress" className="mt-2.5 flex min-h-10 items-center justify-between gap-2 rounded-control bg-surface/80 px-3 py-2 text-xs font-bold hover:bg-surface focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent">
-					<span className="truncate">🗓 {week.title}</span>
+					<span className="flex min-w-0 items-center gap-1.5"><MaterialIcon name="calendar_month" size={16} className="shrink-0 text-muted" /><span>{week.title}</span></span>
 					<span className="shrink-0 tabular-nums text-accent">{week.current}/{week.target} ngày →</span>
 				</Link>
 			) : (

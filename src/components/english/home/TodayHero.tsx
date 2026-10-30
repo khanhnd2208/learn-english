@@ -12,7 +12,7 @@ import { estimateReviewXp } from '@/lib/english/xp';
 import type { TodayOverview } from '@/services/english/enDailyService';
 
 const primary = 'today-primary inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-control bg-accent px-5 font-bold text-accent-foreground';
-const card = 'flex h-full flex-col rounded-panel border-2 border-accent bg-accent-subtle p-4 shadow-[0_3px_0_var(--nav-shadow-active)]';
+const card = 'mode-card game-card-lilac flex h-full flex-col';
 
 /** `id="srs"` keeps old quest links landing here. */
 export default function TodayHero({ overview, xp, goal }: { overview: TodayOverview; xp: number; goal: number }) {

@@ -10,7 +10,7 @@ export const MAIN_NAV: NavLink[] = [
  { href: '/', label: 'Hôm nay', icon: 'target', shortLabel: 'Hôm nay' },
  { href: '/review', label: 'Ôn tập', icon: 'repeat', shortLabel: 'Ôn tập' },
  { href: '/progress', label: 'Tiến bộ', icon: 'flag', shortLabel: 'Tiến bộ' },
- { href: '/store', label: 'Thư viện', icon: 'map', shortLabel: 'Khám phá' },
+ { href: '/store', label: 'Thư viện', icon: 'auto_stories', shortLabel: 'Thư viện' },
 ];
 
 export const BOTTOM_NAV = MAIN_NAV;

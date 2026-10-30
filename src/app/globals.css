@@ -1,5 +1,8 @@
 @import "tailwindcss";
 
+/* `dark:` follows the theme the learner picks (next-themes sets `.dark`), not only the OS setting. */
+@custom-variant dark (&:where(.dark, .dark *));
+
 /* Pixel Parchment — a calm, playful RPG visual system for language learning.
    Every colour lives in a token below; components and recipes only read tokens. */
 
@@ -68,15 +71,16 @@
 
 	/* Pixel controls */
 	--pixel-outline: #41354e;
-	--btn-primary-bg: #785596;
-	--btn-primary-fg: #fffaf1;
-	--btn-primary-shadow: #d0bed8;
+	--btn-primary-bg: #725195;
+	--btn-primary-fg: #ffffff;
+	--btn-primary-shadow: 0 1px 2px rgb(56 38 76 / 20%), inset 0 1px 0 rgb(255 255 255 / 14%);
+	--card-shadow: 0 1px 2px rgb(65 48 63 / 5%), 0 4px 14px rgb(65 48 63 / 5%);
 	--icon-tile-border: #48445e;
 	--icon-tile-shadow: rgb(49 43 66 / 17%);
 	--level-badge-fg: #2b2233;
 	--level-badge-shadow: #a8792a;
 	--progress-track-border: #635672;
-	--progress-track-bg: #fffaf0;
+	--progress-track-bg: color-mix(in srgb, var(--accent) 14%, var(--surface));
 	--progress-fill: linear-gradient(90deg, #8e6ca8, #b488c9);
 	--focus-ring: #8a69a8;
 
@@ -133,6 +137,8 @@
 	--live: #6cc27a;
 	--success: #b8d4a9;
 	--success-subtle: #394a3d;
+	--warning: #e7a66b;
+	--error: #f08b9c;
 
 	--page-glow: rgb(126 92 155 / 18%);
 	--page-gradient: linear-gradient(180deg, var(--background), var(--background-secondary));
@@ -161,8 +167,11 @@
 	--panel-quest-shadow: #33283d;
 
 	--pixel-outline: #d7c3e4;
-	--btn-primary-bg: #8967a4;
-	--btn-primary-fg: #211d2c;
+	--btn-primary-bg: #8462a8;
+	--btn-primary-fg: #ffffff;
+	--btn-primary-shadow: 0 1px 2px rgb(0 0 0 / 30%), inset 0 1px 0 rgb(255 255 255 / 10%);
+	--card-shadow: 0 1px 2px rgb(0 0 0 / 18%);
+	--progress-track-bg: color-mix(in srgb, var(--accent) 16%, var(--surface));
 	--level-badge-shadow: #6e5124;
 
 	--hero-bg: linear-gradient(120deg, #3c3048, #393447 66%, #443d31);
@@ -171,8 +180,8 @@
 	--hero-landscape-opacity: .13;
 	--card-amber-bg: linear-gradient(145deg, #49402f, #35313a);
 	--card-amber-border: #897546;
-	--note-bg: #3e3829;
-	--note-border: #6f6040;
+	--note-bg: #352f3f;
+	--note-border: #5f5268;
 	--note-shadow: #262217;
 	--note-tape: rgb(197 161 227 / 30%);
 	--card-lilac-bg: linear-gradient(145deg, #3b3247, #302d3d);
@@ -356,25 +365,30 @@ body::before {
 	.animate-badge-pop { animation: none; }
 }
 
-/* Typography: the pixel face is for page titles and big numbers only. */
-h1, h2, .game-number {
-	font-family: var(--font-pixel), var(--font-pixel-fallback), var(--font-sans), system-ui, sans-serif;
-	letter-spacing: .015em;
-	line-height: 1.2;
+/* Typography: one sans family. Headings are heavy and slightly tight; big numbers use tabular figures.
+   In the base layer so utilities such as label-caps can still restyle a heading. */
+@layer base {
+	h1, h2, .game-number {
+		font-family: var(--font-sans), system-ui, sans-serif;
+		font-weight: 800;
+		letter-spacing: -.015em;
+		line-height: 1.2;
+	}
+	.game-number { font-variant-numeric: tabular-nums; }
 }
 
 @utility label-caps {
 	@apply text-xs font-bold uppercase text-muted;
 	font-family: var(--font-sans), system-ui, sans-serif;
-	letter-spacing: .055em;
+	letter-spacing: .04em;
 }
 
 /* Surfaces */
 .bg-surface.rounded-card {
-	border-width: 2px;
-	box-shadow: 0 3px 0 color-mix(in srgb, var(--border) 78%, transparent), 0 8px 16px rgb(65 48 63 / 5%);
+	box-shadow: var(--card-shadow);
 }
-.mode-card, .word-row { border: 1px solid var(--border); background: var(--surface); border-radius: 14px; }
+.mode-card, .word-row { border: 1px solid var(--border); background: var(--surface); border-radius: 16px; }
+.mode-card { box-shadow: var(--card-shadow); }
 .mode-card { padding: 16px; }
 @media (min-width: 640px) { .mode-card { padding: 20px; } }
 .word-row { display: flex; align-items: center; gap: 10px; padding: 10px 12px; min-height: 56px; }
@@ -397,12 +411,12 @@ h1, h2, .game-number {
 .brand-accent { color: var(--brand-accent); }
 .brand-tagline { color: var(--muted); }
 .brand-compass {
+	display: inline-flex; align-items: center; justify-content: center;
 	width: 40px; height: 40px;
-	border: 2px solid var(--brand-tile-border);
-	border-radius: 8px;
+	border-radius: 11px;
 	color: var(--brand-tile-fg);
 	background: var(--brand-tile-bg);
-	box-shadow: 0 3px 0 var(--brand-tile-shadow);
+	box-shadow: var(--btn-primary-shadow);
 }
 @utility nav-pill {
 	@apply flex items-center gap-3 px-3 py-3 text-sm transition-colors duration-200;
@@ -421,52 +435,44 @@ h1, h2, .game-number {
 	font-weight: 750;
 	color: var(--nav-fg-active);
 	background: var(--nav-bg-active);
-	box-shadow: inset 0 0 0 1px var(--nav-ring-active), 0 3px 0 var(--nav-shadow-active);
+	box-shadow: inset 0 0 0 1px var(--nav-ring-active);
 }
 .nav-glyph { color: var(--nav-glyph-fg); background: var(--nav-glyph-bg); border: 1px solid var(--nav-glyph-border); border-radius: 7px; }
 .nav-pill-active .nav-glyph { color: var(--nav-glyph-active-fg); background: var(--nav-glyph-active-bg); }
 .adventure-mobile-header a, .mobile-nav-link { color: var(--mobile-nav-fg); }
 .mobile-nav-link[aria-current="page"] { color: var(--mobile-nav-active); }
 .sidebar-quest {
-	border: 2px solid var(--panel-quest-border);
-	border-radius: 10px;
+	border: 1px solid var(--panel-quest-border);
+	border-radius: 12px;
 	background: var(--panel-quest-bg);
-	box-shadow: 0 3px 0 var(--panel-quest-shadow);
 }
 .sidebar-quest > svg { color: var(--nav-glyph-active-bg); }
 
-/* Pixel controls */
-button { letter-spacing: .045em; }
-button:not(:disabled) { transition: transform 120ms steps(2, end), filter 120ms ease, box-shadow 120ms ease; }
-button:not(:disabled):active { transform: translateY(2px); }
-button.bg-accent, a.today-primary {
-	border: 2px solid var(--pixel-outline);
-	border-bottom-width: 4px;
-	border-radius: 8px;
+/* Controls */
+button:not(:disabled) { transition: transform var(--duration-instant) ease, filter var(--duration-fast) ease, box-shadow var(--duration-fast) ease, background-color var(--duration-fast) ease; }
+button:not(:disabled):active, a.today-primary:active { transform: translateY(1px); }
+button.bg-accent, a.bg-accent, a.today-primary {
+	border-radius: 10px;
 	background: var(--btn-primary-bg);
 	color: var(--btn-primary-fg);
-	box-shadow: 0 2px 0 var(--btn-primary-shadow);
+	box-shadow: var(--btn-primary-shadow);
 }
-button.bg-accent:hover, a.today-primary:hover { filter: brightness(1.07); }
+button.bg-accent:hover, a.bg-accent:hover, a.today-primary:hover { filter: brightness(1.08); }
 input, textarea, select { border-radius: 8px !important; }
 input:focus-visible, textarea:focus-visible, select:focus-visible { outline-color: var(--focus-ring); }
 
 .adventure-icon {
 	width: 38px; height: 38px;
-	border: 2px solid var(--icon-tile-border);
-	border-radius: 8px;
-	box-shadow: 0 3px 0 var(--icon-tile-shadow);
+	border-radius: 10px;
 }
-.adventure-icon svg { shape-rendering: crispEdges; image-rendering: pixelated; }
 
 .game-progress-track {
-	border: 2px solid var(--progress-track-border);
-	border-radius: 4px;
+	border-radius: 999px;
 	background: var(--progress-track-bg);
 }
-.game-progress-fill { border-radius: 2px; background: var(--progress-fill); }
+.game-progress-fill { border-radius: 999px; background: var(--progress-fill); }
 
-.choice-btn { display: block; width: 100%; min-height: 48px; padding: 10px 14px; text-align: left; border: 2px solid var(--border); border-radius: 12px; background: var(--surface); color: var(--foreground); }
+.choice-btn { display: block; width: 100%; min-height: 48px; padding: 10px 14px; text-align: left; border: 1.5px solid var(--border); border-radius: 12px; background: var(--surface); color: var(--foreground); }
 .choice-btn:hover, .choice-btn:focus-visible { border-color: var(--accent); outline: none; }
 .choice-btn[data-state="selected"] { border-color: var(--accent); background: var(--accent-subtle); }
 .choice-btn[data-state="correct"] { border-color: var(--success); background: var(--success-subtle); }
@@ -479,24 +485,22 @@ input:focus-visible, textarea:focus-visible, select:focus-visible { outline-colo
 /* Reward surfaces: level hero, badges, week tiles */
 .game-hero {
 	min-height: 220px;
-	border: 2px solid var(--hero-border);
-	border-radius: 14px;
+	border: 1px solid var(--hero-border);
+	border-radius: 16px;
 	background: var(--hero-bg);
-	box-shadow: 0 4px 0 var(--hero-shadow), 0 10px 20px rgb(65 48 63 / 7%);
+	box-shadow: var(--card-shadow);
 }
 .game-hero > .adventure-landscape { opacity: var(--hero-landscape-opacity); filter: saturate(.62) sepia(.16); }
 .game-card-amber { background: var(--card-amber-bg); border-color: var(--card-amber-border); }
 .game-card-lilac { background: var(--card-lilac-bg); border-color: var(--card-lilac-border); }
-.quest-note { position: relative; border: 1px solid var(--note-border); border-radius: 6px 6px 22px 6px; background: var(--note-bg); box-shadow: 0 3px 0 var(--note-shadow), 0 8px 18px rgb(65 48 63 / 8%); }
-.quest-note::before { content: ""; position: absolute; top: -9px; left: 50%; width: 76px; height: 18px; transform: translateX(-50%) rotate(-2deg); border-radius: 2px; background: var(--note-tape); }
-.quest-note::after { content: ""; position: absolute; right: -1px; bottom: -1px; width: 22px; height: 22px; border-top-left-radius: 6px; background: linear-gradient(135deg, color-mix(in srgb, var(--note-border) 70%, var(--note-bg)) 50%, var(--background) 50%); }
-.stat-tile { border: 2px solid var(--border); border-radius: 12px; background: var(--surface); box-shadow: 0 3px 0 var(--border); }
+.quest-note { border: 1px solid var(--note-border); border-radius: 16px; background: var(--note-bg); box-shadow: var(--card-shadow); }
+.stat-tile { border: 1px solid var(--border); border-radius: 12px; background: var(--surface); }
 .podium { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); align-items: end; gap: 8px; }
-.podium-step { display: flex; flex-direction: column; align-items: center; justify-content: flex-start; gap: 4px; border: 2px solid var(--border); border-bottom: 0; border-radius: 12px 12px 0 0; background: var(--surface); box-shadow: 0 3px 0 var(--border); padding: 10px 6px 8px; }
+.podium-step { display: flex; flex-direction: column; align-items: center; justify-content: flex-start; gap: 4px; border: 1px solid var(--border); border-bottom: 0; border-radius: 12px 12px 0 0; background: var(--surface); padding: 10px 6px 8px; }
 .podium-step[data-rank="1"] { min-height: 112px; border-color: var(--gold); background: color-mix(in srgb, var(--gold) 16%, var(--surface)); }
 .podium-step[data-rank="2"] { min-height: 88px; border-color: var(--silver); background: color-mix(in srgb, var(--silver) 16%, var(--surface)); }
 .podium-step[data-rank="3"] { min-height: 72px; border-color: var(--bronze); background: color-mix(in srgb, var(--bronze) 16%, var(--surface)); }
-.medal { display: inline-flex; align-items: center; justify-content: center; width: 28px; height: 28px; border-radius: 999px; border: 2px solid var(--pixel-outline); font-weight: 900; font-size: .8rem; color: var(--level-badge-fg); }
+.medal { display: inline-flex; align-items: center; justify-content: center; width: 28px; height: 28px; border-radius: 999px; font-weight: 900; font-size: .8rem; color: var(--level-badge-fg); }
 .medal[data-rank="1"] { background: var(--gold); }
 .medal[data-rank="2"] { background: var(--silver); }
 .medal[data-rank="3"] { background: var(--bronze); }
@@ -518,13 +522,13 @@ input:focus-visible, textarea:focus-visible, select:focus-visible { outline-colo
 @layer components {
 	.level-badge {
 		display: inline-flex; align-items: center; justify-content: center;
-		min-width: 2.25rem; padding: 1px 6px;
-		border: 2px solid var(--pixel-outline); border-radius: 6px;
+		min-width: 2.25rem; padding: 2px 8px;
+		border-radius: 999px;
 		background: var(--gold); color: var(--level-badge-fg);
-		font-family: var(--font-pixel, inherit); font-size: .75rem; font-weight: 900; line-height: 1.2;
-		box-shadow: 0 2px 0 var(--level-badge-shadow);
+		font-size: .75rem; font-weight: 800; line-height: 1.2;
+		font-variant-numeric: tabular-nums; white-space: nowrap;
 	}
-	.quest-card { border: 2px solid var(--border); border-radius: 12px; background: var(--surface); }
+	.quest-card { border: 1px solid var(--border); border-radius: 12px; background: var(--surface); }
 	.quest-card[data-done="true"] { border-color: color-mix(in srgb, var(--success) 55%, var(--border)); background: var(--success-subtle); }
 	.xp-chip { display: inline-flex; align-items: center; gap: 2px; border-radius: 999px; padding: 1px 8px; font-size: .75rem; font-weight: 800; background: color-mix(in srgb, var(--gold) 26%, var(--surface)); color: var(--foreground); white-space: nowrap; }
 }

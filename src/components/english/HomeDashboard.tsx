@@ -35,19 +35,22 @@ export default function HomeDashboard({ overview, sets, board, resetsIn, greetin
 	return <div className="mx-auto max-w-5xl px-4 py-4 sm:px-6 sm:py-8">
 		<header className="mb-3 flex flex-wrap items-baseline justify-between gap-x-3 gap-y-0.5 sm:mb-6 sm:block"><h1 className="truncate text-xl sm:text-3xl">{greeting}</h1><p className="text-xs text-muted sm:mt-0.5">{dateLabel}</p></header>
 
+		{/* Two independent columns on wide screens so a tall quest note never leaves a gap under the hero.
+		    Below lg the column wrappers dissolve (`contents`) and `order` keeps hero → progress → quests → sets. */}
 		<div className="grid grid-cols-1 gap-3.5 sm:gap-4 lg:grid-cols-3 lg:items-start lg:gap-5">
-			<div className="min-w-0 lg:col-span-2 lg:row-start-1"><TodayHero overview={overview} xp={board.today.xp} goal={board.today.goal} /></div>
+			<div className="contents lg:col-span-2 lg:flex lg:flex-col lg:gap-5">
+				<div className="order-1 min-w-0"><TodayHero overview={overview} xp={board.today.xp} goal={board.today.goal} /></div>
 
-			{hasSets && <div className="min-w-0 lg:col-start-3 lg:row-start-2"><ProgressStrip streak={overview.streakDays} longTerm={board.longTermCount} level={board.level} stages={stages} /></div>}
+				{hasSets && <section id="your-sets" aria-labelledby="your-sets-heading" className="mode-card order-4 min-w-0 overflow-hidden !p-0">
+					<div className="flex items-center justify-between gap-3 border-b border-border px-4 py-2"><h2 id="your-sets-heading" className="text-base sm:text-lg">Đang học <span className="text-sm font-normal text-muted">({enrolled.length})</span></h2><Link href="/review?mode=bo" className="inline-flex min-h-10 shrink-0 items-center text-sm font-bold text-accent">Xem tất cả →</Link></div>
+					<ul>{enrolled.slice(0, SETS_SHOWN).map((set) => <SetRow key={set.id} set={set} />)}</ul>
+				</section>}
+			</div>
 
-			<div className="min-w-0 lg:col-start-3 lg:row-start-1"><QuestNote board={board} resetsIn={resetsIn} hasSets={hasSets} /></div>
-
-			{hasSets && <section id="your-sets" aria-labelledby="your-sets-heading" className="min-w-0 overflow-hidden rounded-panel border border-border bg-surface lg:col-span-2 lg:col-start-1 lg:row-span-2 lg:row-start-2">
-				<div className="flex items-center justify-between gap-3 border-b border-border px-4 py-2"><h2 id="your-sets-heading" className="text-base sm:text-lg">Đang học <span className="text-sm font-normal text-muted">({enrolled.length})</span></h2><Link href="/review?mode=bo" className="inline-flex min-h-10 shrink-0 items-center text-sm font-bold text-accent">Xem tất cả →</Link></div>
-				<ul>{enrolled.slice(0, SETS_SHOWN).map((set) => <SetRow key={set.id} set={set} />)}</ul>
-
-			</section>}
-
+			<div className="contents lg:flex lg:flex-col lg:gap-5">
+				<div className="order-3 min-w-0 lg:order-none"><QuestNote board={board} resetsIn={resetsIn} hasSets={hasSets} /></div>
+				{hasSets && <div className="order-2 min-w-0 lg:order-none"><ProgressStrip streak={overview.streakDays} longTerm={board.longTermCount} level={board.level} stages={stages} /></div>}
+			</div>
 		</div>
 	</div>;
 }
