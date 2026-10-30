@@ -55,11 +55,12 @@ export async function publishEnglishSet(setId: string, exists: (file: string) =>
  for (const item of set.items) {
   const sense = item.sense; if (!sense) continue;
   const audio = sense.word.audioPath;
+  const recorded = Boolean(audio) && await exists(audio);
   const live = sense.examples.filter((e) => e.status !== 'suspended');
   const card = cardExampleOf(live);
   const ordered = card ? [card, ...live.filter((e) => e !== card)] : [];
   const toPack = (e: (typeof live)[number]) => ({ english: e.english, meaningVi: e.meaningVi, target: e.target, targetStart: e.targetStart, targetLength: e.targetLength });
-  const assessment = assessEnglishPack({ title: set.title, description: set.description, packVersion: 4, audioFiles: audio && await exists(audio) ? [audio] : [], words: [{ lemma: sense.word.lemma, senseKey: sense.senseKey ?? '', partOfSpeech: sense.partOfSpeech, ipa: sense.word.ipa, audioFile: audio, forms: sense.word.forms, meaningVi: sense.meaningVi, synonyms: sense.synonyms, noteVi: sense.noteVi, advanced: parseAdvancedNotes(sense.advanced), family: parseWordFamily(sense.family), cardExample: ordered[0] ? toPack(ordered[0]) : {}, quizExamples: ordered.slice(1).map(toPack) }] });
+  const assessment = assessEnglishPack({ title: set.title, description: set.description, packVersion: 4, audioFiles: recorded ? [audio] : [], words: [{ lemma: sense.word.lemma, senseKey: sense.senseKey ?? '', partOfSpeech: sense.partOfSpeech, ipa: sense.word.ipa, audioFile: audio, forms: sense.word.forms, meaningVi: sense.meaningVi, synonyms: sense.synonyms, noteVi: sense.noteVi, advanced: parseAdvancedNotes(sense.advanced), family: parseWordFamily(sense.family), cardExample: ordered[0] ? toPack(ordered[0]) : {}, quizExamples: ordered.slice(1).map(toPack) }] });
   issues.push(...assessment.issues.map((i) => ({ ...i, path: `${sense.word.lemma}: ${i.path}` })));
   if (!assessment.words[0]?.publishable) continue;
   await prisma.enSense.update({ where: { id: sense.id }, data: { status: 'published' } });
@@ -68,7 +69,8 @@ export async function publishEnglishSet(setId: string, exists: (file: string) =>
    const grade = i > 0 && Boolean(assessment.words[0].examples[i]?.gradeEligible);
    await prisma.enExample.update({ where: { id: example.id }, data: { role: grade ? 'grade' : 'study', status: i === 0 || grade ? 'published' : 'draft' } });
   }
-  await prisma.enWord.update({ where: { id: sense.wordId }, data: { status: 'published' } });
+  // An AI pack names an mp3 that was never uploaded; clearing it lets the server voice warm the word.
+  await prisma.enWord.update({ where: { id: sense.wordId }, data: { status: 'published', ...(audio && !recorded ? { audioPath: '' } : {}) } });
   publishedSenses++;
  }
  if (publishedSenses) await prisma.enSet.update({ where: { id: set.id }, data: { status: 'published' } });

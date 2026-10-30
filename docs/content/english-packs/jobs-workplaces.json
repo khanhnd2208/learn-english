@@ -1,0 +1,3108 @@
+{
+ "title": "Nghề nghiệp và nơi làm việc",
+ "description": "50 từ về nghề nghiệp và nơi làm việc, kèm cách dùng a/an khi giới thiệu công việc.",
+ "packVersion": 4,
+ "audioFiles": [
+  "student.mp3",
+  "teacher.mp3",
+  "doctor.mp3",
+  "nurse.mp3",
+  "driver.mp3",
+  "chef.mp3",
+  "designer.mp3",
+  "engineer.mp3",
+  "accountant.mp3",
+  "office-worker.mp3",
+  "salesperson.mp3",
+  "manager.mp3",
+  "business-owner.mp3",
+  "freelancer.mp3",
+  "homemaker.mp3",
+  "it-worker.mp3",
+  "secretary.mp3",
+  "receptionist.mp3",
+  "lawyer.mp3",
+  "banker.mp3",
+  "pharmacist.mp3",
+  "dentist.mp3",
+  "hairdresser.mp3",
+  "waiter.mp3",
+  "cashier.mp3",
+  "mechanic.mp3",
+  "electrician.mp3",
+  "builder.mp3",
+  "farmer.mp3",
+  "factory-worker.mp3",
+  "tour-guide.mp3",
+  "police-officer.mp3",
+  "journalist.mp3",
+  "soldier.mp3",
+  "retired.mp3",
+  "company.mp3",
+  "bank.mp3",
+  "hospital.mp3",
+  "school.mp3",
+  "university.mp3",
+  "office.mp3",
+  "shop.mp3",
+  "restaurant.mp3",
+  "hotel.mp3",
+  "factory.mp3",
+  "supermarket.mp3",
+  "clinic.mp3",
+  "pharmacy.mp3",
+  "airport.mp3",
+  "cafe.mp3"
+ ],
+ "words": [
+  {
+   "lemma": "student",
+   "senseKey": "student.n.learner",
+   "partOfSpeech": "noun",
+   "ipa": "/ˈstuːdənt/",
+   "audioFile": "student.mp3",
+   "forms": [
+    "students"
+   ],
+   "meaningVi": "học sinh, sinh viên",
+   "synonyms": [
+    "pupil",
+    "learner"
+   ],
+   "noteVi": "Student dùng cho cả học sinh và sinh viên; pupil chủ yếu chỉ học sinh nhỏ tuổi (Anh–Anh).",
+   "family": [],
+   "cardExample": {
+    "english": "My sister is a student at a big university in Hanoi.",
+    "meaningVi": "Chị tôi là sinh viên ở một trường đại học lớn tại Hà Nội.",
+    "target": "student"
+   },
+   "quizExamples": [
+    {
+     "english": "Every student in the class has to hand in the homework before Friday.",
+     "meaningVi": "Mọi học sinh trong lớp phải nộp bài tập về nhà trước thứ Sáu.",
+     "target": "student"
+    },
+    {
+     "english": "The library is full of students revising quietly for their final exams.",
+     "meaningVi": "Thư viện kín chỗ các sinh viên đang lặng lẽ ôn thi cuối kỳ.",
+     "target": "students"
+    },
+    {
+     "english": "As a poor student, he lived on instant noodles and cheap coffee.",
+     "meaningVi": "Hồi còn là sinh viên nghèo, anh ấy sống nhờ mì gói và cà phê rẻ.",
+     "target": "student"
+    }
+   ],
+   "advanced": [
+    {
+     "kind": "preposition",
+     "phrase": "a student at sth",
+     "meaningVi": "sinh viên của trường nào",
+     "example": "She is a student at the University of Economics."
+    },
+    {
+     "kind": "collocation",
+     "phrase": "an exchange student",
+     "meaningVi": "sinh viên trao đổi",
+     "example": "We have an exchange student from Japan in our class this year."
+    },
+    {
+     "kind": "collocation",
+     "phrase": "a first-year student",
+     "meaningVi": "sinh viên năm nhất",
+     "example": "As a first-year student, I got lost on campus all the time."
+    }
+   ]
+  },
+  {
+   "lemma": "teacher",
+   "senseKey": "teacher.n.school_teacher",
+   "partOfSpeech": "noun",
+   "ipa": "/ˈtiːtʃɚ/",
+   "audioFile": "teacher.mp3",
+   "forms": [
+    "teachers"
+   ],
+   "meaningVi": "giáo viên",
+   "synonyms": [
+    "instructor",
+    "tutor"
+   ],
+   "noteVi": "",
+   "family": [
+    {
+     "word": "teach",
+     "partOfSpeech": "verb",
+     "meaningVi": "dạy học"
+    },
+    {
+     "word": "teaching",
+     "partOfSpeech": "noun",
+     "meaningVi": "nghề dạy học"
+    }
+   ],
+   "cardExample": {
+    "english": "My mother is a teacher at a primary school near our house.",
+    "meaningVi": "Mẹ tôi là giáo viên ở một trường tiểu học gần nhà.",
+    "target": "teacher"
+   },
+   "quizExamples": [
+    {
+     "english": "Our English teacher always gives us a short test at the start of the lesson.",
+     "meaningVi": "Cô giáo tiếng Anh của chúng tôi luôn cho làm bài kiểm tra ngắn đầu giờ.",
+     "target": "teacher"
+    },
+    {
+     "english": "The kids stood up and said good morning when the teacher walked into the classroom.",
+     "meaningVi": "Bọn trẻ đứng dậy chào buổi sáng khi thầy giáo bước vào lớp.",
+     "target": "teacher"
+    },
+    {
+     "english": "Many teachers stay late at school to mark homework and plan tomorrow's lessons.",
+     "meaningVi": "Nhiều giáo viên ở lại trường muộn để chấm bài và soạn giáo án cho ngày mai.",
+     "target": "teachers"
+    }
+   ],
+   "advanced": [
+    {
+     "kind": "collocation",
+     "phrase": "a primary / secondary school teacher",
+     "meaningVi": "giáo viên tiểu học / trung học",
+     "example": "He worked as a secondary school teacher for ten years."
+    },
+    {
+     "kind": "collocation",
+     "phrase": "a math / English teacher",
+     "meaningVi": "giáo viên toán / tiếng Anh",
+     "example": "Our math teacher explains even the hardest lessons very clearly."
+    },
+    {
+     "kind": "collocation",
+     "phrase": "teacher's pet",
+     "meaningVi": "học trò cưng của thầy cô",
+     "example": "Everyone calls Lan the teacher's pet because she always sits in front."
+    }
+   ]
+  },
+  {
+   "lemma": "doctor",
+   "senseKey": "doctor.n.medical_doctor",
+   "partOfSpeech": "noun",
+   "ipa": "/ˈdɑːktɚ/",
+   "audioFile": "doctor.mp3",
+   "forms": [
+    "doctors"
+   ],
+   "meaningVi": "bác sĩ",
+   "synonyms": [
+    "physician"
+   ],
+   "noteVi": "Viết tắt là Dr khi đi với tên: Dr Minh.",
+   "family": [],
+   "cardExample": {
+    "english": "My uncle is a doctor, so he often gives us advice about our health.",
+    "meaningVi": "Chú tôi là bác sĩ nên hay cho cả nhà lời khuyên về sức khỏe.",
+    "target": "doctor"
+   },
+   "quizExamples": [
+    {
+     "english": "You've had a fever for three days — you should really see the doctor today.",
+     "meaningVi": "Con sốt ba ngày rồi, hôm nay thật sự nên đi khám bác sĩ đi.",
+     "target": "doctor"
+    },
+    {
+     "english": "The doctor listened to my chest and told me it was only a bad cold.",
+     "meaningVi": "Bác sĩ nghe phổi tôi rồi bảo chỉ là cảm nặng thôi.",
+     "target": "doctor"
+    },
+    {
+     "english": "After seven years of medical school, she finally started work as the town's only doctor.",
+     "meaningVi": "Sau bảy năm học trường y, cuối cùng cô ấy bắt đầu làm bác sĩ duy nhất của thị trấn.",
+     "target": "doctor"
+    }
+   ],
+   "advanced": [
+    {
+     "kind": "collocation",
+     "phrase": "see / go to the doctor",
+     "meaningVi": "đi khám bác sĩ",
+     "example": "If the pain gets worse, go to the doctor."
+    },
+    {
+     "kind": "collocation",
+     "phrase": "a doctor's appointment",
+     "meaningVi": "lịch hẹn khám bác sĩ",
+     "example": "I have a doctor's appointment at nine tomorrow morning."
+    },
+    {
+     "kind": "collocation",
+     "phrase": "a doctor's note",
+     "meaningVi": "giấy xác nhận của bác sĩ",
+     "example": "You need a doctor's note if you miss more than two days of work."
+    }
+   ]
+  },
+  {
+   "lemma": "nurse",
+   "senseKey": "nurse.n.hospital_nurse",
+   "partOfSpeech": "noun",
+   "ipa": "/nɝːs/",
+   "audioFile": "nurse.mp3",
+   "forms": [
+    "nurses"
+   ],
+   "meaningVi": "y tá",
+   "synonyms": [],
+   "noteVi": "Nurse là y tá chăm sóc bệnh nhân, khác doctor là bác sĩ khám và chữa bệnh.",
+   "family": [
+    {
+     "word": "nursing",
+     "partOfSpeech": "noun",
+     "meaningVi": "nghề điều dưỡng"
+    }
+   ],
+   "cardExample": {
+    "english": "She works as a nurse in the children's ward of a big hospital.",
+    "meaningVi": "Cô ấy làm y tá ở khoa nhi của một bệnh viện lớn.",
+    "target": "nurse"
+   },
+   "quizExamples": [
+    {
+     "english": "The nurse checked my blood pressure and wrote the numbers on a chart.",
+     "meaningVi": "Cô y tá đo huyết áp cho tôi rồi ghi số vào bảng theo dõi.",
+     "target": "nurse"
+    },
+    {
+     "english": "During the night shift, two nurses look after all thirty patients on the floor.",
+     "meaningVi": "Trong ca đêm, hai y tá chăm sóc cả ba mươi bệnh nhân của tầng.",
+     "target": "nurses"
+    },
+    {
+     "english": "Press this red button if you need the nurse to come to your bed.",
+     "meaningVi": "Bấm nút đỏ này nếu bác cần y tá đến giường.",
+     "target": "nurse"
+    }
+   ],
+   "advanced": [
+    {
+     "kind": "collocation",
+     "phrase": "a night nurse",
+     "meaningVi": "y tá trực đêm",
+     "example": "The night nurse came in every two hours to check on him."
+    },
+    {
+     "kind": "collocation",
+     "phrase": "a school nurse",
+     "meaningVi": "y tá trường học",
+     "example": "The school nurse put a plaster on my knee."
+    },
+    {
+     "kind": "pattern",
+     "phrase": "train as a nurse",
+     "meaningVi": "học để làm y tá",
+     "example": "She decided to train as a nurse after high school."
+    }
+   ]
+  },
+  {
+   "lemma": "driver",
+   "senseKey": "driver.n.vehicle_driver",
+   "partOfSpeech": "noun",
+   "ipa": "/ˈdraɪvɚ/",
+   "audioFile": "driver.mp3",
+   "forms": [
+    "drivers"
+   ],
+   "meaningVi": "tài xế, lái xe",
+   "synonyms": [
+    "chauffeur"
+   ],
+   "noteVi": "",
+   "family": [
+    {
+     "word": "drive",
+     "partOfSpeech": "verb",
+     "meaningVi": "lái xe"
+    },
+    {
+     "word": "driving",
+     "partOfSpeech": "noun",
+     "meaningVi": "việc lái xe"
+    }
+   ],
+   "cardExample": {
+    "english": "My father is a bus driver, so he gets up at four every morning.",
+    "meaningVi": "Bố tôi là tài xế xe buýt nên sáng nào cũng dậy lúc bốn giờ.",
+    "target": "driver"
+   },
+   "quizExamples": [
+    {
+     "english": "The taxi driver took a shortcut through small streets to avoid the traffic jam.",
+     "meaningVi": "Bác tài taxi đi đường tắt qua các ngõ nhỏ để tránh tắc đường.",
+     "target": "driver"
+    },
+    {
+     "english": "The police stopped the driver because he was using his phone on the motorway.",
+     "meaningVi": "Cảnh sát chặn người lái xe vì anh ta dùng điện thoại trên đường cao tốc.",
+     "target": "driver"
+    },
+    {
+     "english": "Delivery drivers often work long hours, even in heavy rain.",
+     "meaningVi": "Các tài xế giao hàng thường làm việc nhiều giờ, kể cả khi mưa to.",
+     "target": "drivers"
+    }
+   ],
+   "advanced": [
+    {
+     "kind": "collocation",
+     "phrase": "a taxi / bus / truck driver",
+     "meaningVi": "tài xế taxi / xe buýt / xe tải",
+     "example": "The truck driver drove all night to deliver the goods."
+    },
+    {
+     "kind": "collocation",
+     "phrase": "a careful / reckless driver",
+     "meaningVi": "người lái xe cẩn thận / ẩu",
+     "example": "My grandfather is a very careful driver, even on empty roads."
+    },
+    {
+     "kind": "collocation",
+     "phrase": "driver's license",
+     "meaningVi": "bằng lái xe",
+     "example": "You can't rent a car without a driver's license."
+    }
+   ]
+  },
+  {
+   "lemma": "chef",
+   "senseKey": "chef.n.professional_cook",
+   "partOfSpeech": "noun",
+   "ipa": "/ʃef/",
+   "audioFile": "chef.mp3",
+   "forms": [
+    "chefs"
+   ],
+   "meaningVi": "đầu bếp",
+   "synonyms": [
+    "cook"
+   ],
+   "noteVi": "Chef là đầu bếp chuyên nghiệp ở nhà hàng; cook là người nấu ăn nói chung, cả ở nhà.",
+   "family": [],
+   "cardExample": {
+    "english": "He is a chef at a famous Italian restaurant in District 1.",
+    "meaningVi": "Anh ấy là đầu bếp ở một nhà hàng Ý nổi tiếng tại Quận 1.",
+    "target": "chef"
+   },
+   "quizExamples": [
+    {
+     "english": "The chef came out of the kitchen to ask if we enjoyed the soup.",
+     "meaningVi": "Bếp trưởng ra khỏi bếp hỏi chúng tôi món súp có ngon không.",
+     "target": "chef"
+    },
+    {
+     "english": "Top chefs train for years to cook dishes that look like works of art.",
+     "meaningVi": "Các đầu bếp hàng đầu rèn luyện nhiều năm để nấu những món đẹp như tác phẩm nghệ thuật.",
+     "target": "chefs"
+    },
+    {
+     "english": "Our hotel's chef makes fresh bread and pastries every morning at five.",
+     "meaningVi": "Đầu bếp của khách sạn chúng tôi làm bánh mì và bánh ngọt tươi lúc năm giờ mỗi sáng.",
+     "target": "chef"
+    }
+   ],
+   "advanced": [
+    {
+     "kind": "collocation",
+     "phrase": "a head chef",
+     "meaningVi": "bếp trưởng",
+     "example": "The head chef decides what goes on the menu."
+    },
+    {
+     "kind": "collocation",
+     "phrase": "a pastry chef",
+     "meaningVi": "đầu bếp làm bánh",
+     "example": "She trained in Paris to become a pastry chef."
+    },
+    {
+     "kind": "collocation",
+     "phrase": "a celebrity chef",
+     "meaningVi": "đầu bếp nổi tiếng trên truyền hình",
+     "example": "A celebrity chef opened a new restaurant downtown."
+    }
+   ]
+  },
+  {
+   "lemma": "designer",
+   "senseKey": "designer.n.design_job",
+   "partOfSpeech": "noun",
+   "ipa": "/dɪˈzaɪnɚ/",
+   "audioFile": "designer.mp3",
+   "forms": [
+    "designers"
+   ],
+   "meaningVi": "nhà thiết kế",
+   "synonyms": [],
+   "noteVi": "",
+   "family": [
+    {
+     "word": "design",
+     "partOfSpeech": "verb",
+     "meaningVi": "thiết kế"
+    }
+   ],
+   "cardExample": {
+    "english": "Linh is a designer, and she makes posters and logos for small companies.",
+    "meaningVi": "Linh là nhà thiết kế, cô ấy làm poster và logo cho các công ty nhỏ.",
+    "target": "designer"
+   },
+   "quizExamples": [
+    {
+     "english": "The fashion designer spent six months creating the dress for the singer's concert.",
+     "meaningVi": "Nhà thiết kế thời trang mất sáu tháng để tạo ra chiếc váy cho buổi hòa nhạc của ca sĩ.",
+     "target": "designer"
+    },
+    {
+     "english": "Our team needs a good designer to make the new app look clean and simple.",
+     "meaningVi": "Nhóm cần một nhà thiết kế giỏi để ứng dụng mới trông gọn gàng và đơn giản.",
+     "target": "designer"
+    },
+    {
+     "english": "Young designers showed their colorful clothes at the student fashion show.",
+     "meaningVi": "Các nhà thiết kế trẻ trình diễn những bộ quần áo đầy màu sắc tại buổi trình diễn thời trang sinh viên.",
+     "target": "designers"
+    }
+   ],
+   "advanced": [
+    {
+     "kind": "collocation",
+     "phrase": "a graphic designer",
+     "meaningVi": "nhà thiết kế đồ họa",
+     "example": "The graphic designer changed the colors of our logo."
+    },
+    {
+     "kind": "collocation",
+     "phrase": "a fashion / interior designer",
+     "meaningVi": "nhà thiết kế thời trang / nội thất",
+     "example": "We hired an interior designer for our new apartment."
+    },
+    {
+     "kind": "collocation",
+     "phrase": "designer clothes",
+     "meaningVi": "quần áo hàng hiệu",
+     "example": "She spends half her salary on designer clothes."
+    }
+   ]
+  },
+  {
+   "lemma": "engineer",
+   "senseKey": "engineer.n.technical_professional",
+   "partOfSpeech": "noun",
+   "ipa": "/ˌendʒɪˈnɪr/",
+   "audioFile": "engineer.mp3",
+   "forms": [
+    "engineers"
+   ],
+   "meaningVi": "kỹ sư",
+   "synonyms": [],
+   "noteVi": "Đọc bắt đầu bằng nguyên âm nên dùng an engineer.",
+   "family": [
+    {
+     "word": "engineering",
+     "partOfSpeech": "noun",
+     "meaningVi": "ngành kỹ thuật"
+    }
+   ],
+   "cardExample": {
+    "english": "My brother is an engineer, and he builds bridges in the countryside.",
+    "meaningVi": "Anh tôi là kỹ sư, anh ấy xây cầu ở vùng nông thôn.",
+    "target": "engineer"
+   },
+   "quizExamples": [
+    {
+     "english": "The engineers checked the old bridge carefully before they let trucks cross it again.",
+     "meaningVi": "Các kỹ sư kiểm tra kỹ cây cầu cũ trước khi cho xe tải đi qua lại.",
+     "target": "engineers"
+    },
+    {
+     "english": "After five years of studying at the technical university, he became a software engineer.",
+     "meaningVi": "Sau năm năm học trường đại học bách khoa, anh ấy trở thành kỹ sư phần mềm.",
+     "target": "engineer"
+    },
+    {
+     "english": "Our factory's chief engineer fixed the broken machine in less than an hour.",
+     "meaningVi": "Kỹ sư trưởng của nhà máy sửa xong cỗ máy hỏng chưa đầy một tiếng.",
+     "target": "engineer"
+    }
+   ],
+   "advanced": [
+    {
+     "kind": "collocation",
+     "phrase": "a software engineer",
+     "meaningVi": "kỹ sư phần mềm",
+     "example": "She works as a software engineer for a bank."
+    },
+    {
+     "kind": "collocation",
+     "phrase": "a civil engineer",
+     "meaningVi": "kỹ sư xây dựng",
+     "example": "A civil engineer from Hanoi designed the new highway to the coast."
+    },
+    {
+     "kind": "pattern",
+     "phrase": "train / qualify as an engineer",
+     "meaningVi": "học / đủ chuẩn làm kỹ sư",
+     "example": "He qualified as an engineer at the age of twenty-three."
+    }
+   ]
+  },
+  {
+   "lemma": "accountant",
+   "senseKey": "accountant.n.finance_professional",
+   "partOfSpeech": "noun",
+   "ipa": "/əˈkaʊntənt/",
+   "audioFile": "accountant.mp3",
+   "forms": [
+    "accountants"
+   ],
+   "meaningVi": "kế toán",
+   "synonyms": [
+    "bookkeeper"
+   ],
+   "noteVi": "Accountant là người làm kế toán; accounting là ngành kế toán. Dùng an accountant.",
+   "family": [
+    {
+     "word": "accounting",
+     "partOfSpeech": "noun",
+     "meaningVi": "ngành kế toán"
+    },
+    {
+     "word": "accountancy",
+     "partOfSpeech": "noun",
+     "meaningVi": "nghề kế toán"
+    }
+   ],
+   "cardExample": {
+    "english": "She is an accountant, so she checks the company's money every month.",
+    "meaningVi": "Cô ấy là kế toán nên tháng nào cũng kiểm tra tiền của công ty.",
+    "target": "accountant"
+   },
+   "quizExamples": [
+    {
+     "english": "Our accountant found three mistakes in the tax form before we sent it.",
+     "meaningVi": "Kế toán của chúng tôi tìm ra ba lỗi trong tờ khai thuế trước khi gửi đi.",
+     "target": "accountant"
+    },
+    {
+     "english": "Small shops often pay an outside accountant to do their taxes once a year.",
+     "meaningVi": "Các cửa hàng nhỏ thường thuê kế toán bên ngoài làm thuế mỗi năm một lần.",
+     "target": "accountant"
+    },
+    {
+     "english": "At the end of the year, the accountants are busy checking every bill and receipt.",
+     "meaningVi": "Cuối năm, các kế toán bận rộn kiểm tra từng hóa đơn và biên lai.",
+     "target": "accountants"
+    }
+   ],
+   "advanced": [
+    {
+     "kind": "collocation",
+     "phrase": "a chartered / certified accountant",
+     "meaningVi": "kế toán có chứng chỉ hành nghề",
+     "example": "She studied for years to become a certified accountant."
+    },
+    {
+     "kind": "pattern",
+     "phrase": "work as an accountant",
+     "meaningVi": "làm nghề kế toán",
+     "example": "He works as an accountant for a hotel chain."
+    }
+   ]
+  },
+  {
+   "lemma": "office worker",
+   "senseKey": "office worker.n.office_employee",
+   "partOfSpeech": "noun",
+   "ipa": "/ˈɑːfɪs ˌwɝːkɚ/",
+   "audioFile": "office-worker.mp3",
+   "forms": [
+    "office workers"
+   ],
+   "meaningVi": "nhân viên văn phòng",
+   "synonyms": [
+    "clerk",
+    "white-collar worker"
+   ],
+   "noteVi": "Dùng an office worker vì office bắt đầu bằng nguyên âm.",
+   "family": [
+    {
+     "word": "work",
+     "partOfSpeech": "verb",
+     "meaningVi": "làm việc"
+    }
+   ],
+   "cardExample": {
+    "english": "I'm an office worker, so I sit at a computer from eight to five.",
+    "meaningVi": "Tôi là nhân viên văn phòng nên ngồi máy tính từ tám giờ đến năm giờ.",
+    "target": "office worker"
+   },
+   "quizExamples": [
+    {
+     "english": "At noon, hundreds of office workers in white shirts rush out to buy lunch.",
+     "meaningVi": "Buổi trưa, hàng trăm nhân viên văn phòng mặc áo sơ mi trắng ùa ra mua cơm.",
+     "target": "office workers"
+    },
+    {
+     "english": "Sitting all day is a common health problem for every office worker.",
+     "meaningVi": "Ngồi cả ngày là vấn đề sức khỏe phổ biến của mọi nhân viên văn phòng.",
+     "target": "office worker"
+    },
+    {
+     "english": "The new café near the business center is popular with tired office workers.",
+     "meaningVi": "Quán cà phê mới gần trung tâm thương mại được những nhân viên văn phòng mệt mỏi rất ưa chuộng.",
+     "target": "office workers"
+    }
+   ],
+   "advanced": [
+    {
+     "kind": "pattern",
+     "phrase": "work as an office worker",
+     "meaningVi": "làm nhân viên văn phòng",
+     "example": "She worked as an office worker before she opened her shop."
+    },
+    {
+     "kind": "collocation",
+     "phrase": "a typical office worker",
+     "meaningVi": "một nhân viên văn phòng điển hình",
+     "example": "A typical office worker checks email dozens of times a day."
+    }
+   ]
+  },
+  {
+   "lemma": "salesperson",
+   "senseKey": "salesperson.n.sales_staff",
+   "partOfSpeech": "noun",
+   "ipa": "/ˈseɪlzˌpɝːsən/",
+   "audioFile": "salesperson.mp3",
+   "forms": [
+    "salespeople",
+    "salespersons"
+   ],
+   "meaningVi": "nhân viên bán hàng",
+   "synonyms": [
+    "sales assistant",
+    "salesman",
+    "saleswoman",
+    "shop assistant"
+   ],
+   "noteVi": "Số nhiều thường dùng là salespeople.",
+   "family": [
+    {
+     "word": "sell",
+     "partOfSpeech": "verb",
+     "meaningVi": "bán"
+    },
+    {
+     "word": "sale",
+     "partOfSpeech": "noun",
+     "meaningVi": "việc bán hàng"
+    }
+   ],
+   "cardExample": {
+    "english": "He is a salesperson at a phone shop in the shopping mall.",
+    "meaningVi": "Anh ấy là nhân viên bán hàng ở một cửa hàng điện thoại trong trung tâm thương mại.",
+    "target": "salesperson"
+   },
+   "quizExamples": [
+    {
+     "english": "The salesperson showed us three different fridges and explained the price of each one.",
+     "meaningVi": "Nhân viên bán hàng cho chúng tôi xem ba chiếc tủ lạnh và giải thích giá từng chiếc.",
+     "target": "salesperson"
+    },
+    {
+     "english": "Good salespeople listen to customers first and only then suggest a product.",
+     "meaningVi": "Nhân viên bán hàng giỏi lắng nghe khách trước rồi mới gợi ý sản phẩm.",
+     "target": "salespeople"
+    },
+    {
+     "english": "Our best salesperson sold forty cars last month and won a trip to Bangkok.",
+     "meaningVi": "Nhân viên bán hàng giỏi nhất của chúng tôi bán được bốn mươi chiếc xe tháng trước và được thưởng chuyến đi Bangkok.",
+     "target": "salesperson"
+    }
+   ],
+   "advanced": [
+    {
+     "kind": "collocation",
+     "phrase": "a car / insurance salesperson",
+     "meaningVi": "nhân viên bán xe / bảo hiểm",
+     "example": "The insurance salesperson called me three times this week."
+    },
+    {
+     "kind": "collocation",
+     "phrase": "a pushy salesperson",
+     "meaningVi": "nhân viên bán hàng chèo kéo",
+     "example": "I left the store because of a pushy salesperson."
+    }
+   ]
+  },
+  {
+   "lemma": "manager",
+   "senseKey": "manager.n.team_boss",
+   "partOfSpeech": "noun",
+   "ipa": "/ˈmænɪdʒɚ/",
+   "audioFile": "manager.mp3",
+   "forms": [
+    "managers"
+   ],
+   "meaningVi": "quản lý",
+   "synonyms": [
+    "boss",
+    "supervisor"
+   ],
+   "noteVi": "",
+   "family": [
+    {
+     "word": "manage",
+     "partOfSpeech": "verb",
+     "meaningVi": "quản lý"
+    },
+    {
+     "word": "management",
+     "partOfSpeech": "noun",
+     "meaningVi": "sự quản lý; ban quản lý"
+    },
+    {
+     "word": "managerial",
+     "partOfSpeech": "adjective",
+     "meaningVi": "thuộc về quản lý"
+    }
+   ],
+   "cardExample": {
+    "english": "My aunt is a manager at a bank, and she leads a team of ten people.",
+    "meaningVi": "Cô tôi là quản lý ở một ngân hàng và dẫn dắt một nhóm mười người.",
+    "target": "manager"
+   },
+   "quizExamples": [
+    {
+     "english": "If the food is cold, ask to speak to the manager of the restaurant.",
+     "meaningVi": "Nếu đồ ăn bị nguội, hãy xin gặp quản lý nhà hàng.",
+     "target": "manager"
+    },
+    {
+     "english": "Our manager gave everyone a day off after we finished the big project.",
+     "meaningVi": "Quản lý cho cả nhóm nghỉ một ngày sau khi chúng tôi hoàn thành dự án lớn.",
+     "target": "manager"
+    },
+    {
+     "english": "The hotel hired two new managers to look after the staff on weekends.",
+     "meaningVi": "Khách sạn thuê hai quản lý mới để trông nhân viên vào cuối tuần.",
+     "target": "managers"
+    }
+   ],
+   "advanced": [
+    {
+     "kind": "collocation",
+     "phrase": "a sales / project manager",
+     "meaningVi": "quản lý kinh doanh / quản lý dự án",
+     "example": "The project manager set a deadline for Friday."
+    },
+    {
+     "kind": "collocation",
+     "phrase": "the store manager",
+     "meaningVi": "cửa hàng trưởng",
+     "example": "The store manager let me return the shoes without a receipt."
+    },
+    {
+     "kind": "pattern",
+     "phrase": "speak to the manager",
+     "meaningVi": "xin gặp quản lý (để khiếu nại)",
+     "example": "The angry customer asked to speak to the manager."
+    }
+   ]
+  },
+  {
+   "lemma": "business owner",
+   "senseKey": "business owner.n.owns_business",
+   "partOfSpeech": "noun",
+   "ipa": "/ˈbɪznəs ˌoʊnɚ/",
+   "audioFile": "business-owner.mp3",
+   "forms": [
+    "business owners"
+   ],
+   "meaningVi": "chủ kinh doanh",
+   "synonyms": [
+    "entrepreneur",
+    "businessman",
+    "businesswoman"
+   ],
+   "noteVi": "",
+   "family": [
+    {
+     "word": "own",
+     "partOfSpeech": "verb",
+     "meaningVi": "sở hữu"
+    },
+    {
+     "word": "ownership",
+     "partOfSpeech": "noun",
+     "meaningVi": "quyền sở hữu"
+    }
+   ],
+   "cardExample": {
+    "english": "My neighbor is a business owner, and she runs three bakeries in the city.",
+    "meaningVi": "Cô hàng xóm tôi là chủ kinh doanh, cô ấy điều hành ba tiệm bánh trong thành phố.",
+    "target": "business owner"
+   },
+   "quizExamples": [
+    {
+     "english": "Many small business owners work seven days a week to keep their shops open.",
+     "meaningVi": "Nhiều chủ doanh nghiệp nhỏ làm việc bảy ngày một tuần để giữ cửa hàng hoạt động.",
+     "target": "business owners"
+    },
+    {
+     "english": "As the business owner, he has to pay his staff even when sales are low.",
+     "meaningVi": "Là chủ kinh doanh, anh ấy vẫn phải trả lương nhân viên kể cả khi bán ế.",
+     "target": "business owner"
+    },
+    {
+     "english": "The city offers cheap loans to young business owners who hire local people.",
+     "meaningVi": "Thành phố cho vay lãi thấp với các chủ kinh doanh trẻ có thuê người địa phương.",
+     "target": "business owners"
+    }
+   ],
+   "advanced": [
+    {
+     "kind": "collocation",
+     "phrase": "a small business owner",
+     "meaningVi": "chủ doanh nghiệp nhỏ",
+     "example": "Being a small business owner means doing a bit of everything."
+    },
+    {
+     "kind": "collocation",
+     "phrase": "a local business owner",
+     "meaningVi": "chủ kinh doanh địa phương",
+     "example": "A local business owner gave free drinks to the volunteers."
+    }
+   ]
+  },
+  {
+   "lemma": "freelancer",
+   "senseKey": "freelancer.n.self_employed",
+   "partOfSpeech": "noun",
+   "ipa": "/ˈfriːlænsɚ/",
+   "audioFile": "freelancer.mp3",
+   "forms": [
+    "freelancers"
+   ],
+   "meaningVi": "người làm tự do",
+   "synonyms": [],
+   "noteVi": "Freelancer là danh từ chỉ người; muốn nói cách làm việc thì dùng work freelance hoặc be self-employed.",
+   "family": [
+    {
+     "word": "freelance",
+     "partOfSpeech": "adjective",
+     "meaningVi": "làm tự do"
+    }
+   ],
+   "cardExample": {
+    "english": "I'm a freelancer, so I choose my own projects and work from home.",
+    "meaningVi": "Tôi là người làm tự do nên tự chọn dự án và làm việc ở nhà.",
+    "target": "freelancer"
+   },
+   "quizExamples": [
+    {
+     "english": "Our company hired two freelancers to translate the website into Japanese.",
+     "meaningVi": "Công ty thuê hai người làm tự do dịch trang web sang tiếng Nhật.",
+     "target": "freelancers"
+    },
+    {
+     "english": "Working as a self-employed freelancer, she has no boss but also no paid holidays.",
+     "meaningVi": "Làm tự do, cô ấy không có sếp nhưng cũng chẳng có ngày nghỉ được trả lương.",
+     "target": "freelancer"
+    },
+    {
+     "english": "Many young freelancers sit in coffee shops all day with their laptops.",
+     "meaningVi": "Nhiều bạn trẻ làm tự do ngồi quán cà phê cả ngày với chiếc laptop.",
+     "target": "freelancers"
+    }
+   ],
+   "advanced": [
+    {
+     "kind": "pattern",
+     "phrase": "work as a freelancer",
+     "meaningVi": "làm việc tự do",
+     "example": "He left his job to work as a freelancer."
+    },
+    {
+     "kind": "collocation",
+     "phrase": "hire a freelancer",
+     "meaningVi": "thuê người làm tự do",
+     "example": "We hired a freelancer to design our wedding invitations."
+    }
+   ]
+  },
+  {
+   "lemma": "homemaker",
+   "senseKey": "homemaker.n.stays_home",
+   "partOfSpeech": "noun",
+   "ipa": "/ˈhoʊmˌmeɪkɚ/",
+   "audioFile": "homemaker.mp3",
+   "forms": [
+    "homemakers"
+   ],
+   "meaningVi": "nội trợ",
+   "synonyms": [
+    "housewife",
+    "househusband",
+    "stay-at-home parent"
+   ],
+   "noteVi": "Homemaker trung tính, dùng cho cả nam và nữ; housewife chỉ dùng cho phụ nữ.",
+   "family": [
+    {
+     "word": "homemaking",
+     "partOfSpeech": "noun",
+     "meaningVi": "việc nội trợ"
+    }
+   ],
+   "cardExample": {
+    "english": "My mother is a homemaker, and she takes care of our home and family.",
+    "meaningVi": "Mẹ tôi làm nội trợ, mẹ chăm lo nhà cửa và gia đình.",
+    "target": "homemaker"
+   },
+   "quizExamples": [
+    {
+     "english": "Being a full-time homemaker with three small kids is harder than any office job.",
+     "meaningVi": "Làm nội trợ toàn thời gian với ba đứa con nhỏ còn vất vả hơn mọi công việc văn phòng.",
+     "target": "homemaker"
+    },
+    {
+     "english": "The cooking class in our neighborhood is mostly for homemakers who want new recipes.",
+     "meaningVi": "Lớp nấu ăn ở khu tôi chủ yếu dành cho những người nội trợ muốn học món mới.",
+     "target": "homemakers"
+    },
+    {
+     "english": "After her twins were born, she left her job and became a full-time homemaker.",
+     "meaningVi": "Sau khi sinh đôi, cô ấy nghỉ việc và ở nhà làm nội trợ toàn thời gian.",
+     "target": "homemaker"
+    }
+   ],
+   "advanced": [
+    {
+     "kind": "collocation",
+     "phrase": "a full-time homemaker",
+     "meaningVi": "người nội trợ toàn thời gian",
+     "example": "She was a full-time homemaker for fifteen years."
+    },
+    {
+     "kind": "pattern",
+     "phrase": "stay at home as a homemaker",
+     "meaningVi": "ở nhà làm nội trợ",
+     "example": "He chose to stay at home as a homemaker while his wife worked."
+    }
+   ]
+  },
+  {
+   "lemma": "IT worker",
+   "senseKey": "it worker.n.it_employee",
+   "partOfSpeech": "noun",
+   "ipa": "/ˌaɪˈtiː ˌwɝːkɚ/",
+   "audioFile": "it-worker.mp3",
+   "forms": [
+    "IT workers"
+   ],
+   "meaningVi": "nhân viên IT",
+   "synonyms": [
+    "IT specialist",
+    "IT technician"
+   ],
+   "noteVi": "IT đọc là /ˌaɪˈtiː/, bắt đầu bằng nguyên âm nên dùng an IT worker.",
+   "family": [
+    {
+     "word": "work",
+     "partOfSpeech": "verb",
+     "meaningVi": "làm việc"
+    }
+   ],
+   "cardExample": {
+    "english": "I'm an IT worker, so people always ask me to fix their laptops.",
+    "meaningVi": "Tôi làm IT nên ai cũng nhờ tôi sửa laptop.",
+    "target": "IT worker"
+   },
+   "quizExamples": [
+    {
+     "english": "Our company has only one IT worker, and he looks after two hundred computers.",
+     "meaningVi": "Công ty chúng tôi chỉ có một nhân viên IT, anh ấy lo cho hai trăm máy tính.",
+     "target": "IT worker"
+    },
+    {
+     "english": "Many IT workers in Da Nang now work remotely for companies in Japan.",
+     "meaningVi": "Nhiều nhân viên IT ở Đà Nẵng giờ làm việc từ xa cho các công ty Nhật.",
+     "target": "IT workers"
+    },
+    {
+     "english": "When the email system crashed, the IT workers stayed until midnight to repair it.",
+     "meaningVi": "Khi hệ thống email sập, các nhân viên IT ở lại tới nửa đêm để sửa.",
+     "target": "IT workers"
+    }
+   ],
+   "advanced": [
+    {
+     "kind": "pattern",
+     "phrase": "work as an IT worker",
+     "meaningVi": "làm nhân viên IT",
+     "example": "He works as an IT worker at a hospital."
+    },
+    {
+     "kind": "collocation",
+     "phrase": "skilled IT workers",
+     "meaningVi": "nhân viên IT tay nghề cao",
+     "example": "The country needs many more skilled IT workers in the next ten years."
+    }
+   ]
+  },
+  {
+   "lemma": "secretary",
+   "senseKey": "secretary.n.office_assistant",
+   "partOfSpeech": "noun",
+   "ipa": "/ˈsekrəteri/",
+   "audioFile": "secretary.mp3",
+   "forms": [
+    "secretaries"
+   ],
+   "meaningVi": "thư ký",
+   "synonyms": [
+    "assistant",
+    "personal assistant",
+    "PA"
+   ],
+   "noteVi": "",
+   "family": [
+    {
+     "word": "secretarial",
+     "partOfSpeech": "adjective",
+     "meaningVi": "thuộc công việc thư ký"
+    }
+   ],
+   "cardExample": {
+    "english": "She works as a secretary for the director of a big trading company.",
+    "meaningVi": "Cô ấy làm thư ký cho giám đốc của một công ty thương mại lớn.",
+    "target": "secretary"
+   },
+   "quizExamples": [
+    {
+     "english": "Please leave your name with my secretary, and I will call you back this afternoon.",
+     "meaningVi": "Anh cứ để lại tên cho thư ký của tôi, chiều nay tôi sẽ gọi lại.",
+     "target": "secretary"
+    },
+    {
+     "english": "The secretary keeps the boss's calendar and books all his business trips.",
+     "meaningVi": "Thư ký giữ lịch làm việc của sếp và đặt mọi chuyến công tác cho ông ấy.",
+     "target": "secretary"
+    },
+    {
+     "english": "The school secretaries answer phone calls from worried parents all morning.",
+     "meaningVi": "Các thư ký của trường nghe điện thoại của những phụ huynh lo lắng suốt buổi sáng.",
+     "target": "secretaries"
+    }
+   ],
+   "advanced": [
+    {
+     "kind": "collocation",
+     "phrase": "a personal secretary",
+     "meaningVi": "thư ký riêng",
+     "example": "The CEO has a personal secretary who speaks four languages."
+    },
+    {
+     "kind": "collocation",
+     "phrase": "the school secretary",
+     "meaningVi": "thư ký văn phòng trường",
+     "example": "Ask the school secretary for a new student card."
+    }
+   ]
+  },
+  {
+   "lemma": "receptionist",
+   "senseKey": "receptionist.n.front_desk",
+   "partOfSpeech": "noun",
+   "ipa": "/rɪˈsepʃənɪst/",
+   "audioFile": "receptionist.mp3",
+   "forms": [
+    "receptionists"
+   ],
+   "meaningVi": "nhân viên lễ tân",
+   "synonyms": [
+    "front desk clerk"
+   ],
+   "noteVi": "",
+   "family": [
+    {
+     "word": "reception",
+     "partOfSpeech": "noun",
+     "meaningVi": "quầy lễ tân"
+    }
+   ],
+   "cardExample": {
+    "english": "She is a receptionist at a hotel, so she welcomes guests and gives them keys.",
+    "meaningVi": "Cô ấy là lễ tân khách sạn nên đón khách và đưa chìa khóa phòng.",
+    "target": "receptionist"
+   },
+   "quizExamples": [
+    {
+     "english": "When you arrive at the clinic, give your name to the receptionist at the front desk.",
+     "meaningVi": "Khi đến phòng khám, bạn báo tên cho nhân viên lễ tân ở quầy.",
+     "target": "receptionist"
+    },
+    {
+     "english": "The receptionist answered the phone with a big smile: \"Good morning, Sunrise Hotel!\"",
+     "meaningVi": "Cô lễ tân nhấc máy với nụ cười tươi: \"Chào buổi sáng, khách sạn Sunrise xin nghe!\"",
+     "target": "receptionist"
+    },
+    {
+     "english": "Our company's receptionists speak English, so foreign visitors feel welcome right away.",
+     "meaningVi": "Các nhân viên lễ tân của công ty nói tiếng Anh nên khách nước ngoài thấy được chào đón ngay.",
+     "target": "receptionists"
+    }
+   ],
+   "advanced": [
+    {
+     "kind": "collocation",
+     "phrase": "a hotel receptionist",
+     "meaningVi": "lễ tân khách sạn",
+     "example": "The hotel receptionist found us a room with a sea view."
+    },
+    {
+     "kind": "pattern",
+     "phrase": "ask the receptionist for sth",
+     "meaningVi": "hỏi lễ tân xin cái gì",
+     "example": "If you need the Wi-Fi password, ask the receptionist downstairs."
+    }
+   ]
+  },
+  {
+   "lemma": "lawyer",
+   "senseKey": "lawyer.n.legal_professional",
+   "partOfSpeech": "noun",
+   "ipa": "/ˈlɔːjɚ/",
+   "audioFile": "lawyer.mp3",
+   "forms": [
+    "lawyers"
+   ],
+   "meaningVi": "luật sư",
+   "synonyms": [
+    "attorney",
+    "solicitor",
+    "barrister"
+   ],
+   "noteVi": "Attorney hay dùng ở Mỹ; solicitor và barrister là cách gọi ở Anh.",
+   "family": [
+    {
+     "word": "law",
+     "partOfSpeech": "noun",
+     "meaningVi": "luật pháp"
+    },
+    {
+     "word": "legal",
+     "partOfSpeech": "adjective",
+     "meaningVi": "thuộc pháp luật"
+    }
+   ],
+   "cardExample": {
+    "english": "My cousin studied law for four years, and now she is a lawyer.",
+    "meaningVi": "Em họ tôi học luật bốn năm và giờ là luật sư.",
+    "target": "lawyer"
+   },
+   "quizExamples": [
+    {
+     "english": "Don't sign anything until your lawyer has read every page of the contract.",
+     "meaningVi": "Đừng ký gì cho đến khi luật sư của bạn đọc hết từng trang hợp đồng.",
+     "target": "lawyer"
+    },
+    {
+     "english": "In court, the lawyer showed the judge a video that proved her client was innocent.",
+     "meaningVi": "Tại tòa, luật sư cho thẩm phán xem đoạn video chứng minh thân chủ vô tội.",
+     "target": "lawyer"
+    },
+    {
+     "english": "The two companies sent their lawyers to talk about the problem instead of the bosses.",
+     "meaningVi": "Hai công ty cử luật sư của mình ra nói chuyện thay vì các sếp.",
+     "target": "lawyers"
+    }
+   ],
+   "advanced": [
+    {
+     "kind": "collocation",
+     "phrase": "hire / get a lawyer",
+     "meaningVi": "thuê luật sư",
+     "example": "If they do not pay you, you should get a lawyer."
+    },
+    {
+     "kind": "collocation",
+     "phrase": "a divorce / criminal lawyer",
+     "meaningVi": "luật sư ly hôn / hình sự",
+     "example": "He is one of the best criminal lawyers in the city."
+    }
+   ]
+  },
+  {
+   "lemma": "banker",
+   "senseKey": "banker.n.bank_professional",
+   "partOfSpeech": "noun",
+   "ipa": "/ˈbæŋkɚ/",
+   "audioFile": "banker.mp3",
+   "forms": [
+    "bankers"
+   ],
+   "meaningVi": "nhân viên ngân hàng",
+   "synonyms": [
+    "bank clerk",
+    "bank teller",
+    "teller"
+   ],
+   "noteVi": "Banker thường chỉ người làm nghề tài chính ngân hàng; nhân viên quầy giao dịch là bank teller.",
+   "family": [
+    {
+     "word": "banking",
+     "partOfSpeech": "noun",
+     "meaningVi": "ngành ngân hàng"
+    }
+   ],
+   "cardExample": {
+    "english": "Her father is a banker, so he often talks about loans and interest rates.",
+    "meaningVi": "Bố cô ấy làm ngân hàng nên hay nói chuyện về khoản vay và lãi suất.",
+    "target": "banker"
+   },
+   "quizExamples": [
+    {
+     "english": "The banker explained how much I would pay every month if I borrowed money for a house.",
+     "meaningVi": "Nhân viên ngân hàng giải thích tôi sẽ trả bao nhiêu mỗi tháng nếu vay tiền mua nhà.",
+     "target": "banker"
+    },
+    {
+     "english": "Bankers in suits hurried along the street on their way to the stock exchange.",
+     "meaningVi": "Những nhân viên ngân hàng mặc vest vội vã trên phố đến sở giao dịch chứng khoán.",
+     "target": "bankers"
+    },
+    {
+     "english": "My cousin left her job as an investment banker because she never had time to sleep.",
+     "meaningVi": "Chị họ tôi bỏ việc chuyên viên ngân hàng đầu tư vì chẳng bao giờ có thời gian ngủ.",
+     "target": "banker"
+    }
+   ],
+   "advanced": [
+    {
+     "kind": "collocation",
+     "phrase": "an investment banker",
+     "meaningVi": "chuyên viên ngân hàng đầu tư",
+     "example": "An investment banker helped the company sell its shares."
+    },
+    {
+     "kind": "pattern",
+     "phrase": "work as a banker",
+     "meaningVi": "làm nghề ngân hàng",
+     "example": "He worked as a banker in Singapore for six years."
+    }
+   ]
+  },
+  {
+   "lemma": "pharmacist",
+   "senseKey": "pharmacist.n.medicine_professional",
+   "partOfSpeech": "noun",
+   "ipa": "/ˈfɑːrməsɪst/",
+   "audioFile": "pharmacist.mp3",
+   "forms": [
+    "pharmacists"
+   ],
+   "meaningVi": "dược sĩ",
+   "synonyms": [
+    "chemist",
+    "druggist"
+   ],
+   "noteVi": "Pharmacist là người (dược sĩ); pharmacy là nơi (nhà thuốc).",
+   "family": [
+    {
+     "word": "pharmaceutical",
+     "partOfSpeech": "adjective",
+     "meaningVi": "thuộc dược phẩm"
+    }
+   ],
+   "cardExample": {
+    "english": "The pharmacist told me to take the medicine twice a day after meals.",
+    "meaningVi": "Dược sĩ dặn tôi uống thuốc ngày hai lần sau bữa ăn.",
+    "target": "pharmacist"
+   },
+   "quizExamples": [
+    {
+     "english": "If you are not sure which cough syrup to buy, ask the pharmacist behind the counter.",
+     "meaningVi": "Nếu không chắc nên mua siro ho nào, hãy hỏi dược sĩ sau quầy.",
+     "target": "pharmacist"
+    },
+    {
+     "english": "Pharmacists must check the doctor's prescription carefully before they give out strong drugs.",
+     "meaningVi": "Dược sĩ phải kiểm tra kỹ đơn của bác sĩ trước khi bán thuốc mạnh.",
+     "target": "pharmacists"
+    },
+    {
+     "english": "My sister studied for five years at medical university to become a hospital pharmacist.",
+     "meaningVi": "Chị tôi học năm năm ở trường đại học y để trở thành dược sĩ bệnh viện.",
+     "target": "pharmacist"
+    }
+   ],
+   "advanced": [
+    {
+     "kind": "pattern",
+     "phrase": "ask your pharmacist",
+     "meaningVi": "hỏi ý kiến dược sĩ",
+     "example": "Ask your pharmacist if you can take these pills together."
+    },
+    {
+     "kind": "collocation",
+     "phrase": "a qualified pharmacist",
+     "meaningVi": "dược sĩ có bằng cấp",
+     "example": "Only a qualified pharmacist can sell this medicine."
+    }
+   ]
+  },
+  {
+   "lemma": "dentist",
+   "senseKey": "dentist.n.teeth_doctor",
+   "partOfSpeech": "noun",
+   "ipa": "/ˈdentɪst/",
+   "audioFile": "dentist.mp3",
+   "forms": [
+    "dentists"
+   ],
+   "meaningVi": "nha sĩ",
+   "synonyms": [],
+   "noteVi": "Đi khám răng nói go to the dentist hoặc go to the dentist's (phòng khám nha khoa).",
+   "family": [
+    {
+     "word": "dental",
+     "partOfSpeech": "adjective",
+     "meaningVi": "thuộc về răng"
+    },
+    {
+     "word": "dentistry",
+     "partOfSpeech": "noun",
+     "meaningVi": "nha khoa"
+    }
+   ],
+   "cardExample": {
+    "english": "I go to the dentist every six months to get my teeth cleaned.",
+    "meaningVi": "Cứ sáu tháng tôi lại đi nha sĩ để làm sạch răng.",
+    "target": "dentist"
+   },
+   "quizExamples": [
+    {
+     "english": "My little son cried all the way home because the dentist pulled out his tooth.",
+     "meaningVi": "Con trai nhỏ của tôi khóc suốt đường về vì nha sĩ nhổ răng cho bé.",
+     "target": "dentist"
+    },
+    {
+     "english": "The dentist said I should brush more gently and use less sugar in my coffee.",
+     "meaningVi": "Nha sĩ bảo tôi nên chải răng nhẹ hơn và cho ít đường vào cà phê.",
+     "target": "dentist"
+    },
+    {
+     "english": "Most people feel nervous in the dentist's chair, even when nothing hurts.",
+     "meaningVi": "Hầu hết mọi người đều hồi hộp khi ngồi ghế nha sĩ, kể cả khi chẳng đau gì.",
+     "target": "dentist"
+    }
+   ],
+   "advanced": [
+    {
+     "kind": "collocation",
+     "phrase": "go to the dentist's",
+     "meaningVi": "đi khám răng",
+     "example": "I have to go to the dentist's after work today."
+    },
+    {
+     "kind": "collocation",
+     "phrase": "a dentist appointment",
+     "meaningVi": "lịch hẹn nha sĩ",
+     "example": "I missed my dentist appointment because of the rain."
+    }
+   ]
+  },
+  {
+   "lemma": "hairdresser",
+   "senseKey": "hairdresser.n.hair_stylist",
+   "partOfSpeech": "noun",
+   "ipa": "/ˈherˌdresɚ/",
+   "audioFile": "hairdresser.mp3",
+   "forms": [
+    "hairdressers"
+   ],
+   "meaningVi": "thợ làm tóc",
+   "synonyms": [
+    "hairstylist",
+    "stylist",
+    "barber"
+   ],
+   "noteVi": "Barber là thợ cắt tóc nam; hairdresser cắt, nhuộm, uốn tóc cho cả nam và nữ.",
+   "family": [
+    {
+     "word": "hairdressing",
+     "partOfSpeech": "noun",
+     "meaningVi": "nghề làm tóc"
+    }
+   ],
+   "cardExample": {
+    "english": "My aunt is a hairdresser, and she cuts my hair for free.",
+    "meaningVi": "Dì tôi là thợ làm tóc và cắt tóc miễn phí cho tôi.",
+    "target": "hairdresser"
+   },
+   "quizExamples": [
+    {
+     "english": "I showed the hairdresser a photo on my phone and said, \"I want this color.\"",
+     "meaningVi": "Tôi đưa thợ làm tóc xem ảnh trên điện thoại và nói: \"Em muốn màu này.\"",
+     "target": "hairdresser"
+    },
+    {
+     "english": "Before the wedding, the bride spent three hours at the hairdresser's getting ready.",
+     "meaningVi": "Trước đám cưới, cô dâu ngồi ba tiếng ở tiệm làm tóc để chuẩn bị.",
+     "target": "hairdresser"
+    },
+    {
+     "english": "Busy hairdressers often stand for ten hours a day, washing, cutting and drying hair.",
+     "meaningVi": "Thợ làm tóc đông khách thường đứng mười tiếng mỗi ngày gội, cắt và sấy tóc.",
+     "target": "hairdressers"
+    }
+   ],
+   "advanced": [
+    {
+     "kind": "collocation",
+     "phrase": "go to the hairdresser's",
+     "meaningVi": "đi tiệm làm tóc",
+     "example": "She goes to the hairdresser's once a month."
+    },
+    {
+     "kind": "collocation",
+     "phrase": "a good hairdresser",
+     "meaningVi": "thợ làm tóc khéo tay",
+     "example": "It is hard to find a good hairdresser in a new city."
+    }
+   ]
+  },
+  {
+   "lemma": "waiter",
+   "senseKey": "waiter.n.restaurant_server",
+   "partOfSpeech": "noun",
+   "ipa": "/ˈweɪtɚ/",
+   "audioFile": "waiter.mp3",
+   "forms": [
+    "waiters"
+   ],
+   "meaningVi": "nhân viên bồi bàn",
+   "synonyms": [
+    "waitress",
+    "server"
+   ],
+   "noteVi": "Waiter là nam; waitress là nữ; server dùng cho cả hai.",
+   "family": [
+    {
+     "word": "wait",
+     "partOfSpeech": "verb",
+     "meaningVi": "phục vụ (bàn)"
+    }
+   ],
+   "cardExample": {
+    "english": "He works as a waiter in a seafood restaurant near the beach.",
+    "meaningVi": "Anh ấy làm bồi bàn ở một nhà hàng hải sản gần biển.",
+    "target": "waiter"
+   },
+   "quizExamples": [
+    {
+     "english": "Excuse me, could you call the waiter? We'd like to see the menu again.",
+     "meaningVi": "Xin lỗi, bạn gọi giúp anh phục vụ được không? Chúng tôi muốn xem lại thực đơn.",
+     "target": "waiter"
+    },
+    {
+     "english": "The waiter carried five hot bowls of pho on one tray without dropping anything.",
+     "meaningVi": "Anh phục vụ bưng năm tô phở nóng trên một khay mà không làm rơi gì.",
+     "target": "waiter"
+    },
+    {
+     "english": "In the US, customers usually give waiters a tip of about fifteen percent.",
+     "meaningVi": "Ở Mỹ, khách thường boa cho nhân viên phục vụ khoảng mười lăm phần trăm.",
+     "target": "waiters"
+    }
+   ],
+   "advanced": [
+    {
+     "kind": "pattern",
+     "phrase": "ask the waiter for the bill",
+     "meaningVi": "gọi phục vụ tính tiền",
+     "example": "When we finished, I asked the waiter for the bill."
+    },
+    {
+     "kind": "collocation",
+     "phrase": "tip the waiter",
+     "meaningVi": "boa cho phục vụ",
+     "example": "Do you usually tip the waiter in Vietnam?"
+    }
+   ]
+  },
+  {
+   "lemma": "cashier",
+   "senseKey": "cashier.n.checkout_worker",
+   "partOfSpeech": "noun",
+   "ipa": "/kæˈʃɪr/",
+   "audioFile": "cashier.mp3",
+   "forms": [
+    "cashiers"
+   ],
+   "meaningVi": "nhân viên thu ngân",
+   "synonyms": [
+    "checkout assistant"
+   ],
+   "noteVi": "",
+   "family": [
+    {
+     "word": "cash",
+     "partOfSpeech": "noun",
+     "meaningVi": "tiền mặt"
+    }
+   ],
+   "cardExample": {
+    "english": "She works as a cashier at a supermarket on weekends.",
+    "meaningVi": "Cô ấy làm thu ngân ở siêu thị vào cuối tuần.",
+    "target": "cashier"
+   },
+   "quizExamples": [
+    {
+     "english": "The cashier scanned my shopping and asked if I wanted to pay by card.",
+     "meaningVi": "Nhân viên thu ngân quét hàng của tôi rồi hỏi tôi có muốn trả bằng thẻ không.",
+     "target": "cashier"
+    },
+    {
+     "english": "At the end of every shift, the cashiers count the money in their tills.",
+     "meaningVi": "Cuối mỗi ca, các thu ngân đếm tiền trong ngăn kéo quầy.",
+     "target": "cashiers"
+    },
+    {
+     "english": "I paid the cashier with a big note, and she gave me lots of coins back.",
+     "meaningVi": "Tôi trả cho cô thu ngân tờ tiền lớn và cô ấy thối lại cả nắm tiền xu.",
+     "target": "cashier"
+    }
+   ],
+   "advanced": [
+    {
+     "kind": "pattern",
+     "phrase": "pay the cashier",
+     "meaningVi": "trả tiền ở quầy thu ngân",
+     "example": "Take the ticket and pay the cashier at the exit."
+    },
+    {
+     "kind": "collocation",
+     "phrase": "the cashier desk",
+     "meaningVi": "quầy thu ngân",
+     "example": "Please bring your shopping to the cashier desk."
+    }
+   ]
+  },
+  {
+   "lemma": "mechanic",
+   "senseKey": "mechanic.n.vehicle_repairer",
+   "partOfSpeech": "noun",
+   "ipa": "/məˈkænɪk/",
+   "audioFile": "mechanic.mp3",
+   "forms": [
+    "mechanics"
+   ],
+   "meaningVi": "thợ sửa xe, sửa máy",
+   "synonyms": [
+    "repairman",
+    "technician"
+   ],
+   "noteVi": "",
+   "family": [
+    {
+     "word": "mechanical",
+     "partOfSpeech": "adjective",
+     "meaningVi": "thuộc máy móc"
+    },
+    {
+     "word": "mechanism",
+     "partOfSpeech": "noun",
+     "meaningVi": "cơ chế; bộ máy"
+    }
+   ],
+   "cardExample": {
+    "english": "My motorbike broke down, so I took it to a mechanic near my house.",
+    "meaningVi": "Xe máy của tôi bị hỏng nên tôi dắt đến thợ sửa xe gần nhà.",
+    "target": "mechanic"
+   },
+   "quizExamples": [
+    {
+     "english": "The mechanic listened to the engine for a minute and said the problem was the battery.",
+     "meaningVi": "Ông thợ nghe tiếng máy một lúc rồi bảo hỏng ở bình ắc quy.",
+     "target": "mechanic"
+    },
+    {
+     "english": "Our neighbor's son is training to become a car mechanic at a garage downtown.",
+     "meaningVi": "Con trai nhà hàng xóm đang học nghề thợ sửa ô tô ở một gara trong phố.",
+     "target": "mechanic"
+    },
+    {
+     "english": "Airplane mechanics check every part of the plane before it flies again.",
+     "meaningVi": "Thợ máy bay kiểm tra từng bộ phận của máy bay trước khi nó bay lại.",
+     "target": "mechanics"
+    }
+   ],
+   "advanced": [
+    {
+     "kind": "collocation",
+     "phrase": "a car / motorbike mechanic",
+     "meaningVi": "thợ sửa ô tô / xe máy",
+     "example": "A good motorbike mechanic can fix almost anything."
+    },
+    {
+     "kind": "collocation",
+     "phrase": "a qualified mechanic",
+     "meaningVi": "thợ máy có tay nghề",
+     "example": "Only let a qualified mechanic touch the brakes."
+    }
+   ]
+  },
+  {
+   "lemma": "electrician",
+   "senseKey": "electrician.n.electrical_worker",
+   "partOfSpeech": "noun",
+   "ipa": "/ɪˌlekˈtrɪʃən/",
+   "audioFile": "electrician.mp3",
+   "forms": [
+    "electricians"
+   ],
+   "meaningVi": "thợ điện",
+   "synonyms": [],
+   "noteVi": "Bắt đầu bằng nguyên âm nên dùng an electrician.",
+   "family": [
+    {
+     "word": "electric",
+     "partOfSpeech": "adjective",
+     "meaningVi": "chạy bằng điện"
+    },
+    {
+     "word": "electrical",
+     "partOfSpeech": "adjective",
+     "meaningVi": "thuộc về điện"
+    },
+    {
+     "word": "electricity",
+     "partOfSpeech": "noun",
+     "meaningVi": "điện"
+    }
+   ],
+   "cardExample": {
+    "english": "The lights went out, so we called an electrician to check the wires.",
+    "meaningVi": "Đèn bị tắt nên chúng tôi gọi thợ điện đến kiểm tra dây.",
+    "target": "electrician"
+   },
+   "quizExamples": [
+    {
+     "english": "Don't try to fix the broken socket yourself — wait for the electrician to come tomorrow.",
+     "meaningVi": "Đừng tự sửa ổ điện hỏng, đợi mai thợ điện đến.",
+     "target": "electrician"
+    },
+    {
+     "english": "The electrician turned off the power before he put the new lamp on the ceiling.",
+     "meaningVi": "Anh thợ điện ngắt cầu dao trước khi lắp đèn mới lên trần nhà.",
+     "target": "electrician"
+    },
+    {
+     "english": "Electricians often climb high ladders and work close to dangerous cables.",
+     "meaningVi": "Thợ điện thường trèo thang cao và làm việc sát những đường dây nguy hiểm.",
+     "target": "electricians"
+    }
+   ],
+   "advanced": [
+    {
+     "kind": "pattern",
+     "phrase": "call (in) an electrician",
+     "meaningVi": "gọi thợ điện",
+     "example": "We had to call in an electrician after the storm."
+    },
+    {
+     "kind": "collocation",
+     "phrase": "a qualified electrician",
+     "meaningVi": "thợ điện có chứng chỉ",
+     "example": "This work must be done by a qualified electrician."
+    }
+   ]
+  },
+  {
+   "lemma": "builder",
+   "senseKey": "builder.n.construction_worker",
+   "partOfSpeech": "noun",
+   "ipa": "/ˈbɪldɚ/",
+   "audioFile": "builder.mp3",
+   "forms": [
+    "builders"
+   ],
+   "meaningVi": "thợ xây",
+   "synonyms": [
+    "construction worker",
+    "bricklayer"
+   ],
+   "noteVi": "",
+   "family": [
+    {
+     "word": "build",
+     "partOfSpeech": "verb",
+     "meaningVi": "xây"
+    },
+    {
+     "word": "building",
+     "partOfSpeech": "noun",
+     "meaningVi": "tòa nhà"
+    }
+   ],
+   "cardExample": {
+    "english": "My uncle is a builder, and he helped build most of the houses in our village.",
+    "meaningVi": "Chú tôi là thợ xây và đã góp tay xây gần hết các ngôi nhà trong làng.",
+    "target": "builder"
+   },
+   "quizExamples": [
+    {
+     "english": "The builders start work at six in the morning to avoid the midday heat.",
+     "meaningVi": "Các thợ xây bắt đầu làm từ sáu giờ sáng để tránh nắng trưa.",
+     "target": "builders"
+    },
+    {
+     "english": "We paid the builder to add a second floor and a small balcony to our house.",
+     "meaningVi": "Chúng tôi trả tiền cho thợ xây để làm thêm tầng hai và một ban công nhỏ.",
+     "target": "builder"
+    },
+    {
+     "english": "After the storm, builders worked for weeks to repair the damaged roofs.",
+     "meaningVi": "Sau bão, thợ xây làm suốt nhiều tuần để sửa những mái nhà bị hỏng.",
+     "target": "builders"
+    }
+   ],
+   "advanced": [
+    {
+     "kind": "collocation",
+     "phrase": "get the builders in",
+     "meaningVi": "thuê thợ về sửa, xây nhà",
+     "example": "We are getting the builders in to fix the kitchen."
+    },
+    {
+     "kind": "collocation",
+     "phrase": "a local builder",
+     "meaningVi": "thợ xây trong vùng",
+     "example": "A local builder gave us a cheap price for the new wall."
+    }
+   ]
+  },
+  {
+   "lemma": "farmer",
+   "senseKey": "farmer.n.grows_crops",
+   "partOfSpeech": "noun",
+   "ipa": "/ˈfɑːrmɚ/",
+   "audioFile": "farmer.mp3",
+   "forms": [
+    "farmers"
+   ],
+   "meaningVi": "nông dân",
+   "synonyms": [
+    "grower"
+   ],
+   "noteVi": "",
+   "family": [
+    {
+     "word": "farm",
+     "partOfSpeech": "noun",
+     "meaningVi": "trang trại"
+    },
+    {
+     "word": "farming",
+     "partOfSpeech": "noun",
+     "meaningVi": "nghề nông"
+    }
+   ],
+   "cardExample": {
+    "english": "My grandfather is a farmer, and he grows rice and vegetables.",
+    "meaningVi": "Ông tôi là nông dân, ông trồng lúa và rau.",
+    "target": "farmer"
+   },
+   "quizExamples": [
+    {
+     "english": "Farmers in the Mekong Delta wake up before sunrise to work in the rice fields.",
+     "meaningVi": "Nông dân ở đồng bằng sông Cửu Long dậy trước khi mặt trời mọc để ra đồng.",
+     "target": "Farmers"
+    },
+    {
+     "english": "The dry weather this year was a disaster for every farmer in the province.",
+     "meaningVi": "Thời tiết khô hạn năm nay là thảm họa với mọi người nông dân trong tỉnh.",
+     "target": "farmer"
+    },
+    {
+     "english": "We buy fresh eggs every Sunday from the old farmer who lives next to the river.",
+     "meaningVi": "Chủ nhật nào chúng tôi cũng mua trứng tươi của bác nông dân sống cạnh sông.",
+     "target": "farmer"
+    }
+   ],
+   "advanced": [
+    {
+     "kind": "collocation",
+     "phrase": "a rice / dairy farmer",
+     "meaningVi": "nông dân trồng lúa / nuôi bò sữa",
+     "example": "His family have been rice farmers for generations."
+    },
+    {
+     "kind": "collocation",
+     "phrase": "farmers' market",
+     "meaningVi": "chợ nông sản",
+     "example": "We buy fruit at the farmers' market every Saturday."
+    }
+   ]
+  },
+  {
+   "lemma": "factory worker",
+   "senseKey": "factory worker.n.factory_employee",
+   "partOfSpeech": "noun",
+   "ipa": "/ˈfæktəri ˌwɝːkɚ/",
+   "audioFile": "factory-worker.mp3",
+   "forms": [
+    "factory workers"
+   ],
+   "meaningVi": "công nhân nhà máy",
+   "synonyms": [
+    "laborer"
+   ],
+   "noteVi": "",
+   "family": [
+    {
+     "word": "work",
+     "partOfSpeech": "verb",
+     "meaningVi": "làm việc"
+    }
+   ],
+   "cardExample": {
+    "english": "My mother is a factory worker, and she makes shoes in an industrial zone.",
+    "meaningVi": "Mẹ tôi là công nhân nhà máy, mẹ làm giày ở một khu công nghiệp.",
+    "target": "factory worker"
+   },
+   "quizExamples": [
+    {
+     "english": "Thousands of factory workers go home to their villages during Tet.",
+     "meaningVi": "Hàng nghìn công nhân nhà máy về quê ăn Tết.",
+     "target": "factory workers"
+    },
+    {
+     "english": "Each factory worker on this line puts together two hundred phones per shift.",
+     "meaningVi": "Mỗi công nhân trên dây chuyền này lắp ráp hai trăm chiếc điện thoại mỗi ca.",
+     "target": "factory worker"
+    },
+    {
+     "english": "The factory workers asked for higher pay because they often worked twelve hours a day.",
+     "meaningVi": "Các công nhân nhà máy đòi tăng lương vì họ thường làm mười hai tiếng mỗi ngày.",
+     "target": "factory workers"
+    }
+   ],
+   "advanced": [
+    {
+     "kind": "collocation",
+     "phrase": "low-paid factory workers",
+     "meaningVi": "công nhân nhà máy lương thấp",
+     "example": "Many low-paid factory workers share small rented rooms."
+    },
+    {
+     "kind": "pattern",
+     "phrase": "work as a factory worker",
+     "meaningVi": "làm công nhân nhà máy",
+     "example": "She worked as a factory worker before she went back to school."
+    }
+   ]
+  },
+  {
+   "lemma": "tour guide",
+   "senseKey": "tour guide.n.travel_guide",
+   "partOfSpeech": "noun",
+   "ipa": "/ˈtʊr ˌɡaɪd/",
+   "audioFile": "tour-guide.mp3",
+   "forms": [
+    "tour guides"
+   ],
+   "meaningVi": "hướng dẫn viên du lịch",
+   "synonyms": [
+    "guide",
+    "travel guide"
+   ],
+   "noteVi": "",
+   "family": [
+    {
+     "word": "guidance",
+     "partOfSpeech": "noun",
+     "meaningVi": "sự hướng dẫn"
+    }
+   ],
+   "cardExample": {
+    "english": "My cousin is a tour guide, and she shows foreign visitors around Hoi An.",
+    "meaningVi": "Em họ tôi là hướng dẫn viên du lịch, em dẫn khách nước ngoài đi tham quan Hội An.",
+    "target": "tour guide"
+   },
+   "quizExamples": [
+    {
+     "english": "Our tour guide told funny stories about the old kings while we walked through the palace.",
+     "meaningVi": "Hướng dẫn viên kể những chuyện vui về các vua xưa khi chúng tôi đi qua cung điện.",
+     "target": "tour guide"
+    },
+    {
+     "english": "Please stay close to the tour guide with the yellow flag so you don't get lost.",
+     "meaningVi": "Mọi người đi sát hướng dẫn viên cầm cờ vàng để khỏi lạc nhé.",
+     "target": "tour guide"
+    },
+    {
+     "english": "Tour guides in Ha Long Bay often speak English, French and Chinese.",
+     "meaningVi": "Hướng dẫn viên du lịch ở vịnh Hạ Long thường nói được tiếng Anh, Pháp và Trung.",
+     "target": "Tour guides"
+    }
+   ],
+   "advanced": [
+    {
+     "kind": "collocation",
+     "phrase": "a local tour guide",
+     "meaningVi": "hướng dẫn viên địa phương",
+     "example": "A local tour guide showed us the best street food."
+    },
+    {
+     "kind": "pattern",
+     "phrase": "work as a tour guide",
+     "meaningVi": "làm hướng dẫn viên du lịch",
+     "example": "He worked as a tour guide during his summer holidays."
+    }
+   ]
+  },
+  {
+   "lemma": "police officer",
+   "senseKey": "police officer.n.police_member",
+   "partOfSpeech": "noun",
+   "ipa": "/pəˈliːs ˌɑːfɪsɚ/",
+   "audioFile": "police-officer.mp3",
+   "forms": [
+    "police officers"
+   ],
+   "meaningVi": "cảnh sát",
+   "synonyms": [
+    "policeman",
+    "policewoman",
+    "cop",
+    "officer"
+   ],
+   "noteVi": "Police luôn là số nhiều (the police are), một người thì nói a police officer.",
+   "family": [],
+   "cardExample": {
+    "english": "Her husband is a police officer, so he sometimes works at night.",
+    "meaningVi": "Chồng cô ấy là cảnh sát nên đôi khi phải làm đêm.",
+    "target": "police officer"
+   },
+   "quizExamples": [
+    {
+     "english": "A lost child was crying at the market until two police officers helped her find her mother.",
+     "meaningVi": "Một bé bị lạc khóc ở chợ cho đến khi hai chú cảnh sát giúp bé tìm mẹ.",
+     "target": "police officers"
+    },
+    {
+     "english": "The police officer asked to see my driving license and checked my motorbike papers.",
+     "meaningVi": "Anh cảnh sát yêu cầu xem bằng lái và kiểm tra giấy tờ xe máy của tôi.",
+     "target": "police officer"
+    },
+    {
+     "english": "If someone steals your bag, tell the nearest police officer right away.",
+     "meaningVi": "Nếu bị giật túi, hãy báo ngay cho cảnh sát gần nhất.",
+     "target": "police officer"
+    }
+   ],
+   "advanced": [
+    {
+     "kind": "collocation",
+     "phrase": "a traffic police officer",
+     "meaningVi": "cảnh sát giao thông",
+     "example": "A traffic police officer stopped me for speeding."
+    },
+    {
+     "kind": "collocation",
+     "phrase": "an off-duty police officer",
+     "meaningVi": "cảnh sát đang ngoài giờ làm việc",
+     "example": "An off-duty police officer caught the thief outside the supermarket."
+    }
+   ]
+  },
+  {
+   "lemma": "journalist",
+   "senseKey": "journalist.n.news_writer",
+   "partOfSpeech": "noun",
+   "ipa": "/ˈdʒɝːnəlɪst/",
+   "audioFile": "journalist.mp3",
+   "forms": [
+    "journalists"
+   ],
+   "meaningVi": "nhà báo",
+   "synonyms": [
+    "reporter",
+    "correspondent"
+   ],
+   "noteVi": "",
+   "family": [
+    {
+     "word": "journalism",
+     "partOfSpeech": "noun",
+     "meaningVi": "nghề báo"
+    },
+    {
+     "word": "journal",
+     "partOfSpeech": "noun",
+     "meaningVi": "tạp chí; nhật ký"
+    }
+   ],
+   "cardExample": {
+    "english": "She is a journalist, and she writes about sports for a daily newspaper.",
+    "meaningVi": "Cô ấy là nhà báo, chuyên viết về thể thao cho một tờ nhật báo.",
+    "target": "journalist"
+   },
+   "quizExamples": [
+    {
+     "english": "The journalist asked the minister a difficult question, and the room went quiet.",
+     "meaningVi": "Nhà báo đặt cho bộ trưởng một câu hỏi khó và cả phòng im bặt.",
+     "target": "journalist"
+    },
+    {
+     "english": "Journalists waited outside the hospital all night to get news about the famous singer.",
+     "meaningVi": "Các nhà báo chờ cả đêm ngoài bệnh viện để có tin về nam ca sĩ nổi tiếng.",
+     "target": "Journalists"
+    },
+    {
+     "english": "After the flood, the journalist spent a week in the villages talking to families.",
+     "meaningVi": "Sau trận lũ, nhà báo ở lại các làng một tuần để trò chuyện với các gia đình.",
+     "target": "journalist"
+    }
+   ],
+   "advanced": [
+    {
+     "kind": "collocation",
+     "phrase": "a freelance journalist",
+     "meaningVi": "nhà báo tự do",
+     "example": "He works as a freelance journalist for several magazines."
+    },
+    {
+     "kind": "collocation",
+     "phrase": "a sports / news journalist",
+     "meaningVi": "nhà báo thể thao / thời sự",
+     "example": "The sports journalist interviewed the coach after the match."
+    }
+   ]
+  },
+  {
+   "lemma": "soldier",
+   "senseKey": "soldier.n.army_member",
+   "partOfSpeech": "noun",
+   "ipa": "/ˈsoʊldʒɚ/",
+   "audioFile": "soldier.mp3",
+   "forms": [
+    "soldiers"
+   ],
+   "meaningVi": "bộ đội, quân nhân",
+   "synonyms": [
+    "serviceman",
+    "servicewoman"
+   ],
+   "noteVi": "",
+   "family": [],
+   "cardExample": {
+    "english": "My grandfather was a soldier, and he still tells us stories about the army.",
+    "meaningVi": "Ông tôi từng là bộ đội và đến giờ vẫn kể cho chúng tôi nghe chuyện trong quân ngũ.",
+    "target": "soldier"
+   },
+   "quizExamples": [
+    {
+     "english": "Hundreds of soldiers helped people move to safe places when the river flooded.",
+     "meaningVi": "Hàng trăm chiến sĩ giúp người dân di chuyển đến nơi an toàn khi nước sông dâng.",
+     "target": "soldiers"
+    },
+    {
+     "english": "The young soldier wrote a letter to his mother every week from his base.",
+     "meaningVi": "Người lính trẻ viết thư cho mẹ hằng tuần từ đơn vị.",
+     "target": "soldier"
+    },
+    {
+     "english": "Soldiers in green uniforms marched past the crowd on National Day.",
+     "meaningVi": "Những người lính trong quân phục xanh diễu hành qua đám đông vào ngày Quốc khánh.",
+     "target": "Soldiers"
+    }
+   ],
+   "advanced": [
+    {
+     "kind": "collocation",
+     "phrase": "a retired soldier",
+     "meaningVi": "cựu quân nhân",
+     "example": "A retired soldier gave a talk at our school."
+    },
+    {
+     "kind": "pattern",
+     "phrase": "serve as a soldier",
+     "meaningVi": "phục vụ trong quân đội",
+     "example": "He served as a soldier for five years."
+    }
+   ]
+  },
+  {
+   "lemma": "retired",
+   "senseKey": "retired.adj.stopped_working",
+   "partOfSpeech": "adjective",
+   "ipa": "/rɪˈtaɪɚd/",
+   "audioFile": "retired.mp3",
+   "forms": [],
+   "meaningVi": "đã nghỉ hưu",
+   "synonyms": [],
+   "noteVi": "Nói I'm retired, không có a/an (retired là tính từ); người về hưu là a retiree.",
+   "family": [
+    {
+     "word": "retire",
+     "partOfSpeech": "verb",
+     "meaningVi": "nghỉ hưu"
+    },
+    {
+     "word": "retirement",
+     "partOfSpeech": "noun",
+     "meaningVi": "sự nghỉ hưu"
+    },
+    {
+     "word": "retiree",
+     "partOfSpeech": "noun",
+     "meaningVi": "người về hưu"
+    }
+   ],
+   "cardExample": {
+    "english": "My father is retired now, so he spends his mornings in the park.",
+    "meaningVi": "Bố tôi giờ đã nghỉ hưu nên buổi sáng ông ra công viên.",
+    "target": "retired"
+   },
+   "quizExamples": [
+    {
+     "english": "Since she turned sixty and stopped working, she has been happily retired in Da Lat.",
+     "meaningVi": "Từ khi sáu mươi tuổi và thôi làm việc, bà sống vui vẻ những năm hưu trí ở Đà Lạt.",
+     "target": "retired"
+    },
+    {
+     "english": "My grandparents are both retired, but they still help at the family shop on weekends.",
+     "meaningVi": "Ông bà tôi đều đã nghỉ hưu nhưng cuối tuần vẫn phụ ở cửa hàng của gia đình.",
+     "target": "retired"
+    },
+    {
+     "english": "\"Do you still work?\" — \"No, I'm retired. I left my job at the bank last year.\"",
+     "meaningVi": "\"Bác còn đi làm không?\" — \"Không, bác nghỉ hưu rồi. Năm ngoái bác thôi việc ở ngân hàng.\"",
+     "target": "retired"
+    }
+   ],
+   "advanced": [
+    {
+     "kind": "collocation",
+     "phrase": "a retired teacher",
+     "meaningVi": "giáo viên đã nghỉ hưu",
+     "example": "Our neighbor is a retired teacher who gives free lessons."
+    },
+    {
+     "kind": "collocation",
+     "phrase": "recently / newly retired",
+     "meaningVi": "mới nghỉ hưu",
+     "example": "Newly retired people often feel bored at first."
+    },
+    {
+     "kind": "collocation",
+     "phrase": "semi-retired",
+     "meaningVi": "nửa nghỉ hưu (chỉ còn làm ít)",
+     "example": "He is semi-retired and only works two days a week."
+    }
+   ]
+  },
+  {
+   "lemma": "company",
+   "senseKey": "company.n.business_firm",
+   "partOfSpeech": "noun",
+   "ipa": "/ˈkʌmpəni/",
+   "audioFile": "company.mp3",
+   "forms": [
+    "companies"
+   ],
+   "meaningVi": "công ty",
+   "synonyms": [
+    "firm",
+    "business",
+    "corporation",
+    "enterprise"
+   ],
+   "noteVi": "Company cũng có nghĩa là sự có bạn bè bên cạnh (I enjoy your company); ở đây là công ty.",
+   "family": [],
+   "cardExample": {
+    "english": "I work for a small company that sells furniture online.",
+    "meaningVi": "Tôi làm cho một công ty nhỏ bán đồ nội thất trên mạng.",
+    "target": "company"
+   },
+   "quizExamples": [
+    {
+     "english": "Our company gives every worker a bonus of one month's salary before Tet.",
+     "meaningVi": "Công ty chúng tôi thưởng mỗi nhân viên một tháng lương trước Tết.",
+     "target": "company"
+    },
+    {
+     "english": "Big tech companies are building new offices and factories in northern Vietnam.",
+     "meaningVi": "Các công ty công nghệ lớn đang xây văn phòng và nhà máy mới ở miền Bắc Việt Nam.",
+     "target": "companies"
+    },
+    {
+     "english": "He left the bank and started his own company with two friends from university.",
+     "meaningVi": "Anh ấy rời ngân hàng và mở công ty riêng cùng hai người bạn đại học.",
+     "target": "company"
+    }
+   ],
+   "advanced": [
+    {
+     "kind": "collocation",
+     "phrase": "start / set up a company",
+     "meaningVi": "thành lập công ty",
+     "example": "They set up a company to sell coffee abroad."
+    },
+    {
+     "kind": "preposition",
+     "phrase": "work for a company",
+     "meaningVi": "làm việc cho công ty",
+     "example": "She works for a company that makes solar panels."
+    },
+    {
+     "kind": "collocation",
+     "phrase": "a company car",
+     "meaningVi": "xe công ty cấp",
+     "example": "As a manager, he gets a company car."
+    }
+   ]
+  },
+  {
+   "lemma": "bank",
+   "senseKey": "bank.n.money_institution",
+   "partOfSpeech": "noun",
+   "ipa": "/bæŋk/",
+   "audioFile": "bank.mp3",
+   "forms": [
+    "banks"
+   ],
+   "meaningVi": "ngân hàng",
+   "synonyms": [],
+   "noteVi": "Bank cũng là bờ sông (river bank); ở đây là ngân hàng.",
+   "family": [
+    {
+     "word": "banking",
+     "partOfSpeech": "noun",
+     "meaningVi": "ngành ngân hàng"
+    }
+   ],
+   "cardExample": {
+    "english": "I need to go to the bank to open a new account.",
+    "meaningVi": "Tôi cần ra ngân hàng để mở tài khoản mới.",
+    "target": "bank"
+   },
+   "quizExamples": [
+    {
+     "english": "The bank lent us money to buy our apartment, and we will pay it back over twenty years.",
+     "meaningVi": "Ngân hàng cho chúng tôi vay tiền mua căn hộ và chúng tôi sẽ trả dần trong hai mươi năm.",
+     "target": "bank"
+    },
+    {
+     "english": "Most banks close at four, so I always transfer money on my phone after work.",
+     "meaningVi": "Hầu hết ngân hàng đóng cửa lúc bốn giờ nên tôi luôn chuyển tiền bằng điện thoại sau giờ làm.",
+     "target": "banks"
+    },
+    {
+     "english": "Thieves broke into the bank at night but could not open the safe.",
+     "meaningVi": "Kẻ trộm đột nhập ngân hàng ban đêm nhưng không mở được két sắt.",
+     "target": "bank"
+    }
+   ],
+   "advanced": [
+    {
+     "kind": "collocation",
+     "phrase": "a bank account",
+     "meaningVi": "tài khoản ngân hàng",
+     "example": "You need a bank account to receive your salary."
+    },
+    {
+     "kind": "collocation",
+     "phrase": "a bank loan",
+     "meaningVi": "khoản vay ngân hàng",
+     "example": "They got a bank loan to open the restaurant."
+    },
+    {
+     "kind": "preposition",
+     "phrase": "put money in the bank",
+     "meaningVi": "gửi tiền vào ngân hàng",
+     "example": "My grandma puts some money in the bank every month."
+    }
+   ]
+  },
+  {
+   "lemma": "hospital",
+   "senseKey": "hospital.n.medical_center",
+   "partOfSpeech": "noun",
+   "ipa": "/ˈhɑːspɪtl/",
+   "audioFile": "hospital.mp3",
+   "forms": [
+    "hospitals"
+   ],
+   "meaningVi": "bệnh viện",
+   "synonyms": [],
+   "noteVi": "Nói be in hospital (Anh–Anh) hoặc be in the hospital (Anh–Mỹ) khi đang nằm viện.",
+   "family": [
+    {
+     "word": "hospitalize",
+     "partOfSpeech": "verb",
+     "meaningVi": "cho nhập viện"
+    }
+   ],
+   "cardExample": {
+    "english": "My mother works at the biggest hospital in the city.",
+    "meaningVi": "Mẹ tôi làm việc ở bệnh viện lớn nhất thành phố.",
+    "target": "hospital"
+   },
+   "quizExamples": [
+    {
+     "english": "After the accident, an ambulance took him to the hospital with a broken leg.",
+     "meaningVi": "Sau tai nạn, xe cứu thương đưa anh ấy vào viện với một chân bị gãy.",
+     "target": "hospital"
+    },
+    {
+     "english": "My grandmother stayed in the hospital for a week after her heart operation.",
+     "meaningVi": "Bà tôi nằm viện một tuần sau ca mổ tim.",
+     "target": "hospital"
+    },
+    {
+     "english": "The new children's hospital has two hundred beds and a playground for patients.",
+     "meaningVi": "Bệnh viện nhi mới có hai trăm giường bệnh và một sân chơi cho bệnh nhân.",
+     "target": "hospital"
+    }
+   ],
+   "advanced": [
+    {
+     "kind": "collocation",
+     "phrase": "be taken to hospital",
+     "meaningVi": "được đưa vào viện",
+     "example": "Two people were taken to hospital after the crash."
+    },
+    {
+     "kind": "collocation",
+     "phrase": "leave hospital",
+     "meaningVi": "xuất viện",
+     "example": "She left hospital three days after the operation."
+    },
+    {
+     "kind": "collocation",
+     "phrase": "a hospital bed",
+     "meaningVi": "giường bệnh",
+     "example": "There are not enough hospital beds in the winter."
+    }
+   ]
+  },
+  {
+   "lemma": "school",
+   "senseKey": "school.n.place_for_learning",
+   "partOfSpeech": "noun",
+   "ipa": "/skuːl/",
+   "audioFile": "school.mp3",
+   "forms": [
+    "schools"
+   ],
+   "meaningVi": "trường học",
+   "synonyms": [],
+   "noteVi": "Go to school (đi học, không có the); go to the school là đến ngôi trường vì việc khác.",
+   "family": [
+    {
+     "word": "schooling",
+     "partOfSpeech": "noun",
+     "meaningVi": "việc học hành"
+    }
+   ],
+   "cardExample": {
+    "english": "My children go to a school near our house, so they walk there every day.",
+    "meaningVi": "Các con tôi học ở một trường gần nhà nên ngày nào cũng đi bộ đến trường.",
+    "target": "school"
+   },
+   "quizExamples": [
+    {
+     "english": "The kids put on their uniforms and ran to school when they heard the bell.",
+     "meaningVi": "Bọn trẻ mặc đồng phục rồi chạy đến trường khi nghe tiếng trống.",
+     "target": "school"
+    },
+    {
+     "english": "Our village built its first school in 1990, and my father was one of the first pupils.",
+     "meaningVi": "Làng tôi xây ngôi trường đầu tiên năm 1990 và bố tôi là một trong những học trò đầu tiên.",
+     "target": "school"
+    },
+    {
+     "english": "Many schools close for three months in summer, and children stay at home.",
+     "meaningVi": "Nhiều trường nghỉ ba tháng hè và trẻ con ở nhà.",
+     "target": "schools"
+    }
+   ],
+   "advanced": [
+    {
+     "kind": "collocation",
+     "phrase": "go to school",
+     "meaningVi": "đi học",
+     "example": "My little brother goes to school by bike."
+    },
+    {
+     "kind": "collocation",
+     "phrase": "primary / high school",
+     "meaningVi": "trường tiểu học / trung học phổ thông",
+     "example": "She teaches math at a high school in Hue."
+    },
+    {
+     "kind": "collocation",
+     "phrase": "after school",
+     "meaningVi": "sau giờ học",
+     "example": "We play football in the park after school every day."
+    }
+   ]
+  },
+  {
+   "lemma": "university",
+   "senseKey": "university.n.higher_education",
+   "partOfSpeech": "noun",
+   "ipa": "/ˌjuːnɪˈvɝːsəti/",
+   "audioFile": "university.mp3",
+   "forms": [
+    "universities"
+   ],
+   "meaningVi": "trường đại học",
+   "synonyms": [
+    "college"
+   ],
+   "noteVi": "Nói a university (không phải an) vì u đọc là /j/.",
+   "family": [],
+   "cardExample": {
+    "english": "My brother studies engineering at a university in Ho Chi Minh City.",
+    "meaningVi": "Anh tôi học kỹ thuật ở một trường đại học tại Thành phố Hồ Chí Minh.",
+    "target": "university"
+   },
+   "quizExamples": [
+    {
+     "english": "Thousands of students take a difficult exam every summer to get into the national university.",
+     "meaningVi": "Hàng nghìn học sinh thi một kỳ thi khó mỗi mùa hè để vào đại học quốc gia.",
+     "target": "university"
+    },
+    {
+     "english": "After four years at university, she finally got her degree in economics.",
+     "meaningVi": "Sau bốn năm đại học, cuối cùng cô ấy cũng nhận bằng kinh tế.",
+     "target": "university"
+    },
+    {
+     "english": "Some universities in Japan give scholarships to students from Vietnam.",
+     "meaningVi": "Một số trường đại học ở Nhật cấp học bổng cho sinh viên Việt Nam.",
+     "target": "universities"
+    }
+   ],
+   "advanced": [
+    {
+     "kind": "preposition",
+     "phrase": "at university",
+     "meaningVi": "đang học đại học",
+     "example": "I met my best friend when we were both at university."
+    },
+    {
+     "kind": "collocation",
+     "phrase": "go to university",
+     "meaningVi": "học đại học",
+     "example": "She was the first person in her family to go to university."
+    },
+    {
+     "kind": "collocation",
+     "phrase": "a university degree",
+     "meaningVi": "bằng đại học",
+     "example": "You need a university degree for this job."
+    }
+   ]
+  },
+  {
+   "lemma": "office",
+   "senseKey": "office.n.workplace_room",
+   "partOfSpeech": "noun",
+   "ipa": "/ˈɑːfɪs/",
+   "audioFile": "office.mp3",
+   "forms": [
+    "offices"
+   ],
+   "meaningVi": "văn phòng",
+   "synonyms": [
+    "workplace"
+   ],
+   "noteVi": "Dùng an office vì bắt đầu bằng nguyên âm; in the office là đang ở chỗ làm.",
+   "family": [],
+   "cardExample": {
+    "english": "She works in an office on the tenth floor of a tall building.",
+    "meaningVi": "Cô ấy làm việc trong một văn phòng ở tầng mười của một tòa nhà cao.",
+    "target": "office"
+   },
+   "quizExamples": [
+    {
+     "english": "I left my laptop at the office, so I couldn't finish the report at home.",
+     "meaningVi": "Tôi để quên laptop ở văn phòng nên không làm xong báo cáo ở nhà được.",
+     "target": "office"
+    },
+    {
+     "english": "Our office is so cold because the air conditioner is always on full power.",
+     "meaningVi": "Văn phòng của chúng tôi lạnh lắm vì máy lạnh lúc nào cũng bật hết công suất.",
+     "target": "office"
+    },
+    {
+     "english": "Many companies now have smaller offices because staff work from home twice a week.",
+     "meaningVi": "Nhiều công ty giờ thuê văn phòng nhỏ hơn vì nhân viên làm ở nhà hai ngày mỗi tuần.",
+     "target": "offices"
+    }
+   ],
+   "advanced": [
+    {
+     "kind": "preposition",
+     "phrase": "in / at the office",
+     "meaningVi": "ở văn phòng, ở chỗ làm",
+     "example": "Is Mr Nam in the office today, or is he working from home?"
+    },
+    {
+     "kind": "collocation",
+     "phrase": "office hours",
+     "meaningVi": "giờ hành chính",
+     "example": "Please call us during office hours, from eight to five."
+    },
+    {
+     "kind": "collocation",
+     "phrase": "head office",
+     "meaningVi": "trụ sở chính",
+     "example": "Our head office is in Hanoi, but we have shops everywhere."
+    }
+   ]
+  },
+  {
+   "lemma": "shop",
+   "senseKey": "shop.n.retail_store",
+   "partOfSpeech": "noun",
+   "ipa": "/ʃɑːp/",
+   "audioFile": "shop.mp3",
+   "forms": [
+    "shops"
+   ],
+   "meaningVi": "cửa hàng",
+   "synonyms": [
+    "store",
+    "boutique"
+   ],
+   "noteVi": "Anh–Anh hay dùng shop, Anh–Mỹ hay dùng store.",
+   "family": [
+    {
+     "word": "shopping",
+     "partOfSpeech": "noun",
+     "meaningVi": "việc mua sắm"
+    },
+    {
+     "word": "shopper",
+     "partOfSpeech": "noun",
+     "meaningVi": "người mua sắm"
+    }
+   ],
+   "cardExample": {
+    "english": "There is a small shop at the end of our street that sells bread and milk.",
+    "meaningVi": "Có một cửa hàng nhỏ ở cuối phố nhà tôi bán bánh mì và sữa.",
+    "target": "shop"
+   },
+   "quizExamples": [
+    {
+     "english": "My aunt opened her own flower shop last year, and now she has three workers.",
+     "meaningVi": "Năm ngoái dì tôi mở tiệm hoa riêng và giờ đã có ba nhân viên.",
+     "target": "shop"
+    },
+    {
+     "english": "Most shops on this street close early on Sunday, so let's go on Saturday.",
+     "meaningVi": "Hầu hết cửa hàng trên phố này đóng cửa sớm vào Chủ nhật nên mình đi thứ Bảy nhé.",
+     "target": "shops"
+    },
+    {
+     "english": "The phone shop gave me a free case when I bought the new model.",
+     "meaningVi": "Cửa hàng điện thoại tặng tôi ốp lưng khi tôi mua mẫu mới.",
+     "target": "shop"
+    }
+   ],
+   "advanced": [
+    {
+     "kind": "collocation",
+     "phrase": "a corner shop",
+     "meaningVi": "tiệm tạp hóa đầu ngõ",
+     "example": "I bought some eggs at the corner shop."
+    },
+    {
+     "kind": "collocation",
+     "phrase": "run a shop",
+     "meaningVi": "kinh doanh, quản lý một cửa hàng",
+     "example": "My parents run a shop that sells shoes."
+    },
+    {
+     "kind": "collocation",
+     "phrase": "a coffee / gift shop",
+     "meaningVi": "tiệm cà phê / quà lưu niệm",
+     "example": "The museum has a nice gift shop next to the main entrance."
+    }
+   ]
+  },
+  {
+   "lemma": "restaurant",
+   "senseKey": "restaurant.n.eating_place",
+   "partOfSpeech": "noun",
+   "ipa": "/ˈrestərɑːnt/",
+   "audioFile": "restaurant.mp3",
+   "forms": [
+    "restaurants"
+   ],
+   "meaningVi": "nhà hàng",
+   "synonyms": [
+    "eatery",
+    "diner"
+   ],
+   "noteVi": "",
+   "family": [],
+   "cardExample": {
+    "english": "We had dinner at a Japanese restaurant to celebrate my birthday.",
+    "meaningVi": "Chúng tôi ăn tối ở một nhà hàng Nhật để mừng sinh nhật tôi.",
+    "target": "restaurant"
+   },
+   "quizExamples": [
+    {
+     "english": "The restaurant was so full on Saturday night that we waited forty minutes for a table.",
+     "meaningVi": "Tối thứ Bảy nhà hàng đông đến mức chúng tôi đợi bốn mươi phút mới có bàn.",
+     "target": "restaurant"
+    },
+    {
+     "english": "This street has dozens of seafood restaurants where you can choose a live fish.",
+     "meaningVi": "Con phố này có hàng chục nhà hàng hải sản nơi bạn có thể chọn cá còn sống.",
+     "target": "restaurants"
+    },
+    {
+     "english": "Could you book a nice restaurant near the hotel for our team dinner on Friday?",
+     "meaningVi": "Bạn đặt giúp một nhà hàng ngon gần khách sạn cho bữa tối của nhóm vào thứ Sáu nhé?",
+     "target": "restaurant"
+    }
+   ],
+   "advanced": [
+    {
+     "kind": "collocation",
+     "phrase": "book a table at a restaurant",
+     "meaningVi": "đặt bàn ở nhà hàng",
+     "example": "I booked a table at a restaurant by the river."
+    },
+    {
+     "kind": "collocation",
+     "phrase": "eat out at a restaurant",
+     "meaningVi": "đi ăn ngoài nhà hàng",
+     "example": "We usually eat out at a restaurant on Sundays."
+    },
+    {
+     "kind": "collocation",
+     "phrase": "a fast-food restaurant",
+     "meaningVi": "tiệm đồ ăn nhanh",
+     "example": "There is a fast-food restaurant next to the station."
+    }
+   ]
+  },
+  {
+   "lemma": "hotel",
+   "senseKey": "hotel.n.place_to_stay",
+   "partOfSpeech": "noun",
+   "ipa": "/hoʊˈtel/",
+   "audioFile": "hotel.mp3",
+   "forms": [
+    "hotels"
+   ],
+   "meaningVi": "khách sạn",
+   "synonyms": [
+    "inn",
+    "motel"
+   ],
+   "noteVi": "",
+   "family": [],
+   "cardExample": {
+    "english": "We stayed at a hotel near the beach for three nights.",
+    "meaningVi": "Chúng tôi ở một khách sạn gần biển ba đêm.",
+    "target": "hotel"
+   },
+   "quizExamples": [
+    {
+     "english": "Our hotel had a swimming pool on the roof with a view of the whole city.",
+     "meaningVi": "Khách sạn của chúng tôi có hồ bơi trên sân thượng nhìn ra toàn thành phố.",
+     "target": "hotel"
+    },
+    {
+     "english": "During the holiday, all the hotels in Sa Pa were full, so we slept in a homestay.",
+     "meaningVi": "Dịp lễ, mọi khách sạn ở Sa Pa đều kín phòng nên chúng tôi ngủ ở homestay.",
+     "target": "hotels"
+    },
+    {
+     "english": "Please call the hotel and ask if we can check in early tomorrow morning.",
+     "meaningVi": "Bạn gọi cho khách sạn hỏi xem sáng mai mình nhận phòng sớm được không nhé.",
+     "target": "hotel"
+    }
+   ],
+   "advanced": [
+    {
+     "kind": "preposition",
+     "phrase": "stay at / in a hotel",
+     "meaningVi": "ở khách sạn",
+     "example": "We always stay at a hotel near the station."
+    },
+    {
+     "kind": "collocation",
+     "phrase": "check in to a hotel",
+     "meaningVi": "nhận phòng khách sạn",
+     "example": "We checked in to the hotel at two o'clock."
+    },
+    {
+     "kind": "collocation",
+     "phrase": "a five-star hotel",
+     "meaningVi": "khách sạn năm sao",
+     "example": "They had their wedding at a five-star hotel."
+    }
+   ]
+  },
+  {
+   "lemma": "factory",
+   "senseKey": "factory.n.manufacturing_plant",
+   "partOfSpeech": "noun",
+   "ipa": "/ˈfæktəri/",
+   "audioFile": "factory.mp3",
+   "forms": [
+    "factories"
+   ],
+   "meaningVi": "nhà máy",
+   "synonyms": [
+    "plant",
+    "mill"
+   ],
+   "noteVi": "",
+   "family": [],
+   "cardExample": {
+    "english": "My uncle works in a factory that makes car parts.",
+    "meaningVi": "Chú tôi làm ở một nhà máy sản xuất phụ tùng ô tô.",
+    "target": "factory"
+   },
+   "quizExamples": [
+    {
+     "english": "The new factory near our town will make ten thousand pairs of shoes every day.",
+     "meaningVi": "Nhà máy mới gần thị trấn sẽ sản xuất mười nghìn đôi giày mỗi ngày.",
+     "target": "factory"
+    },
+    {
+     "english": "Smoke from the factories makes the air in this area very dirty.",
+     "meaningVi": "Khói từ các nhà máy làm không khí khu này rất bẩn.",
+     "target": "factories"
+    },
+    {
+     "english": "Visitors can watch how the chocolate is made on a tour of the factory.",
+     "meaningVi": "Khách tham quan có thể xem sô-cô-la được làm thế nào trong chuyến đi thăm nhà máy.",
+     "target": "factory"
+    }
+   ],
+   "advanced": [
+    {
+     "kind": "preposition",
+     "phrase": "work in a factory",
+     "meaningVi": "làm việc ở nhà máy",
+     "example": "She has worked in a factory since she was eighteen."
+    },
+    {
+     "kind": "collocation",
+     "phrase": "a car / clothing factory",
+     "meaningVi": "nhà máy ô tô / may mặc",
+     "example": "The clothing factory hired five hundred new workers."
+    },
+    {
+     "kind": "collocation",
+     "phrase": "factory floor",
+     "meaningVi": "xưởng sản xuất",
+     "example": "The manager spends most of the day on the factory floor."
+    }
+   ]
+  },
+  {
+   "lemma": "supermarket",
+   "senseKey": "supermarket.n.large_food_store",
+   "partOfSpeech": "noun",
+   "ipa": "/ˈsuːpɚˌmɑːrkɪt/",
+   "audioFile": "supermarket.mp3",
+   "forms": [
+    "supermarkets"
+   ],
+   "meaningVi": "siêu thị",
+   "synonyms": [
+    "grocery store"
+   ],
+   "noteVi": "",
+   "family": [],
+   "cardExample": {
+    "english": "I buy fruit and vegetables at the supermarket near my office.",
+    "meaningVi": "Tôi mua trái cây và rau ở siêu thị gần văn phòng.",
+    "target": "supermarket"
+   },
+   "quizExamples": [
+    {
+     "english": "On Sunday evenings, the supermarket is full of families with big shopping carts.",
+     "meaningVi": "Tối Chủ nhật, siêu thị đông nghịt các gia đình đẩy xe hàng to.",
+     "target": "supermarket"
+    },
+    {
+     "english": "Many supermarkets now give you a discount if you bring your own bags.",
+     "meaningVi": "Nhiều siêu thị giờ giảm giá cho bạn nếu tự mang túi.",
+     "target": "supermarkets"
+    },
+    {
+     "english": "The milk at the supermarket was cheaper than at the little shop next door.",
+     "meaningVi": "Sữa ở siêu thị rẻ hơn ở tiệm nhỏ bên cạnh.",
+     "target": "supermarket"
+    }
+   ],
+   "advanced": [
+    {
+     "kind": "collocation",
+     "phrase": "go to the supermarket",
+     "meaningVi": "đi siêu thị",
+     "example": "We go to the supermarket every Saturday morning."
+    },
+    {
+     "kind": "collocation",
+     "phrase": "a supermarket chain",
+     "meaningVi": "chuỗi siêu thị",
+     "example": "A big supermarket chain opened a store in our town."
+    }
+   ]
+  },
+  {
+   "lemma": "clinic",
+   "senseKey": "clinic.n.small_medical_center",
+   "partOfSpeech": "noun",
+   "ipa": "/ˈklɪnɪk/",
+   "audioFile": "clinic.mp3",
+   "forms": [
+    "clinics"
+   ],
+   "meaningVi": "phòng khám",
+   "synonyms": [
+    "health center",
+    "medical center"
+   ],
+   "noteVi": "Clinic là phòng khám nhỏ, không có giường nằm lâu như hospital.",
+   "family": [
+    {
+     "word": "clinical",
+     "partOfSpeech": "adjective",
+     "meaningVi": "lâm sàng"
+    }
+   ],
+   "cardExample": {
+    "english": "I took my son to a clinic near our house because he had a cough.",
+    "meaningVi": "Tôi đưa con trai đến một phòng khám gần nhà vì bé bị ho.",
+    "target": "clinic"
+   },
+   "quizExamples": [
+    {
+     "english": "The clinic on our street is open until nine, so I can see a doctor after work.",
+     "meaningVi": "Phòng khám trên phố tôi mở đến chín giờ nên tan làm tôi vẫn đi khám được.",
+     "target": "clinic"
+    },
+    {
+     "english": "Free eye clinics visited the mountain villages and gave old people new glasses.",
+     "meaningVi": "Các phòng khám mắt miễn phí đến những bản vùng cao và tặng kính mới cho người già.",
+     "target": "clinics"
+    },
+    {
+     "english": "She opened her own dental clinic after working for ten years in a big hospital.",
+     "meaningVi": "Cô ấy mở phòng khám nha khoa riêng sau mười năm làm ở một bệnh viện lớn.",
+     "target": "clinic"
+    }
+   ],
+   "advanced": [
+    {
+     "kind": "collocation",
+     "phrase": "a private clinic",
+     "meaningVi": "phòng khám tư",
+     "example": "We went to a private clinic because the hospital was too busy."
+    },
+    {
+     "kind": "collocation",
+     "phrase": "a dental / eye clinic",
+     "meaningVi": "phòng khám nha khoa / mắt",
+     "example": "The eye clinic is on the second floor."
+    }
+   ]
+  },
+  {
+   "lemma": "pharmacy",
+   "senseKey": "pharmacy.n.medicine_shop",
+   "partOfSpeech": "noun",
+   "ipa": "/ˈfɑːrməsi/",
+   "audioFile": "pharmacy.mp3",
+   "forms": [
+    "pharmacies"
+   ],
+   "meaningVi": "nhà thuốc, hiệu thuốc",
+   "synonyms": [
+    "drugstore",
+    "chemist's"
+   ],
+   "noteVi": "Pharmacy là nơi bán thuốc; pharmacist là người bán (dược sĩ).",
+   "family": [
+    {
+     "word": "pharmaceutical",
+     "partOfSpeech": "adjective",
+     "meaningVi": "thuộc dược phẩm"
+    }
+   ],
+   "cardExample": {
+    "english": "I bought some medicine for my headache at the pharmacy on the corner.",
+    "meaningVi": "Tôi mua thuốc đau đầu ở nhà thuốc đầu phố.",
+    "target": "pharmacy"
+   },
+   "quizExamples": [
+    {
+     "english": "You can't buy these pills without a prescription — the pharmacy will ask for one.",
+     "meaningVi": "Bạn không mua được loại thuốc này nếu không có đơn, nhà thuốc sẽ đòi xem đơn.",
+     "target": "pharmacy"
+    },
+    {
+     "english": "There are pharmacies on almost every street in Hanoi, and some are open all night.",
+     "meaningVi": "Gần như phố nào ở Hà Nội cũng có hiệu thuốc, có nơi mở cả đêm.",
+     "target": "pharmacies"
+    },
+    {
+     "english": "The hospital pharmacy gave me three kinds of tablets and a small bottle of syrup.",
+     "meaningVi": "Nhà thuốc của bệnh viện phát cho tôi ba loại viên thuốc và một lọ siro nhỏ.",
+     "target": "pharmacy"
+    }
+   ],
+   "advanced": [
+    {
+     "kind": "collocation",
+     "phrase": "a 24-hour pharmacy",
+     "meaningVi": "nhà thuốc mở cửa 24 giờ",
+     "example": "Excuse me, is there a 24-hour pharmacy near here?"
+    },
+    {
+     "kind": "collocation",
+     "phrase": "pick up sth from the pharmacy",
+     "meaningVi": "lấy thuốc ở nhà thuốc",
+     "example": "Can you pick up my pills from the pharmacy?"
+    }
+   ]
+  },
+  {
+   "lemma": "airport",
+   "senseKey": "airport.n.place_for_planes",
+   "partOfSpeech": "noun",
+   "ipa": "/ˈerpɔːrt/",
+   "audioFile": "airport.mp3",
+   "forms": [
+    "airports"
+   ],
+   "meaningVi": "sân bay",
+   "synonyms": [],
+   "noteVi": "Dùng an airport vì bắt đầu bằng nguyên âm.",
+   "family": [],
+   "cardExample": {
+    "english": "We took a taxi to the airport at five in the morning to catch our flight.",
+    "meaningVi": "Chúng tôi đi taxi ra sân bay lúc năm giờ sáng để kịp chuyến bay.",
+    "target": "airport"
+   },
+   "quizExamples": [
+    {
+     "english": "The airport was so crowded before Tet that we waited an hour to check in.",
+     "meaningVi": "Sân bay đông đến mức trước Tết chúng tôi đợi một tiếng mới làm được thủ tục.",
+     "target": "airport"
+    },
+    {
+     "english": "My uncle will pick us up at the airport when our plane lands in Da Nang.",
+     "meaningVi": "Chú tôi sẽ ra sân bay đón khi máy bay hạ cánh ở Đà Nẵng.",
+     "target": "airport"
+    },
+    {
+     "english": "Long Thanh will be one of the biggest airports in Southeast Asia.",
+     "meaningVi": "Long Thành sẽ là một trong những sân bay lớn nhất Đông Nam Á.",
+     "target": "airports"
+    }
+   ],
+   "advanced": [
+    {
+     "kind": "pattern",
+     "phrase": "pick sb up at the airport",
+     "meaningVi": "đón ai ở sân bay",
+     "example": "I will pick you up at the airport at eight."
+    },
+    {
+     "kind": "collocation",
+     "phrase": "an international airport",
+     "meaningVi": "sân bay quốc tế",
+     "example": "Tan Son Nhat is the busiest international airport in Vietnam."
+    },
+    {
+     "kind": "collocation",
+     "phrase": "airport security",
+     "meaningVi": "khu kiểm tra an ninh sân bay",
+     "example": "We spent thirty minutes at airport security because of the long line."
+    }
+   ]
+  },
+  {
+   "lemma": "café",
+   "senseKey": "café.n.coffee_shop",
+   "partOfSpeech": "noun",
+   "ipa": "/kæˈfeɪ/",
+   "audioFile": "cafe.mp3",
+   "forms": [
+    "cafés"
+   ],
+   "meaningVi": "quán cà phê",
+   "synonyms": [
+    "coffee shop",
+    "coffee house"
+   ],
+   "noteVi": "Cũng viết cafe (không dấu); quán cà phê nhỏ, thường bán cả đồ ăn nhẹ.",
+   "family": [],
+   "cardExample": {
+    "english": "Let's meet at a café near the lake and have a coffee together.",
+    "meaningVi": "Mình gặp nhau ở một quán cà phê gần hồ rồi cùng uống cà phê nhé.",
+    "target": "café"
+   },
+   "quizExamples": [
+    {
+     "english": "Students love the café opposite the school because the drinks are cheap and the Wi-Fi is fast.",
+     "meaningVi": "Học sinh rất thích quán cà phê nhỏ đối diện trường vì đồ uống rẻ và Wi-Fi nhanh.",
+     "target": "café"
+    },
+    {
+     "english": "On Sunday mornings, old men sit in the street cafés and watch the world go by.",
+     "meaningVi": "Sáng Chủ nhật, các cụ ông ngồi ở những quán cà phê vỉa hè ngắm phố phường.",
+     "target": "cafés"
+    },
+    {
+     "english": "She quit her office job and opened her own café with only six tables.",
+     "meaningVi": "Cô ấy bỏ việc văn phòng và mở quán cà phê riêng chỉ với sáu cái bàn.",
+     "target": "café"
+    }
+   ],
+   "advanced": [
+    {
+     "kind": "collocation",
+     "phrase": "a street café",
+     "meaningVi": "quán cà phê vỉa hè",
+     "example": "We had iced coffee at a street café in the Old Quarter."
+    },
+    {
+     "kind": "collocation",
+     "phrase": "an internet café",
+     "meaningVi": "quán net",
+     "example": "He used to play games at an internet café after school."
+    }
+   ]
+  }
+ ]
+}

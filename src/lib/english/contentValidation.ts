@@ -150,6 +150,7 @@ export function assessEnglishPack(input: unknown): AssessedPack {
    if (!quiz && !e.meaningVi) problems.push(issue(p, 'meaning_vi', 'Câu trên thẻ thiếu bản dịch.', false));
    if (quiz && !isFullVietnameseMeaning(e.meaningVi, w.meaningVi)) problems.push(issue(p, 'meaning_vi', 'Câu hỏi cần bản dịch đầy đủ.'));
    const earlier = [...visible, ...w.quizExamples.slice(0, Math.max(0, i - 1)).map((q) => q.english)];
+   if (quiz && e.targetStart !== null && /(?:^|[^\p{L}])an?\s+$/iu.test(e.english.slice(0, e.targetStart))) issues.push(issue(p, 'quiz_article_hint', 'Câu hỏi có "a/an" ngay trước từ đích nên lộ âm đầu của đáp án; dùng the, my, số nhiều hoặc thêm tính từ.', false));
    if (quiz && earlier.some((text) => overlap(text, e.english, forms) >= SIMILAR_RATIO)) problems.push(issue(p, 'example_too_similar', 'Câu hỏi gần giống câu đã hiện trên thẻ hoặc câu hỏi khác; người học sẽ nhớ thuộc thay vì hiểu.', false));
    return { index: i, gradeEligible: quiz && problems.length === 0, issues: problems };
   });

@@ -1,8 +1,12 @@
+import { readFileSync } from 'node:fs';
+import { resolve } from 'node:path';
 import { describe, expect, it } from 'vitest';
 import { assessEnglishPack, normalizeSenseKey } from '@/lib/english/contentValidation';
 import { sampleEnglishPack } from '@/lib/english/samplePack';
 import { AI_PACK_PROMPT_EXAMPLE, buildAiPackPrompt, buildAiRepairPrompt } from '@/lib/english/aiPackPrompt';
 const clone = () => structuredClone(sampleEnglishPack);
+/** Real AI output for the 50-word jobs and workplaces list, made with the current prompt. */
+const jobsPack = () => JSON.parse(readFileSync(resolve(__dirname, '../../../docs/content/english-packs/jobs-workplaces.json'), 'utf8'));
 const codes = (p: unknown) => assessEnglishPack(p).issues.map((i) => i.code);
 describe('v4 content validation', () => {
  it('accepts the sample and prompt example without any warning', () => { for (const p of [sampleEnglishPack, AI_PACK_PROMPT_EXAMPLE]) expect(assessEnglishPack(p).issues).toEqual([]); });
@@ -43,15 +47,30 @@ describe('v4 content validation', () => {
  it('accepts accented and capitalised lemmas: café and IT worker publish', () => {
   const cafe = { lemma: 'café', senseKey: 'café.n.coffee_shop', partOfSpeech: 'noun', ipa: '/kæˈfeɪ/', audioFile: 'cafe.mp3', forms: ['cafés', 'cafes'], meaningVi: 'quán cà phê', synonyms: ['coffee shop'], noteVi: '', family: [{ word: 'cafeteria', partOfSpeech: 'noun', meaningVi: 'nhà ăn tự phục vụ' }],
    cardExample: { english: 'My friends and I often meet at a small café near our university.', meaningVi: 'Tôi và các bạn thường gặp nhau ở một quán cà phê nhỏ gần trường.', target: 'café' },
-   quizExamples: [{ english: 'Several cafés in the old town have outdoor tables for visitors.', meaningVi: 'Một số quán cà phê trong phố cổ có bàn ngoài trời cho du khách.', target: 'cafés' }, { english: 'She opened a cafe on a quiet street and serves fresh coffee every morning.', meaningVi: 'Cô ấy mở một quán cà phê trên phố yên tĩnh và pha cà phê mỗi sáng.', target: 'cafe' }],
+   quizExamples: [{ english: 'Several cafés in the old town have outdoor tables for visitors.', meaningVi: 'Một số quán cà phê trong phố cổ có bàn ngoài trời cho du khách.', target: 'cafés' }, { english: 'She opened her own cafe on a quiet street and serves fresh coffee every morning.', meaningVi: 'Cô ấy mở một quán cà phê trên phố yên tĩnh và pha cà phê mỗi sáng.', target: 'cafe' }],
    advanced: [{ kind: 'collocation' as const, phrase: 'a sidewalk café', meaningVi: 'quán cà phê vỉa hè', example: 'We sat at a sidewalk café and watched people pass.' }, { kind: 'collocation' as const, phrase: 'a café terrace', meaningVi: 'khu ngồi ngoài trời quán cà phê', example: 'We had breakfast on the cafe terrace by the river.' }] };
   const it = { ...structuredClone(cafe), lemma: 'IT worker', senseKey: 'IT Worker .N. it_employee', forms: ['IT workers'], audioFile: 'it-worker.mp3', synonyms: [], family: [],
    cardExample: { english: 'My brother is an IT worker who fixes computer problems at his office.', meaningVi: 'Anh tôi là nhân viên IT, chuyên sửa lỗi máy tính ở văn phòng.', target: 'IT worker' },
-   quizExamples: [{ english: 'The company hired more IT workers to protect its customer data.', meaningVi: 'Công ty tuyển thêm nhân viên IT để bảo vệ dữ liệu khách hàng.', target: 'IT workers' }, { english: 'We called an IT worker when nobody could connect to the internet.', meaningVi: 'Chúng tôi gọi nhân viên IT khi không ai kết nối được internet.', target: 'IT worker' }],
+   quizExamples: [{ english: 'The company hired more IT workers to protect its customer data.', meaningVi: 'Công ty tuyển thêm nhân viên IT để bảo vệ dữ liệu khách hàng.', target: 'IT workers' }, { english: 'We called the IT worker when nobody could connect to the internet.', meaningVi: 'Chúng tôi gọi nhân viên IT khi không ai kết nối được internet.', target: 'IT worker' }],
    advanced: [{ kind: 'pattern' as const, phrase: 'work as an IT worker', meaningVi: 'làm nhân viên IT', example: 'He plans to work as an IT worker after graduation.' }, { kind: 'collocation' as const, phrase: 'a skilled IT worker', meaningVi: 'nhân viên IT giỏi', example: 'A skilled IT worker solved the problem in minutes.' }] };
   const a = assessEnglishPack({ title: 'Nghề nghiệp', description: '', packVersion: 4, audioFiles: ['cafe.mp3', 'it-worker.mp3'], words: [cafe, it] });
   expect(a.issues).toEqual([]);
   expect(a.pack!.words[1]!.senseKey).toBe('it worker.n.it_employee');
+ });
+ it('warns, without dropping the question, when a/an right before the blank gives the answer away', () => {
+  const pack = jobsPack(); const engineer = pack.words.find((w: { lemma: string }) => w.lemma === 'engineer')!;
+  const check = (english: string, target = 'engineer') => { Object.assign(engineer.quizExamples[0], { english, target }); const a = assessEnglishPack(pack), w = a.words[pack.words.indexOf(engineer)]!; return [w.issues.filter((i) => i.code === 'quiz_article_hint').map((i) => i.path), w.examples[1]!.gradeEligible]; };
+  expect(check('After five years at the technical university, he finally became an engineer.')).toEqual([['words.engineer.quizExamples.0'], true]);
+  expect(check('An engineer from the city checked the old bridge before the trucks crossed it.')).toEqual([['words.engineer.quizExamples.0'], true]);
+  expect(check('After five years at the technical university, he became a software engineer.')).toEqual([[], true]);
+  expect(check('The engineers checked the old bridge carefully before they let trucks cross it again.', 'engineers')).toEqual([[], true]);
+ });
+ it('the 50-word jobs pack made with this prompt passes with no issue at all', () => {
+  const pack = jobsPack();
+  const a = assessEnglishPack(pack);
+  expect(a.schemaError).toBeNull();
+  expect(a.issues).toEqual([]);
+  expect(a.words.filter((w) => w.publishable && w.gradeExampleCount >= 3)).toHaveLength(50);
  });
  it('normalises senseKeys and rejects broken ones with the offending key', () => {
   expect(normalizeSenseKey(' Café .N. coffee_shop ')).toBe('café.n.coffee_shop');
@@ -81,5 +100,8 @@ describe('v4 content validation', () => {
   expect(prompt).toContain('"café.n.coffee_shop"');
   expect(prompt).toContain('"cafe.mp3"');
   expect(prompt).toContain('không ghi clinic cho hospital');
+  expect(prompt).toContain('KHÔNG đặt "a" hay "an" ngay trước target');
+  expect(prompt).toContain('từ một âm tiết như /nɝːs/ thì không cần');
+  expect(prompt).toContain('giữ nguyên như danh sách');
  });
 });
