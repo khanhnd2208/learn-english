@@ -146,6 +146,9 @@ model EnGuidedReviewSession {
   userId               String
   activeKey            String?                  @unique
   selectedSetIds       String[]                 @default([])
+  questionMode         String                   @default("mix")
+  excludedWordCount    Int                      @default(0)
+  distractorSenseIds   String[]                 @default([])
   poolSenseIds         String[]                 @default([])
   remainingSenseIds    String[]                 @default([])
   currentChunkSenseIds String[]                 @default([])

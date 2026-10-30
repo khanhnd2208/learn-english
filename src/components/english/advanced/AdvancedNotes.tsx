@@ -1,11 +1,9 @@
 'use client';
-import { useAdvancedMode } from '@/components/english/advanced/useAdvancedMode';
 import { ADVANCED_KIND_LABEL, type AdvancedNote } from '@/lib/english/advancedNotes';
 
 /** Fixed phrases for this sense. Nothing is shown until the learner turns on "Nâng cao" on the Ôn tập page. */
-export default function AdvancedNotes({ notes }: { notes: AdvancedNote[] }) {
- const on = useAdvancedMode();
- if (!on || notes.length === 0) return null;
+export default function AdvancedNotes({ notes, enabled = false }: { notes: AdvancedNote[]; enabled?: boolean }) {
+ if (!enabled || notes.length === 0) return null;
  return <section aria-label="Cụm từ nâng cao" className="rounded-panel border border-accent/20 bg-accent/5 px-4 py-3">
   <p className="text-xs font-bold uppercase tracking-wide text-accent">Nâng cao · cụm từ hay đi kèm</p>
   <ul className="mt-1 divide-y divide-accent/10">{notes.map((note) => <li key={`${note.kind}:${note.phrase}`} className="py-2 text-sm">

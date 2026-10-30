@@ -3,7 +3,7 @@ import { prisma } from '@/lib/prisma';
 import { AppError } from '@/lib/appError';
 import { activityByKey, randomRng, type ActivityItem } from '@/lib/english/activities';
 import { EN_GUIDED_CHUNK_SIZE, EN_TX_MAX_WAIT_MS, EN_TX_TIMEOUT_MS } from '@/lib/english/constants';
-import { buildGuidedQuestions, buildRetryQuestion, weightedOrder, type ReviewHistory } from '@/lib/english/guidedReview';
+import { buildGuidedQuestions, buildRetryQuestion, canBuildGuidedQuestion, weightedOrder, type GuidedQuestionMode, type ReviewHistory } from '@/lib/english/guidedReview';
 import { vnDayKey } from '@/lib/english/gapRule';
 import { vnDayStart } from '@/lib/english/schedule';
 import { pacedEnough, XP } from '@/lib/english/xp';
@@ -76,12 +76,13 @@ export async function histories(userId: string, senseIds: string[]): Promise<Rev
 	return senseIds.map((senseId) => byId.get(senseId) ?? { senseId, recentWrong: 0, recentTotal: 0 });
 }
 
-async function questionInputs(chunkNumber: number, chunkIds: string[], poolIds: string[]) {
+const CONTENT_CHANGED = 'Nội dung bộ từ đã thay đổi nên chưa thể tạo đủ câu hỏi. Hãy kết thúc phiên và bắt đầu lại.';
+async function questionInputs(chunkNumber: number, chunkIds: string[], poolIds: string[], mode: GuidedQuestionMode) {
 	const [bundles, pool] = await Promise.all([getSenseBundles(chunkIds, true), getDistractorPool(poolIds)]);
 	const byId = new Map(bundles.map((bundle) => [bundle.sense.id, bundle]));
 	const chunk = chunkIds.flatMap((senseId) => byId.get(senseId) ? [byId.get(senseId)!] : []);
-	const questions = buildGuidedQuestions(chunk, pool, randomRng());
-	if (questions.length !== chunk.length) throw new AppError('Không dựng được đủ câu hỏi cho chặng này', 400);
+	const questions = buildGuidedQuestions(chunk, pool, randomRng(), mode);
+	if (questions.length !== chunkIds.length) throw new AppError(CONTENT_CHANGED, 400);
 	return questions.map((question, position) => ({
 			chunkNumber,
 			kind: 'main',
@@ -97,7 +98,7 @@ async function questionInputs(chunkNumber: number, chunkIds: string[], poolIds: 
 }
 
 const SESSION_SELECT = {
-	id: true, userId: true, activeKey: true, selectedSetIds: true, currentChunkSenseIds: true,
+	id: true, userId: true, activeKey: true, selectedSetIds: true, currentChunkSenseIds: true, questionMode: true, excludedWordCount: true, distractorSenseIds: true,
 	chunkNumber: true, phase: true, studyPosition: true, questionPosition: true,
 	startedAt: true, updatedAt: true, endedAt: true, activeSeconds: true,
 } as const;
@@ -127,6 +128,8 @@ async function serializeSession(userId: string, sessionId: string) {
 		studyPosition: session.studyPosition,
 		questionPosition: session.questionPosition,
 		selectedSetIds: session.selectedSetIds,
+		questionMode: session.questionMode as GuidedQuestionMode,
+		excludedWordCount: session.excludedWordCount,
 		poolSize: sizes!.poolSize,
 		remainingCount: sizes!.remainingCount,
 		words: session.currentChunkSenseIds.flatMap((senseId) => bundles.find((bundle) => bundle.sense.id === senseId) ?? []),
@@ -176,24 +179,46 @@ export async function saveGuidedReviewSelection(userId: string, setIds: string[]
 const chunkBuilds = createLimiter(4);
 
 /** Every start is a fresh run: a session left mid-way is closed, never resumed. */
-export function startGuidedReview(userId: string, setIds: string[]) {
-	return chunkBuilds(() => startGuidedRun(userId, setIds));
+export function startGuidedReview(userId: string, setIds: string[], mode: GuidedQuestionMode = 'mix') {
+	return chunkBuilds(() => startGuidedRun(userId, setIds, mode));
 }
 
-async function startGuidedRun(userId: string, setIds: string[]) {
-	const active = await prisma.enGuidedReviewSession.findUnique({ where: { activeKey: userId }, select: { id: true } });
-	if (active) await abandonGuidedReview(userId, active.id);
+async function startGuidedRun(userId: string, setIds: string[], mode: GuidedQuestionMode) {
 	const { selected, senses } = await selectedSenseIds(userId, setIds);
-	const order = weightedOrder(senses, await histories(userId, senses), randomRng());
+	let eligible = senses;
+	if (mode !== 'mix') {
+		const pool = await getDistractorPool(senses);
+		eligible = [];
+		for (let at = 0; at < senses.length; at += 100) {
+			const bundles = await getSenseBundles(senses.slice(at, at + 100), true);
+			for (const bundle of bundles) if (canBuildGuidedQuestion(bundle, pool, mode)) eligible.push(bundle.sense.id);
+		}
+		if (!eligible.length) throw new AppError('Các bộ đã chọn chưa có từ phù hợp với dạng này. Hãy chọn dạng khác hoặc thêm bộ từ.', 400);
+	}
+	const order = weightedOrder(eligible, await histories(userId, eligible), randomRng());
+	const distractorIds = mode === 'mix' ? order : senses;
 	const chunk = order.slice(0, EN_GUIDED_CHUNK_SIZE);
-	const questions = await questionInputs(1, chunk, order);
+	const questions = await questionInputs(1, chunk, distractorIds, mode);
 	let session;
 	try {
-		session = await prisma.enGuidedReviewSession.create({
+		session = await prisma.$transaction(async (tx) => {
+			const active = await tx.enGuidedReviewSession.findUnique({ where: { activeKey: userId }, select: { id: true, startedAt: true } });
+			if (active) {
+				const answered = await tx.enGuidedReviewQuestion.count({ where: { sessionId: active.id, answer: { not: null } } });
+				if (answered === 0) await tx.enGuidedReviewSession.delete({ where: { id: active.id } });
+				else {
+					const sums = await tx.enGuidedReviewQuestion.aggregate({ where: { sessionId: active.id }, _sum: { responseMs: true } });
+					await tx.enGuidedReviewSession.update({ where: { id: active.id }, data: { activeKey: null, phase: 'finished', endedAt: new Date(), activeSeconds: Math.ceil((sums._sum.responseMs ?? 0) / 1000) } });
+				}
+			}
+			return tx.enGuidedReviewSession.create({
 			data: {
 				userId,
 				activeKey: userId,
 				selectedSetIds: selected,
+				questionMode: mode,
+				excludedWordCount: senses.length - eligible.length,
+				distractorSenseIds: distractorIds,
 				poolSenseIds: order,
 				remainingSenseIds: order.slice(chunk.length),
 				currentChunkSenseIds: chunk,
@@ -201,18 +226,16 @@ async function startGuidedRun(userId: string, setIds: string[]) {
 			},
 			select: { id: true },
 		});
+		});
 	} catch (cause) {
-		if (cause instanceof Prisma.PrismaClientKnownRequestError && cause.code === 'P2002') {
-			const concurrent = await prisma.enGuidedReviewSession.findUnique({ where: { activeKey: userId }, select: { id: true } });
-			if (concurrent) return serializeSession(userId, concurrent.id);
-		}
+		if (cause instanceof Prisma.PrismaClientKnownRequestError && ['P2002', 'P2034'].includes(cause.code)) throw new AppError('Một phiên khác vừa được mở. Hãy thử bắt đầu lại.', 409);
 		throw cause;
 	}
 	await prisma.enReviewPreference.upsert({ where: { userId }, create: { userId, selectedSetIds: selected }, update: { selectedSetIds: selected } });
 	const serialized = await serializeSession(userId, session.id);
 	// Only one chunk ahead: warming the whole selection would monopolize Piper.
 	void warmNext(order.slice(chunk.length));
-	await prisma.enGuidedReviewSession.updateMany({ where: { userId, endedAt: { lt: new Date(Date.now() - 30 * 86400_000) }, NOT: { poolSenseIds: { isEmpty: true } } }, data: { poolSenseIds: [], remainingSenseIds: [] } });
+	await prisma.enGuidedReviewSession.updateMany({ where: { userId, endedAt: { lt: new Date(Date.now() - 30 * 86400_000) }, NOT: { poolSenseIds: { isEmpty: true } } }, data: { poolSenseIds: [], remainingSenseIds: [], distractorSenseIds: [] } });
 	return serialized;
 }
 
@@ -282,18 +305,19 @@ export function startGuidedRetry(userId: string, sessionId: string) {
 
 async function buildGuidedRetry(userId: string, sessionId: string) {
 	const active = await activeSession(userId, sessionId);
-	const session = await prisma.enGuidedReviewSession.findFirstOrThrow({ where: { id: active.id, userId, endedAt: null }, select: { id: true, phase: true, chunkNumber: true, poolSenseIds: true } });
+	const session = await prisma.enGuidedReviewSession.findFirstOrThrow({ where: { id: active.id, userId, endedAt: null }, select: { id: true, phase: true, chunkNumber: true, poolSenseIds: true, distractorSenseIds: true, questionMode: true } });
 	if (session.phase !== 'summary') return serializeSession(userId, session.id);
 	const main = await prisma.enGuidedReviewQuestion.findMany({ where: { sessionId: session.id, chunkNumber: session.chunkNumber, kind: 'main', correct: false }, orderBy: { position: 'asc' } });
 	if (!main.length) return serializeSession(userId, session.id);
 	const existing = await prisma.enGuidedReviewQuestion.count({ where: { sessionId: session.id, chunkNumber: session.chunkNumber, kind: 'retry' } });
 	if (!existing) {
 		const rng = randomRng();
-		const [bundles, pool] = await Promise.all([getSenseBundles(main.map((question) => question.senseId), true), getDistractorPool(session.poolSenseIds)]);
+		const [bundles, pool] = await Promise.all([getSenseBundles(main.map((question) => question.senseId), true), getDistractorPool(session.distractorSenseIds.length ? session.distractorSenseIds : session.poolSenseIds)]);
 		const byId = new Map(bundles.map((bundle) => [bundle.sense.id, bundle]));
 		const retries = rng.shuffle(main).flatMap((question) => {
 			const bundle = byId.get(question.senseId);
-			const retry = bundle && buildRetryQuestion(bundle, pool, question.activityKey, rng);
+			const retry = bundle && buildRetryQuestion(bundle, pool, question.activityKey, rng, session.questionMode as GuidedQuestionMode);
+			if (!retry) throw new AppError(CONTENT_CHANGED, 400);
 			return retry ? [{ question, retry }] : [];
 		});
 		await prisma.enGuidedReviewQuestion.createMany({ data: retries.map(({ retry }, position) => ({ sessionId: session.id, chunkNumber: session.chunkNumber, kind: 'retry', position, senseId: retry.senseId, role: retry.role, activityKey: retry.activityKey, prompt: retry.prompt as Prisma.InputJsonValue, answerKey: retry.answerKey, accepted: retry.accepted, layout: retry.layout as unknown as Prisma.InputJsonValue })), skipDuplicates: true });
@@ -308,7 +332,7 @@ export function nextGuidedChunk(userId: string, sessionId: string, restart: bool
 
 async function buildNextChunk(userId: string, sessionId: string, restart: boolean) {
 	const active = await activeSession(userId, sessionId);
-	const session = await prisma.enGuidedReviewSession.findFirstOrThrow({ where: { id: active.id, userId, endedAt: null }, select: { id: true, phase: true, chunkNumber: true, remainingSenseIds: true, poolSenseIds: true } });
+	const session = await prisma.enGuidedReviewSession.findFirstOrThrow({ where: { id: active.id, userId, endedAt: null }, select: { id: true, phase: true, chunkNumber: true, remainingSenseIds: true, poolSenseIds: true, distractorSenseIds: true, questionMode: true } });
 	if (session.phase !== 'summary') return serializeSession(userId, session.id);
 	let remaining = session.remainingSenseIds;
 	if (!remaining.length) {
@@ -317,7 +341,7 @@ async function buildNextChunk(userId: string, sessionId: string, restart: boolea
 	}
 	const chunk = remaining.slice(0, EN_GUIDED_CHUNK_SIZE);
 	const chunkNumber = session.chunkNumber + 1;
-	const questions = await questionInputs(chunkNumber, chunk, session.poolSenseIds);
+	const questions = await questionInputs(chunkNumber, chunk, session.distractorSenseIds.length ? session.distractorSenseIds : session.poolSenseIds, session.questionMode as GuidedQuestionMode);
 	const advanced = await prisma.$transaction(async (tx) => {
 		const updated = await tx.enGuidedReviewSession.updateMany({ where: { id: session.id, phase: 'summary', chunkNumber: session.chunkNumber }, data: { remainingSenseIds: remaining.slice(chunk.length), currentChunkSenseIds: chunk, chunkNumber, phase: 'study', studyPosition: 0, questionPosition: 0 } });
 		if (!updated.count) return false;

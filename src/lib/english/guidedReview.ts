@@ -1,7 +1,7 @@
 import { answerLayout, type AnswerLayout } from '@/lib/english/answerLayout';
 import { activityByKey, type ActivityItem, type ActivityKey } from '@/lib/english/activities';
 import type { DistractorPool } from '@/lib/english/activities/distractors';
-import type { Rng } from '@/lib/english/activities/rng';
+import { mulberry32, type Rng } from '@/lib/english/activities/rng';
 import type { SenseBundle } from '@/lib/english/senseBundle';
 
 /** Recent first-attempt results of a word in Ôn luân phiên (SRS). */
@@ -23,6 +23,7 @@ export function weightedOrder(senseIds: string[], histories: ReviewHistory[], rn
 }
 
 export const REVIEW_KEYS: ActivityKey[] = ['meaning_choice', 'cloze_choice', 'listen_type'];
+export type GuidedQuestionMode = 'mix' | ActivityKey;
 function buildOne(bundle: SenseBundle, pool: DistractorPool, keys: ActivityKey[], rng: Rng): GuidedQuestion | null {
  for (const key of keys) {
   const item = activityByKey(key)?.build(bundle, { pool, rng, allowSyntheticAudio: true });
@@ -30,10 +31,13 @@ function buildOne(bundle: SenseBundle, pool: DistractorPool, keys: ActivityKey[]
  }
  return null;
 }
-export function buildGuidedQuestions(chunk: SenseBundle[], pool: DistractorPool, rng: Rng): GuidedQuestion[] {
+export function canBuildGuidedQuestion(bundle: SenseBundle, pool: DistractorPool, mode: GuidedQuestionMode): boolean {
+ return Boolean(buildOne(bundle, pool, mode === 'mix' ? REVIEW_KEYS : [mode], mulberry32(0)));
+}
+export function buildGuidedQuestions(chunk: SenseBundle[], pool: DistractorPool, rng: Rng, mode: GuidedQuestionMode = 'mix'): GuidedQuestion[] {
  const start = Math.floor(rng.next() * REVIEW_KEYS.length);
  const built = chunk.flatMap((bundle, i) => {
-  const keys = REVIEW_KEYS.map((_, j) => REVIEW_KEYS[(start + i + j) % REVIEW_KEYS.length]!);
+  const keys = mode === 'mix' ? REVIEW_KEYS.map((_, j) => REVIEW_KEYS[(start + i + j) % REVIEW_KEYS.length]!) : [mode];
   const question = buildOne(bundle, pool, keys, rng);
   return question ? [question] : [];
  });
@@ -42,7 +46,8 @@ export function buildGuidedQuestions(chunk: SenseBundle[], pool: DistractorPool,
  if (shuffled.length > 1 && shuffled[0]?.senseId === lastStudied) [shuffled[0], shuffled[1]] = [shuffled[1]!, shuffled[0]!];
  return shuffled;
 }
-export function buildRetryQuestion(bundle: SenseBundle, pool: DistractorPool, previousKey: string, rng: Rng): GuidedQuestion | null {
+export function buildRetryQuestion(bundle: SenseBundle, pool: DistractorPool, previousKey: string, rng: Rng, mode: GuidedQuestionMode = 'mix'): GuidedQuestion | null {
+ if (mode !== 'mix') return buildOne(bundle, pool, [mode], rng);
  const other = rng.shuffle(REVIEW_KEYS.filter((key) => key !== previousKey));
  return buildOne(bundle, pool, [...other, ...REVIEW_KEYS.filter((key) => key === previousKey)], rng);
 }

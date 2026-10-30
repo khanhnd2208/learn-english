@@ -13,6 +13,8 @@ import { EN_GUIDED_CHUNK_SIZE } from '@/lib/english/constants';
 import type { SenseBundle } from '@/lib/english/senseBundle';
 import { useAudioPreload } from '@/lib/useAudioPreload';
 import type { GoalReward } from '@/services/english/enGoalService';
+import { useAdvancedMode } from '@/components/english/advanced/useAdvancedMode';
+import type { GuidedQuestionMode } from '@/lib/english/guidedReview';
 
 export type GuidedPublicQuestion = PublicQuestion & {
 	id: string;
@@ -29,6 +31,8 @@ export type GuidedSession = {
 	studyPosition: number;
 	questionPosition: number;
 	selectedSetIds: string[];
+	questionMode: GuidedQuestionMode;
+	excludedWordCount: number;
 	poolSize: number;
 	remainingCount: number;
 	words: SenseBundle[];
@@ -42,6 +46,7 @@ type AnswerResult = { correct: boolean; expected: string; session: GuidedSession
 
 export default function GuidedReviewSession({ initial, onClose }: { initial: GuidedSession; onClose: () => void }) {
 	const [session, setSession] = useState(initial);
+	const showAdvanced = useAdvancedMode();
 	const [viewedWord, setViewedWord] = useState(Math.min(initial.studyPosition, Math.max(0, initial.words.length - 1)));
 	const [shownQuestion, setShownQuestion] = useState<GuidedPublicQuestion | null>(initial.questions.find((question) => question.answer === null) ?? null);
 	const [feedback, setFeedback] = useState<QuestionFeedback | null>(null);
@@ -165,8 +170,10 @@ export default function GuidedReviewSession({ initial, onClose }: { initial: Gui
 		<div key={`${session.phase}-${viewedWord}-${shownQuestion?.id ?? ''}`} className="min-h-0 flex-1 overflow-y-auto">
 			<div className="mx-auto max-w-2xl px-4 py-3 sm:py-5">
 				<div className="mb-3 flex items-baseline justify-between gap-3"><p className="font-bold">{stepLabel}</p><p className="shrink-0 text-xs font-bold uppercase tracking-wide text-accent">Chặng {lapChunk}/{lapChunks} · {covered}/{session.poolSize} từ</p></div>
+				<p className="mb-2 text-sm text-muted">Dạng câu hỏi: {{ mix: 'Trộn lẫn', meaning_choice: 'Chọn nghĩa', cloze_choice: 'Điền câu', listen_type: 'Nghe viết' }[session.questionMode]}</p>
+				{session.phase === 'study' && session.chunkNumber === 1 && viewedWord === 0 && session.excludedWordCount > 0 && <p className="mb-2 text-sm text-muted">Ôn {session.poolSize} từ phù hợp. Bỏ qua {session.excludedWordCount} từ chưa đủ dữ liệu cho dạng này.</p>}
 
-				{session.phase === 'study' && word && <div key={word.sense.id} className="mode-card p-4 sm:p-6"><EnglishWordCard bundle={word} /></div>}
+				{session.phase === 'study' && word && <div key={word.sense.id} className="mode-card p-4 sm:p-6"><EnglishWordCard bundle={word} showAdvanced={showAdvanced} /></div>}
 
 				{inQuiz && shownQuestion && <QuestionView key={shownQuestion.id} item={shownQuestion} disabled={busy} feedback={feedback} onAnswer={(value) => void answer(value)} audioText={questionWord?.word.lemma} recordedAudioAvailable={Boolean(questionWord && (questionWord.word.audioPath))} />}
 

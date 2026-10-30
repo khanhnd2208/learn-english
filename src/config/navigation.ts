@@ -9,7 +9,6 @@ export interface NavLink {
 export const MAIN_NAV: NavLink[] = [
  { href: '/', label: 'Hôm nay', icon: 'target', shortLabel: 'Hôm nay' },
  { href: '/review', label: 'Ôn tập', icon: 'repeat', shortLabel: 'Ôn tập' },
- { href: '/sets', label: 'Bộ từ của tôi', icon: 'auto_stories', shortLabel: 'Bộ từ' },
  { href: '/progress', label: 'Tiến bộ', icon: 'flag', shortLabel: 'Tiến bộ' },
  { href: '/store', label: 'Thư viện', icon: 'map', shortLabel: 'Khám phá' },
 ];
@@ -27,6 +26,7 @@ export const ENGLISH_ADMIN_NAV = ADMIN_NAV;
 export function isNavActive(pathname: string, href: string): boolean {
 	if (href === '/') return pathname === '/';
 	if (href === '/progress') return pathname === '/progress' || pathname === '/quests' || pathname === '/mistakes';
+	if (href === '/review' && pathname.startsWith('/sets/')) return true;
 	if (href === '/admin') return pathname === '/admin';
 	return pathname === href || pathname.startsWith(`${href}/`);
 }

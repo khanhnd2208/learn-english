@@ -1,0 +1,4 @@
+ALTER TABLE "EnGuidedReviewSession"
+ADD COLUMN "questionMode" TEXT NOT NULL DEFAULT 'mix',
+ADD COLUMN "excludedWordCount" INTEGER NOT NULL DEFAULT 0,
+ADD COLUMN "distractorSenseIds" TEXT[] NOT NULL DEFAULT ARRAY[]::TEXT[];
