@@ -39,7 +39,11 @@ TỪNG TRƯỜNG
 - partOfSpeech: tiếng Anh, viết thường: noun, verb, adjective, adverb, preposition, conjunction, phrasal verb, idiom.
 - ipa: giọng Mỹ, đặt trong dấu / /, có dấu trọng âm ˈ.
 - audioFile: "<lemma>.mp3" (dấu cách thay bằng "-"); mọi audioFile phải có trong audioFiles ở đầu gói.
-- forms: chỉ các dạng BIẾN ĐỔI NGỮ PHÁP của chính từ này: số nhiều; -s, -ed, -ing, quá khứ, quá khứ phân từ; so sánh hơn/nhất (-er/-est); biến thể chính tả Anh–Anh. Không ghi lại lemma. Không ghi từ khác loại (happiness không phải dạng của happy — nó thuộc family). Tính từ dạng -ed/-ing hoặc dài (excited, comfortable) thường có forms: [].
+- forms: chỉ các dạng BIẾN ĐỔI NGỮ PHÁP của chính từ này: số nhiều; -s, -ed, -ing, quá khứ, quá khứ phân từ; so sánh hơn/nhất (-er/-est); biến thể chính tả Anh–Anh. Không ghi lại lemma. Không ghi từ khác loại (happiness không phải dạng của happy — nó thuộc family).
+  - Danh từ đếm được: BẮT BUỘC ghi số nhiều, kể cả danh từ ghép nhiều chữ (doctor → ["doctors"], office worker → ["office workers"], child → ["children"]).
+  - Động từ: ghi đủ -s, -ed/quá khứ, quá khứ phân từ, -ing (give up → ["gives up", "gave up", "given up", "giving up"]).
+  - Chỉ tính từ dạng -ed/-ing hoặc tính từ dài (excited, comfortable) và danh từ không đếm được mới thường có forms: [].
+  - Mọi câu và mọi cụm trong gói chỉ được dùng lemma hoặc một dạng có trong forms; nếu định dùng dạng nào thì phải ghi nó vào forms.
 - meaningVi: ngắn gọn (2–6 chữ), chỉ nêu đúng nghĩa của mục này, không liệt kê nhiều nghĩa, không dùng dấu "/".
 - synonyms: tối đa ${EN_MAX_SYNONYMS} từ/cụm tiếng Anh cùng loại từ mà người Việt có thể gõ khi chỉ thấy meaningVi và loại từ. Không chứa lemma hay dạng của nó. Phải thật sự gần nghĩa; ưu tiên từ thông dụng trước từ hiếm.
 - noteVi: tối đa một câu (dưới 200 ký tự), chỉ ghi bẫy thật sự (dễ nhầm với từ nào và khác thế nào, -ed/-ing, đếm được/không đếm được, sắc thái trang trọng). Không có bẫy thì để "".
@@ -48,7 +52,8 @@ HỌ TỪ (family) — luôn hiển thị trên thẻ, kể cả khi không bậ
 - Các từ CÙNG GỐC thông dụng (A2–C1) mà người học nên biết kèm: đổi loại từ (happy → happiness, happily), thêm tiền tố/hậu tố (happy → unhappy), hoặc gốc động từ/danh từ (worried → worry).
 - Mỗi mục: { "word": từ tiếng Anh, "partOfSpeech": một trong ${EN_FAMILY_PARTS_OF_SPEECH.join(', ')}, "meaningVi": nghĩa ngắn 2–6 chữ, gắn với nghĩa đang học }.
 - Tối đa ${EN_MAX_FAMILY} mục, xếp từ thông dụng nhất. Nếu cùng mặt chữ nhưng khác loại từ (worry là động từ và danh từ) thì ghi một mục, chọn loại phổ biến hơn.
-- KHÔNG ghi: chính lemma, các dạng trong forms (happier, happiest), từ đồng nghĩa khác gốc, từ hiếm/cổ. Chỉ để [] khi thật sự không có từ cùng gốc thông dụng (ví dụ "okay").
+- KHÔNG ghi: chính lemma, các dạng trong forms (happier, happiest), từ đồng nghĩa khác gốc, từ hiếm/cổ.
+- KHÔNG ghi từ viết giống hệt một dạng trong forms dù nghĩa khác: mechanic có forms ["mechanics"] nên không ghi "mechanics" (cơ học) vào family; ghi "mechanical" thay thế. Chỉ để [] khi thật sự không có từ cùng gốc thông dụng (ví dụ "okay").
 
 CÂU VÍ DỤ — phần quan trọng nhất của gói
 Mỗi nghĩa có 1 cardExample và ${EN_QUIZ_EXAMPLES_MIN}–${EN_QUIZ_EXAMPLES_MAX} quizExamples (tổng 3–5 câu).
@@ -69,13 +74,18 @@ PHẦN NÂNG CAO (advanced) — BẮT BUỘC, hiện khi người học bật "N
   3. collocation: từ hay đi cùng mà người Việt khó tự ghép: trạng từ nhấn mạnh (wide awake, deeply embarrassed), động từ đi kèm (stay calm, get ready, make sb proud), danh từ đi kèm (a nervous laugh).
   4. phrasal_verb / idiom: cụm động từ hoặc thành ngữ phổ biến chứa từ này (lend a hand, bored to death).
 - KHÔNG ghi cụm hiển nhiên ai cũng tự ghép được và lặp ở mọi từ (feel X, very X, so X, really X); tối đa một cụm dạng "feel/look/get + từ" và chỉ khi nó có nét nghĩa riêng.
-- phrase: viết đúng cách dùng, phải chứa lemma hoặc một dạng trong forms. Không trùng nhau.
+- Danh từ chỉ người, nghề nghiệp, đồ vật (doctor, driver, cashier) thường không có giới từ cố định: dùng collocation và pattern có từ đích đứng riêng thành một chữ, ví dụ "see a doctor", "a qualified mechanic", "a taxi driver", "work as a cashier", "become a freelancer". Đủ ${EN_MIN_ADVANCED} mục tốt là được; không bịa cụm cho đủ số.
+- phrase: viết đúng cách dùng, phải chứa NGUYÊN lemma hoặc nguyên một dạng trong forms, đứng thành chữ riêng. Không trùng nhau.
+  - Được: "see a doctor", "a doctor's note" (thêm 's sở hữu được chấp nhận), "a taxi driver".
+  - Không được: dùng từ gốc hay từ khác loại thay cho từ đích ("work freelance" cho freelancer, "a mechanical problem" cho mechanic) — những từ đó thuộc family; dùng một phần của cụm từ ghép ("office staff", "a factory job" cho office worker / factory worker); dùng dạng chưa ghi trong forms.
 - meaningVi: nghĩa ngắn của cả cụm.
-- example: BẮT BUỘC, một câu tự nhiên 8–15 từ dùng đúng cụm đó, khác cardExample và mọi quizExamples.
+- example: BẮT BUỘC, một câu tự nhiên 8–15 từ chứa nguyên cụm phrase (chỗ sb/sth/V thay bằng từ cụ thể) nên cũng chứa lemma hoặc một dạng trong forms; khác cardExample và mọi quizExamples.
 
 TỰ KIỂM TRA TRƯỚC KHI TRẢ LỜI
 - JSON parse được; mọi chuỗi dùng nháy kép; không dấu phẩy thừa.
-- Mỗi target nằm trong câu và thuộc [lemma, ...forms]; mỗi phrase nâng cao chứa lemma hoặc một dạng.
+- Mỗi target nằm trong câu và thuộc [lemma, ...forms].
+- Với TỪNG mục advanced: tìm thấy lemma hoặc một dạng trong forms, nguyên chữ, trong cả phrase lẫn example. Không thấy thì sửa cụm hoặc thay cụm khác — không được giữ.
+- Danh từ đếm được và động từ đã có forms; không mục family nào trùng lemma hay một dạng trong forms.
 - Mỗi nghĩa có 1 cardExample, ${EN_QUIZ_EXAMPLES_MIN}–${EN_QUIZ_EXAMPLES_MAX} quizExamples không giống cardExample, ít nhất ${EN_MIN_ADVANCED} mục advanced có example, và family (hoặc [] nếu thật sự không có).
 - Đọc lại các câu của cả gói: không có hai câu cùng khuôn, không có câu hỏi nào điền được bằng từ khác trong danh sách.
 - Số mục words khớp số nghĩa đã chọn; senseKey không trùng; audioFiles đủ.`;
