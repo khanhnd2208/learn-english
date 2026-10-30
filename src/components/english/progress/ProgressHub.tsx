@@ -80,7 +80,7 @@ export default function ProgressHub({ board, weeks, wrong, stages, dueNext7Days,
 			<div className="mt-3.5 grid grid-cols-2 gap-2 sm:mt-4 sm:gap-3 lg:grid-cols-4">
 				<StatTile icon="spark" value={board.streak.current} label="Chuỗi ngày học" note={`Kỷ lục ${board.streak.longest} ngày`} />
 				<StatTile icon="sprout" value={board.longTermCount} label="Từ nhớ lâu" note={comparison(longTermDelta)} tone={longTermDelta > 0 ? 'up' : longTermDelta < 0 ? 'down' : 'muted'} />
-				<StatTile icon="target" value={thisWeek.percent === null ? '—' : `${thisWeek.percent}%`} label="Trả lời đúng (tuần này)" note={accuracyDelta === null ? (thisWeek.answers ? `${thisWeek.correct}/${thisWeek.answers} câu đúng` : 'Chưa ôn tuần này') : comparison(accuracyDelta, ' điểm phần trăm')} tone={accuracyDelta === null || accuracyDelta === 0 ? 'muted' : accuracyDelta > 0 ? 'up' : 'down'} />
+				<StatTile icon="target" value={thisWeek.percent === null ? '—' : `${thisWeek.percent}%`} label="Trả lời đúng (tuần này)" note={accuracyDelta === null ? (thisWeek.answers ? `${thisWeek.correct}/${thisWeek.answers} câu đúng` : 'Chưa ôn tuần này') : comparison(accuracyDelta, '%')} tone={accuracyDelta === null || accuracyDelta === 0 ? 'muted' : accuracyDelta > 0 ? 'up' : 'down'} />
 				<StatTile icon="trophy" value={`${unlocked}/${tierCount}`} label="Huy hiệu đã mở" note={board.unseenAchievements.length ? `${board.unseenAchievements.length} mới!` : undefined} tone="up" />
 			</div>
 		</header>
@@ -220,12 +220,11 @@ function StatsTab({ board, weeks, wrong, stages, dueNext7Days }: { board: GoalBo
 			<MiniBarChart label="Tỉ lệ trả lời đúng 8 tuần" bars={accuracyBars} max={100} band={{ from: 80, label: '≥80% tốt' }} height={104} empty="Chưa có lượt ôn luân phiên nào trong 8 tuần." />
 		</Card>
 
-		<Card title={<>Từ nhớ lâu <InfoHint title={HINTS.stages.title}>{HINTS.stages.body}</InfoHint></>} aside={<span className="text-sm"><span className="game-number text-2xl tabular-nums">{longTerm}</span> {longTermDelta !== 0 && <span className={`font-bold ${longTermDelta > 0 ? 'text-success' : 'text-error'}`}>{comparison(longTermDelta)}</span>}</span>}>
+		<Card title={<>Từ nhớ lâu <InfoHint title={HINTS.stages.title}>{HINTS.stages.body}</InfoHint></>} aside={<span className="game-number text-2xl tabular-nums">{longTerm}</span>}>
+			{longTermDelta !== 0 && <p className={`mt-1 text-xs font-bold ${longTermDelta > 0 ? 'text-success' : 'text-error'}`}>{comparison(longTermDelta)}</p>}
 			<p className="mt-1 text-xs text-muted">Số từ {STAGE_META.long_term.hint}, ước tính cuối mỗi tuần. Mỗi cột là một tuần, bắt đầu từ ngày ghi bên dưới.</p>
 			<MiniBarChart label="Số từ nhớ lâu 8 tuần" bars={longTermBars} height={104} empty="Chưa có từ nào lên mức nhớ lâu. Ôn đúng đều đặn để từ lên mức." />
 		</Card>
-
-
 
 		<Card title="Từ hay sai" aside={<Link href="/review" className="inline-flex min-h-11 items-center text-sm font-bold text-accent">Ôn theo bộ →</Link>} className="md:col-span-2">
 			{wrong.length
