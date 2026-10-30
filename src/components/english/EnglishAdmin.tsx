@@ -11,6 +11,7 @@ import EnglishAdminAppeals from '@/components/english/EnglishAdminAppeals';
 import type { EnglishPackPreview } from '@/lib/english/packPreview';
 import { sampleEnglishPack } from '@/lib/english/samplePack';
 import { publishEnglishSetRequest, publishSummary } from '@/lib/english/publishClient';
+import { buildAiRepairPrompt } from '@/lib/english/aiPackPrompt';
 
 interface Issue {
 	path: string;
@@ -55,6 +56,16 @@ export default function EnglishAdmin({ sets, qaEnabled, pendingAppeals }: { sets
 	const [busy, setBusy] = useState(false);
 	const [panel, setPanel] = useState<'content' | 'appeals' | 'qa'>(pendingAppeals > 0 ? 'appeals' : 'content');
 	const [pending, setPending] = useState(pendingAppeals);
+	const repairPrompt = buildAiRepairPrompt(issues);
+
+	async function copyRepair() {
+		try {
+			await navigator.clipboard.writeText(repairPrompt);
+			setMessage('Đã copy prompt sửa lỗi. Dán vào đúng cuộc trò chuyện với AI, rồi dán JSON mới vào ô trên.');
+		} catch {
+			setMessage('Trình duyệt chặn copy tự động. Hãy chép danh sách lỗi bên dưới gửi cho AI.');
+		}
+	}
 
 	async function send(action: 'preview' | 'save', publishAfterSave = false) {
 		setBusy(true);
@@ -152,10 +163,11 @@ export default function EnglishAdmin({ sets, qaEnabled, pendingAppeals }: { sets
 					{issues.length > 0 && (
 						<ul className="space-y-1 text-sm text-warning">
 							{issues.slice(0, 30).map((issue) => (
-								<li key={`${issue.path}-${issue.code}`}>{issue.path}: {issue.message}</li>
+								<li key={`${issue.path}-${issue.code}-${issue.message}`}>{issue.path}: {issue.message}</li>
 							))}
 						</ul>
 					)}
+					{repairPrompt && <Button type="button" variant="secondary" onClick={() => void copyRepair()}>Copy prompt sửa lỗi</Button>}
 				</CardContent>
 			</Card>
 			<section className="space-y-3">

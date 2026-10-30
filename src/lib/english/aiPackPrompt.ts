@@ -30,29 +30,33 @@ const RULES = `QUY TẮC CHUNG
 - Giữ nguyên thứ tự từ trong danh sách. Không bỏ từ nào, không tự thêm từ ngoài danh sách.
 - Một mục trong words là MỘT nghĩa. Từ nhiều nghĩa phổ biến thì tách thành nhiều mục, mỗi mục một senseKey riêng; chỉ giữ nghĩa thông dụng nhất (tối đa 2 nghĩa) trừ khi danh sách hoặc tên bộ đã gợi ý nghĩa (ví dụ bộ "Cảm giác" thì "free" là rảnh, không phải miễn phí).
 - Cụm từ (give up, look after) giữ nguyên làm lemma.
+- Danh sách có thể kèm IPA, mạo từ (a/an) và nghĩa tiếng Việt: dùng nghĩa đã cho để chọn đúng nghĩa cần học; IPA trong danh sách chỉ để tham khảo (vẫn ghi giọng Mỹ); ghi chú mạo từ đặc biệt (a university, an hour, không dùng a/an) là bẫy nên đưa vào noteVi.
 - Mọi trường bên dưới đều BẮT BUỘC có nội dung, trừ khi quy tắc của trường đó cho phép để trống.
 
 TỪNG TRƯỜNG
 - title: tên bộ (dùng đúng tên đã cho nếu có); description: một câu ngắn hoặc "".
-- lemma: dạng nguyên mẫu, chữ thường (trừ danh từ riêng).
-- senseKey: "lemma.loại.nhãn", chỉ chữ thường, số, dấu cách, gạch nối, nháy đơn; loại là n, v, adj, adv, prep, conj, phr…; nhãn là 1–3 từ tiếng Anh nối bằng "_" mô tả nghĩa. Không trùng nhau trong gói. Ví dụ: "give up.phr.stop_trying".
+- lemma: viết đúng như danh sách, kể cả dấu (café) và chữ hoa của tên riêng, viết tắt (IT worker); còn lại chữ thường.
+- senseKey: "lemma.loại.nhãn". Phần lemma là lemma viết thường, giữ dấu nếu có (café → "café.n.coffee_shop", IT worker → "it worker.n.it_employee"); loại là n, v, adj, adv, prep, conj, phr, idiom; nhãn là 1–3 từ tiếng Anh không dấu, chữ thường, nối bằng "_". Không trùng nhau trong gói. Ví dụ: "give up.phr.stop_trying".
 - partOfSpeech: tiếng Anh, viết thường: noun, verb, adjective, adverb, preposition, conjunction, phrasal verb, idiom.
 - ipa: giọng Mỹ, đặt trong dấu / /, có dấu trọng âm ˈ.
-- audioFile: "<lemma>.mp3" (dấu cách thay bằng "-"); mọi audioFile phải có trong audioFiles ở đầu gói.
+- audioFile: lemma viết thường, bỏ dấu, dấu cách thay bằng "-", thêm ".mp3" (café → "cafe.mp3", IT worker → "it-worker.mp3", give up → "give-up.mp3"); mọi audioFile phải có trong audioFiles ở đầu gói, đúng thứ tự words.
 - forms: chỉ các dạng BIẾN ĐỔI NGỮ PHÁP của chính từ này: số nhiều; -s, -ed, -ing, quá khứ, quá khứ phân từ; so sánh hơn/nhất (-er/-est); biến thể chính tả Anh–Anh. Không ghi lại lemma. Không ghi từ khác loại (happiness không phải dạng của happy — nó thuộc family).
   - Danh từ đếm được: BẮT BUỘC ghi số nhiều, kể cả danh từ ghép nhiều chữ (doctor → ["doctors"], office worker → ["office workers"], child → ["children"]).
   - Động từ: ghi đủ -s, -ed/quá khứ, quá khứ phân từ, -ing (give up → ["gives up", "gave up", "given up", "giving up"]).
   - Chỉ tính từ dạng -ed/-ing hoặc tính từ dài (excited, comfortable) và danh từ không đếm được mới thường có forms: [].
   - Mọi câu và mọi cụm trong gói chỉ được dùng lemma hoặc một dạng có trong forms; nếu định dùng dạng nào thì phải ghi nó vào forms.
 - meaningVi: ngắn gọn (2–6 chữ), chỉ nêu đúng nghĩa của mục này, không liệt kê nhiều nghĩa, không dùng dấu "/".
-- synonyms: tối đa ${EN_MAX_SYNONYMS} từ/cụm tiếng Anh cùng loại từ mà người Việt có thể gõ khi chỉ thấy meaningVi và loại từ. Không chứa lemma hay dạng của nó. Phải thật sự gần nghĩa; ưu tiên từ thông dụng trước từ hiếm.
+- synonyms: tối đa ${EN_MAX_SYNONYMS} từ/cụm tiếng Anh cùng loại từ mà người Việt có thể gõ khi chỉ thấy meaningVi và loại từ (đáp án gõ trùng synonym được tính là gần đúng). Phải thật sự gần nghĩa và có trong từ điển; ưu tiên từ thông dụng trước từ hiếm.
+  - KHÔNG ghi: lemma hay dạng của nó; một từ khác có trong DANH SÁCH TỪ (bộ có cả hospital và clinic thì không ghi clinic cho hospital); cụm tự ghép cho đủ số ("design professional", "nursing professional", "pharmacy professional"); từ đã ghi trong family.
+  - Không có từ nào đạt thì để [].
 - noteVi: tối đa một câu (dưới 200 ký tự), chỉ ghi bẫy thật sự (dễ nhầm với từ nào và khác thế nào, -ed/-ing, đếm được/không đếm được, sắc thái trang trọng). Không có bẫy thì để "".
 
 HỌ TỪ (family) — luôn hiển thị trên thẻ, kể cả khi không bật "Nâng cao"
 - Các từ CÙNG GỐC thông dụng (A2–C1) mà người học nên biết kèm: đổi loại từ (happy → happiness, happily), thêm tiền tố/hậu tố (happy → unhappy), hoặc gốc động từ/danh từ (worried → worry).
 - Mỗi mục: { "word": từ tiếng Anh, "partOfSpeech": một trong ${EN_FAMILY_PARTS_OF_SPEECH.join(', ')}, "meaningVi": nghĩa ngắn 2–6 chữ, gắn với nghĩa đang học }.
 - Tối đa ${EN_MAX_FAMILY} mục, xếp từ thông dụng nhất. Nếu cùng mặt chữ nhưng khác loại từ (worry là động từ và danh từ) thì ghi một mục, chọn loại phổ biến hơn.
-- KHÔNG ghi: chính lemma, các dạng trong forms (happier, happiest), từ đồng nghĩa khác gốc, từ hiếm/cổ.
+- KHÔNG ghi: chính lemma, các dạng trong forms (happier, happiest), từ đồng nghĩa khác gốc, từ hiếm/cổ, từ tự chế ("redesigning" làm danh từ), từ đã ghi trong synonyms.
+- Từ ghép nhiều chữ (office worker, tour guide): chỉ ghi từ cùng gốc của chữ chính mang nghĩa (worker → work; guide → guidance) khi thật sự hữu ích; không liệt kê lại từng chữ của cụm.
 - KHÔNG ghi từ viết giống hệt một dạng trong forms dù nghĩa khác: mechanic có forms ["mechanics"] nên không ghi "mechanics" (cơ học) vào family; ghi "mechanical" thay thế. Chỉ để [] khi thật sự không có từ cùng gốc thông dụng (ví dụ "okay").
 
 CÂU VÍ DỤ — phần quan trọng nhất của gói
@@ -68,6 +72,7 @@ Mỗi nghĩa có 1 cardExample và ${EN_QUIZ_EXAMPLES_MIN}–${EN_QUIZ_EXAMPLES_
 
 PHẦN NÂNG CAO (advanced) — BẮT BUỘC, hiện khi người học bật "Nâng cao" (B2–C2), không dùng để chấm
 - Mỗi nghĩa ${EN_MIN_ADVANCED}–4 mục (tối đa ${EN_MAX_ADVANCED}): những cụm người bản ngữ thật sự hay dùng với ĐÚNG nghĩa này. Chỉ để [] khi từ thật sự không có cụm cố định nào (rất hiếm).
+- Ưu tiên cụm tần suất cao mà người học B1–B2 sẽ gặp trong đời sống, công việc; tránh thuật ngữ chuyên ngành hẹp ("a publicly traded company", "hotel occupancy").
 - kind là một trong: ${EN_ADVANCED_KINDS.join(', ')}. Chọn theo thứ tự ưu tiên:
   1. preposition: giới từ cố định đi kèm (afraid of sth, good at sth, depend on sb/sth). Từ có giới từ đi kèm thì BẮT BUỘC ghi, ghi đủ các giới từ phổ biến nếu nghĩa khác nhau (angry with sb / angry about sth).
   2. pattern: cấu trúc ngữ pháp, dùng sb / sth / V / V-ing / to V / that ... làm chỗ trống (glad to V, too tired to V, it is worth V-ing).
@@ -83,12 +88,29 @@ PHẦN NÂNG CAO (advanced) — BẮT BUỘC, hiện khi người học bật "N
 
 TỰ KIỂM TRA TRƯỚC KHI TRẢ LỜI
 - JSON parse được; mọi chuỗi dùng nháy kép; không dấu phẩy thừa.
+- Mỗi senseKey bắt đầu bằng đúng lemma viết thường (giữ dấu), rồi ".loại.nhãn"; audioFile viết thường, không dấu.
+- Không synonym nào là một từ khác trong danh sách, là cụm tự ghép, hay trùng family.
 - Mỗi target nằm trong câu và thuộc [lemma, ...forms].
 - Với TỪNG mục advanced: tìm thấy lemma hoặc một dạng trong forms, nguyên chữ, trong cả phrase lẫn example. Không thấy thì sửa cụm hoặc thay cụm khác — không được giữ.
 - Danh từ đếm được và động từ đã có forms; không mục family nào trùng lemma hay một dạng trong forms.
 - Mỗi nghĩa có 1 cardExample, ${EN_QUIZ_EXAMPLES_MIN}–${EN_QUIZ_EXAMPLES_MAX} quizExamples không giống cardExample, ít nhất ${EN_MIN_ADVANCED} mục advanced có example, và family (hoặc [] nếu thật sự không có).
 - Đọc lại các câu của cả gói: không có hai câu cùng khuôn, không có câu hỏi nào điền được bằng từ khác trong danh sách.
 - Số mục words khớp số nghĩa đã chọn; senseKey không trùng; audioFiles đủ.`;
+
+/** Issue as the admin sees it in the list under step 2. */
+export interface AiRepairIssue { path: string; code: string; message: string }
+/** Missing recordings and synonyms the checker already dropped are not the AI's to fix. */
+const NOT_FOR_AI = new Set(['audio', 'synonym_in_pack']);
+
+/**
+ * Follow-up for the same AI chat: the exact problems the checker found, so the AI fixes only those
+ * and sends the whole pack back. '' when nothing is left for the AI to fix.
+ */
+export function buildAiRepairPrompt(issues: AiRepairIssue[]): string {
+ const lines = [...new Set(issues.filter((i) => !NOT_FOR_AI.has(i.code)).map((i) => `- ${i.path}: ${i.message}`))];
+ if (!lines.length) return '';
+ return `Hệ thống kiểm tra gói JSON bạn vừa trả về và thấy ${lines.length} lỗi:\n${lines.join('\n')}\n\nSửa đúng các lỗi trên theo QUY TẮC trong prompt ban đầu. Giữ nguyên mọi phần không có lỗi, không đổi thứ tự từ. Trả về lại TOÀN BỘ gói JSON hoàn chỉnh trong một khối, không markdown, không giải thích.`;
+}
 
 export function buildAiPackPrompt(wordList: string, packTitle = ''): string {
  return `Bạn là biên soạn viên từ vựng tiếng Anh cho người Việt. Tạo gói từ vựng JSON v4 cho ${packTitle ? `bộ "${packTitle}"` : 'danh sách từ sau'}.\n\nDANH SÁCH TỪ:\n${wordList.trim()}\n\n${RULES}\n\nMẪU (chỉ để xem định dạng và mức chất lượng, không chép nội dung):\n${JSON.stringify(AI_PACK_PROMPT_EXAMPLE, null, 2)}`;
