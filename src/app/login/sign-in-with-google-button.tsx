@@ -53,7 +53,7 @@ export default function SignInWithGoogleButton({ callbackUrl }: { callbackUrl: s
 			type="button"
 			disabled={loading || inAppBrowserBlocked}
 			onClick={handleSignIn}
-			className="inline-flex w-full items-center justify-center gap-2.5 rounded-full border border-border bg-surface px-5 py-3 text-sm font-bold uppercase tracking-wider text-foreground transition-all hover:border-accent hover:text-accent disabled:cursor-not-allowed disabled:opacity-50"
+			className="inline-flex w-full items-center justify-center gap-2.5 rounded-full border border-border bg-surface px-5 py-3 text-sm font-semibold text-foreground transition-all hover:border-accent hover:text-accent disabled:cursor-not-allowed disabled:opacity-50"
 		>
 			<GoogleIcon className="h-5 w-5" />
 			<span>

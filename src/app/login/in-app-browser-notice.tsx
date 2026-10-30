@@ -75,7 +75,7 @@ export default function InAppBrowserNotice() {
 				{externalUrl ? (
 					<a
 						href={externalUrl}
-						className="inline-flex rounded-full border border-accent bg-accent px-4 py-2 text-xs font-semibold uppercase tracking-wide text-accent-foreground transition-opacity hover:opacity-90"
+						className="inline-flex rounded-full border border-accent bg-accent px-4 py-2 text-sm font-semibold text-accent-foreground transition-opacity hover:opacity-90"
 					>
 						Mở trong trình duyệt hệ thống
 					</a>
@@ -83,7 +83,7 @@ export default function InAppBrowserNotice() {
 				<button
 					type="button"
 					onClick={handleCopyLink}
-					className="rounded-full border border-border bg-surface px-4 py-2 text-xs font-semibold uppercase tracking-wide text-foreground transition-colors hover:border-accent hover:text-accent"
+					className="rounded-full border border-border bg-surface px-4 py-2 text-sm font-semibold text-foreground transition-colors hover:border-accent hover:text-accent"
 				>
 					{copied ? 'Đã sao chép link' : 'Sao chép link'}
 				</button>

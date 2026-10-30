@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import { AdventureIcon } from '@/components/english/AdventureIcon';
+import MaterialIcon from '@/components/ui/MaterialIcon';
 import { isIdleQuest } from '@/lib/english/quests';
 import type { GoalQuest } from '@/services/english/enGoalService';
 
@@ -17,7 +18,7 @@ export default function QuestItem({ quest, compact = false, dense = false, locke
 	const done = quest.done && !idle;
 	if (dense) {
 		const rowContent = <>
-			<span aria-hidden="true" className={`flex size-5 shrink-0 items-center justify-center rounded border-2 text-xs font-black ${done ? 'border-success bg-success text-white' : idle ? 'border-border text-muted' : 'border-foreground-secondary'}`}>{done ? '✓' : locked ? '🔒' : ''}</span>
+			<span aria-hidden="true" className={`flex size-5 shrink-0 items-center justify-center rounded-md border-[1.5px] text-xs font-black ${done ? 'border-success bg-success text-white' : idle ? 'border-border text-muted' : 'border-muted'}`}>{done ? '✓' : locked ? <MaterialIcon name="lock" size={13} /> : ''}</span>
 			<span className={`min-w-0 flex-1 line-clamp-2 text-sm font-bold ${done ? 'text-foreground-secondary line-through decoration-2' : idle ? 'text-muted' : ''}`}>{quest.title}</span>
 			{!idle && <span className="shrink-0 text-xs font-bold tabular-nums text-muted">{quest.current}/{quest.target}</span>}
 			{!idle && quest.xp > 0 && <span className="xp-chip shrink-0">+{quest.xp}</span>}
@@ -25,7 +26,7 @@ export default function QuestItem({ quest, compact = false, dense = false, locke
 		</>;
 		return <li className="border-b border-dashed border-[var(--note-border)] last:border-b-0" data-done={done}>
 			{!idle && !quest.done ? (
-				<Link href={questHref(quest)} aria-label={`Làm nhiệm vụ: ${quest.title}`} className="flex min-h-11 min-w-0 items-center gap-2 py-2 hover: opacity-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent">
+				<Link href={questHref(quest)} aria-label={`Làm nhiệm vụ: ${quest.title}`} className="flex min-h-11 min-w-0 items-center gap-2 py-2 hover:opacity-80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent">
 					{rowContent}
 				</Link>
 			) : (
@@ -35,7 +36,7 @@ export default function QuestItem({ quest, compact = false, dense = false, locke
 	}
 	if (idle) return <li className="quest-card flex items-center gap-3 border-dashed p-3 opacity-75" data-done={false}>
 		<span className="shrink-0 grayscale"><AdventureIcon name={quest.icon} size={20} framed /></span>
-		<p className="min-w-0 flex-1 text-sm font-bold text-muted">{locked ? '🔒 ' : ''}{quest.title}</p>
+		<p className="flex min-w-0 flex-1 items-center gap-1.5 text-sm font-bold text-muted">{locked && <MaterialIcon name="lock" size={16} />}{quest.title}</p>
 	</li>;
 	return <li className={`quest-card flex items-center gap-3 ${compact ? 'p-3' : 'p-3.5 sm:p-4'}`} data-done={quest.done}>
 		<span className="relative shrink-0">

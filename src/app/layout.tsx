@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from 'next';
-import { Be_Vietnam_Pro, Handjet, VT323 } from 'next/font/google';
+import { Be_Vietnam_Pro } from 'next/font/google';
 import Providers from '@/components/Providers';
 import PwaRegister from '@/components/PwaRegister';
 import './globals.css';
@@ -12,8 +12,6 @@ const sans = Be_Vietnam_Pro({
 	subsets: ['latin', 'vietnamese'],
 	weight: ['400', '600', '700', '800', '900'],
 });
-const pixel = Handjet({ variable: '--font-pixel', subsets: ['latin', 'vietnamese'], weight: ['400', '500', '600', '700', '800'] });
-const pixelFallback = VT323({ variable: '--font-pixel-fallback', subsets: ['latin', 'vietnamese'], weight: '400' });
 
 export const viewport: Viewport = {
 	width: 'device-width',
@@ -50,7 +48,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
 					rel="stylesheet"
 				/>
 			</head>
-			<body className={`${sans.variable} ${pixel.variable} ${pixelFallback.variable} antialiased selection:bg-accent-subtle selection:text-accent`}>
+			<body className={`${sans.variable} antialiased selection:bg-accent-subtle selection:text-accent`}>
 				<Providers>
 					<PwaRegister />
 					{children}
