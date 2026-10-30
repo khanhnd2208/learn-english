@@ -60,6 +60,13 @@ describe('AI pack → store → download', () => {
 		await expect(enrollEnglishSet('learner', setId)).resolves.toBeUndefined();
 	});
 
+	it('clears an mp3 name that was never uploaded so the server voice can read the word, and keeps a real one', async () => {
+		const { setId } = await saveEnglishPack(sampleEnglishPack);
+		const [kept, ...rest] = sampleEnglishPack.words.map((word) => word.audioFile);
+		await publishEnglishSet(setId, async (file) => file === kept);
+		expect(db.tables.word!.map((word) => word.audioPath)).toEqual([kept, ...rest.map(() => '')]);
+	});
+
 	it('keeps a word whose hidden question is broken, without ever showing that question', async () => {
 		const pack = structuredClone(sampleEnglishPack);
 		pack.words[0]!.quizExamples[0]!.meaningVi = 'mượn';

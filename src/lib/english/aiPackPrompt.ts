@@ -30,7 +30,8 @@ const RULES = `QUY TẮC CHUNG
 - Giữ nguyên thứ tự từ trong danh sách. Không bỏ từ nào, không tự thêm từ ngoài danh sách.
 - Một mục trong words là MỘT nghĩa. Từ nhiều nghĩa phổ biến thì tách thành nhiều mục, mỗi mục một senseKey riêng; chỉ giữ nghĩa thông dụng nhất (tối đa 2 nghĩa) trừ khi danh sách hoặc tên bộ đã gợi ý nghĩa (ví dụ bộ "Cảm giác" thì "free" là rảnh, không phải miễn phí).
 - Cụm từ (give up, look after) giữ nguyên làm lemma.
-- Danh sách có thể kèm IPA, mạo từ (a/an) và nghĩa tiếng Việt: dùng nghĩa đã cho để chọn đúng nghĩa cần học; IPA trong danh sách chỉ để tham khảo (vẫn ghi giọng Mỹ); ghi chú mạo từ đặc biệt (a university, an hour, không dùng a/an) là bẫy nên đưa vào noteVi.
+- Danh sách có thể là bảng (STT, từ, IPA, mạo từ a/an, nghĩa tiếng Việt): bỏ cột STT; dùng nghĩa đã cho để chọn đúng nghĩa cần học; IPA trong danh sách chỉ để tham khảo (danh sách hay ghi giọng Anh, bạn vẫn ghi giọng Mỹ); ghi chú mạo từ đặc biệt (an engineer, a university, an hour, không dùng a/an) là bẫy nên đưa vào noteVi.
+- Bộ nghề nghiệp có cả tính từ (retired) hay danh từ chỉ nơi chốn (bank, hospital): mỗi từ vẫn giữ đúng loại từ của nó, không đổi thành danh từ chỉ người.
 - Mọi trường bên dưới đều BẮT BUỘC có nội dung, trừ khi quy tắc của trường đó cho phép để trống.
 
 TỪNG TRƯỜNG
@@ -38,14 +39,14 @@ TỪNG TRƯỜNG
 - lemma: viết đúng như danh sách, kể cả dấu (café) và chữ hoa của tên riêng, viết tắt (IT worker); còn lại chữ thường.
 - senseKey: "lemma.loại.nhãn". Phần lemma là lemma viết thường, giữ dấu nếu có (café → "café.n.coffee_shop", IT worker → "it worker.n.it_employee"); loại là n, v, adj, adv, prep, conj, phr, idiom; nhãn là 1–3 từ tiếng Anh không dấu, chữ thường, nối bằng "_". Không trùng nhau trong gói. Ví dụ: "give up.phr.stop_trying".
 - partOfSpeech: tiếng Anh, viết thường: noun, verb, adjective, adverb, preposition, conjunction, phrasal verb, idiom.
-- ipa: giọng Mỹ, đặt trong dấu / /, có dấu trọng âm ˈ.
+- ipa: giọng Mỹ, đặt trong dấu / /; từ từ hai âm tiết trở lên có dấu trọng âm ˈ (từ một âm tiết như /nɝːs/ thì không cần); cụm nhiều chữ ghi IPA cả cụm (office worker → /ˈɑːfɪs ˌwɝːkɚ/).
 - audioFile: lemma viết thường, bỏ dấu, dấu cách thay bằng "-", thêm ".mp3" (café → "cafe.mp3", IT worker → "it-worker.mp3", give up → "give-up.mp3"); mọi audioFile phải có trong audioFiles ở đầu gói, đúng thứ tự words.
 - forms: chỉ các dạng BIẾN ĐỔI NGỮ PHÁP của chính từ này: số nhiều; -s, -ed, -ing, quá khứ, quá khứ phân từ; so sánh hơn/nhất (-er/-est); biến thể chính tả Anh–Anh. Không ghi lại lemma. Không ghi từ khác loại (happiness không phải dạng của happy — nó thuộc family).
   - Danh từ đếm được: BẮT BUỘC ghi số nhiều, kể cả danh từ ghép nhiều chữ (doctor → ["doctors"], office worker → ["office workers"], child → ["children"]).
   - Động từ: ghi đủ -s, -ed/quá khứ, quá khứ phân từ, -ing (give up → ["gives up", "gave up", "given up", "giving up"]).
   - Chỉ tính từ dạng -ed/-ing hoặc tính từ dài (excited, comfortable) và danh từ không đếm được mới thường có forms: [].
   - Mọi câu và mọi cụm trong gói chỉ được dùng lemma hoặc một dạng có trong forms; nếu định dùng dạng nào thì phải ghi nó vào forms.
-- meaningVi: ngắn gọn (2–6 chữ), chỉ nêu đúng nghĩa của mục này, không liệt kê nhiều nghĩa, không dùng dấu "/".
+- meaningVi: ngắn gọn (2–6 chữ), chỉ nêu đúng nghĩa của mục này, không liệt kê nhiều nghĩa khác nhau, không dùng dấu "/". Nếu danh sách đã ghi nghĩa bằng hai cách gọi của cùng một nghĩa (học sinh, sinh viên) thì giữ nguyên như danh sách.
 - synonyms: tối đa ${EN_MAX_SYNONYMS} từ/cụm tiếng Anh cùng loại từ mà người Việt có thể gõ khi chỉ thấy meaningVi và loại từ (đáp án gõ trùng synonym được tính là gần đúng). Phải thật sự gần nghĩa và có trong từ điển; ưu tiên từ thông dụng trước từ hiếm.
   - KHÔNG ghi: lemma hay dạng của nó; một từ khác có trong DANH SÁCH TỪ (bộ có cả hospital và clinic thì không ghi clinic cho hospital); cụm tự ghép cho đủ số ("design professional", "nursing professional", "pharmacy professional"); từ đã ghi trong family.
   - Không có từ nào đạt thì để [].
@@ -67,6 +68,7 @@ Mỗi nghĩa có 1 cardExample và ${EN_QUIZ_EXAMPLES_MIN}–${EN_QUIZ_EXAMPLES_
 - Tránh câu chung chung, rỗng nghĩa ("I am happy.", "It is good.") và tránh lặp một khuôn cho cả gói (không để mọi câu đều là "I'm X because ..."). Đổi chủ ngữ (I, she, my brother, we, the kids…), thì, dạng câu (khẳng định, phủ định, câu hỏi, lời thoại) và dạng từ trong forms.
 - cardExample: câu tiêu biểu nhất, thể hiện cách dùng phổ biến nhất của nghĩa này; người mới đọc là hiểu ngay.
 - quizExamples: mỗi câu một tình huống KHÁC HẲN cardExample, khác nhau và khác câu ví dụ ở phần nâng cao. Không viết lại cardExample bằng cách đổi vài chữ. Ngữ cảnh phải đủ mạnh để khi che target, chỉ đúng từ này điền tự nhiên — không phải từ đồng nghĩa hay một từ khác trong cùng danh sách (ví dụ phân biệt rõ tired / sleepy / exhausted, hungry / starving).
+- quizExamples: KHÔNG đặt "a" hay "an" ngay trước target — khi che từ đích, "an ___" lộ ngay đáp án bắt đầu bằng nguyên âm. Dùng the, my, our, số nhiều, sở hữu cách, hoặc thêm tính từ ở giữa ("a good designer", "the engineers"). cardExample thì nên có a/an để người học thấy cách dùng mạo từ.
 - target: chuỗi xuất hiện y nguyên đúng MỘT lần trong câu (giữ hoa/thường như trong câu) và phải là lemma hoặc một dạng trong forms.
 - meaningVi: dịch đầy đủ, tự nhiên cả câu (không dịch word-by-word); phần dịch của từ đích phải đúng nghĩa meaningVi.
 
@@ -90,7 +92,8 @@ TỰ KIỂM TRA TRƯỚC KHI TRẢ LỜI
 - JSON parse được; mọi chuỗi dùng nháy kép; không dấu phẩy thừa.
 - Mỗi senseKey bắt đầu bằng đúng lemma viết thường (giữ dấu), rồi ".loại.nhãn"; audioFile viết thường, không dấu.
 - Không synonym nào là một từ khác trong danh sách, là cụm tự ghép, hay trùng family.
-- Mỗi target nằm trong câu và thuộc [lemma, ...forms].
+- Mỗi target nằm trong câu và thuộc [lemma, ...forms]; không quizExample nào có "a"/"an" đứng ngay trước target.
+- Đếm số chữ: mỗi câu cardExample/quizExamples 10–18 chữ, mỗi example nâng cao 8–15 chữ.
 - Với TỪNG mục advanced: tìm thấy lemma hoặc một dạng trong forms, nguyên chữ, trong cả phrase lẫn example. Không thấy thì sửa cụm hoặc thay cụm khác — không được giữ.
 - Danh từ đếm được và động từ đã có forms; không mục family nào trùng lemma hay một dạng trong forms.
 - Mỗi nghĩa có 1 cardExample, ${EN_QUIZ_EXAMPLES_MIN}–${EN_QUIZ_EXAMPLES_MAX} quizExamples không giống cardExample, ít nhất ${EN_MIN_ADVANCED} mục advanced có example, và family (hoặc [] nếu thật sự không có).
