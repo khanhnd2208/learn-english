@@ -24,6 +24,7 @@
     "postinstall": "prisma generate",
     "db:seed:load": "tsx scripts/seed-load-test.ts",
     "bench": "tsx scripts/bench-services.ts",
+    "bench:http": "tsx scripts/bench-http.ts",
     "test:db": "tsx scripts/test-db.ts"
   },
   "dependencies": {
