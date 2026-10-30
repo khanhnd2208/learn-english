@@ -20,3 +20,15 @@ The seed's 0–250 answers/day is a synthetic workload distribution. It is **not
 Frozen pre-optimization service bodies live in `src/lib/__dbtests__/legacy/`. Only import wiring and exports for private oracle functions differ. Their schedule and question builders are frozen too. They must never be updated to match a new implementation.
 
 For production pool tuning, the owner should check `SHOW max_connections` and the connection budgets of all four apps sharing the VPS before raising `PG_POOL_MAX`. The production default is 10 after PR3. Consider PM2 `max_memory_restart: '1200M'` after inspecting actual memory headroom. These are deployment recommendations; the load scripts never connect to or configure the VPS. Slow API calls log only method, pathname and duration after `SLOW_REQUEST_MS` (default 1000).
+
+## HTTP benchmark
+
+`bench:http` drives a running `next start` over HTTP with minted session cookies. Start the server against the guarded `_load` database with a throwaway secret, then run the bench with the same secret:
+
+    export DATABASE_URL='postgresql://localhost/learn_english_load'
+    npm run db:seed:load -- --truncate --users 200 --sets 2 --words 30 --days 30 --seed 42
+    npm run build
+    AUTH_SECRET=load-only-secret DATABASE_URL=$DATABASE_URL PORT=3102 NODE_OPTIONS=--max-old-space-size=512 npx next start -p 3102
+    BENCH_AUTH_SECRET=load-only-secret npm run bench:http -- --users 200 --think-ms 4000 --ramp-ms 60000 --label local --out docs/testing/load-http-local.md
+
+Never point it at learner data: the script refuses non-localhost URLs and databases without `_load` / `_test`. Running it on the VPS needs the owner's go-ahead (a second app instance and a `_load` database on the shared Postgres).
