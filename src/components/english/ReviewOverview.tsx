@@ -9,6 +9,10 @@ import Checkbox from '@/components/ui/Checkbox';
 import { englishPost } from '@/components/english/englishApi';
 import InfoHint from '@/components/ui/InfoHint';
 import AdvancedToggle from '@/components/english/advanced/AdvancedToggle';
+import Radio from '@/components/ui/Radio';
+import MaterialIcon from '@/components/ui/MaterialIcon';
+import SetWordListDialog from '@/components/english/SetWordListDialog';
+import type { GuidedQuestionMode } from '@/lib/english/guidedReview';
 import { EN_GUIDED_CHUNK_SIZE } from '@/lib/english/constants';
 import { HINTS } from '@/lib/english/hintCopy';
 import type { TodayOverview } from '@/services/english/enDailyService';
@@ -27,6 +31,8 @@ export default function ReviewOverview({ overview, guided: initial, mode }: { ov
 	const [guided, setGuided] = useState(initial);
 	const [session, setSession] = useState<GuidedSession | null>(null);
 	const [search, setSearch] = useState('');
+	const [questionMode, setQuestionMode] = useState<GuidedQuestionMode>('mix');
+	const [openSet, setOpenSet] = useState<{ id: string; title: string } | null>(null);
 	const [busy, setBusy] = useState(false);
 	const [saving, setSaving] = useState(false);
 	const [error, setError] = useState('');
@@ -60,7 +66,7 @@ export default function ReviewOverview({ overview, guided: initial, mode }: { ov
 		setBusy(true);
 		setError('');
 		try {
-			const started = await englishPost<GuidedSession>('/api/review', { action: 'start', setIds: guided.selectedSetIds });
+			const started = await englishPost<GuidedSession>('/api/review', { action: 'start', setIds: guided.selectedSetIds, questionMode });
 			setSession(started);
 		} catch (cause) {
 			setError(cause instanceof Error ? cause.message : 'Không bắt đầu được phiên học.');
@@ -70,7 +76,7 @@ export default function ReviewOverview({ overview, guided: initial, mode }: { ov
 	}
 
 	return <div className="mx-auto max-w-2xl px-4 py-4 sm:px-6 sm:py-8">
-		<header className="mb-3.5 flex items-center justify-between gap-3 sm:mb-5"><h1 className="text-2xl sm:text-4xl">Ôn tập</h1><AdvancedToggle /></header>
+		<header className="mb-3.5 sm:mb-5"><h1 className="text-2xl sm:text-4xl">Ôn tập</h1></header>
 		<div role="group" aria-label="Chế độ ôn tập" className="mb-4 flex rounded-control border border-border bg-surface p-1">
 			{([['bo', 'Ôn theo bộ'], ['luan-phien', 'Ôn luân phiên']] as const).map(([value, label]) => <button key={value} type="button" aria-pressed={mode === value} onClick={() => router.replace(`/review?mode=${value}`)} className={`min-h-11 flex-1 rounded-control px-2 text-sm font-bold ${mode === value ? 'bg-accent text-accent-foreground' : 'text-muted'}`}>{label}</button>)}
 		</div>
@@ -88,22 +94,24 @@ export default function ReviewOverview({ overview, guided: initial, mode }: { ov
 				{guided.sets.length > 8 && <input value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Tìm bộ từ…" aria-label="Tìm bộ từ" className="mb-2 min-h-11 w-full rounded-control border border-border bg-background px-3 text-sm" />}
 				<div className="max-h-60 overflow-y-auto divide-y divide-border" aria-label="Chọn bộ từ để học">
 					<Checkbox label="Tất cả" checked={allSelected} disabled={busy} onChange={() => saveSelection(allSelected ? [] : allSetIds)} className="w-full px-2 font-bold" />
-					{filtered.map((set) => <div key={set.id} className="flex items-center justify-between gap-3"><Checkbox label={set.title} checked={selected.has(set.id)} disabled={busy} onChange={() => saveSelection(selected.has(set.id) ? guided.selectedSetIds.filter((id) => id !== set.id) : [...guided.selectedSetIds, set.id])} className="min-w-0 flex-1 px-2 font-bold" /><span className="shrink-0 text-xs text-muted sm:text-sm">{set.words} từ</span></div>)}
+					{filtered.map((set) => <div key={set.id} className="flex items-center justify-between gap-2"><Checkbox label={set.title} checked={selected.has(set.id)} disabled={busy} onChange={() => saveSelection(selected.has(set.id) ? guided.selectedSetIds.filter((id) => id !== set.id) : [...guided.selectedSetIds, set.id])} className="min-w-0 flex-1 px-2 font-bold" /><span className="shrink-0 text-xs text-muted sm:text-sm">{set.words} từ</span><button type="button" title="Xem từ trong bộ" aria-label={`Xem từ trong bộ ${set.title}`} onClick={() => setOpenSet({ id: set.id, title: set.title })} className="flex size-11 shrink-0 items-center justify-center rounded-control text-accent hover:bg-accent-subtle focus-visible:ring-2 focus-visible:ring-accent"><MaterialIcon name="menu_book" size={20} /></button></div>)}
 				</div>
 				{filtered.length === 0 && <p className="mt-2 text-sm text-muted">Không tìm thấy bộ từ phù hợp.</p>}
 				<div className="mt-2.5 flex flex-wrap items-center justify-between gap-2 text-sm">
-					<p className={`font-bold text-foreground-secondary ${saving ? 'opacity-60' : ''}`} aria-live="polite"><span className="tabular-nums">{guided.selectedSetIds.length}</span> bộ · <span className="tabular-nums">{guided.uniqueWords}</span> từ{guided.practicedToday > 0 && <> · đã luyện <span className="tabular-nums">{guided.practicedToday}</span> câu</>}</p>
+					<p className={`font-bold text-foreground-secondary ${saving ? 'opacity-60' : ''}`} aria-live="polite">{guided.selectedSetIds.length === 0 ? 'Chọn ít nhất một bộ để bắt đầu.' : <><span className="tabular-nums">{guided.selectedSetIds.length}</span> bộ · <span className="tabular-nums">{guided.uniqueWords}</span> từ</>}{guided.practicedToday > 0 && <> · đã luyện <span className="tabular-nums">{guided.practicedToday}</span> câu</>}</p>
 					<Link href="/store" className="inline-flex min-h-9 shrink-0 items-center font-bold text-accent hover:underline">+ Thêm bộ</Link>
 				</div>
 			</div>
 
+			<div className="space-y-3"><fieldset disabled={busy}><legend className="mb-2 font-bold">Dạng câu hỏi</legend><div className="grid grid-cols-2 gap-2 sm:grid-cols-4">{([['mix', 'Trộn lẫn', 'Kết hợp chọn nghĩa, điền câu và nghe viết.'], ['meaning_choice', 'Chọn nghĩa', 'Nhìn từ tiếng Anh và chọn nghĩa đúng.'], ['cloze_choice', 'Điền câu', 'Chọn từ đúng để điền vào câu.'], ['listen_type', 'Nghe viết', 'Nghe phát âm và gõ từ bạn nghe được.']] as const).map(([value, label, hint]) => <div key={value} title={hint} className="min-w-0 rounded-control border border-border px-2"><Radio name="guided-question-mode" value={value} label={label} checked={questionMode === value} onChange={() => setQuestionMode(value)} className="whitespace-nowrap font-bold" /></div>)}</div></fieldset><div><AdvancedToggle disabled={busy} /><p className="text-xs text-muted">Hiện thêm cụm từ và cách dùng trên thẻ học.</p></div></div>
 			<div>
-				<button type="button" disabled={busy || saving || guided.selectedSetIds.length === 0 || guided.uniqueWords === 0} onClick={() => void start()} className={solidButton}>Bắt đầu học <span aria-hidden="true">→</span></button>
+				<button type="button" disabled={busy || saving || guided.selectedSetIds.length === 0 || guided.uniqueWords === 0} onClick={() => void start()} className={solidButton}>{busy ? 'Đang chuẩn bị…' : 'Bắt đầu học'} <span aria-hidden="true">→</span></button>
 				{error && <p role="alert" className="mt-2 text-sm text-error">{error}</p>}
 			</div>
 		</section>}
 
 		</>}
 		{session && <GuidedReviewSession initial={session} onClose={() => { setSession(null); router.refresh(); }} />}
+		<SetWordListDialog set={openSet} onClose={() => setOpenSet(null)} />
 	</div>;
 }

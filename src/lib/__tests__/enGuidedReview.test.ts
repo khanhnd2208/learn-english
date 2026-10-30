@@ -1,10 +1,23 @@
 import { expect, it } from 'vitest';
-import { buildGuidedQuestions, buildRetryQuestion, REVIEW_KEYS, reviewWeight, weightedOrder } from '@/lib/english/guidedReview';
+import { buildGuidedQuestions, buildRetryQuestion, canBuildGuidedQuestion, REVIEW_KEYS, reviewWeight, weightedOrder } from '@/lib/english/guidedReview';
 import { poolFromBundles } from '@/lib/english/activities/distractors';
 import { buildGuidedQuestions as legacyQuestions, buildRetryQuestion as legacyRetry } from '@/lib/__dbtests__/legacy/questions';
 import { mulberry32 } from '@/lib/english/activities';
 import { bundle } from './fixtures/bundle';
 it('cycles through available modes and changes the retry mode', () => { const all = [1,2,3,4,5].map(bundle); const q = buildGuidedQuestions(all, poolFromBundles(all), mulberry32(7)); expect(q).toHaveLength(5); expect(new Set(q.map((x) => x.activityKey))).toEqual(new Set(REVIEW_KEYS)); expect(buildRetryQuestion(all[0]!, poolFromBundles(all), 'meaning_choice', mulberry32(2))?.activityKey).not.toBe('meaning_choice'); all.forEach((b) => { b.examples[1]!.role = 'study'; }); expect(buildGuidedQuestions(all, poolFromBundles(all), mulberry32(7)).every((x) => x.activityKey !== 'cloze_choice')).toBe(true); });
+it('keeps a selected question mode through main and retry', () => {
+	const all = [1,2,3,4,5].map(bundle);
+	const pool = poolFromBundles(all);
+	for (const mode of REVIEW_KEYS) {
+		expect(buildGuidedQuestions(all, pool, mulberry32(7), mode).map((q) => q.activityKey)).toEqual(Array(5).fill(mode));
+		expect(buildRetryQuestion(all[0]!, pool, 'meaning_choice', mulberry32(7), mode)?.activityKey).toBe(mode);
+	}
+	all[0]!.examples[1]!.role = 'study';
+	expect(canBuildGuidedQuestion(all[0]!, pool, 'cloze_choice')).toBe(false);
+	all[1]!.word.audioPath = '';
+	expect(canBuildGuidedQuestion(all[1]!, pool, 'listen_type')).toBe(true);
+	expect(canBuildGuidedQuestion(all[2]!, { entries: [] }, 'meaning_choice')).toBe(false);
+});
 it('weights only SRS mistakes: unseen and well-known words tie, often-missed words come first', () => {
 	expect(reviewWeight({ recentWrong: 0, recentTotal: 0 })).toBe(reviewWeight({ recentWrong: 0, recentTotal: 10 }));
 	expect(reviewWeight({ recentWrong: 4, recentTotal: 5 })).toBeGreaterThan(reviewWeight({ recentWrong: 1, recentTotal: 5 }));

@@ -48,7 +48,7 @@ export function WordHeader({ bundle, autoPlay = false }: { bundle: SenseBundle; 
 }
 
 /** Meaning, one example, note, near-synonyms and word family; fixed phrases only when "Nâng cao" is on. */
-export function WordDetails({ bundle }: { bundle: SenseBundle }) {
+export function WordDetails({ bundle, showAdvanced = false }: { bundle: SenseBundle; showAdvanced?: boolean }) {
 	const example = cardExampleOf(bundle.examples);
 	return <div className="space-y-3">
 		<p className="text-lg font-bold text-foreground">{bundle.sense.meaningVi}</p>
@@ -56,6 +56,6 @@ export function WordDetails({ bundle }: { bundle: SenseBundle }) {
 		{bundle.sense.noteVi && <p className="flex gap-2 rounded-panel border border-warning/30 bg-warning/5 px-3 py-2.5 text-sm text-foreground-secondary"><MaterialIcon name="lightbulb" size={18} className="mt-0.5 shrink-0 text-warning" /><span>{bundle.sense.noteVi}</span></p>}
 		{bundle.sense.synonyms.length > 0 && <p className="text-sm text-muted"><span className="font-bold text-foreground-secondary">Gần nghĩa:</span> {bundle.sense.synonyms.join(', ')}</p>}
 		<WordFamily family={bundle.sense.family} />
-		<AdvancedNotes notes={bundle.sense.advanced} />
+		<AdvancedNotes notes={bundle.sense.advanced} enabled={showAdvanced} />
 	</div>;
 }

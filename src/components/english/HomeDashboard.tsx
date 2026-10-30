@@ -43,7 +43,7 @@ export default function HomeDashboard({ overview, sets, board, resetsIn, greetin
 			<div className="min-w-0 lg:col-start-3 lg:row-start-1"><QuestNote board={board} resetsIn={resetsIn} hasSets={hasSets} /></div>
 
 			{hasSets && <section id="your-sets" aria-labelledby="your-sets-heading" className="min-w-0 overflow-hidden rounded-panel border border-border bg-surface lg:col-span-2 lg:col-start-1 lg:row-span-2 lg:row-start-2">
-				<div className="flex items-center justify-between gap-3 border-b border-border px-4 py-2"><h2 id="your-sets-heading" className="text-base sm:text-lg">Đang học <span className="text-sm font-normal text-muted">({enrolled.length})</span></h2><Link href="/sets" className="inline-flex min-h-10 shrink-0 items-center text-sm font-bold text-accent">Xem tất cả →</Link></div>
+				<div className="flex items-center justify-between gap-3 border-b border-border px-4 py-2"><h2 id="your-sets-heading" className="text-base sm:text-lg">Đang học <span className="text-sm font-normal text-muted">({enrolled.length})</span></h2><Link href="/review?mode=bo" className="inline-flex min-h-10 shrink-0 items-center text-sm font-bold text-accent">Xem tất cả →</Link></div>
 				<ul>{enrolled.slice(0, SETS_SHOWN).map((set) => <SetRow key={set.id} set={set} />)}</ul>
 
 			</section>}

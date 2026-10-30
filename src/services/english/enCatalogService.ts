@@ -6,6 +6,18 @@ import { getSenseBundles } from '@/services/english/enContentService';
 import { EN_LOCKED_PREVIEW_WORDS } from '@/lib/english/constants';
 import { countStages } from '@/lib/english/schedule';
 import type { SenseBundle } from '@/lib/english/senseBundle';
+import type { SetWordList } from '@/lib/english/setWordList';
+
+export async function getEnrolledSetWords(userId: string, setId: string): Promise<SetWordList> {
+	const set = await prisma.enSet.findFirst({ where: { id: setId, status: 'published', enrollments: { some: { userId } } }, select: { id: true, title: true, items: { orderBy: [{ position: 'asc' }, { id: 'asc' }], where: { sense: { status: 'published' } }, select: { senseId: true, sense: { select: { meaningVi: true, partOfSpeech: true, word: { select: { lemma: true, ipa: true, audioPath: true } } } } } } } });
+	if (!set) throw new AppError('Bộ từ này không còn khả dụng.', 404);
+	const seen = new Set<string>();
+	return { id: set.id, title: set.title, words: set.items.flatMap((item) => {
+		if (!item.senseId || !item.sense || seen.has(item.senseId)) return [];
+		seen.add(item.senseId);
+		return [{ senseId: item.senseId, lemma: item.sense.word.lemma, ipa: item.sense.word.ipa, partOfSpeech: item.sense.partOfSpeech, meaningVi: item.sense.meaningVi, recordedAudioAvailable: Boolean(item.sense.word.audioPath.trim()) }];
+	}) };
+}
 
 export interface EnglishSetSummary {
 	id: string;

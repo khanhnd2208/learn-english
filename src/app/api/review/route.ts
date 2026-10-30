@@ -15,7 +15,7 @@ import {
 
 const bodySchema = z.discriminatedUnion('action', [
 	z.object({ action: z.literal('selection'), setIds: z.array(z.string().min(1)).max(100) }).strict(),
-	z.object({ action: z.literal('start'), setIds: z.array(z.string().min(1)).max(100) }).strict(),
+	z.object({ action: z.literal('start'), setIds: z.array(z.string().min(1)).max(100), questionMode: z.enum(['mix', 'meaning_choice', 'cloze_choice', 'listen_type']).default('mix') }).strict(),
 	z.object({ action: z.literal('study'), sessionId: z.string().min(1), position: z.number().int().nonnegative() }).strict(),
 	z.object({ action: z.literal('answer'), sessionId: z.string().min(1), questionId: z.string().min(1), answer: z.string().max(500), responseMs: z.number().finite().nonnegative() }).strict(),
 	z.object({ action: z.literal('retry'), sessionId: z.string().min(1) }).strict(),
@@ -31,7 +31,7 @@ export const POST = withAuth(async (request, user) => {
 	if (!parsed.success) return apiError('Yêu cầu ôn tập không hợp lệ', 400);
 	const input = parsed.data;
 	if (input.action === 'selection') return apiSuccess(await saveGuidedReviewSelection(user.id, input.setIds));
-	if (input.action === 'start') return apiSuccess(await startGuidedReview(user.id, input.setIds));
+	if (input.action === 'start') return apiSuccess(await startGuidedReview(user.id, input.setIds, input.questionMode));
 	if (input.action === 'study') return apiSuccess(await saveStudyPosition(user.id, input.sessionId, input.position));
 	if (input.action === 'retry') return apiSuccess(await startGuidedRetry(user.id, input.sessionId));
 	if (input.action === 'next') return apiSuccess(await nextGuidedChunk(user.id, input.sessionId, input.restart === true));

@@ -43,7 +43,7 @@ export default function SetDetail({ detail, isAdmin = false }: { detail: English
 	const percent = (count: number) => `${detail.wordCount ? (count / detail.wordCount) * 100 : 0}%`;
 
 	return <div className="mx-auto max-w-3xl space-y-4 px-4 py-4 sm:space-y-5 sm:px-6 sm:py-10">
-		<Link href={detail.enrolled ? '/sets' : '/store'} className="inline-flex min-h-10 items-center text-sm font-bold text-accent">← {detail.enrolled ? 'Bộ từ' : 'Thư viện'}</Link>
+		<Link href={detail.enrolled ? '/review?mode=bo' : '/store'} className="inline-flex min-h-10 items-center text-sm font-bold text-accent">← {detail.enrolled ? 'Ôn theo bộ' : 'Thư viện'}</Link>
 		<header className="mode-card space-y-3.5 sm:space-y-4">
 			<div className="flex items-start justify-between gap-3"><div className="min-w-0"><h1 className="text-2xl sm:text-4xl">{detail.title}</h1><p className="mt-1 text-sm text-muted">{learned}/{detail.wordCount} từ đã học{longTerm > 0 ? ` · ${longTerm} nhớ lâu` : ''}</p>{detail.description && <p className="mt-1.5 text-sm text-muted">{detail.description}</p>}</div>{detail.enrolled && <details className="relative shrink-0"><summary aria-label="Tùy chọn bộ từ" className="flex min-h-10 min-w-10 cursor-pointer items-center justify-center rounded-control border border-border text-xl sm:min-h-11 sm:min-w-11">⋯</summary><div className="absolute right-0 z-20 mt-1 rounded-card border border-border bg-surface p-2 shadow-overlay"><RemoveSetButton setId={detail.id} setTitle={detail.title} locked={detail.locked} listed={detail.listed} /></div></details>}</div>
 			<div className="relative h-2 overflow-hidden rounded-full bg-surface-container" role="img" aria-label={`${learned} đã ôn, ${longTerm} nhớ lâu trên ${detail.wordCount} từ`}>
