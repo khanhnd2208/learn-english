@@ -45,10 +45,12 @@ function parsePack(input: unknown): { pack: EnglishPack | null; error: string | 
  const first = current.error.issues[0];
  return { pack: null, error: `JSON sai cấu trúc ở ${first?.path.join('.') || 'gốc'}: ${first?.message ?? 'không hợp lệ'}.` };
 }
+/** Lowercase words split on spaces and hyphens, with a possessive ending dropped (doctor's, drivers', taxi-driver). */
+const formWords = (text: string) => lemmaKeyOf(text).replace(/[’‘]/g, "'").replace(/(\w)'s\b|(s)'(?=\s|$)/g, '$1$2').replace(/[^a-z0-9']+/g, ' ').trim();
 /** True when any word of the text (or a multi-word form) is the lemma or one of its forms. */
 function containsForm(text: string, forms: Set<string>): boolean {
- const lower = ` ${lemmaKeyOf(text).replace(/[^a-z0-9' -]+/g, ' ').replace(/\s+/g, ' ')} `;
- return [...forms].some((f) => f && lower.includes(` ${f} `));
+ const lower = ` ${formWords(text)} `;
+ return [...forms].some((f) => f && lower.includes(` ${formWords(f)} `));
 }
 /** Share of content words two sentences have in common, ignoring the studied word itself. */
 function overlap(a: string, b: string, forms: Set<string>): number {
