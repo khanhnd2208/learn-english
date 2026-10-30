@@ -1,16 +1,16 @@
 import { cache } from 'react';
 import { requestNow } from '@/lib/requestNow';
-import { overviewCounts, studiedDays } from './enOverviewQueries';
+import { guidedDayTotals, overviewCounts, reviewDayTotals, studiedDays, xpDayTotals } from './enOverviewQueries';
 import { streakStats } from '@/lib/english/streak';
 import { prisma } from '@/lib/prisma';
 import { AppError } from '@/lib/appError';
 import { EN_WEEKLY_DAYS_DEFAULT, EN_TX_MAX_WAIT_MS, EN_TX_TIMEOUT_MS } from '@/lib/english/constants';
 import { shiftVnDay, vnDayKey, vnWeekDays } from '@/lib/english/gapRule';
 import { vnDayStart } from '@/lib/english/schedule';
-import { periodMetrics, type XpRow } from '@/lib/english/goalMetrics';
+import { mergeDayTotals, metricsFromDayTotals, type XpRow } from '@/lib/english/goalMetrics';
 import { DAILY_QUEST_KEYS, WEEKLY_QUEST_KEYS, dailyQuests, parseQuests, topUpQuests, questProgress, QUEST_META, weeklyQuests, type Quest, type QuestAction, type QuestContext, type QuestMetrics } from '@/lib/english/quests';
 import { achievementStatus, newlyEarned, nearestAchievements, parseAchievementKey, describeAchievement, TIER_NAMES, type LifetimeMetrics } from '@/lib/english/achievements';
-import { DAILY_GOAL_DEFAULT, goalTierIndex, isDailyGoalXp, levelFromXp, XP, type LevelInfo, type XpKind } from '@/lib/english/xp';
+import { DAILY_GOAL_DEFAULT, goalTierIndex, isDailyGoalXp, levelFromXp, REWARD_XP_KINDS, XP, type LevelInfo, type XpKind } from '@/lib/english/xp';
 import { getTodayOverview, computeTodayOverview, type TodayOverview } from '@/services/english/enDailyService';
 
 export type GoalQuest = Quest & {
@@ -105,11 +105,10 @@ async function questContext(userId: string, now: Date, dailyGoalXp: number, week
 async function rewardSnapshot(userId: string) {
 	const [row] = await prisma.$queryRaw<Array<{
 		dailyXpGoal: number | null; weeklyDaysGoal: number | null; dailyGoalChosenAt: Date | null; seenLevel: number | null;
-		totalXp: number; learned: number; longTerm: number; revived: number; goalDays: number; chests: number;
+		learned: number; longTerm: number; revived: number; goalDays: number; chests: number;
 		legacySessionsFinished: number; guidedSessionsFinished: number; enrolledSets: number;
 	}>>`
 		SELECT p."dailyXpGoal", p."weeklyDaysGoal", p."dailyGoalChosenAt", p."seenLevel",
-		(SELECT COALESCE(sum(x."xp"), 0)::int FROM "EnXpEvent" x WHERE x."userId" = ${userId}) AS "totalXp",
 		(SELECT count(*)::int FROM "EnWordState" w WHERE w."userId" = ${userId} AND w."box" > 0) AS learned,
 		(SELECT count(*)::int FROM "EnWordState" w WHERE w."userId" = ${userId} AND w."box" >= 4) AS "longTerm",
 		(SELECT count(*)::int FROM "EnWordState" w WHERE w."userId" = ${userId} AND w."box" > 0 AND w."lapses" > 0 AND w."box" >= 3) AS revived,
@@ -120,6 +119,12 @@ async function rewardSnapshot(userId: string) {
 		(SELECT count(*)::int FROM "EnEnrollment" e JOIN "EnSet" st ON st."id" = e."setId" AND st."status" = 'published' WHERE e."userId" = ${userId}) AS "enrolledSets"
 		FROM (SELECT 1) seed LEFT JOIN "EnLearnerProfile" p ON p."userId" = ${userId}`;
 	return row!;
+}
+
+/** Lifetime XP for the level; only the board needs it, so answers do not sum the whole ledger. */
+export async function totalXpOf(userId: string): Promise<number> {
+	const total = await prisma.enXpEvent.aggregate({ where: { userId }, _sum: { xp: true } });
+	return total._sum.xp ?? 0;
 }
 
 /** Everything the board and the reward step need, read in one pass. */
@@ -134,20 +139,20 @@ export async function loadRewardState(userId: string, now: Date) {
 	let context: Promise<QuestContext> | undefined;
 	const ctx = () => context ??= questContext(userId, now, dailyGoalXp, weeklyDaysGoal);
 	const weekFrom = vnDayStart(weekStart);
-	const [daily, weeklyBoard, reviews, guidedReviews, xpRows, achievements, studied] = await Promise.all([
+	const [daily, weeklyBoard, reviewDays, guidedDays, xpDays, rewardRows, achievements, studied] = await Promise.all([
 		ensureBoard(userId, 'daily', today, async () => dailyQuests(await ctx())),
 		ensureBoard(userId, 'weekly', weekStart, async () => weeklyQuests(await ctx())),
-		prisma.enReview.findMany({ where: { userId, at: { gte: weekFrom } }, select: { at: true, scheduled: true } }),
-		prisma.enGuidedReviewQuestion.findMany({ where: { kind: 'main', session: { userId, questions: { some: { kind: 'main', answeredAt: { gte: weekFrom } } } } }, select: { sessionId: true, chunkNumber: true, answer: true, answeredAt: true, correct: true } }),
-		prisma.enXpEvent.findMany({ where: { userId, day: { gte: weekStart } }, select: { day: true, xp: true, kind: true, sourceKey: true } }),
+		reviewDayTotals(userId, weekFrom),
+		guidedDayTotals(userId, weekFrom),
+		xpDayTotals(userId, weekStart),
+		prisma.enXpEvent.findMany({ where: { userId, day: { gte: weekStart }, kind: { in: [...REWARD_XP_KINDS] } }, select: { day: true, xp: true, kind: true, sourceKey: true } }),
 		prisma.enAchievement.findMany({ where: { userId }, select: { key: true, seenAt: true } }),
 		studiedDays(userId, vnDayStart(shiftVnDay(today, -365))),
 	]);
-	const guidedRows = guidedReviews.map((row) => ({ sessionId: row.sessionId, chunkNumber: row.chunkNumber, answered: row.answer !== null && row.answeredAt !== null, answeredAt: row.answeredAt, correct: row.correct === true }));
+	const dayTotals = mergeDayTotals(reviewDays, guidedDays, xpDays);
 	// Boards stored before the chest became the only weekly reward still carry quest XP.
 	const weekly = weeklyBoard.map((quest) => ({ ...quest, xp: 0 }));
-	const base = { reviews, guided: guidedRows, xp: xpRows as XpRow[] };
-	const dayMetrics = periodMetrics({ ...base, days: new Set([today]) });
+	const dayMetrics = metricsFromDayTotals(new Set([today]), dayTotals);
 	const lifetime: LifetimeMetrics = {
 		longTerm: snapshot.longTerm,
 		learned: snapshot.learned,
@@ -167,21 +172,21 @@ export async function loadRewardState(userId: string, now: Date) {
 		daily,
 		weekly,
 		dayMetrics,
-		weekMetrics: periodMetrics({ ...base, days: new Set(weekDays) }),
-		claimed: new Set(xpRows.map((row) => row.sourceKey)),
-		xpRows,
-		totalXp: snapshot.totalXp,
+		weekMetrics: metricsFromDayTotals(new Set(weekDays), dayTotals),
+		claimed: new Set(rewardRows.map((row) => row.sourceKey)),
+		dayTotals,
+		rewardRows: rewardRows as XpRow[],
 		lifetime,
 		achievements,
 	};
 }
 
 type RewardState = Awaited<ReturnType<typeof loadRewardState>>;
-type GoalState = RewardState & { overview: TodayOverview };
+type GoalState = RewardState & { overview: TodayOverview; totalXp: number };
 
 async function loadBoardState(userId: string, now: Date, cachedOverview: boolean): Promise<GoalState> {
-	const [state, overview] = await Promise.all([loadRewardState(userId, now), cachedOverview ? getTodayOverview(userId) : computeTodayOverview(userId, now)]);
-	return { ...state, overview };
+	const [state, overview, totalXp] = await Promise.all([loadRewardState(userId, now), cachedOverview ? getTodayOverview(userId) : computeTodayOverview(userId, now), totalXpOf(userId)]);
+	return { ...state, overview, totalXp };
 }
 
 /**
@@ -267,10 +272,10 @@ function questView(quest: Quest, metrics: QuestMetrics): GoalQuest {
 function boardView(state: GoalState): GoalBoard {
 	const unlocked = new Set(state.achievements.map((row) => row.key));
 	const statuses = achievementStatus(state.lifetime, unlocked);
-	const goalDays = new Set(state.xpRows.filter((row) => row.kind === 'goal').map((row) => row.day));
+	const goalDays = new Set(state.rewardRows.filter((row) => row.kind === 'goal').map((row) => row.day));
 	const studiedDays = new Set(state.overview.week.filter((entry) => entry.studied).map((entry) => entry.day));
 	const dayXp = new Map<string, number>();
-	for (const row of state.xpRows) dayXp.set(row.day, (dayXp.get(row.day) ?? 0) + row.xp);
+	for (const total of state.dayTotals) dayXp.set(total.day, total.xp);
 	return {
 		level: levelFromXp(state.totalXp),
 		seenLevel: state.profile?.seenLevel ?? 0,

@@ -2,6 +2,7 @@ import { Prisma } from '@prisma/client';
 import { prisma } from '@/lib/prisma';
 import { shiftVnDay, vnDayKey } from '@/lib/english/gapRule';
 import { vnDayStart } from '@/lib/english/schedule';
+import type { GuidedDayRow, ReviewDayRow, XpDayRow } from '@/lib/english/goalMetrics';
 
 /** Shared live-word scope: paused sets and hidden senses never enter the SRS queue. */
 export function liveCte(userId: string) {
@@ -55,4 +56,37 @@ export async function recentLapseIds(userId: string): Promise<string[]> {
 		SELECT "senseId" FROM sched WHERE "lapses" > 0 AND "box" <= 2
 		ORDER BY "lapses" DESC, "lastReviewedAt" DESC NULLS LAST, "senseId" ASC LIMIT 6`);
 	return rows.map((row) => row.senseId);
+}
+
+/** SRS answers per Vietnam day since `from`. */
+export async function reviewDayTotals(userId: string, from: Date): Promise<ReviewDayRow[]> {
+	return prisma.$queryRaw<ReviewDayRow[]>`
+		SELECT to_char("at" + INTERVAL '7 hours', 'YYYY-MM-DD') AS "day", count(*)::int AS "reviewed", count(*) FILTER (WHERE "scheduled")::int AS "srsWords"
+		FROM "EnReview" WHERE "userId" = ${userId} AND "at" >= ${from} GROUP BY 1`;
+}
+
+/**
+ * Guided answers per day and finished chunks per day of their last answer, in sessions with a main answer since `from`
+ * (the same sessions the row-by-row version loaded).
+ */
+export async function guidedDayTotals(userId: string, from: Date): Promise<GuidedDayRow[]> {
+	return prisma.$queryRaw<GuidedDayRow[]>`
+		WITH q AS (
+			SELECT q."sessionId", q."chunkNumber", q."answer", q."answeredAt" FROM "EnGuidedReviewQuestion" q
+			JOIN "EnGuidedReviewSession" s ON s."id" = q."sessionId"
+			WHERE s."userId" = ${userId} AND q."kind" = 'main'
+			AND EXISTS (SELECT 1 FROM "EnGuidedReviewQuestion" r WHERE r."sessionId" = s."id" AND r."kind" = 'main' AND r."answeredAt" >= ${from})
+		), chunks AS (
+			SELECT max("answeredAt") AS "doneAt" FROM q GROUP BY "sessionId", "chunkNumber"
+			HAVING bool_and("answer" IS NOT NULL AND "answeredAt" IS NOT NULL)
+		)
+		SELECT 'answer' AS "kind", to_char("answeredAt" + INTERVAL '7 hours', 'YYYY-MM-DD') AS "day", count(*)::int AS "n" FROM q WHERE "answeredAt" >= ${from} GROUP BY 2
+		UNION ALL
+		SELECT 'chunk' AS "kind", to_char("doneAt" + INTERVAL '7 hours', 'YYYY-MM-DD') AS "day", count(*)::int AS "n" FROM chunks WHERE "doneAt" >= ${from} GROUP BY 2`;
+}
+
+/** XP per Vietnam day key since `fromDay`. */
+export async function xpDayTotals(userId: string, fromDay: string): Promise<XpDayRow[]> {
+	return prisma.$queryRaw<XpDayRow[]>`
+		SELECT "day", COALESCE(sum("xp"), 0)::int AS "xp" FROM "EnXpEvent" WHERE "userId" = ${userId} AND "day" >= ${fromDay} GROUP BY "day"`;
 }

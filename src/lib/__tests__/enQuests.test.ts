@@ -1,9 +1,43 @@
 import { describe, expect, it } from 'vitest';
 import { dailyQuests, emptyMetrics, isIdleQuest, todayQuestCount, parseQuests, questProgress, timeLeftLabel, topUpQuests, weeklyQuests, type QuestContext } from '@/lib/english/quests';
-import { periodMetrics } from '@/lib/english/goalMetrics';
+import { mergeDayTotals, metricsFromDayTotals, periodMetrics } from '@/lib/english/goalMetrics';
 import { achievementStatus, newlyEarned, nearestAchievements, type LifetimeMetrics } from '@/lib/english/achievements';
 
 const ctx: QuestContext = { tier: 1, weeklyDaysGoal: 4, srsAvailable: 30, enrolledSets: 2 };
+
+describe('day totals', () => {
+	const totals = mergeDayTotals(
+		[{ day: '2026-10-26', reviewed: 3, srsWords: 2 }],
+		[{ kind: 'answer', day: '2026-10-26', n: 3 }, { kind: 'chunk', day: '2026-10-26', n: 1 }],
+		[{ day: '2026-10-26', xp: 120 }, { day: '2026-10-25', xp: 990 }],
+	);
+
+	it('merges and sorts the three daily SQL results', () => {
+		expect(totals).toEqual([
+			{ day: '2026-10-25', srsWords: 0, reviewed: 0, guidedAnswered: 0, chunksDone: 0, xp: 990 },
+			{ day: '2026-10-26', srsWords: 2, reviewed: 3, guidedAnswered: 3, chunksDone: 1, xp: 120 },
+		]);
+	});
+
+	it('counts SRS, chunks, XP and studied days for a selected day', () => {
+		expect(metricsFromDayTotals(new Set(['2026-10-26']), totals)).toEqual({ xp: 120, srsWords: 2, chunksDone: 1, daysStudied: 1 });
+	});
+
+	it('does not count an XP-only day as studied', () => {
+		expect(metricsFromDayTotals(new Set(['2026-10-25']), [{ day: '2026-10-25', srsWords: 0, reviewed: 0, guidedAnswered: 0, chunksDone: 0, xp: 50 }])).toEqual({ xp: 50, srsWords: 0, chunksDone: 0, daysStudied: 0 });
+	});
+
+	it('counts a day with only Review as studied', () => {
+		expect(metricsFromDayTotals(new Set(['2026-10-26', '2026-10-27']), [
+			{ day: '2026-10-26', srsWords: 1, reviewed: 1, guidedAnswered: 0, chunksDone: 0, xp: 0 },
+			{ day: '2026-10-27', srsWords: 0, reviewed: 0, guidedAnswered: 1, chunksDone: 0, xp: 0 },
+		]).daysStudied).toBe(2);
+	});
+
+	it('returns empty metrics for empty input', () => {
+		expect(metricsFromDayTotals(new Set(['2026-10-26']), mergeDayTotals([], [], []))).toEqual(emptyMetrics());
+	});
+});
 
 describe('daily quests', () => {
 	it('are the same two quests every day, in order', () => {
