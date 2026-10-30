@@ -18,7 +18,7 @@ function NavDot({ show }: { show: boolean }) {
 	return show ? <span aria-label="Có thành tựu mới" className="size-2 rounded-full bg-error" /> : null;
 }
 
-export default function EnglishShell({ children, goals, newLearner }: { children: React.ReactNode; goals: ShellGoals; newLearner: boolean }) {
+export default function EnglishShell({ children, goals, newLearner, avatarUrl, hasUpload }: { children: React.ReactNode; goals: ShellGoals; newLearner: boolean; avatarUrl: string | null; hasUpload: boolean }) {
 	const pathname = usePathname();
 	const focus = /\/sets\/[^/]+\/(practice|test)$/.test(pathname);
 	const { data } = useSession();
@@ -62,7 +62,7 @@ export default function EnglishShell({ children, goals, newLearner }: { children
 					<GoalRing value={goals.xp} max={goals.goal} size={36} stroke={4} label="Mục tiêu ngày">{goals.xp >= goals.goal && <span className="text-sm font-bold text-success">✓</span>}</GoalRing>
 					<span className="min-w-0"><span className="block text-sm font-bold tabular-nums">{goals.xp}/{goals.goal} XP</span><span className="block text-xs text-muted">Lv {goals.level} · Nhiệm vụ {goals.questsDone}/{goals.questsTotal}</span></span>
 				</Link>
-				<div className="mx-4 mb-4 border-t border-border pt-3"><AccountMenu name={accountName} goals={goals} admin={admin} /></div>
+				<div className="mx-4 mb-4 border-t border-border pt-3"><AccountMenu name={accountName} goals={goals} admin={admin} avatarUrl={avatarUrl} hasUpload={hasUpload} /></div>
 			</aside>
 			<header className="adventure-mobile-header sticky top-0 z-30 flex h-14 items-center justify-between border-b px-3.5 md:hidden">
 				<Link href="/" className="brand-wordmark flex items-center gap-2 text-base font-black"><span className="brand-compass !size-8"><AdventureIcon name="compass" size={16} /></span><span>WORD<span className="brand-accent">QUEST</span></span></Link>
@@ -72,7 +72,7 @@ export default function EnglishShell({ children, goals, newLearner }: { children
 						<span className="rounded-full bg-accent-subtle px-2 py-1 text-xs font-bold tabular-nums">{goals.xp}/{goals.goal}</span>
 						<span className="level-badge text-xs">Lv {goals.level}</span>
 					</Link>
-					<AccountMenu name={accountName} goals={goals} admin={admin} />
+					<AccountMenu name={accountName} goals={goals} admin={admin} avatarUrl={avatarUrl} hasUpload={hasUpload} />
 				</div>
 			</header>
 			<main className="min-h-screen bg-background pb-20 md:pb-0">{children}</main>

@@ -12,6 +12,7 @@ import GoalRing from '@/components/english/goals/GoalRing';
 import LevelBar from '@/components/english/goals/LevelBar';
 import QuestItem from '@/components/english/goals/QuestItem';
 import { MiniBarChart, StageDonut, StatTile, type ChartBar } from '@/components/english/progress/charts';
+import LeaderboardTab from '@/components/english/progress/LeaderboardTab';
 import { ACHIEVEMENT_GROUPS, TIER_NAMES, type AchievementGroup, type AchievementIcon } from '@/lib/english/achievements';
 import { HINTS } from '@/lib/english/hintCopy';
 import { accuracySeries, shortDayLabel, weekDelta, weekXpSummary, type WeekHistory } from '@/lib/english/progressStats';
@@ -20,7 +21,7 @@ import { STAGE_META } from '@/lib/english/stageMeta';
 import { DAILY_GOAL_TIERS, XP } from '@/lib/english/xp';
 import type { GoalAchievement, GoalBoard } from '@/services/english/enGoalService';
 
-export type ProgressTab = 'quests' | 'stats' | 'achievements';
+export type ProgressTab = 'quests' | 'stats' | 'achievements' | 'leaderboard';
 type Stages = ReturnType<typeof countStages>;
 type WrongWord = { id: string; count: number; lemma: string; meaning: string };
 
@@ -85,10 +86,11 @@ export default function ProgressHub({ board, weeks, wrong, stages, dueNext7Days,
 		</header>
 
 		<Tabs value={tab} onValueChange={changeTab}>
-			<TabsList>
+			<TabsList className="[&>button]:whitespace-nowrap">
 				<TabsTrigger value="quests">Nhiệm vụ</TabsTrigger>
 				<TabsTrigger value="stats">Thống kê</TabsTrigger>
 				<TabsTrigger value="achievements">Thành tựu{board.unseenAchievements.length > 0 && <span className="ml-1.5 inline-block size-2 rounded-full bg-error align-middle" aria-label="có mới" />}</TabsTrigger>
+				<TabsTrigger value="leaderboard">Xếp hạng</TabsTrigger>
 			</TabsList>
 
 			<TabsContent value="quests" className="pt-5">
@@ -101,6 +103,10 @@ export default function ProgressHub({ board, weeks, wrong, stages, dueNext7Days,
 
 			<TabsContent value="achievements" className="space-y-6 pt-5">
 				<AchievementList board={board} onOpen={setDetail} />
+			</TabsContent>
+
+			<TabsContent value="leaderboard" className="pt-5">
+				<LeaderboardTab weekResetsIn={weekResetsIn} />
 			</TabsContent>
 		</Tabs>
 
