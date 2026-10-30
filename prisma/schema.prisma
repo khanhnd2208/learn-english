@@ -220,6 +220,7 @@ model EnReview {
   @@index([userId, at])
   @@index([userId, senseId, at])
   @@index([sessionId])
+  @@index([at])
 }
 
 /// A learner's claim that a wrong SRS answer was also correct. Admin accepts or rejects it;
@@ -285,6 +286,10 @@ model EnLearnerProfile {
   dailyGoalChosenAt DateTime?
   /// Highest level the learner has been congratulated for.
   seenLevel         Int       @default(0)
+  /// Uploaded avatar file under ENGLISH_AUDIO_ROOT, e.g. `avatars/<userId>.webp`. Null = default picture.
+  avatarFile        String?
+  /// Bumped on every avatar change so `/api/avatar/<id>?v=` busts caches.
+  avatarVersion     Int       @default(0)
   createdAt         DateTime  @default(now())
   updatedAt         DateTime  @updatedAt
 }
@@ -304,6 +309,8 @@ model EnXpEvent {
   @@unique([userId, sourceKey])
   @@index([userId, day])
   @@index([userId, kind])
+  @@index([day, userId])
+  @@index([at])
 }
 
 /// Quests fixed for one day or week, so targets do not move while the learner works on them.

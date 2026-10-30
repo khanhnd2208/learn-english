@@ -10,7 +10,7 @@ import ProgressHub, { type ProgressTab } from '@/components/english/progress/Pro
 
 export const dynamic = 'force-dynamic';
 
-const TABS: ProgressTab[] = ['quests', 'stats', 'achievements'];
+const TABS: ProgressTab[] = ['quests', 'stats', 'achievements', 'leaderboard'];
 
 export default async function ProgressPage({ searchParams }: { searchParams: Promise<{ tab?: string }> }) {
 	const session = await auth();

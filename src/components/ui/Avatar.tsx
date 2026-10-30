@@ -5,11 +5,11 @@ interface Props {
 	src?: string | null;
 	alt?: string;
 	name?: string;
-	size?: 'sm' | 'md' | 'lg';
+	size?: 'sm' | 'md' | 'lg' | 'xl' | 'xxl';
 	className?: string;
 }
 
-const SIZE_MAP = { sm: 32, md: 40, lg: 48 } as const;
+const SIZE_MAP = { sm: 32, md: 40, lg: 48, xl: 56, xxl: 72 } as const;
 
 export default function Avatar({ src, alt = '', name, size = 'md', className }: Props) {
 	const px = SIZE_MAP[size];
@@ -27,12 +27,14 @@ export default function Avatar({ src, alt = '', name, size = 'md', className }: 
 				size === 'sm' && 'h-8 w-8 text-xs',
 				size === 'md' && 'h-10 w-10 text-sm',
 				size === 'lg' && 'h-12 w-12 text-base',
+				size === 'xl' && 'h-14 w-14 text-lg',
+				size === 'xxl' && 'h-18 w-18 text-xl',
 				className,
 			)}
 			aria-hidden={!alt && !name}
 		>
 			{src ? (
-				<Image src={src} alt={alt} width={px} height={px} className="h-full w-full object-cover" />
+				<Image src={src} alt={alt} width={px} height={px} className="h-full w-full object-cover" unoptimized={src.startsWith('/')} />
 			) : (
 				<span>{initials ?? '?'}</span>
 			)}
