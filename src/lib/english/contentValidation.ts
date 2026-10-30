@@ -45,8 +45,10 @@ function parsePack(input: unknown): { pack: EnglishPack | null; error: string | 
  const first = current.error.issues[0];
  return { pack: null, error: `JSON sai cấu trúc ở ${first?.path.join('.') || 'gốc'}: ${first?.message ?? 'không hợp lệ'}.` };
 }
+/** Identity of a word form that ignores case and accents, so café, Café and cafe are one form. */
+const formKey = (text: string) => lemmaKeyOf(text).normalize('NFD').replace(/\p{M}+/gu, '').replace(/[’‘]/g, "'");
 /** Lowercase words split on spaces and hyphens, with a possessive ending dropped (doctor's, drivers', taxi-driver). */
-const formWords = (text: string) => lemmaKeyOf(text).replace(/[’‘]/g, "'").replace(/(\w)'s\b|(s)'(?=\s|$)/g, '$1$2').replace(/[^a-z0-9']+/g, ' ').trim();
+const formWords = (text: string) => formKey(text).replace(/([\p{L}\p{N}])'s(?![\p{L}\p{N}])|(s)'(?=\s|$)/gu, '$1$2').replace(/[^\p{L}\p{N}']+/gu, ' ').trim();
 /** True when any word of the text (or a multi-word form) is the lemma or one of its forms. */
 function containsForm(text: string, forms: Set<string>): boolean {
  const lower = ` ${formWords(text)} `;
@@ -54,7 +56,7 @@ function containsForm(text: string, forms: Set<string>): boolean {
 }
 /** Share of content words two sentences have in common, ignoring the studied word itself. */
 function overlap(a: string, b: string, forms: Set<string>): number {
- const words = (text: string) => new Set(lemmaKeyOf(text).replace(/[^a-z0-9' ]+/g, ' ').split(' ').filter((w) => w && !forms.has(w)));
+ const words = (text: string) => new Set(formKey(text).replace(/[^\p{L}\p{N}' ]+/gu, ' ').split(' ').filter((w) => w && !forms.has(w)));
  const x = words(a), y = words(b);
  if (!x.size || !y.size) return lemmaKeyOf(a) === lemmaKeyOf(b) ? 1 : 0;
  const shared = [...x].filter((w) => y.has(w)).length;
@@ -67,27 +69,51 @@ function normalizeExample(e: PackExample): PackExample {
  const targetStart = e.targetStart ?? (typeof found === 'object' ? found.start : null);
  return { ...e, english, target, meaningVi: e.meaningVi.trim(), targetStart, targetLength: targetStart === null ? null : (e.targetLength ?? target.length) };
 }
+/** "Café .N. coffee_shop" → "café.n.coffee_shop": lowercase, NFC, single spaces, curly apostrophes made straight. */
+export function normalizeSenseKey(key: string): string {
+ return key.normalize('NFC').trim().toLowerCase().replace(/[’‘]/g, "'").replace(/\s+/g, ' ').replace(/ ?\. ?/g, '.');
+}
+/** lemma.pos.label — the lemma part may carry accents (café) and was lowercased by normalizeSenseKey. */
+const SENSE_KEY = /^[\p{Ll}\p{N}' -]+\.[a-z]+\.[a-z0-9_]+$/u;
 export function normalizeEnglishPack(pack: EnglishPack): EnglishPack {
- return { ...pack, title: pack.title.trim(), description: pack.description.trim(), audioFiles: uniqueTexts(pack.audioFiles), words: pack.words.map((w) => ({ ...w, lemma: w.lemma.trim(), senseKey: w.senseKey.trim(), partOfSpeech: w.partOfSpeech.trim(), ipa: w.ipa.trim(), audioFile: w.audioFile.trim(), meaningVi: w.meaningVi.trim(), noteVi: w.noteVi.trim(), advanced: w.advanced.map((a) => ({ kind: a.kind, phrase: a.phrase.trim().replace(/\s+/g, ' '), meaningVi: a.meaningVi.trim(), example: a.example.trim() })).filter((a) => a.phrase), family: w.family.map((f) => ({ word: f.word.trim().replace(/\s+/g, ' '), partOfSpeech: f.partOfSpeech.trim().toLowerCase(), meaningVi: f.meaningVi.trim() })).filter((f) => f.word), forms: uniqueTexts(w.forms), synonyms: uniqueTexts(w.synonyms).filter((s) => lemmaKeyOf(s) !== lemmaKeyOf(w.lemma)), cardExample: normalizeExample(w.cardExample), quizExamples: w.quizExamples.map(normalizeExample).filter((e) => e.english) })) };
+ return { ...pack, title: pack.title.trim(), description: pack.description.trim(), audioFiles: uniqueTexts(pack.audioFiles), words: pack.words.map((w) => ({ ...w, lemma: w.lemma.trim(), senseKey: normalizeSenseKey(w.senseKey), partOfSpeech: w.partOfSpeech.trim(), ipa: w.ipa.trim(), audioFile: w.audioFile.trim(), meaningVi: w.meaningVi.trim(), noteVi: w.noteVi.trim(), advanced: w.advanced.map((a) => ({ kind: a.kind, phrase: a.phrase.trim().replace(/\s+/g, ' '), meaningVi: a.meaningVi.trim(), example: a.example.trim() })).filter((a) => a.phrase), family: w.family.map((f) => ({ word: f.word.trim().replace(/\s+/g, ' '), partOfSpeech: f.partOfSpeech.trim().toLowerCase(), meaningVi: f.meaningVi.trim() })).filter((f) => f.word), forms: uniqueTexts(w.forms), synonyms: uniqueTexts(w.synonyms).filter((s) => formKey(s) !== formKey(w.lemma)), cardExample: normalizeExample(w.cardExample), quizExamples: w.quizExamples.map(normalizeExample).filter((e) => e.english) })) };
+}
+/**
+ * A synonym that is another word of the same pack would let a learner pass "hospital" by typing
+ * "clinic", so it is dropped from the stored pack and reported.
+ */
+function dropPackSynonyms(pack: EnglishPack): { pack: EnglishPack; dropped: Map<number, string[]> } {
+ const owner = new Map<string, string>();
+ for (const w of pack.words) for (const f of [w.lemma, ...w.forms]) if (f && !owner.has(formKey(f))) owner.set(formKey(f), formKey(w.lemma));
+ const dropped = new Map<number, string[]>();
+ const words = pack.words.map((w, index) => {
+  const hits = w.synonyms.filter((s) => { const o = owner.get(formKey(s)); return o !== undefined && o !== formKey(w.lemma); });
+  if (!hits.length) return w;
+  dropped.set(index, hits);
+  return { ...w, synonyms: w.synonyms.filter((s) => !hits.includes(s)) };
+ });
+ return { pack: { ...pack, words }, dropped };
 }
 export function assessEnglishPack(input: unknown): AssessedPack {
  const parsed = parsePack(input);
  if (!parsed.pack) return { schemaError: parsed.error, pack: null, issues: [], words: [] };
  const raw = parsed.pack;
- const pack = normalizeEnglishPack(raw);
+ const { pack, dropped } = dropPackSynonyms(normalizeEnglishPack(raw));
  const seen = new Set<string>();
  const words = pack.words.map((w, index): AssessedWord => {
   const path = `words.${w.lemma || index}`, issues: ContentIssue[] = [];
   if (!w.lemma) issues.push(issue(path, 'lemma', 'Thiếu từ tiếng Anh.'));
-  if (!/^[a-z0-9' -]+\.[a-z]+\.[a-z0-9_]+$/.test(w.senseKey)) issues.push(issue(path, 'sense_key', 'senseKey không đúng định dạng.'));
+  if (!SENSE_KEY.test(w.senseKey)) issues.push(issue(path, 'sense_key', `senseKey "${w.senseKey}" không đúng mẫu lemma.loại.nhãn (ví dụ give up.phr.stop_trying).`));
+  else if (w.lemma && formKey(w.senseKey.slice(0, w.senseKey.indexOf('.'))) !== formKey(w.lemma)) issues.push(issue(path, 'sense_key_lemma', `senseKey "${w.senseKey}" không bắt đầu bằng từ "${w.lemma}".`, false));
+  for (const s of dropped.get(index) ?? []) issues.push(issue(path, 'synonym_in_pack', `Đã bỏ từ đồng nghĩa "${s}" vì đó là một từ khác trong bộ.`, false));
   if (seen.has(w.senseKey)) issues.push(issue(path, 'duplicate_sense_key', 'senseKey bị trùng.'));
   seen.add(w.senseKey);
   if (!w.partOfSpeech) issues.push(issue(path, 'part_of_speech', 'Thiếu loại từ.'));
   if (!w.meaningVi) issues.push(issue(path, 'meaning_vi', 'Thiếu nghĩa tiếng Việt.'));
   if (!/^\/[^/\n]+\/$/.test(w.ipa)) issues.push(issue(path, 'ipa', 'IPA cần nằm trong dấu / /.'));
   if (!w.audioFile || !pack.audioFiles.includes(w.audioFile)) issues.push(issue(path, 'audio', 'Chưa có file audio; sẽ đọc bằng giọng máy (TTS).', false));
-  const forms = new Set([w.lemma, ...w.forms].map(lemmaKeyOf));
-  if (raw.words[index].synonyms.some((s) => forms.has(lemmaKeyOf(s)))) issues.push(issue(path, 'synonym_self', 'Từ đồng nghĩa trùng từ hoặc dạng của từ.'));
+  const forms = new Set([w.lemma, ...w.forms].map(formKey));
+  if (raw.words[index].synonyms.some((s) => forms.has(formKey(s)))) issues.push(issue(path, 'synonym_self', 'Từ đồng nghĩa trùng từ hoặc dạng của từ.'));
   if (w.synonyms.length > EN_MAX_SYNONYMS) issues.push(issue(path, 'synonym_count', 'Quá nhiều từ đồng nghĩa.'));
   if (w.noteVi.length > 200) issues.push(issue(path, 'note_too_long', 'Lưu ý dài hơn 200 ký tự.', false));
   if (w.advanced.length < EN_MIN_ADVANCED) issues.push(issue(path, 'advanced_missing', `Phần nâng cao cần ít nhất ${EN_MIN_ADVANCED} cụm.`, false));
@@ -105,7 +131,7 @@ export function assessEnglishPack(input: unknown): AssessedPack {
   if (w.family.length > EN_MAX_FAMILY) issues.push(issue(path, 'family_count', `Họ từ tối đa ${EN_MAX_FAMILY} từ.`, false));
   const members = new Set<string>();
   w.family.forEach((f, i) => {
-   const p = `${path}.family.${i}`, key = lemmaKeyOf(f.word);
+   const p = `${path}.family.${i}`, key = formKey(f.word);
    if (forms.has(key)) issues.push(issue(p, 'family_self', 'Từ cùng họ trùng từ đang học hoặc dạng biến đổi của nó.', false));
    if (members.has(key)) issues.push(issue(p, 'family_duplicate', 'Từ cùng họ bị trùng.', false));
    members.add(key);
@@ -120,7 +146,7 @@ export function assessEnglishPack(input: unknown): AssessedPack {
    if (e.english.includes('___')) { if (!blankReport(e.english, e.target).ok) problems.push(issue(p, 'target_ambiguous', 'Chỗ trống không hợp lệ.')); }
    else if (e.targetStart === null) problems.push(issue(p, 'target_ambiguous', 'Không xác định được vị trí từ đích.'));
    else if (e.english.slice(e.targetStart, e.targetStart + (e.targetLength ?? 0)).toLowerCase() !== e.target.toLowerCase()) problems.push(issue(p, 'target_offset_mismatch', 'Vị trí từ đích không khớp.'));
-   if (!forms.has(lemmaKeyOf(e.target))) problems.push(issue(p, 'word_form', 'Từ đích không phải dạng của từ đang học.'));
+   if (!forms.has(formKey(e.target))) problems.push(issue(p, 'word_form', 'Từ đích không phải dạng của từ đang học.'));
    if (!quiz && !e.meaningVi) problems.push(issue(p, 'meaning_vi', 'Câu trên thẻ thiếu bản dịch.', false));
    if (quiz && !isFullVietnameseMeaning(e.meaningVi, w.meaningVi)) problems.push(issue(p, 'meaning_vi', 'Câu hỏi cần bản dịch đầy đủ.'));
    const earlier = [...visible, ...w.quizExamples.slice(0, Math.max(0, i - 1)).map((q) => q.english)];
