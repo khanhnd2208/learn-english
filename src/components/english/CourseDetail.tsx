@@ -15,6 +15,13 @@ export default function CourseDetail({ detail, isAdmin, initialTab }: { detail: 
   const [confirmLeave, setConfirmLeave] = useState(false);
   const [pending, setPending] = useState(false);
   const [error, setError] = useState('');
+  const examGroups = detail.exams.reduce<Array<{ key: string; title: string; rows: CourseDetailData['exams'] }>>((groups, exam) => {
+    const key = exam.setId ?? 'summary';
+    let group = groups.find((row) => row.key === key);
+    if (!group) { group = { key, title: exam.setId ? `Bài ${exam.lessonNumber} · ${exam.lessonTitle}` : 'Ôn tổng hợp', rows: [] }; groups.push(group); }
+    group.rows.push(exam);
+    return groups;
+  }, []);
   function changeTab(next: string) { setTab(next as 'words' | 'exams'); router.replace(next === 'exams' ? '?tab=kiem-tra' : '?', { scroll: false }); }
   async function leave() {
     setPending(true); setError('');
@@ -35,7 +42,10 @@ export default function CourseDetail({ detail, isAdmin, initialTab }: { detail: 
     </header>
     <Tabs value={tab} onValueChange={changeTab}><TabsList><TabsTrigger value="words">Từ vựng</TabsTrigger><TabsTrigger value="exams">Kiểm tra</TabsTrigger></TabsList>
       <TabsContent value="words">{detail.lessons.length ? <ul className="space-y-2">{detail.lessons.map((lesson) => <li key={lesson.setId} className="word-row"><Link href={`/sets/${lesson.setId}`} className="min-w-0 flex-1"><span className="block truncate font-bold">Bài {lesson.number} · {lesson.title}</span><span className="text-xs text-muted">{lesson.words} từ{lesson.learned > 0 ? ` · ${lesson.learned} đã học` : ''}{isAdmin && lesson.status === 'draft' ? ' · Bản nháp' : ''}</span><ProgressBar value={lesson.learned} max={lesson.words || 1} className="mt-2 h-1" /></Link></li>)}</ul> : <p className="text-sm text-muted">Khóa này chưa có bài nào.</p>}</TabsContent>
-      <TabsContent value="exams"><p className="text-sm text-muted">Khóa này chưa có bài kiểm tra.</p></TabsContent>
+      <TabsContent value="exams" className="space-y-4">
+        {!detail.enrolled && !isAdmin && <p className="text-sm text-muted">Đăng ký khóa học để làm bài kiểm tra.</p>}
+        {examGroups.length ? examGroups.map((group) => <section key={group.key} className="space-y-2"><h2 className="font-bold">{group.title}</h2><ul className="space-y-2">{group.rows.map((exam) => <li key={exam.id} className="word-row"><div className="min-w-0 flex-1"><p className="truncate font-bold">{exam.title}</p><p className="text-xs text-muted">{exam.questionCount} câu{isAdmin && exam.status === 'draft' ? ' · Bản nháp' : ''}</p></div>{exam.inProgress ? <span className="shrink-0 text-xs font-bold text-accent">Đang làm</span> : exam.best ? <span className="shrink-0 text-xs font-bold text-muted">{exam.best.passed ? `Đạt · ${exam.best.score}/${exam.best.total}` : `Cao nhất ${exam.best.score}/${exam.best.total}`}</span> : null}{detail.enrolled || isAdmin ? <Link href={`/courses/${detail.id}/exams/${exam.id}`} className="inline-flex min-h-10 shrink-0 items-center rounded-control bg-accent px-3 text-xs font-bold text-accent-foreground">{exam.inProgress ? 'Làm tiếp' : exam.best ? 'Làm lại' : 'Làm bài'}</Link> : <span className="inline-flex min-h-10 shrink-0 items-center rounded-control bg-surface-container px-3 text-xs font-bold text-muted">Làm bài</span>}</li>)}</ul></section>) : <p className="text-sm text-muted">Khóa này chưa có bài kiểm tra.</p>}
+      </TabsContent>
     </Tabs>
     <Dialog open={confirmLeave} onClose={() => setConfirmLeave(false)} title="Rời khóa học?" description="Các bài của khóa sẽ rời khỏi lịch ôn. Tiến độ từ đã học vẫn được giữ nếu bạn đăng ký lại."><div className="flex justify-end gap-2"><Button type="button" variant="secondary" disabled={pending} onClick={() => setConfirmLeave(false)}>Ở lại</Button><Button type="button" loading={pending} onClick={() => void leave()}>Rời khóa</Button></div>{error && <p className="mt-2 text-sm text-error">{error}</p>}</Dialog>
   </div>;

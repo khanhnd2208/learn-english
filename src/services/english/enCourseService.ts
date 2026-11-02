@@ -2,6 +2,7 @@ import { Prisma } from '@prisma/client';
 import { prisma } from '@/lib/prisma';
 import { AppError } from '@/lib/appError';
 import { accessCodeMatches, listEnglishSets } from '@/services/english/enCatalogService';
+import { courseExamRows } from '@/services/english/enExamService';
 
 export interface CourseSummary {
   id: string; title: string; description: string; status: string; listed: boolean;
@@ -55,10 +56,13 @@ export async function listCourses(userId: string, isAdmin: boolean): Promise<Cou
     WHERE s."courseId" = ANY(${ids}::text[]) AND s."status" = 'published'
     GROUP BY s."courseId"`) : [];
   const byCourse = new Map(counts.map((row) => [row.courseId, row.words]));
+  const exams = ids.length ? await prisma.enExam.findMany({ where: { courseId: { in: ids }, status: 'published', questions: { some: {} }, OR: [{ setId: null }, { set: { status: 'published' } }] }, select: { courseId: true } }) : [];
+  const examCount = new Map<string, number>();
+  for (const exam of exams) examCount.set(exam.courseId, (examCount.get(exam.courseId) ?? 0) + 1);
   return courses.map((course) => ({
     id: course.id, title: course.title, description: course.description, status: course.status,
     listed: course.listed, locked: course.accessCode != null, enrolled: course.enrollments.length > 0,
-    lessons: course.sets.length, words: byCourse.get(course.id) ?? 0, exams: 0,
+    lessons: course.sets.length, words: byCourse.get(course.id) ?? 0, exams: examCount.get(course.id) ?? 0,
     ...(isAdmin ? { accessCode: course.accessCode, learners: course._count.enrollments } : {}),
   }));
 }
@@ -87,7 +91,7 @@ export async function getCourseDetail(userId: string, courseId: string, isAdmin:
     words: lessons.reduce((sum, lesson) => sum + lesson.words, 0),
     learned: lessons.reduce((sum, lesson) => sum + lesson.learned, 0),
     longTerm: lessons.reduce((sum, lesson) => sum + lesson.longTerm, 0),
-    lessons, exams: [],
+    lessons, exams: await courseExamRows(userId, courseId, isAdmin),
     ...(isAdmin ? { accessCode: course.accessCode, learners: course._count.enrollments } : {}),
   };
 }
@@ -140,9 +144,12 @@ export async function addSetToCourse(courseId: string, setId: string) {
   });
 }
 export async function removeSetFromCourse(courseId: string, setId: string) {
-  const set = await prisma.enSet.findFirst({ where: { id: setId, courseId }, select: { id: true } });
-  if (!set) throw new AppError('Không tìm thấy bộ học', 404);
-  return prisma.enSet.update({ where: { id: setId }, data: { courseId: null } });
+  return prisma.$transaction(async (tx) => {
+    const set = await tx.enSet.findFirst({ where: { id: setId, courseId }, select: { id: true } });
+    if (!set) throw new AppError('Không tìm thấy bộ học', 404);
+    await tx.enExam.updateMany({ where: { courseId, setId }, data: { setId: null } });
+    return tx.enSet.update({ where: { id: setId }, data: { courseId: null } });
+  });
 }
 export async function moveLesson(courseId: string, setId: string, direction: 'up' | 'down') {
   return prisma.$transaction(async (tx) => {
@@ -163,5 +170,6 @@ export async function listAdminCourses(): Promise<AdminCoursesData> {
     prisma.enSet.findMany({ where: { courseId: null }, orderBy: { title: 'asc' }, select: { id: true, title: true, status: true } }),
   ]);
   const byId = new Map(summaries.map((summary) => [summary.id, summary]));
-  return { courses: courses.map((course) => ({ ...byId.get(course.id)!, lessonsList: course.sets, examsList: [] })), unassignedSets };
+  const examRows = await Promise.all(courses.map((course) => courseExamRows('', course.id, true)));
+  return { courses: courses.map((course, index) => ({ ...byId.get(course.id)!, lessonsList: course.sets, examsList: examRows[index]! })), unassignedSets };
 }

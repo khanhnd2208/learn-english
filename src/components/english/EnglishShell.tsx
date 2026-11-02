@@ -16,7 +16,7 @@ const navAdventureIcons: Record<string, 'map' | 'target' | 'book' | 'compass' | 
 
 export default function EnglishShell({ children, goals, newLearner, avatarUrl, hasUpload }: { children: React.ReactNode; goals: ShellGoals; newLearner: boolean; avatarUrl: string | null; hasUpload: boolean }) {
 	const pathname = usePathname();
-	const focus = /\/sets\/[^/]+\/(practice|test)$/.test(pathname);
+	const focus = /\/sets\/[^/]+\/(practice|test)$|^\/courses\/[^/]+\/exams\/[^/]+$/.test(pathname);
 	const { data } = useSession();
 	const admin = (data?.user as { role?: string } | undefined)?.role === 'admin';
 	const accountName = data?.user?.name || data?.user?.email || 'Tài khoản';
