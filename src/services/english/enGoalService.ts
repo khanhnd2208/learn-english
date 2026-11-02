@@ -1,7 +1,6 @@
 import { cache } from 'react';
 import { requestNow } from '@/lib/requestNow';
-import { guidedDayTotals, overviewCounts, reviewDayTotals, studiedDays, xpDayTotals } from './enOverviewQueries';
-import { streakStats } from '@/lib/english/streak';
+import { guidedDayTotals, overviewCounts, reviewDayTotals, xpDayTotals } from './enOverviewQueries';
 import { prisma } from '@/lib/prisma';
 import { AppError } from '@/lib/appError';
 import { EN_WEEKLY_DAYS_DEFAULT, EN_TX_MAX_WAIT_MS, EN_TX_TIMEOUT_MS } from '@/lib/english/constants';
@@ -9,7 +8,6 @@ import { shiftVnDay, vnDayKey, vnWeekDays } from '@/lib/english/gapRule';
 import { vnDayStart } from '@/lib/english/schedule';
 import { mergeDayTotals, metricsFromDayTotals, type XpRow } from '@/lib/english/goalMetrics';
 import { DAILY_QUEST_KEYS, WEEKLY_QUEST_KEYS, dailyQuests, parseQuests, topUpQuests, questProgress, QUEST_META, weeklyQuests, type Quest, type QuestAction, type QuestContext, type QuestMetrics } from '@/lib/english/quests';
-import { achievementStatus, newlyEarned, nearestAchievements, parseAchievementKey, describeAchievement, TIER_NAMES, type LifetimeMetrics } from '@/lib/english/achievements';
 import { DAILY_GOAL_DEFAULT, goalTierIndex, isDailyGoalXp, levelFromXp, REWARD_XP_KINDS, XP, type LevelInfo, type XpKind } from '@/lib/english/xp';
 import { getTodayOverview, computeTodayOverview, type TodayOverview } from '@/services/english/enDailyService';
 
@@ -21,22 +19,6 @@ export type GoalQuest = Quest & {
 	current: number;
 	done: boolean;
 };
-
-export type GoalAchievement = {
-	id: string;
-	title: string;
-	description: string;
-	/** Description with `{n}` left in, to render each tier. */
-	template: string;
-	group: string;
-	icon: string;
-	reached: number;
-	tiers: number[];
-	current: number;
-	next: number | null;
-};
-
-export type UnseenAchievement = { key: string; title: string; tierName: string; description: string };
 
 export type GoalBoard = {
 	level: LevelInfo;
@@ -55,13 +37,10 @@ export type GoalBoard = {
 		resetsAt: string;
 		days: Array<{ day: string; xp: number; studied: boolean; goalMet: boolean; isToday: boolean; isFuture: boolean }>;
 	};
-	achievements: GoalAchievement[];
-	nearest: string[];
-	unseenAchievements: UnseenAchievement[];
 };
 
 /** What one action earned, for in-session toasts. */
-export type GoalReward = { xp: number; quests: Array<{ title: string; xp: number }>; achievements: UnseenAchievement[] };
+export type GoalReward = { xp: number; quests: Array<{ title: string; xp: number }> };
 
 type PendingXp = { sourceKey: string; kind: XpKind; xp: number };
 
@@ -105,18 +84,11 @@ async function questContext(userId: string, now: Date, dailyGoalXp: number, week
 async function rewardSnapshot(userId: string) {
 	const [row] = await prisma.$queryRaw<Array<{
 		dailyXpGoal: number | null; weeklyDaysGoal: number | null; dailyGoalChosenAt: Date | null; seenLevel: number | null;
-		learned: number; longTerm: number; revived: number; goalDays: number; chests: number;
-		legacySessionsFinished: number; guidedSessionsFinished: number; enrolledSets: number;
+		learned: number; longTerm: number;
 	}>>`
 		SELECT p."dailyXpGoal", p."weeklyDaysGoal", p."dailyGoalChosenAt", p."seenLevel",
 		(SELECT count(*)::int FROM "EnWordState" w WHERE w."userId" = ${userId} AND w."box" > 0) AS learned,
 		(SELECT count(*)::int FROM "EnWordState" w WHERE w."userId" = ${userId} AND w."box" >= 4) AS "longTerm",
-		(SELECT count(*)::int FROM "EnWordState" w WHERE w."userId" = ${userId} AND w."box" > 0 AND w."lapses" > 0 AND w."box" >= 3) AS revived,
-		(SELECT count(*)::int FROM "EnXpEvent" x WHERE x."userId" = ${userId} AND x."kind" = 'goal') AS "goalDays",
-		(SELECT count(*)::int FROM "EnXpEvent" x WHERE x."userId" = ${userId} AND x."kind" = 'chest') AS chests,
-		(SELECT count(*)::int FROM "EnPracticeSession" s WHERE s."userId" = ${userId} AND s."mode" = 'review' AND s."endedAt" IS NOT NULL) AS "legacySessionsFinished",
-		(SELECT count(*)::int FROM "EnGuidedReviewSession" s WHERE s."userId" = ${userId} AND s."endedAt" IS NOT NULL) AS "guidedSessionsFinished",
-		(SELECT count(*)::int FROM "EnEnrollment" e JOIN "EnSet" st ON st."id" = e."setId" AND st."status" = 'published' WHERE e."userId" = ${userId}) AS "enrolledSets"
 		FROM (SELECT 1) seed LEFT JOIN "EnLearnerProfile" p ON p."userId" = ${userId}`;
 	return row!;
 }
@@ -139,30 +111,18 @@ export async function loadRewardState(userId: string, now: Date) {
 	let context: Promise<QuestContext> | undefined;
 	const ctx = () => context ??= questContext(userId, now, dailyGoalXp, weeklyDaysGoal);
 	const weekFrom = vnDayStart(weekStart);
-	const [daily, weeklyBoard, reviewDays, guidedDays, xpDays, rewardRows, achievements, studied] = await Promise.all([
+	const [daily, weeklyBoard, reviewDays, guidedDays, xpDays, rewardRows] = await Promise.all([
 		ensureBoard(userId, 'daily', today, async () => dailyQuests(await ctx())),
 		ensureBoard(userId, 'weekly', weekStart, async () => weeklyQuests(await ctx())),
 		reviewDayTotals(userId, weekFrom),
 		guidedDayTotals(userId, weekFrom),
 		xpDayTotals(userId, weekStart),
 		prisma.enXpEvent.findMany({ where: { userId, day: { gte: weekStart }, kind: { in: [...REWARD_XP_KINDS] } }, select: { day: true, xp: true, kind: true, sourceKey: true } }),
-		prisma.enAchievement.findMany({ where: { userId }, select: { key: true, seenAt: true } }),
-		studiedDays(userId, vnDayStart(shiftVnDay(today, -365))),
 	]);
 	const dayTotals = mergeDayTotals(reviewDays, guidedDays, xpDays);
 	// Boards stored before the chest became the only weekly reward still carry quest XP.
 	const weekly = weeklyBoard.map((quest) => ({ ...quest, xp: 0 }));
 	const dayMetrics = metricsFromDayTotals(new Set([today]), dayTotals);
-	const lifetime: LifetimeMetrics = {
-		longTerm: snapshot.longTerm,
-		learned: snapshot.learned,
-		longestStreak: streakStats(studied, today).longest,
-		goalDays: snapshot.goalDays,
-		chests: snapshot.chests,
-		revived: snapshot.revived,
-		sessionsFinished: snapshot.legacySessionsFinished + snapshot.guidedSessionsFinished,
-		enrolledSets: snapshot.enrolledSets,
-	};
 	return {
 		today,
 		weekDays,
@@ -176,8 +136,6 @@ export async function loadRewardState(userId: string, now: Date) {
 		claimed: new Set(rewardRows.map((row) => row.sourceKey)),
 		dayTotals,
 		rewardRows: rewardRows as XpRow[],
-		lifetime,
-		achievements,
 	};
 }
 
@@ -190,18 +148,15 @@ async function loadBoardState(userId: string, now: Date, cachedOverview: boolean
 }
 
 /**
- * Quest, chest and achievement rewards that are due but not paid yet. Rewards add XP, which can
+ * Quest and chest rewards that are due but not paid yet. Rewards add XP, which can
  * finish the XP quests in turn, so this repeats on in-memory metrics until nothing new is earned.
  */
-export function pendingRewards(state: Pick<GoalState, 'today' | 'weekStart' | 'dailyGoalXp' | 'daily' | 'weekly' | 'dayMetrics' | 'weekMetrics' | 'claimed' | 'lifetime' | 'achievements'>) {
+export function pendingRewards(state: Pick<GoalState, 'today' | 'weekStart' | 'dailyGoalXp' | 'daily' | 'weekly' | 'dayMetrics' | 'weekMetrics' | 'claimed'>) {
 	const day: QuestMetrics = { ...state.dayMetrics };
 	const week: QuestMetrics = { ...state.weekMetrics };
-	const lifetime: LifetimeMetrics = { ...state.lifetime };
 	const claimed = new Set(state.claimed);
-	const unlocked = new Set(state.achievements.map((row) => row.key));
 	const xp: PendingXp[] = [];
 	const quests: Array<{ title: string; xp: number }> = [];
-	const achievements: string[] = [];
 	const pay = (event: PendingXp) => {
 		claimed.add(event.sourceKey);
 		xp.push(event);
@@ -221,32 +176,22 @@ export function pendingRewards(state: Pick<GoalState, 'today' | 'weekStart' | 'd
 		if (!claimed.has(goalKey) && day.xp >= state.dailyGoalXp) {
 			pay({ sourceKey: goalKey, kind: 'goal', xp: XP.dailyGoal });
 			quests.push({ title: `Đạt mục tiêu ngày ${state.dailyGoalXp} XP`, xp: XP.dailyGoal });
-			lifetime.goalDays += 1;
 		}
 		// Weekly quests pay nothing themselves: the chest opens once all of them are done.
 		const chest = chestSourceKey(state.weekStart);
 		if (!claimed.has(chest) && state.weekly.length > 0 && state.weekly.every((quest) => questProgress(quest, week).done)) {
 			pay({ sourceKey: chest, kind: 'chest', xp: XP.weeklyChest });
 			quests.push({ title: 'Mở rương tuần', xp: XP.weeklyChest });
-			lifetime.chests += 1;
-		}
-		for (const earned of newlyEarned(lifetime, unlocked)) {
-			unlocked.add(earned.key);
-			achievements.push(earned.key);
-			pay({ sourceKey: `ach:${earned.key}`, kind: 'achievement', xp: earned.xp });
 		}
 		if (xp.length === before) break;
 	}
-	return { xp, quests, achievements };
+	return { xp, quests };
 }
 
 async function payRewards(userId: string, now: Date, state: RewardState) {
 	const pending = pendingRewards(state);
 	if (!pending.xp.length) return { ...pending, paid: 0 };
 	const paid = await prisma.$transaction(async (tx) => {
-		if (pending.achievements.length) {
-			await tx.enAchievement.createMany({ data: pending.achievements.map((key) => ({ userId, key, unlockedAt: now })), skipDuplicates: true });
-		}
 		const created = await tx.enXpEvent.createManyAndReturn({
 			data: pending.xp.map((event) => ({ ...event, userId, day: state.today, at: now })),
 			skipDuplicates: true,
@@ -257,21 +202,12 @@ async function payRewards(userId: string, now: Date, state: RewardState) {
 	return { ...pending, paid };
 }
 
-function unseenView(key: string): UnseenAchievement | null {
-	const parsed = parseAchievementKey(key);
-	if (!parsed) return null;
-	const tierName = parsed.def.tiers.length > 1 ? TIER_NAMES[parsed.tier] ?? '' : '';
-	return { key, title: parsed.def.title, tierName, description: describeAchievement(parsed.def, parsed.tier) };
-}
-
 function questView(quest: Quest, metrics: QuestMetrics): GoalQuest {
 	const meta = QUEST_META[quest.key];
 	return { ...quest, title: meta.title(quest.target), hint: meta.hint, icon: meta.icon, action: meta.action, ...questProgress(quest, metrics) };
 }
 
 function boardView(state: GoalState): GoalBoard {
-	const unlocked = new Set(state.achievements.map((row) => row.key));
-	const statuses = achievementStatus(state.lifetime, unlocked);
 	const goalDays = new Set(state.rewardRows.filter((row) => row.kind === 'goal').map((row) => row.day));
 	const studiedDays = new Set(state.overview.week.filter((entry) => entry.studied).map((entry) => entry.day));
 	const dayXp = new Map<string, number>();
@@ -298,20 +234,6 @@ function boardView(state: GoalState): GoalBoard {
 			resetsAt: vnDayStart(shiftVnDay(state.weekStart, 7)).toISOString(),
 			days: state.weekDays.map((day) => ({ day, xp: dayXp.get(day) ?? 0, studied: studiedDays.has(day), goalMet: goalDays.has(day), isToday: day === state.today, isFuture: day > state.today })),
 		},
-		achievements: statuses.map((status) => ({
-			id: status.def.id,
-			title: status.def.title,
-			description: describeAchievement(status.def, Math.min(status.reached, status.def.tiers.length - 1)),
-			template: status.def.description,
-			group: status.def.group,
-			icon: status.def.icon,
-			reached: status.reached,
-			tiers: status.def.tiers,
-			current: status.current,
-			next: status.next,
-		})),
-		nearest: nearestAchievements(statuses).map((status) => status.def.id),
-		unseenAchievements: state.achievements.filter((row) => !row.seenAt).flatMap((row) => unseenView(row.key) ?? []),
 	};
 }
 
@@ -322,7 +244,6 @@ export async function settleProgress(userId: string, actionXp = 0, now = new Dat
 	return {
 		xp: actionXp + result.paid,
 		quests: result.quests,
-		achievements: result.achievements.flatMap((key) => unseenView(key) ?? []),
 	};
 }
 
@@ -345,15 +266,10 @@ export async function setDailyGoal(userId: string, xp: number, now = new Date())
 	return { dailyXpGoal: xp };
 }
 
-/** Marks celebrations as shown: unlocked achievements and the current level. */
-export async function markGoalsSeen(userId: string, input: { keys: string[]; level?: number }, now = new Date()) {
-	if (input.keys.length) {
-		await prisma.enAchievement.updateMany({ where: { userId, key: { in: input.keys }, seenAt: null }, data: { seenAt: now } });
-	}
-	if (input.level !== undefined) {
-		const level = Math.max(0, Math.trunc(input.level));
-		await prisma.enLearnerProfile.upsert({ where: { userId }, create: { userId, seenLevel: level }, update: { seenLevel: level } });
-	}
+/** Marks the current level celebration as shown. */
+export async function markGoalsSeen(userId: string, input: { level: number }) {
+	const level = Math.max(0, Math.trunc(input.level));
+	await prisma.enLearnerProfile.upsert({ where: { userId }, create: { userId, seenLevel: level }, update: { seenLevel: level } });
 	return { ok: true as const };
 }
 
@@ -363,6 +279,6 @@ export async function safeSettle(userId: string, actionXp = 0, now = new Date())
 		return await settleProgress(userId, actionXp, now);
 	} catch (error) {
 		console.error('[goals] settle failed', error);
-		return { xp: actionXp, quests: [], achievements: [] };
+		return { xp: actionXp, quests: [] };
 	}
 }

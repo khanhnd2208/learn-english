@@ -2,10 +2,8 @@
 
 import { useEffect, useState } from 'react';
 import Dialog from '@/components/ui/Dialog';
-import { AdventureIcon } from '@/components/english/AdventureIcon';
 import { englishPost } from '@/components/english/englishApi';
 import DailyGoalSheet from '@/components/english/goals/DailyGoalSheet';
-import type { UnseenAchievement } from '@/services/english/enGoalService';
 
 export type ShellGoals = {
 	xp: number;
@@ -17,11 +15,10 @@ export type ShellGoals = {
 	questsTotal: number;
 	dailyGoalXp: number;
 	showGoalPicker: boolean;
-	unseen: UnseenAchievement[];
 };
 
 /**
- * One-time celebrations, in order: the first-run goal picker, a level-up, then new achievements.
+ * One-time celebrations: the first-run goal picker, then a level-up.
  * Each is marked as seen on the server when closed, so it never shows twice.
  */
 export default function RewardCenter({ goals }: { goals: ShellGoals }) {
@@ -37,37 +34,24 @@ export default function RewardCenter({ goals }: { goals: ShellGoals }) {
 
 	// Keys carry the content, so a new level or badge after a refresh shows even if an earlier one was closed.
 	const levelKey = `level:${goals.level}`;
-	const achKey = `ach:${goals.unseen.map((entry) => entry.key).join(',')}`;
 	const step = !ready ? null
 		: goals.showGoalPicker && !dismissed.has('goal') ? 'goal'
-			: levelUp && !dismissed.has(levelKey) ? 'level'
-				: goals.unseen.length && !dismissed.has(achKey) ? 'ach'
-					: null;
+			: levelUp && !dismissed.has(levelKey) ? 'level' : null;
 
-	function close(key: 'level' | 'ach') {
-		setDismissed((current) => new Set(current).add(key === 'level' ? levelKey : achKey));
-		const body = key === 'level' ? { keys: [], level: goals.level } : { keys: goals.unseen.map((entry) => entry.key) };
-		void englishPost('/api/goals/seen', body).catch(() => undefined);
+	function close() {
+		setDismissed((current) => new Set(current).add(levelKey));
+		void englishPost('/api/goals/seen', { level: goals.level }).catch(() => undefined);
 	}
 
 	return <>
 		<DailyGoalSheet open={step === 'goal'} intro current={goals.dailyGoalXp} todayGoal={goals.goal} onClose={() => setDismissed((current) => new Set(current).add('goal'))} />
-		<Dialog open={step === 'level'} onClose={() => close('level')} title="Lên cấp!">
+		<Dialog open={step === 'level'} onClose={close} title="Lên cấp!">
 			<div className="space-y-3 py-2 text-center">
 				<div className="animate-badge-pop mx-auto inline-flex"><span className="level-badge px-4 py-2 text-3xl">Lv {goals.level}</span></div>
 				<p className="text-lg font-black">{goals.levelTitle}</p>
 				<p className="text-sm text-muted">Mỗi cấp là kết quả của những lần bạn nhớ lại được từ. Tiếp tục nhé!</p>
-				<button type="button" onClick={() => close('level')} className="min-h-11 w-full rounded-control bg-accent px-5 font-bold text-accent-foreground">Tuyệt vời</button>
+				<button type="button" onClick={close} className="min-h-11 w-full rounded-control bg-accent px-5 font-bold text-accent-foreground">Tuyệt vời</button>
 			</div>
-		</Dialog>
-		<Dialog open={step === 'ach'} onClose={() => close('ach')} title={goals.unseen.length > 1 ? `Bạn mở được ${goals.unseen.length} thành tựu` : 'Thành tựu mới'}>
-			<ul className="max-h-[50vh] space-y-2 overflow-y-auto py-2">
-				{goals.unseen.map((entry) => <li key={entry.key} className="game-card-amber animate-badge-pop flex items-center gap-3 rounded-card border-2 p-3">
-					<AdventureIcon name="trophy" size={26} framed />
-					<div className="min-w-0"><p className="font-black">{entry.title}{entry.tierName ? ` · ${entry.tierName}` : ''}</p><p className="text-sm text-muted">{entry.description}</p></div>
-				</li>)}
-			</ul>
-			<button type="button" onClick={() => close('ach')} className="mt-2 min-h-11 w-full rounded-control bg-accent px-5 font-bold text-accent-foreground">Nhận</button>
 		</Dialog>
 	</>;
 }

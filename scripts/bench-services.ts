@@ -31,7 +31,7 @@ async function main() {
 	// Services imported below share this instrumented singleton; production is unchanged.
 	(globalThis as unknown as { _prisma: unknown })._prisma = extended;
 	const daily = values.legacy ? await import('../src/lib/__dbtests__/legacy/daily') : await import('../src/services/english/enDailyService');
-	const goals = values.legacy ? await import('../src/lib/__dbtests__/legacy/goals') : await import('../src/services/english/enGoalService');
+	const goals = await import('../src/services/english/enGoalService');
 	const guided = values.legacy ? await import('../src/lib/__dbtests__/legacy/guided') : await import('../src/services/english/enGuidedReviewService');
 	const { listEnglishSets } = values.legacy ? await import('../src/lib/__dbtests__/legacy/catalog') : await import('../src/services/english/enCatalogService');
 	const users = await base.enLearnerProfile.findMany({ where: { userId: { startsWith: 'load-user-' } }, orderBy: { userId: 'asc' }, select: { userId: true } });

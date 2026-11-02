@@ -6,5 +6,5 @@ export const dynamic = 'force-dynamic';
 export default async function SetsPage() {
 	const session = await auth();
 	if (!session?.user) redirect('/login');
-	redirect('/review?mode=bo');
+	redirect('/review');
 }

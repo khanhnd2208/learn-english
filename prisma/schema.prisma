@@ -302,7 +302,7 @@ model EnXpEvent {
   id        String   @id @default(cuid())
   userId    String
   sourceKey String
-  /// review | new (legacy) | longterm | extra | quiz | quest | goal | chest | achievement
+  /// review | new (legacy) | longterm | extra | quiz | quest | goal | chest
   kind      String
   xp        Int
   /// Vietnam calendar day, YYYY-MM-DD.

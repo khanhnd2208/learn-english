@@ -5,7 +5,7 @@ import { isIdleQuest } from '@/lib/english/quests';
 import type { GoalQuest } from '@/services/english/enGoalService';
 
 export function questHref(quest: Pick<GoalQuest, 'action'>): string {
-	return quest.action === 'srs' ? '/review?mode=luan-phien' : '/review?mode=bo';
+	return quest.action === 'srs' ? '/#srs' : '/review';
 }
 
 /**

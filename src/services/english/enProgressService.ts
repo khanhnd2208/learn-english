@@ -1,7 +1,9 @@
+import { Prisma } from '@prisma/client';
 import { prisma } from '@/lib/prisma';
 import { shiftVnDay, vnDayKey, vnWeekDays } from '@/lib/english/gapRule';
 import { vnDayStart } from '@/lib/english/schedule';
 import { weeklyProgress } from '@/lib/english/progressHistory';
+import { liveCte } from '@/services/english/enOverviewQueries';
 
 /** History is reconstructed from recorded scheduled transitions, not XP awards. */
 export async function getProgressHistory(userId: string, now = new Date()) {
@@ -9,7 +11,7 @@ export async function getProgressHistory(userId: string, now = new Date()) {
  const monday = vnWeekDays(today)[0]!;
  const first = shiftVnDay(monday, -49);
  const [states, reviews] = await Promise.all([
-  prisma.enWordState.findMany({ where: { userId }, select: { senseId: true, box: true } }),
+  prisma.$queryRaw<Array<{ senseId: string; box: number }>>(Prisma.sql`${liveCte(userId)} SELECT "senseId", "box" FROM sched`),
   prisma.enReview.findMany({ where: { userId, at: { gte: vnDayStart(first) } }, orderBy: { at: 'desc' }, select: { senseId: true, at: true, correct: true, scheduled: true, boxBefore: true, boxAfter: true } }),
  ]);
  const wrongCounts = new Map<string, number>();

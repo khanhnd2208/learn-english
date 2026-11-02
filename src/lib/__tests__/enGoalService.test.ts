@@ -6,7 +6,6 @@ const mocks = vi.hoisted(() => ({ upsert: vi.fn() }));
 vi.mock('@/lib/prisma', () => ({ prisma: { enLearnerProfile: { upsert: mocks.upsert } } }));
 vi.mock('@/services/english/enDailyService', () => ({ getTodayOverview: vi.fn(), computeTodayOverview: vi.fn() }));
 
-const lifetime = { longTerm: 0, learned: 0, longestStreak: 0, goalDays: 0, chests: 0, revived: 0, sessionsFinished: 0, enrolledSets: 0 };
 const base = {
 	today: '2026-10-26',
 	weekStart: '2026-10-26',
@@ -16,8 +15,6 @@ const base = {
 	dayMetrics: { ...emptyMetrics(), xp: 320, srsWords: 20 },
 	weekMetrics: { ...emptyMetrics(), xp: 320, srsWords: 100, daysStudied: 4 },
 	claimed: new Set<string>(),
-	lifetime,
-	achievements: [] as Array<{ key: string; seenAt: Date | null }>,
 };
 
 describe('pending goal rewards', () => {
@@ -27,11 +24,11 @@ describe('pending goal rewards', () => {
 			'quest:daily:2026-10-26:srs_words',
 			'quest:daily:2026-10-26:daily_goal',
 			'chest:2026-10-26',
-			'ach:perfect_week_1',
 		]);
 		expect(result.xp.find((event) => event.sourceKey.endsWith('daily_goal'))).toMatchObject({ kind: 'goal', xp: 100 });
 		expect(result.quests.map((quest) => quest.title)).toContain('Mở rương tuần');
 		expect(result.xp.find((event) => event.kind === 'chest')?.xp).toBe(500);
+		expect(Object.keys(result).sort()).toEqual(['quests', 'xp']);
 	});
 
 	it('keeps the chest closed until the weekly quest is done', () => {
@@ -56,10 +53,6 @@ describe('pending goal rewards', () => {
 		expect(again.xp).toEqual([]);
 	});
 
-	it('unlocks achievements once, counting a goal and a chest earned in the same pass', () => {
-		const result = pendingRewards({ ...base, lifetime: { ...lifetime, goalDays: 4, sessionsFinished: 1 }, achievements: [{ key: 'first_step_1', seenAt: null }] });
-		expect(result.achievements).toEqual(['on_time_1', 'perfect_week_1']);
-	});
 });
 
 describe('daily goal', () => {
