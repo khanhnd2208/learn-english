@@ -78,7 +78,12 @@ export async function getCourseDetail(userId: string, courseId: string, isAdmin:
   if (!course) throw new AppError('Không tìm thấy khóa học', 404);
   const enrolled = course.enrollments.length > 0;
   if (!isAdmin && !enrolled && (course.status !== 'published' || !course.listed || !course.sets.length)) throw new AppError('Không tìm thấy khóa học', 404);
-  const summaries = await listEnglishSets(userId, isAdmin);
+  // Count only this course's lessons, not every set in the catalog.
+  const setIds = course.sets.map((set) => set.id);
+  const [summaries, exams] = await Promise.all([
+    setIds.length ? listEnglishSets(userId, isAdmin, { setIds }) : Promise.resolve([]),
+    courseExamRows(userId, courseId, isAdmin),
+  ]);
   const bySet = new Map(summaries.map((set) => [set.id, set]));
   const lessons = course.sets.map((set, index) => ({
     setId: set.id, number: index + 1, title: set.title, status: set.status,
@@ -91,7 +96,7 @@ export async function getCourseDetail(userId: string, courseId: string, isAdmin:
     words: lessons.reduce((sum, lesson) => sum + lesson.words, 0),
     learned: lessons.reduce((sum, lesson) => sum + lesson.learned, 0),
     longTerm: lessons.reduce((sum, lesson) => sum + lesson.longTerm, 0),
-    lessons, exams: await courseExamRows(userId, courseId, isAdmin),
+    lessons, exams,
     ...(isAdmin ? { accessCode: course.accessCode, learners: course._count.enrollments } : {}),
   };
 }
