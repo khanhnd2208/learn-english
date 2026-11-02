@@ -109,6 +109,7 @@ model EnSet {
   items       EnSetItem[]
   enrollments EnEnrollment[]
   course      EnCourse?       @relation(fields: [courseId], references: [id], onDelete: SetNull)
+  exams       EnExam[]
 
   @@index([status, sortOrder])
   @@index([courseId, sortOrder])
@@ -126,6 +127,7 @@ model EnCourse {
   updatedAt   DateTime             @updatedAt
   sets        EnSet[]
   enrollments EnCourseEnrollment[]
+  exams       EnExam[]
 
   @@index([status, sortOrder])
 }
@@ -139,6 +141,77 @@ model EnCourseEnrollment {
 
   @@unique([userId, courseId])
   @@index([userId])
+}
+
+model EnExam {
+  id          String           @id @default(cuid())
+  courseId    String
+  setId       String?
+  title       String
+  description String           @default("")
+  status      EnContentStatus  @default(draft)
+  sortOrder   Int              @default(0)
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
+  course      EnCourse         @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  set         EnSet?           @relation(fields: [setId], references: [id], onDelete: SetNull)
+  questions   EnExamQuestion[]
+  attempts    EnExamAttempt[]
+
+  @@index([courseId, status, sortOrder])
+}
+
+model EnExamQuestion {
+  id            String   @id @default(cuid())
+  examId        String
+  position      Int
+  /// mcq | fill
+  type          String
+  prompt        String
+  options       String[] @default([])
+  correctIndex  Int?
+  answers       String[] @default([])
+  explanationVi String   @default("")
+  exam          EnExam   @relation(fields: [examId], references: [id], onDelete: Cascade)
+
+  @@unique([examId, position])
+}
+
+model EnExamAttempt {
+  id         String              @id @default(cuid())
+  userId     String
+  examId     String
+  /// "{userId}:{examId}" while in progress, null once finished.
+  activeKey  String?             @unique
+  status     EnTestStatus        @default(in_progress)
+  position   Int                 @default(0)
+  total      Int
+  score      Int?
+  startedAt  DateTime            @default(now())
+  finishedAt DateTime?
+  exam       EnExam              @relation(fields: [examId], references: [id], onDelete: Cascade)
+  items      EnExamAttemptItem[]
+
+  @@index([userId, examId, status])
+}
+
+/// Snapshot of a question when the attempt started, so editing the exam never changes history.
+model EnExamAttemptItem {
+  id            String        @id @default(cuid())
+  attemptId     String
+  position      Int
+  type          String
+  prompt        String
+  options       String[]      @default([])
+  correctIndex  Int?
+  answers       String[]      @default([])
+  explanationVi String        @default("")
+  answer        String?
+  correct       Boolean?
+  answeredAt    DateTime?
+  attempt       EnExamAttempt @relation(fields: [attemptId], references: [id], onDelete: Cascade)
+
+  @@unique([attemptId, position])
 }
 
 model EnSetItem {
