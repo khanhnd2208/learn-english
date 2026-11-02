@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { accuracySeries, shortDayLabel, weekDelta, weekXpSummary } from '@/lib/english/progressStats';
+import { accuracySeries, liveStages, shortDayLabel, weekDelta, weekXpSummary } from '@/lib/english/progressStats';
 
 describe('progress stats', () => {
 	it('rounds weekly accuracy and leaves empty weeks as null', () => {
@@ -27,5 +27,9 @@ describe('progress stats', () => {
 	it('formats a Vietnam day key as d/M', () => {
 		expect(shortDayLabel('2026-10-26')).toBe('26/10');
 		expect(shortDayLabel('2026-09-07')).toBe('7/9');
+	});
+
+	it('keeps live stages unique across enrolled sets', () => {
+		expect(liveStages({ newCount: 5, learnedCount: 10, rememberingCount: 3, longTermCount: 2 })).toEqual({ new: 5, learning: 5, remembering: 3, longTerm: 2 });
 	});
 });

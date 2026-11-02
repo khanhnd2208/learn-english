@@ -16,7 +16,6 @@ export function useRewardToasts() {
 			setXpPop({ id: Date.now(), xp: earned.xp });
 		}
 		for (const quest of earned.quests) toast(`✓ ${quest.title} · +${quest.xp} XP`, 'success');
-		for (const badge of earned.achievements) toast(`🏆 Thành tựu: ${badge.title}${badge.tierName ? ` · ${badge.tierName}` : ''}`, 'success');
 	}, [toast]);
 	return { sessionXp, xpPop, reward };
 }

@@ -23,7 +23,6 @@ export default async function AppLayout({ children }: { children: React.ReactNod
 		dailyGoalXp: board.dailyGoalXp,
 		// Ask for a goal once the learner has something to study, not on an empty first visit.
 		showGoalPicker: !board.goalChosen && (overview.enrolledSets > 0 || overview.learnedCount > 0),
-		unseen: board.unseenAchievements,
 	};
 	return <EnglishShell goals={goals} newLearner={overview.enrolledSets === 0 && overview.learnedCount === 0} avatarUrl={avatar.avatarUrl} hasUpload={avatar.hasUpload}>{children}</EnglishShell>;
 }

@@ -31,3 +31,8 @@ export function weekXpSummary(days: WeekDayXp[]): { total: number; studiedDays: 
 export function shortDayLabel(day: string): string {
 	return `${Number(day.slice(8, 10))}/${Number(day.slice(5, 7))}`;
 }
+
+/** Counts are scoped to unique live senses, not summed once for every enrolled set. */
+export function liveStages({ newCount, learnedCount, rememberingCount, longTermCount }: { newCount: number; learnedCount: number; rememberingCount: number; longTermCount: number }) {
+	return { new: newCount, learning: learnedCount - rememberingCount - longTermCount, remembering: rememberingCount, longTerm: longTermCount };
+}

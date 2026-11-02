@@ -14,10 +14,6 @@ const navAdventureIcons: Record<string, 'map' | 'target' | 'book' | 'compass' | 
 	map: 'map', target: 'target', repeat: 'repeat', auto_stories: 'book', explore: 'compass', edit_note: 'flag', flag: 'trophy',
 };
 
-function NavDot({ show }: { show: boolean }) {
-	return show ? <span aria-label="Có thành tựu mới" className="size-2 rounded-full bg-error" /> : null;
-}
-
 export default function EnglishShell({ children, goals, newLearner, avatarUrl, hasUpload }: { children: React.ReactNode; goals: ShellGoals; newLearner: boolean; avatarUrl: string | null; hasUpload: boolean }) {
 	const pathname = usePathname();
 	const focus = /\/sets\/[^/]+\/(practice|test)$/.test(pathname);
@@ -39,7 +35,6 @@ export default function EnglishShell({ children, goals, newLearner, avatarUrl, h
 							<Link key={item.href} href={item.href} className={active ? 'nav-pill-active' : 'nav-pill'}>
 								<span className="nav-glyph"><AdventureIcon name={navAdventureIcons[item.icon] ?? 'map'} size={19} /></span>
 								<span>{item.label}</span>
-								{item.href === '/progress' && <NavDot show={goals.unseen.length > 0} />}
 							</Link>
 						);
 					})}
@@ -85,7 +80,6 @@ export default function EnglishShell({ children, goals, newLearner, avatarUrl, h
 							<span className={`flex items-center justify-center rounded-full px-2.5 py-0.5 transition-colors ${active ? 'bg-accent-subtle text-accent' : ''}`}>
 								<AdventureIcon name={navAdventureIcons[item.icon] ?? 'map'} size={20} />
 							</span>
-							{item.href === '/progress' && goals.unseen.length > 0 && <span aria-label="Có thành tựu mới" className="absolute top-1 right-[calc(50%-16px)] size-2 rounded-full bg-error" />}
 							<span>{item.shortLabel}</span>
 						</Link>
 					);

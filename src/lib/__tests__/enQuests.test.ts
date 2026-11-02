@@ -1,7 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { dailyQuests, emptyMetrics, isIdleQuest, todayQuestCount, parseQuests, questProgress, timeLeftLabel, topUpQuests, weeklyQuests, type QuestContext } from '@/lib/english/quests';
 import { mergeDayTotals, metricsFromDayTotals, periodMetrics } from '@/lib/english/goalMetrics';
-import { achievementStatus, newlyEarned, nearestAchievements, type LifetimeMetrics } from '@/lib/english/achievements';
 
 const ctx: QuestContext = { tier: 1, weeklyDaysGoal: 4, srsAvailable: 30, enrolledSets: 2 };
 
@@ -130,26 +129,6 @@ describe('period metrics', () => {
 	it('counts a day with only Review as studied', () => {
 		const metrics = periodMetrics({ days: new Set(['2026-10-26', '2026-10-27']), reviews: [{ at: at('08:00:00'), scheduled: true }], guided: [{ sessionId: 's', chunkNumber: 1, answered: true, answeredAt: at('09:00:00', '27'), correct: false }], xp: [] });
 		expect(metrics.daysStudied).toBe(2);
-	});
-});
-
-describe('achievements', () => {
-	const metrics: LifetimeMetrics = { longTerm: 12, learned: 30, longestStreak: 2, goalDays: 0, chests: 0, revived: 0, sessionsFinished: 1, enrolledSets: 1 };
-
-	it('unlocks each reached tier once, paying ten times the old XP', () => {
-		const earned = newlyEarned(metrics, new Set(['first_step_1']));
-		expect(earned.map((entry) => entry.key)).toEqual(['memory_vault_1', 'explorer_1']);
-		expect(earned[0]?.xp).toBe(200);
-	});
-
-	it('keeps an unlocked badge when its metric drops and shows the next tier', () => {
-		const status = achievementStatus({ ...metrics, longTerm: 8 }, new Set(['memory_vault_1'])).find((entry) => entry.def.id === 'memory_vault');
-		expect(status).toMatchObject({ reached: 1, current: 8, next: 50 });
-	});
-
-	it('lists the closest locked achievements first', () => {
-		const nearest = nearestAchievements(achievementStatus({ ...metrics, longestStreak: 2 }));
-		expect(nearest[0]?.def.id).toBe('flame');
 	});
 });
 

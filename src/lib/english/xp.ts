@@ -23,10 +23,10 @@ export const XP = {
 } as const;
 
 /** `extra` covers Ôn theo bộ too, since both share the daily cap. */
-export type XpKind = 'review' | 'longterm' | 'extra' | 'quest' | 'goal' | 'chest' | 'achievement';
+export type XpKind = 'review' | 'longterm' | 'extra' | 'quest' | 'goal' | 'chest';
 
 /** XP kinds paid by the reward step, as opposed to answers. Their source keys are the only ones `pendingRewards` checks. */
-export const REWARD_XP_KINDS = ['quest', 'goal', 'chest', 'achievement'] as const satisfies readonly XpKind[];
+export const REWARD_XP_KINDS = ['quest', 'goal', 'chest'] as const satisfies readonly XpKind[];
 
 export type XpEventInput = { sourceKey: string; kind: XpKind; xp: number };
 
