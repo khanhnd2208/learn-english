@@ -1,3 +1,6 @@
+import { EN_SRS_SESSION_SIZE } from '@/lib/english/constants';
+import { estimateReviewXp } from '@/lib/english/xp';
+
 /** SRS questions are short checks, averaging about 12 seconds each. Zero when nothing is waiting. */
 export function reviewMinutes(overview: { dueCount: number; newCount: number }): number {
 	const questions = overview.dueCount + overview.newCount;
@@ -17,5 +20,3 @@ type ReviewCounts = { dueTotal: number; newCount: number; enrolledSets: number; 
 export function isReviewDone(overview: ReviewCounts): boolean {
 	return overview.dueTotal === 0 && overview.newCount === 0 && (overview.enrolledSets > 0 || overview.learnedCount > 0);
 }
-import { EN_SRS_SESSION_SIZE } from '@/lib/english/constants';
-import { estimateReviewXp } from '@/lib/english/xp';

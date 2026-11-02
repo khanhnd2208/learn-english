@@ -62,10 +62,10 @@ export interface EnglishSetDetail {
 	courseTitle: string | null;
 }
 
-export async function listEnglishSets(userId: string, includeDrafts: boolean, opts: { storeOnly?: boolean } = {}): Promise<EnglishSetSummary[]> {
+export async function listEnglishSets(userId: string, includeDrafts: boolean, opts: { storeOnly?: boolean; setIds?: string[] } = {}): Promise<EnglishSetSummary[]> {
 	const now = new Date();
 	const sets = await prisma.enSet.findMany({
-		where: { ...(includeDrafts ? {} : { status: 'published' }), ...(opts.storeOnly ? { listed: true } : {}) },
+		where: { ...(includeDrafts ? {} : { status: 'published' }), ...(opts.storeOnly ? { listed: true } : {}), ...(opts.setIds ? { id: { in: opts.setIds } } : {}) },
 		orderBy: [{ sortOrder: 'asc' }, { title: 'asc' }],
 		select: { id: true, title: true, description: true, status: true, listed: true, accessCode: true,
 			enrollments: { where: { userId }, select: { id: true } }, _count: { select: { enrollments: true } } },
