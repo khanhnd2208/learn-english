@@ -58,6 +58,8 @@ export interface EnglishSetDetail {
 	listed: boolean;
 	/** A locked set seen before unlocking shows only the first few words. */
 	previewOnly: boolean;
+	courseId: string | null;
+	courseTitle: string | null;
 }
 
 export async function listEnglishSets(userId: string, includeDrafts: boolean, opts: { storeOnly?: boolean } = {}): Promise<EnglishSetSummary[]> {
@@ -93,7 +95,7 @@ export async function listEnglishSets(userId: string, includeDrafts: boolean, op
 	});
 }
 
-function accessCodeMatches(expected: string, actual: string): boolean {
+export function accessCodeMatches(expected: string, actual: string): boolean {
 	const expectedHash = createHash('sha256').update(expected.trim().toLocaleLowerCase('vi')).digest();
 	const actualHash = createHash('sha256').update(actual.trim().toLocaleLowerCase('vi')).digest();
 	return timingSafeEqual(expectedHash, actualHash);
@@ -102,6 +104,7 @@ function accessCodeMatches(expected: string, actual: string): boolean {
 export async function enrollEnglishSet(userId: string, setId: string, accessCode?: string) {
 	const set = await prisma.enSet.findFirst({ where: { id: setId, status: 'published' } });
 	if (!set) throw new AppError('Bộ học chưa xuất bản', 404);
+	if (set.courseId) throw new AppError('Hãy đăng ký cả khóa học chứa bài này.', 400);
 	const existing = await prisma.enEnrollment.findUnique({ where: { userId_setId: { userId, setId } } });
 	if (!existing) {
 		if (!set.listed) throw new AppError('Bộ học không còn mở đăng ký', 404);
@@ -117,6 +120,8 @@ export async function enrollEnglishSet(userId: string, setId: string, accessCode
 }
 
 export async function unenrollEnglishSet(userId: string, setId: string) {
+	const set = await prisma.enSet.findUnique({ where: { id: setId }, select: { courseId: true } });
+	if (set?.courseId) throw new AppError('Bài này thuộc một khóa học. Hãy rời cả khóa học.', 400);
 	await prisma.enEnrollment.deleteMany({ where: { userId, setId } });
 }
 
@@ -124,15 +129,17 @@ export async function getEnglishSetDetail(userId: string, setId: string, include
 	const set = await prisma.enSet.findFirst({
 		where: { id: setId, ...(includeDrafts ? {} : { status: 'published' }) },
 		include: {
+			course: { select: { id: true, title: true, status: true, listed: true, accessCode: true } },
 			items: { orderBy: { position: 'asc' }, select: { senseId: true } },
 			enrollments: { where: { userId }, select: { id: true } },
 		},
 	});
 	if (!set) throw new AppError('Không tìm thấy bộ học', 404);
 	const enrolled = set.enrollments.length > 0;
+	if (!includeDrafts && !enrolled && !set.courseId) throw new AppError('Không tìm thấy bộ học', 404);
 	// Admins see everything. A hidden set stays open only to learners who already have it.
-	if (!includeDrafts && !enrolled && !set.listed) throw new AppError('Không tìm thấy bộ học', 404);
-	const previewOnly = !includeDrafts && !enrolled && set.accessCode != null;
+	if (!includeDrafts && !enrolled && (set.course ? set.course.status !== 'published' || !set.course.listed : !set.listed)) throw new AppError('Không tìm thấy bộ học', 404);
+	const previewOnly = !includeDrafts && !enrolled && (set.course ? set.course.accessCode != null : set.accessCode != null);
 	const allSenseIds = set.items.flatMap((item) => (item.senseId ? [item.senseId] : []));
 	const bundles = await getSenseBundles(allSenseIds, !includeDrafts);
 	const visibleIds = new Set(bundles.map((bundle) => bundle.sense.id));
@@ -158,9 +165,11 @@ export async function getEnglishSetDetail(userId: string, setId: string, include
 		description: set.description,
 		status: set.status,
 		enrolled,
-		locked: set.accessCode != null,
+		locked: set.course ? set.course.accessCode != null : set.accessCode != null,
 		listed: set.listed,
 		previewOnly,
+		courseId: set.courseId,
+		courseTitle: set.course?.title ?? null,
 		wordCount,
 		words: ordered.map((bundle) => ({
 			bundle,

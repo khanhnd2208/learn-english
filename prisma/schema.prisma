@@ -103,12 +103,42 @@ model EnSet {
   listed      Boolean         @default(true)
   accessCode  String?
   sortOrder   Int             @default(0)
+  courseId    String?
   createdAt   DateTime        @default(now())
   updatedAt   DateTime        @updatedAt
   items       EnSetItem[]
   enrollments EnEnrollment[]
+  course      EnCourse?       @relation(fields: [courseId], references: [id], onDelete: SetNull)
 
   @@index([status, sortOrder])
+  @@index([courseId, sortOrder])
+}
+
+model EnCourse {
+  id          String               @id @default(cuid())
+  title       String
+  description String               @default("")
+  status      EnContentStatus      @default(draft)
+  listed      Boolean              @default(true)
+  accessCode  String?
+  sortOrder   Int                  @default(0)
+  createdAt   DateTime             @default(now())
+  updatedAt   DateTime             @updatedAt
+  sets        EnSet[]
+  enrollments EnCourseEnrollment[]
+
+  @@index([status, sortOrder])
+}
+
+model EnCourseEnrollment {
+  id        String   @id @default(cuid())
+  userId    String
+  courseId  String
+  createdAt DateTime @default(now())
+  course    EnCourse @relation(fields: [courseId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, courseId])
+  @@index([userId])
 }
 
 model EnSetItem {

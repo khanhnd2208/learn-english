@@ -87,12 +87,12 @@ export default function ReviewOverview({ guided: initial }: { guided: GuidedRevi
 		{noSets ? <section className="mode-card text-center">
 			<h2 className="text-2xl">Chưa có bộ từ</h2>
 			<p className="mt-1 text-sm text-muted">Tải một bộ để có từ học thêm.</p>
-			<Link href="/store" className="mt-4 inline-flex min-h-12 items-center rounded-control bg-accent px-5 font-bold text-accent-foreground">Chọn bộ từ →</Link>
+			<Link href="/store" className="mt-4 inline-flex min-h-12 items-center rounded-control bg-accent px-5 font-bold text-accent-foreground">Chọn khóa học →</Link>
 		</section> : <section aria-label="Ôn theo bộ" className="mode-card space-y-4 p-4 sm:p-6">
 			<div>
 				<div className="mb-2 flex items-center justify-between gap-2">
 					<p className="flex items-center gap-1.5 text-sm font-bold">Bộ đang học <InfoHint title={HINTS.guided.title}>{HINTS.guided.body}</InfoHint></p>
-					<Link href="/store" className="text-sm font-bold text-accent">+ Thêm bộ</Link>
+					<Link href="/store" className="text-sm font-bold text-accent">+ Thêm khóa học</Link>
 				</div>
 				{guided.sets.length > 8 && <input value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Tìm bộ từ…" aria-label="Tìm bộ từ" className="mb-2 min-h-11 w-full rounded-control border border-border bg-background px-3 text-sm" />}
 				<div className="max-h-60 overflow-y-auto divide-y divide-border" aria-label="Chọn bộ từ để học">
