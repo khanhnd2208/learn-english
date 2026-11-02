@@ -26,7 +26,7 @@ export default function TodayHero({ overview, xp, goal }: { overview: TodayOverv
 				<p className="label-caps text-accent">Bắt đầu</p>
 				<h2 className="mt-1 text-2xl sm:text-3xl">Chọn bộ từ đầu tiên</h2>
 				<p className="mt-1 text-sm text-foreground-secondary">Tải một bộ, app sẽ lên lịch ôn cho từng từ.</p>
-				<Link href="/store" className={`${primary} mt-3.5 sm:w-auto sm:self-start`}>Chọn bộ từ <span aria-hidden="true">→</span></Link>
+				<Link href="/store" className={`${primary} mt-3.5 sm:w-auto sm:self-start`}>Chọn khóa học <span aria-hidden="true">→</span></Link>
 			</div> : <>
 				{state === 'goal' && <p className="mb-2 text-sm font-bold text-success">✓ Đạt mục tiêu hôm nay</p>}
 				<div className={card}>

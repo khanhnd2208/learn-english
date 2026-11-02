@@ -88,7 +88,7 @@ describe('English store access', () => {
 
 	describe('set detail', () => {
 		const ids = Array.from({ length: 8 }, (_, index) => `sense-${index}`);
-		const setRow = (overrides: Record<string, unknown>) => ({ id: 'set-1', title: 'Set', description: '', status: 'published', listed: true, accessCode: null, items: ids.map((senseId) => ({ senseId })), enrollments: [], ...overrides });
+		const setRow = (overrides: Record<string, unknown>) => ({ id: 'set-1', title: 'Set', description: '', status: 'published', listed: true, accessCode: null, courseId: 'course-1', course: { id: 'course-1', title: 'Course', status: 'published', listed: true, accessCode: null }, items: ids.map((senseId) => ({ senseId })), enrollments: [], ...overrides });
 
 		beforeEach(() => {
 			mocks.wordStateFindMany.mockResolvedValue([]);
@@ -96,7 +96,7 @@ describe('English store access', () => {
 		});
 
 		it('shows only sample words of a locked set before unlocking', async () => {
-			mocks.setFindFirst.mockResolvedValue(setRow({ accessCode: 'code' }));
+			mocks.setFindFirst.mockResolvedValue(setRow({ course: { id: 'course-1', title: 'Course', status: 'published', listed: true, accessCode: 'code' } }));
 			const detail = await getEnglishSetDetail('user-1', 'set-1', false);
 			expect(detail).toMatchObject({ previewOnly: true, wordCount: 8 });
 			expect(detail.words).toHaveLength(5);
@@ -111,8 +111,8 @@ describe('English store access', () => {
 			expect(admin.words).toHaveLength(8);
 		});
 
-		it('hides an unlisted set from learners who do not have it', async () => {
-			mocks.setFindFirst.mockResolvedValue(setRow({ listed: false }));
+		it('hides a set in an unlisted course from learners who do not have it', async () => {
+			mocks.setFindFirst.mockResolvedValue(setRow({ course: { id: 'course-1', title: 'Course', status: 'published', listed: false, accessCode: null } }));
 			await expect(getEnglishSetDetail('user-1', 'set-1', false)).rejects.toMatchObject({ status: 404 });
 			mocks.setFindFirst.mockResolvedValue(setRow({ listed: false, enrollments: [{ id: 'enrollment-1' }] }));
 			expect((await getEnglishSetDetail('user-1', 'set-1', false)).words).toHaveLength(8);
