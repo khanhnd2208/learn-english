@@ -1,7 +1,7 @@
 'use client';
 import { useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { DndContext, KeyboardSensor, PointerSensor, closestCorners, useDroppable, useSensor, useSensors, type DragEndEvent, type DragOverEvent, type DragStartEvent } from '@dnd-kit/core';
+import { DndContext, KeyboardSensor, PointerSensor, closestCorners, useDroppable, useSensor, useSensors, type DragEndEvent, type DragOverEvent } from '@dnd-kit/core';
 import { SortableContext, arrayMove, sortableKeyboardCoordinates, useSortable, verticalListSortingStrategy } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import { Card, CardContent } from '@/components/ui/Card';
@@ -70,7 +70,7 @@ function Board({ subjects }: { subjects: AdminTestSubject[] }) {
     finally { setBusy(false); }
   }
 
-  function onDragStart(_event: DragStartEvent) { snapshot.current = latest.current; }
+  function onDragStart() { snapshot.current = latest.current; }
   function onDragOver({ active, over }: DragOverEvent) {
     if (!over) return;
     const current = latest.current;
