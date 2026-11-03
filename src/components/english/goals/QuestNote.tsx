@@ -43,7 +43,7 @@ export default function QuestNote({ board, resetsIn, hasSets }: { board: GoalBoa
 				<Link href="/progress" className="mt-2 inline-flex min-h-10 items-center text-sm font-bold text-accent">Nhiệm vụ tuần và rương →</Link>
 			)
 		) : (
-			<Link href="/store" className="mt-3 inline-flex min-h-11 w-full items-center justify-center rounded-control bg-accent px-4 font-bold text-accent-foreground">Chọn khóa học để mở nhiệm vụ →</Link>
+			<Link href="/store" className="mt-3 inline-flex min-h-11 w-full items-center justify-center rounded-control bg-accent px-4 font-bold text-accent-foreground">Chọn môn học để mở nhiệm vụ →</Link>
 		)}
 	</section>;
 }

@@ -103,18 +103,23 @@ model EnSet {
   listed      Boolean         @default(true)
   accessCode  String?
   sortOrder   Int             @default(0)
+  /// Unused since docs/plans/en-vocab-test-split.md. Dropped only in the owner-approved step C.
   courseId    String?
+  subjectId   String?
   createdAt   DateTime        @default(now())
   updatedAt   DateTime        @updatedAt
   items       EnSetItem[]
   enrollments EnEnrollment[]
   course      EnCourse?       @relation(fields: [courseId], references: [id], onDelete: SetNull)
+  subject     EnVocabSubject? @relation(fields: [subjectId], references: [id], onDelete: SetNull)
   exams       EnExam[]
 
   @@index([status, sortOrder])
   @@index([courseId, sortOrder])
+  @@index([subjectId, sortOrder])
 }
 
+/// Unused since docs/plans/en-vocab-test-split.md. Dropped only in the owner-approved step C.
 model EnCourse {
   id          String               @id @default(cuid())
   title       String
@@ -132,6 +137,7 @@ model EnCourse {
   @@index([status, sortOrder])
 }
 
+/// Unused since docs/plans/en-vocab-test-split.md. Dropped only in the owner-approved step C.
 model EnCourseEnrollment {
   id        String   @id @default(cuid())
   userId    String
@@ -143,6 +149,7 @@ model EnCourseEnrollment {
   @@index([userId])
 }
 
+/// Unused since docs/plans/en-vocab-test-split.md. Dropped only in the owner-approved step C.
 model EnExam {
   id          String           @id @default(cuid())
   courseId    String
@@ -161,6 +168,7 @@ model EnExam {
   @@index([courseId, status, sortOrder])
 }
 
+/// Unused since docs/plans/en-vocab-test-split.md. Dropped only in the owner-approved step C.
 model EnExamQuestion {
   id            String   @id @default(cuid())
   examId        String
@@ -177,6 +185,7 @@ model EnExamQuestion {
   @@unique([examId, position])
 }
 
+/// Unused since docs/plans/en-vocab-test-split.md. Dropped only in the owner-approved step C.
 model EnExamAttempt {
   id         String              @id @default(cuid())
   userId     String
@@ -196,6 +205,7 @@ model EnExamAttempt {
 }
 
 /// Snapshot of a question when the attempt started, so editing the exam never changes history.
+/// Unused since docs/plans/en-vocab-test-split.md. Dropped only in the owner-approved step C.
 model EnExamAttemptItem {
   id            String        @id @default(cuid())
   attemptId     String
@@ -212,6 +222,33 @@ model EnExamAttemptItem {
   attempt       EnExamAttempt @relation(fields: [attemptId], references: [id], onDelete: Cascade)
 
   @@unique([attemptId, position])
+}
+
+model EnVocabSubject {
+  id          String                     @id @default(cuid())
+  title       String
+  description String                     @default("")
+  status      EnContentStatus            @default(draft)
+  listed      Boolean                    @default(true)
+  accessCode  String?
+  sortOrder   Int                        @default(0)
+  createdAt   DateTime                   @default(now())
+  updatedAt   DateTime                   @updatedAt
+  sets        EnSet[]
+  enrollments EnVocabSubjectEnrollment[]
+
+  @@index([status, sortOrder])
+}
+
+model EnVocabSubjectEnrollment {
+  id        String         @id @default(cuid())
+  userId    String
+  subjectId String
+  createdAt DateTime       @default(now())
+  subject   EnVocabSubject @relation(fields: [subjectId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, subjectId])
+  @@index([userId])
 }
 
 model EnSetItem {
@@ -467,7 +504,7 @@ model EnTestItem {
 model EnStudyDay {
   userId String
   /// YYYY-MM-DD in Asia/Ho_Chi_Minh.
-  day String
+  day    String
 
   @@id([userId, day])
 }

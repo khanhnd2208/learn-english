@@ -2,8 +2,6 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 const mocks = vi.hoisted(() => ({
 	setFindFirst: vi.fn(),
-	enrollmentFindUnique: vi.fn(),
-	enrollmentUpsert: vi.fn(),
 	transaction: vi.fn(),
 	setFindUnique: vi.fn(),
 	setDelete: vi.fn(),
@@ -17,7 +15,6 @@ const mocks = vi.hoisted(() => ({
 
 vi.mock('@/lib/prisma', () => ({ prisma: {
 	enSet: { findFirst: mocks.setFindFirst, findUnique: mocks.setFindUnique, delete: mocks.setDelete },
-	enEnrollment: { findUnique: mocks.enrollmentFindUnique, upsert: mocks.enrollmentUpsert },
 	enWordState: { findMany: mocks.wordStateFindMany },
 	$transaction: mocks.transaction,
 } }));
@@ -26,44 +23,12 @@ vi.mock('@/services/english/enContentService', async (importOriginal) => ({
 	getSenseBundles: mocks.getSenseBundles,
 }));
 
-import { enrollEnglishSet, getEnglishSetDetail } from '@/services/english/enCatalogService';
+import { getEnglishSetDetail } from '@/services/english/enCatalogService';
 import { deleteEnglishSet as deleteStoreSet } from '@/services/english/enContentService';
 
 describe('English store access', () => {
 	beforeEach(() => {
 		vi.clearAllMocks();
-		mocks.enrollmentFindUnique.mockResolvedValue(null);
-		mocks.enrollmentUpsert.mockResolvedValue({});
-		mocks.setFindFirst.mockResolvedValue({ id: 'set-1', status: 'published', listed: true, accessCode: null });
-	});
-
-	it('enrolls an unlocked listed set', async () => {
-		await enrollEnglishSet('user-1', 'set-1');
-		expect(mocks.enrollmentUpsert).toHaveBeenCalledOnce();
-	});
-
-	it('accepts a locked code with different case and surrounding whitespace', async () => {
-		mocks.setFindFirst.mockResolvedValue({ id: 'set-1', status: 'published', listed: true, accessCode: 'Open-Sesame' });
-		await enrollEnglishSet('user-1', 'set-1', '  open-sesame ');
-		expect(mocks.enrollmentUpsert).toHaveBeenCalledOnce();
-	});
-
-	it('rejects a wrong locked code with ACCESS_CODE', async () => {
-		mocks.setFindFirst.mockResolvedValue({ id: 'set-1', status: 'published', listed: true, accessCode: 'Open-Sesame' });
-		await expect(enrollEnglishSet('user-1', 'set-1', 'wrong')).rejects.toMatchObject({ status: 403, code: 'ACCESS_CODE' });
-		expect(mocks.enrollmentUpsert).not.toHaveBeenCalled();
-	});
-
-	it('lets an existing learner continue without the code', async () => {
-		mocks.setFindFirst.mockResolvedValue({ id: 'set-1', status: 'published', listed: false, accessCode: 'Open-Sesame' });
-		mocks.enrollmentFindUnique.mockResolvedValue({ id: 'enrollment-1' });
-		await enrollEnglishSet('user-1', 'set-1');
-		expect(mocks.enrollmentUpsert).toHaveBeenCalledOnce();
-	});
-
-	it('rejects a new learner from an unlisted set', async () => {
-		mocks.setFindFirst.mockResolvedValue({ id: 'set-1', status: 'published', listed: false, accessCode: null });
-		await expect(enrollEnglishSet('user-1', 'set-1')).rejects.toMatchObject({ status: 404 });
 	});
 
 	it('removes a deleted set from review selections', async () => {
@@ -88,7 +53,7 @@ describe('English store access', () => {
 
 	describe('set detail', () => {
 		const ids = Array.from({ length: 8 }, (_, index) => `sense-${index}`);
-		const setRow = (overrides: Record<string, unknown>) => ({ id: 'set-1', title: 'Set', description: '', status: 'published', listed: true, accessCode: null, courseId: 'course-1', course: { id: 'course-1', title: 'Course', status: 'published', listed: true, accessCode: null }, items: ids.map((senseId) => ({ senseId })), enrollments: [], ...overrides });
+		const setRow = (overrides: Record<string, unknown>) => ({ id: 'set-1', title: 'Set', description: '', status: 'published', listed: true, accessCode: null, subjectId: 'subject-1', subject: { id: 'subject-1', title: 'Subject', status: 'published', listed: true, accessCode: null, enrollments: [] }, items: ids.map((senseId) => ({ senseId })), enrollments: [], ...overrides });
 
 		beforeEach(() => {
 			mocks.wordStateFindMany.mockResolvedValue([]);
@@ -96,7 +61,7 @@ describe('English store access', () => {
 		});
 
 		it('shows only sample words of a locked set before unlocking', async () => {
-			mocks.setFindFirst.mockResolvedValue(setRow({ course: { id: 'course-1', title: 'Course', status: 'published', listed: true, accessCode: 'code' } }));
+			mocks.setFindFirst.mockResolvedValue(setRow({ subject: { id: 'subject-1', title: 'Subject', status: 'published', listed: true, accessCode: 'code', enrollments: [] } }));
 			const detail = await getEnglishSetDetail('user-1', 'set-1', false);
 			expect(detail).toMatchObject({ previewOnly: true, wordCount: 8 });
 			expect(detail.words).toHaveLength(5);
@@ -111,11 +76,21 @@ describe('English store access', () => {
 			expect(admin.words).toHaveLength(8);
 		});
 
-		it('hides a set in an unlisted course from learners who do not have it', async () => {
-			mocks.setFindFirst.mockResolvedValue(setRow({ course: { id: 'course-1', title: 'Course', status: 'published', listed: false, accessCode: null } }));
+		it('hides a set in an unlisted subject from learners who do not have it', async () => {
+			mocks.setFindFirst.mockResolvedValue(setRow({ subject: { id: 'subject-1', title: 'Subject', status: 'published', listed: false, accessCode: null, enrollments: [] } }));
 			await expect(getEnglishSetDetail('user-1', 'set-1', false)).rejects.toMatchObject({ status: 404 });
 			mocks.setFindFirst.mockResolvedValue(setRow({ listed: false, enrollments: [{ id: 'enrollment-1' }] }));
 			expect((await getEnglishSetDetail('user-1', 'set-1', false)).words).toHaveLength(8);
+		});
+
+		it('hides a standalone set from learners who do not have it', async () => {
+			mocks.setFindFirst.mockResolvedValue(setRow({ subjectId: null, subject: null }));
+			await expect(getEnglishSetDetail('user-1', 'set-1', false)).rejects.toMatchObject({ status: 404 });
+		});
+
+		it('keeps a standalone set open to a learner who has it', async () => {
+			mocks.setFindFirst.mockResolvedValue(setRow({ subjectId: null, subject: null, enrollments: [{ id: 'enrollment-1' }] }));
+			expect(await getEnglishSetDetail('user-1', 'set-1', false)).toMatchObject({ listed: false, subjectEnrolled: false });
 		});
 	});
 });

@@ -44,20 +44,17 @@ const db = vi.hoisted(() => {
 });
 vi.mock('@/lib/prisma', () => ({ prisma: { ...db.prisma, $transaction: (fn: (tx: typeof db.prisma) => Promise<unknown>) => fn(db.prisma) } }));
 import { publishEnglishSet, saveEnglishPack } from '@/services/english/enContentService';
-import { enrollEnglishSet } from '@/services/english/enCatalogService';
 
 const noAudio = async () => false;
 beforeEach(() => db.reset());
 
 describe('AI pack → store → download', () => {
-	it('publishes a saved pack so learners can download it, even without mp3 files', async () => {
+	it('publishes a saved pack even without mp3 files', async () => {
 		const { setId } = await saveEnglishPack(sampleEnglishPack);
-		await expect(enrollEnglishSet('learner', setId)).rejects.toThrow('chưa xuất bản');
 		const result = await publishEnglishSet(setId, noAudio);
 		expect(result).toMatchObject({ publishedSenses: sampleEnglishPack.words.length, totalSenses: sampleEnglishPack.words.length, status: 'published' });
 		expect(db.tables.set![0]!.status).toBe('published');
 		expect(db.tables.sense!.every((sense) => sense.status === 'published')).toBe(true);
-		await expect(enrollEnglishSet('learner', setId)).resolves.toBeUndefined();
 	});
 
 	it('clears an mp3 name that was never uploaded so the server voice can read the word, and keeps a real one', async () => {

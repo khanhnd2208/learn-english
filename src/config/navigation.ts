@@ -10,7 +10,7 @@ export const MAIN_NAV: NavLink[] = [
  { href: '/', label: 'Hôm nay', icon: 'target', shortLabel: 'Hôm nay' },
  { href: '/review', label: 'Ôn theo bộ', icon: 'repeat', shortLabel: 'Ôn theo bộ' },
  { href: '/progress', label: 'Tiến bộ', icon: 'flag', shortLabel: 'Tiến bộ' },
- { href: '/store', label: 'Khóa học', icon: 'auto_stories', shortLabel: 'Khóa học' },
+ { href: '/store', label: 'Cửa hàng', icon: 'auto_stories', shortLabel: 'Cửa hàng' },
 ];
 
 export const BOTTOM_NAV = MAIN_NAV;
@@ -27,7 +27,7 @@ export function isNavActive(pathname: string, href: string): boolean {
 	if (href === '/') return pathname === '/';
 	if (href === '/progress') return pathname === '/progress' || pathname === '/quests' || pathname === '/mistakes';
 	if (href === '/review' && pathname.startsWith('/sets/')) return true;
-	if (href === '/store' && pathname.startsWith('/courses/')) return true;
+	if (href === '/store' && pathname.startsWith('/subjects/')) return true;
 	if (href === '/admin') return pathname === '/admin';
 	return pathname === href || pathname.startsWith(`${href}/`);
 }
