@@ -122,6 +122,22 @@ Each of these has shipped as a bug at least once, or comes close to an invariant
 - Ask first only when it is truly needed: destructive data changes on a database with real learner data (DROP, deleting progress), new secrets, domains or DNS, or a failure you cannot fix safely.
 - Back up a database with `pg_dump` before running a destructive migration on it.
 
+### Deploy to the VPS
+
+SSH host alias `webofficial-vps`. App config lives in `/opt/vps/apps/learn-english/` (`app.conf`: port 3003, health `/api/health`; `build.sh`: `prisma generate`, `prisma migrate deploy`, `npm run build`). `app-deploy` backs up Postgres (`DB_BACKUP=pg`), builds the new release beside the running one, health-checks it, and rolls back by itself if the check fails.
+
+1. Merge the PR into `main`, then run `git fetch origin`. Deploy `origin/main`, never the working tree.
+2. Ship it, labelling the release with the 12-character commit:
+
+```bash
+SHA=$(git rev-parse --short=12 origin/main) && git archive --format=tar.gz origin/main | ssh webofficial-vps "sudo -u deploy /opt/vps/bin/app-deploy learn-english - $SHA"
+```
+
+3. Success ends with `health /api/health → 200` and `✓ learn-english đang chạy releases/<timestamp>-<sha>`. Check that sha is the one you shipped.
+4. Roll back with `ssh webofficial-vps "sudo -u deploy /opt/vps/bin/app-deploy learn-english --rollback"`. List releases with `--list`.
+
+Do not run `app-deploy` without arguments to "see what it does", and do not touch the other apps on the VPS (`chijuly`, `fun`, `learn-chinese`, `nextjs-app`). Migrations run during the build, so they must be additive (see *Prisma and migrations*).
+
 <!-- BEGIN:nextjs-agent-rules -->
 
 ## This is NOT the Next.js you know
