@@ -289,11 +289,13 @@ model EnTestPaper {
   updatedAt   DateTime              @updatedAt
   subject     EnTestSubject         @relation(fields: [subjectId], references: [id], onDelete: Cascade)
   questions   EnTestPaperQuestion[]
+  entries     EnTestPaperEntry[]
   attempts    EnTestPaperAttempt[]
 
   @@index([subjectId, status, sortOrder])
 }
 
+/// Unused since docs/plans/en-test-bank-v2.md. Dropped only in an owner-approved step.
 model EnTestPaperQuestion {
   id            String      @id @default(cuid())
   paperId       String
@@ -308,6 +310,37 @@ model EnTestPaperQuestion {
   paper         EnTestPaper @relation(fields: [paperId], references: [id], onDelete: Cascade)
 
   @@unique([paperId, position])
+}
+
+/// Shared question bank. A paper only points at these, in order.
+model EnTestQuestion {
+  id            String   @id @default(cuid())
+  /// mcq | fill
+  type          String
+  prompt        String
+  options       String[] @default([])
+  correctIndex  Int?
+  answers       String[] @default([])
+  /// fill only. Keep the default equal to EN_TEST_MATCH_RULES.
+  matchRules    String[] @default(["ignore_case", "collapse_spaces", "ignore_hyphen", "ignore_punctuation"])
+  explanationVi String   @default("")
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  entries       EnTestPaperEntry[]
+  attemptItems  EnTestPaperAttemptItem[]
+}
+
+model EnTestPaperEntry {
+  id         String         @id @default(cuid())
+  paperId    String
+  questionId String
+  position   Int
+  paper      EnTestPaper    @relation(fields: [paperId], references: [id], onDelete: Cascade)
+  question   EnTestQuestion @relation(fields: [questionId], references: [id], onDelete: Restrict)
+
+  @@unique([paperId, position])
+  @@unique([paperId, questionId])
+  @@index([questionId])
 }
 
 model EnTestPaperAttempt {
@@ -343,9 +376,13 @@ model EnTestPaperAttemptItem {
   answer        String?
   correct       Boolean?
   answeredAt    DateTime?
+  questionId    String?
+  matchRules    String[]           @default(["ignore_case", "collapse_spaces", "ignore_hyphen", "ignore_punctuation"])
   attempt       EnTestPaperAttempt @relation(fields: [attemptId], references: [id], onDelete: Cascade)
+  question      EnTestQuestion?    @relation(fields: [questionId], references: [id], onDelete: SetNull)
 
   @@unique([attemptId, position])
+  @@index([questionId])
 }
 
 model EnSetItem {

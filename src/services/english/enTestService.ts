@@ -2,7 +2,8 @@ import { Prisma, type EnTestPaperAttempt, type EnTestPaperAttemptItem } from '@p
 import { prisma } from '@/lib/prisma';
 import { AppError } from '@/lib/appError';
 import { vnDayKey } from '@/lib/english/gapRule';
-import { formatVnDay, gradeTestAnswer, isTestPassed, pickBestAttempt, testPercent, type TestQuestionInput } from '@/lib/english/testPaper';
+import { EN_TEST_HISTORY_LIMIT } from '@/lib/english/constants';
+import { formatVnDateTime, formatVnDay, gradeTestAnswer, isTestPassed, pickBestAttempt, testPercent, type TestQuestionInput } from '@/lib/english/testPaper';
 import { parseTestRows } from '@/lib/english/testImport';
 import { buildTestWorkbook, readTestWorkbook } from '@/services/english/enTestWorkbookService';
 
@@ -12,7 +13,7 @@ export interface PublicTestAttempt {
 }
 export interface TestResult {
   attemptId: string; paperId: string; subjectId: string; score: number; total: number; percent: number; passed: boolean;
-  items: Array<{ position: number; type: string; prompt: string; options: string[]; answer: string | null; correct: boolean; correctText: string; explanationVi: string }>;
+  items: Array<{ position: number; type: string; prompt: string; options: string[]; answer: string | null; correct: boolean; correctText: string; answers: string[]; explanationVi: string }>;
 }
 type AttemptWithItems = EnTestPaperAttempt & { items: EnTestPaperAttemptItem[] };
 type AttemptWithPaper = AttemptWithItems & { paper: { subjectId: string } };
@@ -40,24 +41,26 @@ export async function saveTestPaper(input: { subjectId: string; title: string; d
       const existing = await tx.enTestPaper.findFirst({ where: { id: input.paperId, subjectId: input.subjectId }, select: { id: true } });
       if (!existing) throw new AppError('Không tìm thấy bài kiểm tra', 404);
       paper = await tx.enTestPaper.update({ where: { id: input.paperId }, data: { title: input.title, description: input.description, ...(input.publish ? { status: 'published' } : {}) } });
-      await tx.enTestPaperQuestion.deleteMany({ where: { paperId: paper.id } });
+      await tx.enTestPaperEntry.deleteMany({ where: { paperId: paper.id } });
     } else {
       const last = await tx.enTestPaper.findFirst({ where: { subjectId: input.subjectId }, orderBy: { sortOrder: 'desc' }, select: { sortOrder: true } });
       paper = await tx.enTestPaper.create({ data: { subjectId: input.subjectId, title: input.title, description: input.description, status: input.publish ? 'published' : 'draft', sortOrder: (last?.sortOrder ?? -1) + 1 } });
     }
-    await tx.enTestPaperQuestion.createMany({ data: parsed.questions.map((question, position) => ({ paperId: paper.id, position, type: question.type, prompt: question.prompt, options: question.type === 'mcq' ? question.options : [], correctIndex: question.type === 'mcq' ? question.correctIndex : null, answers: question.type === 'fill' ? question.answers : [], explanationVi: question.explanationVi })) });
+    for (const [position, question] of parsed.questions.entries()) {
+      await tx.enTestPaperEntry.create({ data: { paper: { connect: { id: paper.id } }, position, question: { create: { type: question.type, prompt: question.prompt, options: question.type === 'mcq' ? question.options : [], correctIndex: question.type === 'mcq' ? question.correctIndex : null, answers: question.type === 'fill' ? question.answers : [], explanationVi: question.explanationVi } } } });
+    }
     return paper;
   });
 }
 export async function setTestPaperStatus(paperId: string, status: 'draft' | 'published') {
-  if (status === 'published' && !(await prisma.enTestPaperQuestion.count({ where: { paperId } }))) throw new AppError('Bài kiểm tra chưa có câu hỏi.', 400);
+  if (status === 'published' && !(await prisma.enTestPaperEntry.count({ where: { paperId } }))) throw new AppError('Bài kiểm tra chưa có câu hỏi.', 400);
   return prisma.enTestPaper.update({ where: { id: paperId }, data: { status } });
 }
 export async function deleteTestPaper(paperId: string) { await prisma.enTestPaper.delete({ where: { id: paperId } }); return { deleted: true }; }
 export async function exportTestPaper(paperId: string): Promise<{ fileName: string; data: Buffer }> {
-  const paper = await prisma.enTestPaper.findUnique({ where: { id: paperId }, include: { questions: { orderBy: { position: 'asc' } } } });
+  const paper = await prisma.enTestPaper.findUnique({ where: { id: paperId }, include: { entries: { orderBy: { position: 'asc' }, include: { question: true } } } });
   if (!paper) throw new AppError('Không tìm thấy bài kiểm tra', 404);
-  const questions = paper.questions.map((question): TestQuestionInput => question.type === 'mcq'
+  const questions = paper.entries.map((entry) => entry.question).map((question): TestQuestionInput => question.type === 'mcq'
     ? { type: 'mcq', prompt: question.prompt, options: question.options, correctIndex: question.correctIndex ?? 0, explanationVi: question.explanationVi }
     : { type: 'fill', prompt: question.prompt, answers: question.answers, explanationVi: question.explanationVi });
   return { fileName: 'bai-kiem-tra.xlsx', data: await buildTestWorkbook(questions) };
@@ -68,9 +71,9 @@ export async function listMyTestPapers(userId: string): Promise<MyTestPaper[]> {
   const subjects = await prisma.enTestSubject.findMany({
     where: { status: 'published', enrollments: { some: { userId } } },
     orderBy: [{ sortOrder: 'asc' }, { title: 'asc' }],
-    include: { papers: { where: { status: 'published', questions: { some: {} } }, orderBy: [{ sortOrder: 'asc' }, { title: 'asc' }], include: { _count: { select: { questions: true } }, attempts: { where: { userId, status: 'finished' }, select: { score: true, total: true, finishedAt: true } } } } },
+    include: { papers: { where: { status: 'published', entries: { some: {} } }, orderBy: [{ sortOrder: 'asc' }, { title: 'asc' }], include: { _count: { select: { entries: true } }, attempts: { where: { userId, status: 'finished' }, select: { score: true, total: true, finishedAt: true } } } } },
   });
-  return subjects.flatMap((subject) => subject.papers.map((paper) => ({ id: paper.id, title: paper.title, subjectId: subject.id, subjectTitle: subject.title, questionCount: paper._count.questions, best: bestSummary(paper.attempts) })));
+  return subjects.flatMap((subject) => subject.papers.map((paper) => ({ id: paper.id, title: paper.title, subjectId: subject.id, subjectTitle: subject.title, questionCount: paper._count.entries, best: bestSummary(paper.attempts) })));
 }
 /** Sets each paper's course and position from the given columns, atomically. Papers not listed stay as they are. */
 export async function reorderTestPapers(columns: Array<{ subjectId: string; paperIds: string[] }>) {
@@ -92,37 +95,42 @@ export async function paperSubjectId(paperId: string): Promise<string | null> {
 }
 
 async function accessiblePaper(userId: string, paperId: string, isAdmin: boolean) {
-  const paper = await prisma.enTestPaper.findUnique({ where: { id: paperId }, include: { subject: { include: { enrollments: { where: { userId }, select: { id: true } } } }, _count: { select: { questions: true } } } });
-  if (!paper || (!isAdmin && (paper.status !== 'published' || !paper._count.questions || paper.subject.status !== 'published'))) throw new AppError('Không tìm thấy bài kiểm tra', 404);
+  const paper = await prisma.enTestPaper.findUnique({ where: { id: paperId }, include: { subject: { include: { enrollments: { where: { userId }, select: { id: true } } } }, _count: { select: { entries: true } } } });
+  if (!paper || (!isAdmin && (paper.status !== 'published' || !paper._count.entries || paper.subject.status !== 'published'))) throw new AppError('Không tìm thấy bài kiểm tra', 404);
   if (!isAdmin && !paper.subject.enrollments.length) throw new AppError('Hãy đăng ký khóa học để làm bài kiểm tra.', 403);
   return paper;
 }
 export async function getTestPaperForLearner(userId: string, paperId: string, isAdmin: boolean) {
   const paper = await accessiblePaper(userId, paperId, isAdmin);
-  const attempts = await prisma.enTestPaperAttempt.findMany({ where: { userId, paperId }, include: { items: { orderBy: { position: 'asc' } } }, orderBy: { startedAt: 'desc' } });
-  const active = attempts.find((attempt) => attempt.status === 'in_progress');
-  const finished = attempts.filter((attempt) => attempt.status === 'finished' && attempt.score !== null && attempt.finishedAt !== null);
-  const last = finished.sort((a, b) => b.finishedAt!.getTime() - a.finishedAt!.getTime())[0];
+  const [active, finished] = await Promise.all([
+    prisma.enTestPaperAttempt.findUnique({ where: { activeKey: `${userId}:${paperId}` }, include: { items: { orderBy: { position: 'asc' } } } }),
+    prisma.enTestPaperAttempt.findMany({ where: { userId, paperId, status: 'finished', score: { not: null } }, select: { id: true, score: true, total: true, finishedAt: true }, orderBy: { finishedAt: 'desc' } }),
+  ]);
+  const done = finished.filter((attempt): attempt is typeof attempt & { finishedAt: Date } => attempt.finishedAt !== null);
+  const last = done[0];
+  const history = done.slice(0, EN_TEST_HISTORY_LIMIT).map((attempt, index) => ({ attemptId: attempt.id, number: done.length - index, score: attempt.score!, total: attempt.total, percent: testPercent(attempt.score!, attempt.total), passed: isTestPassed(attempt.score!, attempt.total), finishedAt: formatVnDateTime(attempt.finishedAt) }));
   return {
-    paper: { id: paper.id, title: paper.title, description: paper.description, subjectId: paper.subjectId, subjectTitle: paper.subject.title, questionCount: paper._count.questions },
+    paper: { id: paper.id, title: paper.title, description: paper.description, subjectId: paper.subjectId, subjectTitle: paper.subject.title, questionCount: paper._count.entries },
     attempt: active ? publicAttempt(active) : null,
     best: bestSummary(finished),
+    history,
+    attemptCount: done.length,
     lastFinished: last ? { attemptId: last.id, score: last.score!, total: last.total, passed: isTestPassed(last.score!, last.total), day: formatVnDay(vnDayKey(last.finishedAt!)) } : null,
   };
 }
 
 export async function startTestPaper(userId: string, paperId: string, isAdmin: boolean): Promise<PublicTestAttempt> {
   const paper = await accessiblePaper(userId, paperId, isAdmin);
-  if (!paper._count.questions) throw new AppError('Bài kiểm tra chưa có câu hỏi.', 400);
+  if (!paper._count.entries) throw new AppError('Bài kiểm tra chưa có câu hỏi.', 400);
   const activeKey = `${userId}:${paperId}`;
   try {
     return await prisma.$transaction(async (tx) => {
       const existing = await tx.enTestPaperAttempt.findUnique({ where: { activeKey }, include: { items: { orderBy: { position: 'asc' } } } });
       if (existing) return publicAttempt(existing);
-      const questions = await tx.enTestPaperQuestion.findMany({ where: { paperId }, orderBy: { position: 'asc' } });
-      if (!questions.length) throw new AppError('Bài kiểm tra chưa có câu hỏi.', 400);
-      const attempt = await tx.enTestPaperAttempt.create({ data: { userId, paperId, activeKey, total: questions.length } });
-      await tx.enTestPaperAttemptItem.createMany({ data: questions.map((question) => ({ attemptId: attempt.id, position: question.position, type: question.type, prompt: question.prompt, options: question.options, correctIndex: question.correctIndex, answers: question.answers, explanationVi: question.explanationVi })) });
+      const entries = await tx.enTestPaperEntry.findMany({ where: { paperId }, orderBy: { position: 'asc' }, include: { question: true } });
+      if (!entries.length) throw new AppError('Bài kiểm tra chưa có câu hỏi.', 400);
+      const attempt = await tx.enTestPaperAttempt.create({ data: { userId, paperId, activeKey, total: entries.length } });
+      await tx.enTestPaperAttemptItem.createMany({ data: entries.map(({ position, question }) => ({ attemptId: attempt.id, position, questionId: question.id, matchRules: question.matchRules, type: question.type, prompt: question.prompt, options: question.options, correctIndex: question.correctIndex, answers: question.answers, explanationVi: question.explanationVi })) });
       const items = await tx.enTestPaperAttemptItem.findMany({ where: { attemptId: attempt.id }, orderBy: { position: 'asc' } });
       return publicAttempt({ ...attempt, items });
     });
@@ -142,14 +150,14 @@ export async function answerTestPaper(userId: string, attemptId: string, positio
     if (!item) throw new AppError('Câu trả lời không hợp lệ', 400);
     const value = answer.trim();
     if (value && item.type === 'mcq' && (!/^[0-5]$/.test(value) || Number(value) >= item.options.length)) throw new AppError('Câu trả lời không hợp lệ', 400);
-    await tx.enTestPaperAttemptItem.update({ where: { id: item.id }, data: { answer: value || null, correct: value ? gradeTestAnswer(item, value) : null, answeredAt: value ? new Date() : null } });
+    await tx.enTestPaperAttemptItem.update({ where: { id: item.id }, data: { answer: value || null, correct: value ? gradeTestAnswer(item, value) : null, answeredAt: !value ? null : value === item.answer ? item.answeredAt : new Date() } });
     await tx.enTestPaperAttempt.update({ where: { id: attempt.id }, data: { position } });
     return { saved: true };
   });
 }
 function resultOf(attempt: AttemptWithPaper): TestResult {
   const score = attempt.score ?? attempt.items.filter((item) => item.correct).length;
-  return { attemptId: attempt.id, paperId: attempt.paperId, subjectId: attempt.paper.subjectId, score, total: attempt.total, percent: testPercent(score, attempt.total), passed: isTestPassed(score, attempt.total), items: [...attempt.items].sort((a, b) => a.position - b.position).map((item) => ({ position: item.position, type: item.type, prompt: item.prompt, options: item.options, answer: item.answer, correct: item.correct ?? false, correctText: item.type === 'mcq' ? item.options[item.correctIndex ?? -1] ?? '' : item.answers.join(' / '), explanationVi: item.explanationVi })) };
+  return { attemptId: attempt.id, paperId: attempt.paperId, subjectId: attempt.paper.subjectId, score, total: attempt.total, percent: testPercent(score, attempt.total), passed: isTestPassed(score, attempt.total), items: [...attempt.items].sort((a, b) => a.position - b.position).map((item) => ({ position: item.position, type: item.type, prompt: item.prompt, options: item.options, answer: item.answer, correct: item.correct ?? false, correctText: item.type === 'mcq' ? item.options[item.correctIndex ?? -1] ?? '' : item.answers.join(' / '), answers: item.answers, explanationVi: item.explanationVi })) };
 }
 export async function finishTestPaper(userId: string, attemptId: string): Promise<TestResult> {
   return prisma.$transaction(async (tx) => {

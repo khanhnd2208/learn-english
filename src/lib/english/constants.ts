@@ -30,3 +30,7 @@ export const EN_TEST_MAX_QUESTIONS = 100;
 export const EN_TEST_MAX_OPTIONS = 6;
 export const EN_TEST_MAX_FILL_ANSWERS = 10;
 export const EN_TEST_MAX_FILE_BYTES = 1_000_000;
+
+/** Keep equal to the @default of matchRules in schema.prisma. */
+export const EN_TEST_MATCH_RULES = ['ignore_case', 'collapse_spaces', 'ignore_hyphen', 'ignore_punctuation'] as const;
+export const EN_TEST_HISTORY_LIMIT = 20;

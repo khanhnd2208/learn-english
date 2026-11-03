@@ -1,8 +1,9 @@
 import { expect, test } from 'vitest';
-import { formatVnDay, gradeTestAnswer, isTestPassed, pickBestAttempt, testPercent } from '@/lib/english/testPaper';
+import { EN_TEST_MATCH_RULES as all } from '@/lib/english/constants';
+import { formatVnDateTime, formatVnDay, gradeTestAnswer, isTestPassed, matchFillAnswer, pickBestAttempt, testPercent, testReviewCounts } from '@/lib/english/testPaper';
 
-const mcq = { type: 'mcq', correctIndex: 1, answers: [] };
-const fill = { type: 'fill', correctIndex: null, answers: ['since', 'from'] };
+const mcq = { type: 'mcq', correctIndex: 1, answers: [], matchRules: [] as string[] };
+const fill = { type: 'fill', correctIndex: null, answers: ['since', 'from'], matchRules: [...all] };
 
 test('grades multiple choice by option index', () => {
   expect(gradeTestAnswer(mcq, '1')).toBe(true);
@@ -30,4 +31,27 @@ test('prefers the newer attempt on an equal ratio', () => {
 });
 test('formats a Vietnam day key', () => {
   expect(formatVnDay('2026-11-03')).toBe('03/11/2026');
+});
+test('matches fill answers under the default rules', () => {
+  expect(matchFillAnswer('  SINCE. ', 'since', all)).toBe(true);
+  expect(matchFillAnswer('sinse', 'since', all)).toBe(false);
+  expect(matchFillAnswer('must   not', 'must not', all)).toBe(true);
+  expect(matchFillAnswer('alot', 'a lot', all)).toBe(false);
+});
+test('apostrophes depend on ignore_punctuation', () => {
+  expect(matchFillAnswer('mustnt', "mustn't", all)).toBe(true);
+  expect(matchFillAnswer('mustnt', "mustn't", all.filter((rule) => rule !== 'ignore_punctuation'))).toBe(false);
+});
+test('hyphens depend on ignore_hyphen', () => {
+  for (const typed of ['well known', 'wellknown', 'well—known']) expect(matchFillAnswer(typed, 'well-known', all)).toBe(true);
+  expect(matchFillAnswer('well known', 'well-known', all.filter((rule) => rule !== 'ignore_hyphen'))).toBe(false);
+});
+test('case matters without ignore_case', () => {
+  expect(matchFillAnswer('london', 'London', ['collapse_spaces'])).toBe(false);
+});
+test('counts review statuses', () => {
+  expect(testReviewCounts([{ answer: '1', correct: true }, { answer: '0', correct: false }, { answer: null, correct: false }])).toEqual({ correct: 1, wrong: 1, blank: 1 });
+});
+test('formats a Vietnam date and time', () => {
+  expect(formatVnDateTime(new Date('2026-11-03T17:30:00Z'))).toBe('00:30 · 04/11/2026');
 });
