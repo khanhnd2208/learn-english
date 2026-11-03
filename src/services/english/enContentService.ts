@@ -9,7 +9,7 @@ import { parseAdvancedNotes } from '@/lib/english/advancedNotes';
 import { cardExampleOf, toSenseBundle, type SenseBundle } from '@/lib/english/senseBundle';
 import { parseWordFamily } from '@/lib/english/wordFamily';
 import { audioFileExists } from '@/services/english/enAudioService';
-import { syncCourseEnrollments } from '@/services/english/enCourseService';
+import { syncSubjectEnrollments } from '@/services/english/enVocabSubjectService';
 
 export interface EnglishPackSaveResult { setId: string; issues: AssessedPack['issues']; schemaError: string | null }
 export interface EnglishPublishResult { publishedSenses: number; totalSenses: number; status: string; issues: AssessedPack['issues'] }
@@ -75,7 +75,7 @@ export async function publishEnglishSet(setId: string, exists: (file: string) =>
   publishedSenses++;
  }
  if (publishedSenses) await prisma.enSet.update({ where: { id: set.id }, data: { status: 'published' } });
- if (publishedSenses && set.courseId) await prisma.$transaction((tx) => syncCourseEnrollments(tx, set.courseId!));
+ if (publishedSenses && set.subjectId) await prisma.$transaction((tx) => syncSubjectEnrollments(tx, set.subjectId!));
  return { publishedSenses, totalSenses: set.items.length, status: publishedSenses ? 'published' : set.status, issues };
 }
 
@@ -151,7 +151,7 @@ export async function listEnglishAdminSets() {
 	const sets = await prisma.enSet.findMany({
 		orderBy: { updatedAt: 'desc' },
 		take: 20,
-		include: { _count: { select: { items: true, enrollments: true } }, course: { select: { title: true } } },
+		include: { _count: { select: { items: true, enrollments: true } }, subject: { select: { title: true } } },
 	});
 	return sets.map((set) => ({
 		id: set.id,
@@ -159,6 +159,6 @@ export async function listEnglishAdminSets() {
 		status: set.status,
 		items: set._count.items,
 		learners: set._count.enrollments,
-		courseTitle: set.course?.title ?? null,
+		subjectTitle: set.subject?.title ?? null,
 	}));
 }

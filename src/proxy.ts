@@ -17,7 +17,11 @@ export default auth((req) => {
 		return NextResponse.redirect(new URL(req.auth?.user ? '/' : '/login', req.url));
 	}
 
-	const protectedPaths = ['/', '/sets', '/review', '/store', '/courses', '/mistakes', '/progress'];
+	if (pathname === '/courses' || pathname.startsWith('/courses/')) {
+		return NextResponse.redirect(new URL('/store', req.url));
+	}
+
+	const protectedPaths = ['/', '/sets', '/review', '/store', '/subjects', '/mistakes', '/progress'];
 	const isProtected = protectedPaths.some((path) => pathname === path || pathname.startsWith(`${path}/`));
 	if (isProtected && !req.auth?.user) {
 		return NextResponse.redirect(new URL('/login', req.url));
