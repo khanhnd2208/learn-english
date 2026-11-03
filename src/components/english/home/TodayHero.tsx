@@ -31,7 +31,8 @@ export default function TodayHero({ overview, xp, goal }: { overview: TodayOverv
 				{state === 'goal' && <p className="mb-2 text-sm font-bold text-success">✓ Đạt mục tiêu hôm nay</p>}
 				<div className={card}>
 					<div className="flex items-center justify-between gap-2"><h2 className="label-caps text-accent">Ôn luân phiên</h2>{state === 'review' && <span className="xp-chip">≈ +{preview.xp} XP</span>}</div>
-					<p className="mt-1 flex items-center gap-2 text-2xl font-bold">{state === 'review' ? `${preview.total} từ cần ôn` : '✓ Xong hôm nay'} <InfoHint title={HINTS.srs.title}>{HINTS.srs.body}</InfoHint></p>
+					<p className="mt-1 text-sm text-foreground-secondary">Gõ lại từ để nhớ lâu. Từ đến hạn quay lại đúng lúc, bạn không phải tự nhớ lịch.</p>
+					<p className="mt-2 flex items-center gap-2 text-2xl font-bold">{state === 'review' ? `${preview.total} từ cần ôn` : '✓ Xong hôm nay'} <InfoHint title={HINTS.srs.title}>{HINTS.srs.body}</InfoHint></p>
 					<p className="mt-1 text-sm text-foreground-secondary">{state === 'review' ? <>Tất cả bộ đang học: {[overview.dueCount > 0 && `${overview.dueCount} đến hạn`, overview.newCount > 0 && `${overview.newCount} từ mới`].filter(Boolean).join(' · ')}{preview.total > 50 ? <><br />Mỗi lượt 50 từ · lượt này ~{preview.minutes} phút</> : <><br />~{preview.minutes} phút</>}</> : overview.tomorrowCount > 0 ? `Mai có ${overview.tomorrowCount} từ đến hạn` : 'Mai chưa có từ đến hạn'}</p>
 					<div className="mt-auto pt-3.5">{state === 'review' ? <button type="button" onClick={() => setOpen(true)} className={primary}>Ôn {preview.round} từ <span aria-hidden="true">→</span></button> : <button type="button" disabled className="inline-flex min-h-12 w-full items-center justify-center rounded-control border-2 border-border px-5 font-bold text-muted">Ôn luân phiên <span aria-hidden="true" className="ml-2">→</span></button>}</div>
 				</div>

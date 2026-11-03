@@ -1,4 +1,5 @@
 import QuestNote from '@/components/english/goals/QuestNote';
+import GuidedReviewCard from '@/components/english/home/GuidedReviewCard';
 import ProgressStrip from '@/components/english/home/ProgressStrip';
 import TodayHero from '@/components/english/home/TodayHero';
 import { liveStages } from '@/lib/english/progressStats';
@@ -21,7 +22,10 @@ export default function HomeDashboard({ overview, board, resetsIn, greeting, dat
 		    Below lg the column wrappers dissolve (`contents`) and `order` keeps hero → progress → quests → sets. */}
 		<div className="grid grid-cols-1 gap-3.5 sm:gap-4 lg:grid-cols-3 lg:items-start lg:gap-5">
 			<div className="contents lg:col-span-2 lg:flex lg:flex-col lg:gap-5">
-				<div className="order-1 min-w-0"><TodayHero overview={overview} xp={board.today.xp} goal={board.today.goal} /></div>
+				<div className="order-1 grid min-w-0 gap-3.5 sm:gap-4 sm:grid-cols-2">
+					<TodayHero overview={overview} xp={board.today.xp} goal={board.today.goal} />
+					<GuidedReviewCard hasSets={hasSets} />
+				</div>
 			</div>
 
 			<div className="contents lg:flex lg:flex-col lg:gap-5">
