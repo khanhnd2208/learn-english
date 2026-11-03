@@ -43,6 +43,6 @@ it('leaving only removes the enrollment', async () => {
 });
 it('cannot delete a subject that still has papers', async () => {
   mock.paperCount.mockResolvedValue(2);
-  await expect(deleteTestSubject('subject')).rejects.toMatchObject({ message: 'Hãy xóa hết bài kiểm tra của môn trước khi xóa.' });
+  await expect(deleteTestSubject('subject')).rejects.toMatchObject({ message: 'Hãy xóa hết bài kiểm tra của khóa trước khi xóa.' });
   expect(mock.subjectDelete).not.toHaveBeenCalled();
 });

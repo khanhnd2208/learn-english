@@ -34,7 +34,7 @@ export async function saveTestPaper(input: { subjectId: string; title: string; d
   if (parsed.issues.length) throw new AppError('File còn lỗi, hãy sửa rồi tải lên lại.', 400);
   return prisma.$transaction(async (tx) => {
     const subject = await tx.enTestSubject.findUnique({ where: { id: input.subjectId }, select: { id: true } });
-    if (!subject) throw new AppError('Không tìm thấy môn học', 404);
+    if (!subject) throw new AppError('Không tìm thấy khóa học', 404);
     let paper;
     if (input.paperId) {
       const existing = await tx.enTestPaper.findFirst({ where: { id: input.paperId, subjectId: input.subjectId }, select: { id: true } });
@@ -94,7 +94,7 @@ export async function paperSubjectId(paperId: string): Promise<string | null> {
 async function accessiblePaper(userId: string, paperId: string, isAdmin: boolean) {
   const paper = await prisma.enTestPaper.findUnique({ where: { id: paperId }, include: { subject: { include: { enrollments: { where: { userId }, select: { id: true } } } }, _count: { select: { questions: true } } } });
   if (!paper || (!isAdmin && (paper.status !== 'published' || !paper._count.questions || paper.subject.status !== 'published'))) throw new AppError('Không tìm thấy bài kiểm tra', 404);
-  if (!isAdmin && !paper.subject.enrollments.length) throw new AppError('Hãy đăng ký môn học để làm bài kiểm tra.', 403);
+  if (!isAdmin && !paper.subject.enrollments.length) throw new AppError('Hãy đăng ký khóa học để làm bài kiểm tra.', 403);
   return paper;
 }
 export async function getTestPaperForLearner(userId: string, paperId: string, isAdmin: boolean) {

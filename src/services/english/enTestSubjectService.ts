@@ -16,7 +16,7 @@ export interface TestPaperRow {
 export interface TestSubjectDetail extends Omit<TestSubjectSummary, 'papers' | 'passed'> { papers: TestPaperRow[]; progress: { passed: number; total: number; nextId: string | null } }
 export interface AdminTestSubject extends TestSubjectSummary { papersList: TestPaperRow[] }
 
-const NOT_FOUND = 'Không tìm thấy môn học';
+const NOT_FOUND = 'Không tìm thấy khóa học';
 const visibleToLearner = (userId: string) => ({ OR: [
   { status: 'published' as const, listed: true, papers: { some: { status: 'published' as const, questions: { some: {} } } } },
   { enrollments: { some: { userId } } },
@@ -105,7 +105,7 @@ export async function updateTestSubject(subjectId: string, input: { title?: stri
 }
 export async function deleteTestSubject(subjectId: string) {
   const count = await prisma.enTestPaper.count({ where: { subjectId } });
-  if (count) throw new AppError('Hãy xóa hết bài kiểm tra của môn trước khi xóa.', 400);
+  if (count) throw new AppError('Hãy xóa hết bài kiểm tra của khóa trước khi xóa.', 400);
   await prisma.enTestSubject.delete({ where: { id: subjectId } });
   return { deleted: true };
 }
