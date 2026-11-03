@@ -24,3 +24,9 @@ export const EN_MAX_SYNONYMS = 8;
 export const EN_SRS_SESSION_SIZE = 50;
 /** Reserve this share for due words when enough are available. */
 export const EN_SRS_DUE_MIN_SHARE = 0.6;
+
+export const EN_TEST_PASS_PERCENT = 80;
+export const EN_TEST_MAX_QUESTIONS = 100;
+export const EN_TEST_MAX_OPTIONS = 6;
+export const EN_TEST_MAX_FILL_ANSWERS = 10;
+export const EN_TEST_MAX_FILE_BYTES = 1_000_000;

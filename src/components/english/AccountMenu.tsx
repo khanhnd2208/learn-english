@@ -19,7 +19,7 @@ const THEMES = [
 const item = 'flex min-h-11 w-full items-center gap-3 rounded-control px-2.5 text-left font-medium hover:bg-surface-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent';
 const subscribeNoop = () => () => {};
 
-export default function AccountMenu({ name, goals, admin, avatarUrl, hasUpload }: { name: string; goals: ShellGoals; admin: boolean; avatarUrl: string | null; hasUpload: boolean }) {
+export default function AccountMenu({ name, goals, admin, adminHref, avatarUrl, hasUpload }: { name: string; goals: ShellGoals; admin: boolean; adminHref: string; avatarUrl: string | null; hasUpload: boolean }) {
  const { theme, setTheme } = useTheme();
  // The stored theme is only known in the browser; until then no option shows as chosen.
  const mounted = useSyncExternalStore(subscribeNoop, () => true, () => false);
@@ -60,7 +60,7 @@ export default function AccountMenu({ name, goals, admin, avatarUrl, hasUpload }
     <div className="border-t border-border pt-1.5">
      <button type="button" onClick={() => { closeMenu(); setAvatarOpen(true); }} className={item}><MaterialIcon name="photo_camera" size={20} className="text-muted" />Đổi ảnh đại diện</button>
      <button type="button" onClick={() => { closeMenu(); setGoalOpen(true); }} className={item}><MaterialIcon name="flag" size={20} className="text-muted" />Mục tiêu ngày</button>
-     {admin && <Link href="/admin" onClick={closeMenu} className={item}><MaterialIcon name="admin_panel_settings" size={20} className="text-muted" />Quản trị</Link>}
+     {admin && <Link href={adminHref} onClick={closeMenu} className={item}><MaterialIcon name="admin_panel_settings" size={20} className="text-muted" />Quản trị</Link>}
     </div>
     <div role="radiogroup" aria-label="Giao diện" className="mt-1.5 border-t border-border px-2.5 pt-2.5 pb-2">
      <p className="mb-2 text-xs font-semibold text-muted">Giao diện</p>
