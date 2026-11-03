@@ -2,7 +2,7 @@ import { expect, test } from 'vitest';
 import { prisma } from '@/lib/prisma';
 import { resetEnTables } from './setup';
 import { buildTestWorkbook } from '@/services/english/enTestWorkbookService';
-import { deleteTestPaper, finishTestPaper, listMyTestResults, saveTestPaper, startTestPaper } from '@/services/english/enTestService';
+import { deleteTestPaper, finishTestPaper, listMyTestResults, reorderTestPapers, saveTestPaper, startTestPaper } from '@/services/english/enTestService';
 import type { TestQuestionInput } from '@/lib/english/testPaper';
 
 const one: TestQuestionInput[] = [{ type: 'mcq', prompt: 'Pick one.', options: ['no', 'yes'], correctIndex: 1, explanationVi: '' }];
@@ -57,4 +57,15 @@ test('deleting a paper removes its attempts', async () => {
   const attempt = await startTestPaper('learner', paper.id, false);
   await deleteTestPaper(paper.id);
   expect(await prisma.enTestPaperAttempt.count({ where: { id: attempt.id } })).toBe(0);
+});
+test('reordering moves a paper to another course and is repeatable', async () => {
+  const { subject, paper } = await world();
+  const other = await prisma.enTestSubject.create({ data: { title: 'Other', status: 'published' } });
+  const second = await saveTestPaper({ subjectId: subject.id, title: 'Second', description: '', data: await file(one), publish: true });
+  const columns = [{ subjectId: subject.id, paperIds: [second.id] }, { subjectId: other.id, paperIds: [paper.id] }];
+  for (let run = 0; run < 2; run++) {
+    await reorderTestPapers(columns);
+    expect(await prisma.enTestPaper.findUniqueOrThrow({ where: { id: paper.id } })).toMatchObject({ subjectId: other.id, sortOrder: 0 });
+    expect(await prisma.enTestPaper.findUniqueOrThrow({ where: { id: second.id } })).toMatchObject({ subjectId: subject.id, sortOrder: 0 });
+  }
 });

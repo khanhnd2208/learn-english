@@ -34,7 +34,7 @@ export async function saveTestPaper(input: { subjectId: string; title: string; d
   if (parsed.issues.length) throw new AppError('File còn lỗi, hãy sửa rồi tải lên lại.', 400);
   return prisma.$transaction(async (tx) => {
     const subject = await tx.enTestSubject.findUnique({ where: { id: input.subjectId }, select: { id: true } });
-    if (!subject) throw new AppError('Không tìm thấy môn học', 404);
+    if (!subject) throw new AppError('Không tìm thấy khóa học', 404);
     let paper;
     if (input.paperId) {
       const existing = await tx.enTestPaper.findFirst({ where: { id: input.paperId, subjectId: input.subjectId }, select: { id: true } });
@@ -62,6 +62,31 @@ export async function exportTestPaper(paperId: string): Promise<{ fileName: stri
     : { type: 'fill', prompt: question.prompt, answers: question.answers, explanationVi: question.explanationVi });
   return { fileName: 'bai-kiem-tra.xlsx', data: await buildTestWorkbook(questions) };
 }
+export interface MyTestPaper { id: string; title: string; subjectId: string; subjectTitle: string; questionCount: number; best: { score: number; total: number; passed: boolean } | null }
+/** Published papers of the published courses the learner joined, in course then paper order. */
+export async function listMyTestPapers(userId: string): Promise<MyTestPaper[]> {
+  const subjects = await prisma.enTestSubject.findMany({
+    where: { status: 'published', enrollments: { some: { userId } } },
+    orderBy: [{ sortOrder: 'asc' }, { title: 'asc' }],
+    include: { papers: { where: { status: 'published', questions: { some: {} } }, orderBy: [{ sortOrder: 'asc' }, { title: 'asc' }], include: { _count: { select: { questions: true } }, attempts: { where: { userId, status: 'finished' }, select: { score: true, total: true, finishedAt: true } } } } },
+  });
+  return subjects.flatMap((subject) => subject.papers.map((paper) => ({ id: paper.id, title: paper.title, subjectId: subject.id, subjectTitle: subject.title, questionCount: paper._count.questions, best: bestSummary(paper.attempts) })));
+}
+/** Sets each paper's course and position from the given columns, atomically. Papers not listed stay as they are. */
+export async function reorderTestPapers(columns: Array<{ subjectId: string; paperIds: string[] }>) {
+  const paperIds = columns.flatMap((column) => column.paperIds);
+  if (new Set(paperIds).size !== paperIds.length) throw new AppError('Một bài kiểm tra xuất hiện hai lần.', 400);
+  await prisma.$transaction(async (tx) => {
+    const subjectIds = columns.map((column) => column.subjectId);
+    if (new Set(subjectIds).size !== subjectIds.length) throw new AppError('Một khóa học xuất hiện hai lần.', 400);
+    if (await tx.enTestSubject.count({ where: { id: { in: subjectIds } } }) !== subjectIds.length) throw new AppError('Không tìm thấy khóa học', 404);
+    if (await tx.enTestPaper.count({ where: { id: { in: paperIds } } }) !== paperIds.length) throw new AppError('Không tìm thấy bài kiểm tra', 404);
+    for (const column of columns) {
+      for (const [index, paperId] of column.paperIds.entries()) await tx.enTestPaper.update({ where: { id: paperId }, data: { subjectId: column.subjectId, sortOrder: index } });
+    }
+  });
+  return { ok: true };
+}
 export async function paperSubjectId(paperId: string): Promise<string | null> {
   return (await prisma.enTestPaper.findUnique({ where: { id: paperId }, select: { subjectId: true } }))?.subjectId ?? null;
 }
@@ -69,7 +94,7 @@ export async function paperSubjectId(paperId: string): Promise<string | null> {
 async function accessiblePaper(userId: string, paperId: string, isAdmin: boolean) {
   const paper = await prisma.enTestPaper.findUnique({ where: { id: paperId }, include: { subject: { include: { enrollments: { where: { userId }, select: { id: true } } } }, _count: { select: { questions: true } } } });
   if (!paper || (!isAdmin && (paper.status !== 'published' || !paper._count.questions || paper.subject.status !== 'published'))) throw new AppError('Không tìm thấy bài kiểm tra', 404);
-  if (!isAdmin && !paper.subject.enrollments.length) throw new AppError('Hãy đăng ký môn học để làm bài kiểm tra.', 403);
+  if (!isAdmin && !paper.subject.enrollments.length) throw new AppError('Hãy đăng ký khóa học để làm bài kiểm tra.', 403);
   return paper;
 }
 export async function getTestPaperForLearner(userId: string, paperId: string, isAdmin: boolean) {

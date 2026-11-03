@@ -33,7 +33,7 @@ beforeEach(() => {
 });
 it('requires subject enrollment for a learner', async () => {
   mock.paperFindUnique.mockResolvedValue({ ...paper, subject: { ...paper.subject, enrollments: [] } });
-  await expect(startTestPaper('user', 'paper', false)).rejects.toMatchObject({ status: 403, message: 'Hãy đăng ký môn học để làm bài kiểm tra.' });
+  await expect(startTestPaper('user', 'paper', false)).rejects.toMatchObject({ status: 403, message: 'Hãy đăng ký khóa học để làm bài kiểm tra.' });
   noLearningWrites();
 });
 it('resumes an active attempt without creating another', async () => {

@@ -83,6 +83,7 @@ export default function ReviewOverview({ guided: initial }: { guided: GuidedRevi
 
 	return <div className="mx-auto max-w-2xl px-4 py-4 sm:px-6 sm:py-8">
 		<header className="mb-3.5 flex items-center justify-between gap-2 sm:mb-5"><h1 className="text-2xl sm:text-4xl">Ôn theo bộ</h1><button type="button" title="Cài đặt câu hỏi" aria-label="Cài đặt câu hỏi" onClick={() => setSettingsOpen(true)} className="flex size-11 items-center justify-center rounded-control text-accent hover:bg-accent-subtle"><MaterialIcon name="tune" size={22} /></button></header>
+		<p className="-mt-2 mb-3.5 text-sm text-foreground-secondary sm:mb-5">Chọn một bộ, ôn từng lượt 5 từ.</p>
 		<>
 		{noSets ? <section className="mode-card text-center">
 			<h2 className="text-2xl">Chưa có bộ từ</h2>

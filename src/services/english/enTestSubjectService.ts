@@ -2,19 +2,21 @@ import { prisma } from '@/lib/prisma';
 import { AppError } from '@/lib/appError';
 import { accessCodeMatches } from '@/lib/accessCode';
 import { isTestPassed, pickBestAttempt } from '@/lib/english/testPaper';
+import { courseProgress } from '@/lib/english/testCourse';
+import { EN_TEST_PASS_PERCENT } from '@/lib/english/constants';
 
 export interface TestSubjectSummary {
   id: string; title: string; description: string; status: string; listed: boolean;
-  locked: boolean; enrolled: boolean; papers: number; accessCode?: string | null; learners?: number;
+  locked: boolean; enrolled: boolean; papers: number; passed: number; accessCode?: string | null; learners?: number;
 }
 export interface TestPaperRow {
   id: string; title: string; description?: string; status: string; questionCount: number;
   inProgress: boolean; best: { score: number; total: number; passed: boolean } | null; attempts: number;
 }
-export interface TestSubjectDetail extends Omit<TestSubjectSummary, 'papers'> { papers: TestPaperRow[] }
+export interface TestSubjectDetail extends Omit<TestSubjectSummary, 'papers' | 'passed'> { papers: TestPaperRow[]; progress: { passed: number; total: number; nextId: string | null } }
 export interface AdminTestSubject extends TestSubjectSummary { papersList: TestPaperRow[] }
 
-const NOT_FOUND = 'Không tìm thấy môn học';
+const NOT_FOUND = 'Không tìm thấy khóa học';
 const visibleToLearner = (userId: string) => ({ OR: [
   { status: 'published' as const, listed: true, papers: { some: { status: 'published' as const, questions: { some: {} } } } },
   { enrollments: { some: { userId } } },
@@ -27,13 +29,14 @@ export async function listTestSubjects(userId: string, isAdmin: boolean): Promis
     include: {
       enrollments: { where: { userId }, select: { id: true } },
       _count: { select: { enrollments: true } },
-      papers: { where: { status: 'published', questions: { some: {} } }, select: { id: true } },
+      papers: { where: { status: 'published', questions: { some: {} } }, select: { id: true, attempts: { where: { userId, status: 'finished' }, select: { score: true, total: true } } } },
     },
   });
   return subjects.map((subject) => ({
     id: subject.id, title: subject.title, description: subject.description, status: subject.status,
     listed: subject.listed, locked: subject.accessCode != null, enrolled: subject.enrollments.length > 0,
     papers: subject.papers.length,
+    passed: subject.papers.filter((paper) => paper.attempts.some((attempt) => attempt.score !== null && isTestPassed(attempt.score, attempt.total))).length,
     ...(isAdmin ? { accessCode: subject.accessCode, learners: subject._count.enrollments } : {}),
   }));
 }
@@ -65,10 +68,13 @@ export async function getTestSubjectDetail(userId: string, subjectId: string, is
   if (!subject) throw new AppError(NOT_FOUND, 404);
   const enrolled = subject.enrollments.length > 0;
   if (!isAdmin && !enrolled && (subject.status !== 'published' || !subject.listed || !subject.papers.length)) throw new AppError(NOT_FOUND, 404);
+  const papers = await testPaperRows(userId, subjectId, isAdmin);
+  const learnerPapers = papers.filter((paper) => paper.status === 'published' && paper.questionCount > 0);
   return {
     id: subject.id, title: subject.title, description: subject.description, status: subject.status,
     listed: subject.listed, locked: subject.accessCode != null, enrolled,
-    papers: await testPaperRows(userId, subjectId, isAdmin),
+    papers,
+    progress: courseProgress(learnerPapers.map((paper) => ({ id: paper.id, bestPercent: paper.best ? paper.best.score * 100 / paper.best.total : null })), EN_TEST_PASS_PERCENT),
     ...(isAdmin ? { accessCode: subject.accessCode, learners: subject._count.enrollments } : {}),
   };
 }
@@ -99,7 +105,7 @@ export async function updateTestSubject(subjectId: string, input: { title?: stri
 }
 export async function deleteTestSubject(subjectId: string) {
   const count = await prisma.enTestPaper.count({ where: { subjectId } });
-  if (count) throw new AppError('Hãy xóa hết bài kiểm tra của môn trước khi xóa.', 400);
+  if (count) throw new AppError('Hãy xóa hết bài kiểm tra của khóa trước khi xóa.', 400);
   await prisma.enTestSubject.delete({ where: { id: subjectId } });
   return { deleted: true };
 }
