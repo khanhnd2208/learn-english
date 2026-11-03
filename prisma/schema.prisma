@@ -251,6 +251,103 @@ model EnVocabSubjectEnrollment {
   @@index([userId])
 }
 
+model EnTestSubject {
+  id          String                    @id @default(cuid())
+  title       String
+  description String                    @default("")
+  status      EnContentStatus           @default(draft)
+  listed      Boolean                   @default(true)
+  accessCode  String?
+  sortOrder   Int                       @default(0)
+  createdAt   DateTime                  @default(now())
+  updatedAt   DateTime                  @updatedAt
+  papers      EnTestPaper[]
+  enrollments EnTestSubjectEnrollment[]
+
+  @@index([status, sortOrder])
+}
+
+model EnTestSubjectEnrollment {
+  id        String        @id @default(cuid())
+  userId    String
+  subjectId String
+  createdAt DateTime      @default(now())
+  subject   EnTestSubject @relation(fields: [subjectId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, subjectId])
+  @@index([userId])
+}
+
+model EnTestPaper {
+  id          String                @id @default(cuid())
+  subjectId   String
+  title       String
+  description String                @default("")
+  status      EnContentStatus       @default(draft)
+  sortOrder   Int                   @default(0)
+  createdAt   DateTime              @default(now())
+  updatedAt   DateTime              @updatedAt
+  subject     EnTestSubject         @relation(fields: [subjectId], references: [id], onDelete: Cascade)
+  questions   EnTestPaperQuestion[]
+  attempts    EnTestPaperAttempt[]
+
+  @@index([subjectId, status, sortOrder])
+}
+
+model EnTestPaperQuestion {
+  id            String      @id @default(cuid())
+  paperId       String
+  position      Int
+  /// mcq | fill
+  type          String
+  prompt        String
+  options       String[]    @default([])
+  correctIndex  Int?
+  answers       String[]    @default([])
+  explanationVi String      @default("")
+  paper         EnTestPaper @relation(fields: [paperId], references: [id], onDelete: Cascade)
+
+  @@unique([paperId, position])
+}
+
+model EnTestPaperAttempt {
+  id         String                   @id @default(cuid())
+  userId     String
+  paperId    String
+  /// "{userId}:{paperId}" while in progress, null once finished.
+  activeKey  String?                  @unique
+  status     EnTestStatus             @default(in_progress)
+  position   Int                      @default(0)
+  total      Int
+  score      Int?
+  startedAt  DateTime                 @default(now())
+  finishedAt DateTime?
+  paper      EnTestPaper              @relation(fields: [paperId], references: [id], onDelete: Cascade)
+  items      EnTestPaperAttemptItem[]
+
+  @@index([userId, paperId, status])
+  @@index([userId, finishedAt])
+}
+
+/// Snapshot of a question when the attempt started, so replacing the paper never changes history.
+model EnTestPaperAttemptItem {
+  id            String             @id @default(cuid())
+  attemptId     String
+  position      Int
+  type          String
+  prompt        String
+  options       String[]           @default([])
+  correctIndex  Int?
+  answers       String[]           @default([])
+  explanationVi String             @default("")
+  answer        String?
+  correct       Boolean?
+  answeredAt    DateTime?
+  attempt       EnTestPaperAttempt @relation(fields: [attemptId], references: [id], onDelete: Cascade)
+
+  @@unique([attemptId, position])
+}
+
 model EnSetItem {
   id       String   @id @default(cuid())
   setId    String

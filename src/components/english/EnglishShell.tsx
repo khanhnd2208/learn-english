@@ -3,7 +3,9 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useSession } from 'next-auth/react';
-import { ENGLISH_ADMIN_NAV, ENGLISH_NAV, isNavActive } from '@/config/navigation';
+import { ENGLISH_ADMIN_NAV, ENGLISH_NAV, TEST_ADMIN_NAV, TEST_NAV, isNavActive } from '@/config/navigation';
+import { modeOfPath } from '@/lib/appMode';
+import ModeSwitch from '@/components/english/ModeSwitch';
 import { AdventureIcon } from '@/components/english/AdventureIcon';
 import AccountMenu from '@/components/english/AccountMenu';
 import OnboardingTour from '@/components/english/OnboardingTour';
@@ -16,7 +18,12 @@ const navAdventureIcons: Record<string, 'map' | 'target' | 'book' | 'compass' | 
 
 export default function EnglishShell({ children, goals, newLearner, avatarUrl, hasUpload }: { children: React.ReactNode; goals: ShellGoals; newLearner: boolean; avatarUrl: string | null; hasUpload: boolean }) {
 	const pathname = usePathname();
-	const focus = /\/sets\/[^/]+\/(practice|test)$/.test(pathname);
+	const focus = /\/sets\/[^/]+\/(practice|test)$|^\/tests\/papers\/[^/]+$/.test(pathname);
+	const mode = modeOfPath(pathname);
+	const testMode = mode === 'test';
+	const nav = testMode ? TEST_NAV : ENGLISH_NAV;
+	const adminNav = testMode ? TEST_ADMIN_NAV : ENGLISH_ADMIN_NAV;
+	const adminHref = testMode ? '/admin/tests' : '/admin';
 	const { data } = useSession();
 	const admin = (data?.user as { role?: string } | undefined)?.role === 'admin';
 	const accountName = data?.user?.name || data?.user?.email || 'Tài khoản';
@@ -28,8 +35,9 @@ export default function EnglishShell({ children, goals, newLearner, avatarUrl, h
 				<div className="px-5 pt-7">
 					<Link href="/" className="brand-wordmark flex items-center gap-3 text-xl font-black tracking-tight"><span className="brand-compass"><AdventureIcon name="compass" size={22} /></span><span className="leading-tight">Word<span className="brand-accent">Quest</span><small className="brand-tagline mt-0.5 block text-xs font-medium tracking-normal">Học từ vựng tiếng Anh</small></span></Link>
 				</div>
+				<div className="px-5 pt-4"><ModeSwitch /></div>
 				<nav className="mt-8 flex flex-1 flex-col gap-1">
-					{ENGLISH_NAV.map((item) => {
+					{nav.map((item) => {
 						const active = isNavActive(pathname, item.href);
 						return (
 							<Link key={item.href} href={item.href} className={active ? 'nav-pill-active' : 'nav-pill'}>
@@ -41,7 +49,7 @@ export default function EnglishShell({ children, goals, newLearner, avatarUrl, h
 					{admin && (
 						<div className="mt-3 border-t border-border pt-3">
 							<p className="label-caps px-6 pb-2">Quản trị</p>
-							{ENGLISH_ADMIN_NAV.map((item) => {
+							{adminNav.map((item) => {
 								const active = isNavActive(pathname, item.href);
 								return (
 									<Link key={item.href} href={item.href} className={active ? 'nav-pill-active' : 'nav-pill'}>
@@ -53,27 +61,27 @@ export default function EnglishShell({ children, goals, newLearner, avatarUrl, h
 						</div>
 					)}
 				</nav>
-				<Link href="/progress" aria-label={`Hôm nay ${goals.xp}/${goals.goal} XP, nhiệm vụ ${goals.questsDone}/${goals.questsTotal}`} className="mx-4 mb-2 flex items-center gap-3 rounded-card border border-border bg-surface p-3 text-foreground hover:border-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent">
+				{!testMode && <Link href="/progress" aria-label={`Hôm nay ${goals.xp}/${goals.goal} XP, nhiệm vụ ${goals.questsDone}/${goals.questsTotal}`} className="mx-4 mb-2 flex items-center gap-3 rounded-card border border-border bg-surface p-3 text-foreground hover:border-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent">
 					<GoalRing value={goals.xp} max={goals.goal} size={36} stroke={4} label="Mục tiêu ngày">{goals.xp >= goals.goal && <span className="text-sm font-bold text-success">✓</span>}</GoalRing>
 					<span className="min-w-0"><span className="block text-sm font-bold tabular-nums">{goals.xp}/{goals.goal} XP</span><span className="block text-xs text-muted">Lv {goals.level} · Nhiệm vụ {goals.questsDone}/{goals.questsTotal}</span></span>
-				</Link>
-				<div className="mx-3 mb-3 border-t border-border pt-2"><AccountMenu name={accountName} goals={goals} admin={admin} avatarUrl={avatarUrl} hasUpload={hasUpload} /></div>
+				</Link>}
+				<div className="mx-3 mb-3 border-t border-border pt-2"><AccountMenu name={accountName} goals={goals} admin={admin} adminHref={adminHref} avatarUrl={avatarUrl} hasUpload={hasUpload} /></div>
 			</aside>
 			<header className="adventure-mobile-header sticky top-0 z-30 flex h-14 items-center justify-between border-b px-3.5 md:hidden">
-				<Link href="/" className="brand-wordmark flex items-center gap-2 text-base font-black"><span className="brand-compass !size-8"><AdventureIcon name="compass" size={16} /></span><span>Word<span className="brand-accent">Quest</span></span></Link>
+				<ModeSwitch />
 				<div className="flex items-center gap-1">
-					<Link href="/progress" aria-label={`Mục tiêu ngày ${goals.xp}/${goals.goal} XP`} className="flex min-h-10 items-center gap-1.5 rounded-control px-1.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent">
+					{!testMode && <Link href="/progress" aria-label={`Mục tiêu ngày ${goals.xp}/${goals.goal} XP`} className="flex min-h-10 items-center gap-1.5 rounded-control px-1.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent">
 						<GoalRing value={goals.xp} max={goals.goal} size={26} stroke={4} label="Mục tiêu ngày">{goals.xp >= goals.goal && <span className="text-xs font-bold text-success">✓</span>}</GoalRing>
 						<span className="rounded-full bg-accent-subtle px-2 py-1 text-xs font-bold tabular-nums">{goals.xp}/{goals.goal}</span>
 						<span className="level-badge text-xs">Lv {goals.level}</span>
-					</Link>
-					<AccountMenu name={accountName} goals={goals} admin={admin} avatarUrl={avatarUrl} hasUpload={hasUpload} />
+					</Link>}
+					<AccountMenu name={accountName} goals={goals} admin={admin} adminHref={adminHref} avatarUrl={avatarUrl} hasUpload={hasUpload} />
 				</div>
 			</header>
 			<main className="min-h-screen bg-background pb-20 md:pb-0">{children}</main>
-			<RewardCenter goals={goals} /><OnboardingTour eligible={newLearner} />
+			{!testMode && <><RewardCenter goals={goals} /><OnboardingTour eligible={newLearner} /></>}
 			<nav aria-label="Điều hướng chính" className="adventure-mobile-nav fixed bottom-0 z-50 flex min-h-16 w-full items-center justify-around border-t px-1.5 pb-safe md:hidden">
-				{ENGLISH_NAV.map((item) => {
+				{nav.map((item) => {
 					const active = isNavActive(pathname, item.href);
 					return (
 						<Link key={item.href} href={item.href} aria-current={active ? 'page' : undefined} className="mobile-nav-link relative flex min-h-12 flex-1 flex-col items-center justify-center gap-0.5 rounded-control py-1 text-[11px] font-bold">
