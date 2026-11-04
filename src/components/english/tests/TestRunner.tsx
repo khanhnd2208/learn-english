@@ -77,7 +77,8 @@ export default function TestRunner({ initial }: { initial: Initial }) {
     saveQueue.current = saveQueue.current.then(async () => {
       try {
         await api({ action: 'answer', attemptId: attempt.id, position: index, answer: value ?? '' });
-        if (unsaved.current.get(index) === value) unsaved.current.delete(index);
+        // A newer successful write supersedes an older failure for this question.
+        if (lastQueued.current[index] === value) unsaved.current.delete(index);
         if (unsaved.current.size === 0) setError('');
       } catch {
         unsaved.current.set(index, value);
