@@ -26,4 +26,6 @@ export { default as BackLink } from './BackLink';
 export { default as ProgressBar } from './ProgressBar';
 export { default as InfoHint } from './InfoHint';
 export { default as ThemeToggle } from './ThemeToggle';
+export { default as PageHeader } from './PageHeader';
+export { default as ListRow } from './ListRow';
 export { default as UserMessageModal } from './UserMessageModal';
