@@ -159,6 +159,15 @@ components:
 
 > **UI/UX docs:** See `docs/product/`, `docs/ux/`, `docs/design/`, `docs/qa/` for full design system workflow. Component showcase: `/dev/ui` (admin only).
 
+## Lean UI
+
+1. Không đặt câu phụ dưới tiêu đề trang.
+2. Không hiện sẵn câu giải thích; khi cần, đặt sau `InfoHint`.
+3. Danh sách dùng `ListRow`: một dòng tiêu đề, một dòng meta, cả hàng bấm được.
+4. Mỗi màn có một nút chính.
+5. Không tạo vùng cuộn lồng trên điện thoại.
+6. Không đặt nút màu accent trong hàng danh sách.
+
 ## Overview
 
 **Learn Chinese** (Vietnamese: *Học Hán Ngữ*) is a web app that helps Vietnamese speakers master Mandarin Chinese vocabulary. Admins publish word sets. Learners discover them, follow the original set, and review on a spaced schedule (shown in the UI as Ôn tập).

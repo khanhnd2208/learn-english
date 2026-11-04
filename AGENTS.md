@@ -99,6 +99,7 @@ Each of these has shipped as a bug at least once, or comes close to an invariant
 - Use `randomRng()` or `mulberry32(seed)` from `src/lib/english/activities/rng.ts`, not `Math.random()`. Tests pass a seeded rng and assert on the exact order.
 
 **UI**
+- Giao diện gọn: không đặt câu phụ dưới tiêu đề hoặc hiện sẵn lời giải thích; dùng `InfoHint` khi cần. Danh sách dùng `ListRow` với cả hàng bấm được, một dòng tiêu đề và một dòng meta. Mỗi màn chỉ có một nút chính; không đặt nút accent trong hàng và không cuộn lồng trên điện thoại.
 - Never show zero noise like "0 đến hạn", "~0 phút" or an empty chip: hide it or say what it means ("Mai chưa có từ đến hạn") (2383b5d).
 - When rewording a screen, keep every hint and number that was there unless the plan says to remove it (2383b5d restored a dropped new-words hint).
 - Copy is short, natural Vietnamese: "%" rather than "điểm phần trăm", and no English left in learner-facing text.
