@@ -33,6 +33,7 @@ export default function TestRunner({ initial }: { initial: Initial }) {
   const unsaved = useRef(new Map<number, Answer>());
   const saveQueue = useRef<Promise<void>>(Promise.resolve());
   const autoTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const exiting = useRef(false);
   const subjectUrl = '/tests/subjects/' + initial.paper.subjectId;
 
   useEffect(() => { window.scrollTo({ top: 0 }); }, [stage]);
@@ -113,7 +114,7 @@ export default function TestRunner({ initial }: { initial: Initial }) {
   }
 
   function goTo(next: number) {
-    if (!attempt || next < 0 || next >= attempt.total) return;
+    if (!attempt || pending || exiting.current || next < 0 || next >= attempt.total) return;
     cancelAuto();
     const previous = positionRef.current;
     queueSave(previous, answersRef.current[previous] ?? null);
@@ -124,7 +125,7 @@ export default function TestRunner({ initial }: { initial: Initial }) {
   }
 
   function choose(index: number) {
-    if (!attempt) return;
+    if (!attempt || pending || exiting.current) return;
     const current = positionRef.current;
     const wasBlank = !answersRef.current[current]?.trim();
     const value = String(index);
@@ -141,6 +142,7 @@ export default function TestRunner({ initial }: { initial: Initial }) {
   }
 
   function updateFill(value: string) {
+    if (pending || exiting.current) return;
     const nextAnswers = [...answersRef.current];
     nextAnswers[positionRef.current] = value;
     answersRef.current = nextAnswers;
@@ -148,6 +150,7 @@ export default function TestRunner({ initial }: { initial: Initial }) {
   }
 
   function submit() {
+    if (pending || exiting.current) return;
     cancelAuto();
     setSheetOpen(false);
     setConfirmFinish(true);
@@ -168,11 +171,12 @@ export default function TestRunner({ initial }: { initial: Initial }) {
   }
 
   async function exit() {
-    if (!attempt) return;
+    if (!attempt || pending || exiting.current) return;
+    exiting.current = true;
     cancelAuto();
     queueSave(positionRef.current, answersRef.current[positionRef.current] ?? null);
     if (await flush()) { router.push(subjectUrl); router.refresh(); }
-    else setConfirmExit(true);
+    else { exiting.current = false; setConfirmExit(true); }
   }
 
   const item = attempt?.items[position];
@@ -199,7 +203,7 @@ export default function TestRunner({ initial }: { initial: Initial }) {
     {stage === 'questions' && attempt && item && <>
       <header className="sticky top-0 z-10 space-y-3 border-b border-border bg-background pb-3">
         <div className="flex min-h-11 items-center justify-between gap-2">
-          <button type="button" aria-label="Thoát bài kiểm tra" className="inline-flex size-11 items-center justify-center rounded-control border border-border" onClick={() => void exit()}><MaterialIcon name="close" size={22} /></button>
+          <button type="button" aria-label="Thoát bài kiểm tra" disabled={pending} className="inline-flex size-11 items-center justify-center rounded-control border border-border" onClick={() => void exit()}><MaterialIcon name="close" size={22} /></button>
           <button type="button" className="inline-flex min-h-11 items-center gap-1 font-bold md:hidden" aria-live="polite" onClick={() => setSheetOpen(true)}>Câu {position + 1}/{attempt.total}<MaterialIcon name="expand_more" /></button>
           <span className="hidden font-bold md:block" aria-live="polite">Câu {position + 1}/{attempt.total}</span>
           <span className="size-11 md:hidden" aria-hidden="true" />
@@ -219,7 +223,7 @@ export default function TestRunner({ initial }: { initial: Initial }) {
               </div>
             </> : <div className="space-y-4">
               {blank ? <h1 className="text-lg font-bold leading-relaxed sm:text-2xl">{blank.before}<span className="inline-block min-w-16 border-b-2 border-accent text-center text-accent">{answers[position] ?? ''}</span>{blank.after}</h1> : <h1 className="text-lg font-bold leading-relaxed sm:text-2xl">{item.prompt}</h1>}
-              <input key={position} autoFocus value={answers[position] ?? ''} onChange={(event) => updateFill(event.target.value)} onBlur={() => queueSave(positionRef.current, answersRef.current[positionRef.current] ?? null)} onKeyDown={(event) => { if (event.key !== 'Enter') return; event.preventDefault(); if (position === attempt.total - 1) submit(); else goTo(position + 1); }} aria-label={'Đáp án câu ' + (position + 1)} placeholder="Nhập đáp án" maxLength={200} autoCapitalize="none" autoCorrect="off" autoComplete="off" spellCheck={false} enterKeyHint={position === attempt.total - 1 ? 'done' : 'next'} className="min-h-12 w-full rounded-control border border-border bg-surface px-3 text-base" />
+              <input key={position} autoFocus disabled={pending} value={answers[position] ?? ''} onChange={(event) => updateFill(event.target.value)} onBlur={() => queueSave(positionRef.current, answersRef.current[positionRef.current] ?? null)} onKeyDown={(event) => { if (event.key !== 'Enter') return; event.preventDefault(); if (position === attempt.total - 1) submit(); else goTo(position + 1); }} aria-label={'Đáp án câu ' + (position + 1)} placeholder="Nhập đáp án" maxLength={200} autoCapitalize="none" autoCorrect="off" autoComplete="off" spellCheck={false} enterKeyHint={position === attempt.total - 1 ? 'done' : 'next'} className="min-h-12 w-full rounded-control border border-border bg-surface px-3 text-base" />
             </div>}
           </section>
           {error && <p role="alert" className="flex items-center gap-2 text-sm text-error">{error}<Button type="button" variant="link" onClick={() => void flush()}>Thử lại</Button></p>}
