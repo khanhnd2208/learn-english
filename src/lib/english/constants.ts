@@ -26,6 +26,7 @@ export const EN_SRS_SESSION_SIZE = 50;
 export const EN_SRS_DUE_MIN_SHARE = 0.6;
 
 export const EN_TEST_PASS_PERCENT = 80;
+export const EN_TEST_AUTO_ADVANCE_MS = 250;
 export const EN_TEST_MAX_QUESTIONS = 100;
 export const EN_TEST_MAX_OPTIONS = 6;
 export const EN_TEST_MAX_FILL_ANSWERS = 10;
