@@ -63,7 +63,7 @@ export default function ProgressHub({ board, weeks, wrong, stages, dueNext7Days,
 	return <div className="mx-auto max-w-5xl space-y-4 px-4 py-4 sm:space-y-5 sm:px-6 sm:py-8">
 		<header className="game-hero relative overflow-hidden rounded-panel border-2 p-3.5 sm:p-5">
 			<div className="flex items-center gap-2.5 sm:gap-3">
-				<span className="level-badge px-2 py-1 text-base sm:text-lg">Lv {board.level.level}</span>
+				<span className="level-badge px-2 py-1 text-base sm:text-lg">Cấp {board.level.level}</span>
 				<h1 className="min-w-0 flex-1 truncate text-xl sm:text-2xl">{board.level.title}</h1>
 				<span className="shrink-0 text-xs font-bold tabular-nums sm:text-sm">{board.level.total} XP</span>
 			</div>

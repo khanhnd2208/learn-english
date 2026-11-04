@@ -29,7 +29,7 @@ export default function ProgressStrip({ streak, longTerm, level, stages }: {
 		<dl className="grid grid-cols-3 gap-2 sm:gap-3">
 			<Stat value={streak} label="Chuỗi ngày" />
 			<Stat value={longTerm} label="Nhớ lâu" hint={<InfoHint title={HINTS.stages.title}>{HINTS.stages.body}</InfoHint>} />
-			<Stat value={`Lv ${level.level}`} label="Cấp độ" />
+			<Stat value={`Cấp ${level.level}`} label="Cấp độ" />
 		</dl>
 		<div>
 			<StageBar stages={stages} />

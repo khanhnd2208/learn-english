@@ -5,7 +5,7 @@ export default function LevelBar({ level, compact = false, label = true }: { lev
 	const percent = Math.round((level.intoLevel / level.levelSize) * 100);
 	return <div className="min-w-0">
 		{label && <div className="mb-1.5 flex items-center gap-2">
-			<span className="level-badge">Lv {level.level}</span>
+			<span className="level-badge">Cấp {level.level}</span>
 			<span className={`truncate font-bold ${compact ? 'text-xs' : 'text-sm'}`}>{level.title}</span>
 		</div>}
 		<div className={`game-progress-track overflow-hidden ${compact ? 'h-2' : 'h-3'}`} role="progressbar" aria-label={`Kinh nghiệm cấp ${level.level}`} aria-valuemin={0} aria-valuemax={level.levelSize} aria-valuenow={level.intoLevel}>

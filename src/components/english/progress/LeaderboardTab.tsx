@@ -20,7 +20,7 @@ function RankRow({ row }: { row: LeaderboardRow }) {
 		<div className="min-w-0 flex-1">
 			<p className="truncate font-bold">{row.name}</p>
 			<div className="flex items-center gap-1 text-xs text-muted">
-				<span>Lv {row.level}</span>
+				<span>Cấp {row.level}</span>
 				{row.active && <><span aria-hidden="true"> · </span><span className="live-dot shrink-0" /><span>Đang học</span></>}
 			</div>
 		</div>
