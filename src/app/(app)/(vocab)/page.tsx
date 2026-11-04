@@ -2,7 +2,6 @@ import { requestNow } from '@/lib/requestNow';
 import { redirect } from 'next/navigation';
 import HomeDashboard from '@/components/english/HomeDashboard';
 import { getGoalBoard } from '@/services/english/enGoalService';
-import { timeLeftLabel } from '@/lib/english/quests';
 import { auth } from '@/lib/auth';
 import { getTodayOverview } from '@/services/english/enDailyService';
 
@@ -23,5 +22,5 @@ export default async function EnglishHomePage() {
 	const now = requestNow();
 	const [overview, board] = await Promise.all([getTodayOverview(session.user.id), getGoalBoard(session.user.id)]);
 	const dateLabel = new Intl.DateTimeFormat('vi-VN', { timeZone: VN_TIME_ZONE, weekday: 'long', day: 'numeric', month: 'long' }).format(now);
-	return <HomeDashboard overview={overview} board={board} resetsIn={timeLeftLabel(board.today.resetsAt, now)} greeting={greetingFor(now, session.user.name)} dateLabel={dateLabel.charAt(0).toUpperCase() + dateLabel.slice(1)} />;
+	return <HomeDashboard overview={overview} board={board} greeting={greetingFor(now, session.user.name)} dateLabel={dateLabel.charAt(0).toUpperCase() + dateLabel.slice(1)} />;
 }
