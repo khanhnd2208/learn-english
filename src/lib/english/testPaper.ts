@@ -37,6 +37,16 @@ export function testReviewCounts(items: Array<{ answer: string | null; correct: 
   for (const item of items) counts[testReviewStatus(item)] += 1;
   return counts;
 }
+export function testAutoAdvanceTarget({ position, total, wasBlank }: { position: number; total: number; wasBlank: boolean }): number | null {
+  return wasBlank && position + 1 < total ? position + 1 : null;
+}
+export function firstBlankPosition(answers: readonly (string | null)[]): number | null {
+  const index = answers.findIndex((answer) => !answer?.trim());
+  return index < 0 ? null : index;
+}
+export function testShowsSubmit({ position, total, answers }: { position: number; total: number; answers: readonly (string | null)[] }): boolean {
+  return position === total - 1 || firstBlankPosition(answers) === null;
+}
 export function isTestPassed(score: number, total: number): boolean { return total > 0 && score * 100 >= total * EN_TEST_PASS_PERCENT; }
 export function testPercent(score: number, total: number): number { return total > 0 ? Math.round(score * 100 / total) : 0; }
 export function pickBestAttempt<T extends { score: number; total: number; finishedAt: Date }>(attempts: T[]): T | null {

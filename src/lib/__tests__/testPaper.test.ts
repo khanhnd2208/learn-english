@@ -1,6 +1,6 @@
 import { expect, test } from 'vitest';
 import { EN_TEST_MATCH_RULES as all } from '@/lib/english/constants';
-import { formatVnDateTime, formatVnDay, gradeTestAnswer, isTestPassed, matchFillAnswer, pickBestAttempt, testPercent, testReviewCounts } from '@/lib/english/testPaper';
+import { firstBlankPosition, formatVnDateTime, formatVnDay, gradeTestAnswer, isTestPassed, matchFillAnswer, pickBestAttempt, testAutoAdvanceTarget, testPercent, testReviewCounts, testShowsSubmit } from '@/lib/english/testPaper';
 
 const mcq = { type: 'mcq', correctIndex: 1, answers: [], matchRules: [] as string[] };
 const fill = { type: 'fill', correctIndex: null, answers: ['since', 'from'], matchRules: [...all] };
@@ -54,4 +54,18 @@ test('counts review statuses', () => {
 });
 test('formats a Vietnam date and time', () => {
   expect(formatVnDateTime(new Date('2026-11-03T17:30:00Z'))).toBe('00:30 · 04/11/2026');
+});
+test('auto advances only a newly answered nonfinal question', () => {
+  expect(testAutoAdvanceTarget({ position: 0, total: 3, wasBlank: true })).toBe(1);
+  expect(testAutoAdvanceTarget({ position: 0, total: 3, wasBlank: false })).toBeNull();
+  expect(testAutoAdvanceTarget({ position: 2, total: 3, wasBlank: true })).toBeNull();
+});
+test('finds the first blank answer', () => {
+  expect(firstBlankPosition(['1', null, ' ', '2'])).toBe(1);
+  expect(firstBlankPosition(['1', '2'])).toBeNull();
+});
+test('offers submit on the last question or once every question is answered', () => {
+  expect(testShowsSubmit({ position: 2, total: 3, answers: ['1', null, null] })).toBe(true);
+  expect(testShowsSubmit({ position: 0, total: 3, answers: ['1', 'a', '2'] })).toBe(true);
+  expect(testShowsSubmit({ position: 0, total: 3, answers: ['1', null, '2'] })).toBe(false);
 });
