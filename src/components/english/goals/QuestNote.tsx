@@ -4,22 +4,23 @@ import MaterialIcon from '@/components/ui/MaterialIcon';
 import { todayQuestCount } from '@/lib/english/quests';
 import type { GoalBoard } from '@/services/english/enGoalService';
 
-/**
- * Today's quests as a pinned note on the home page. It always shows, even before the first set,
- * so the learner can see what a day asks of them; without sets the quests stay locked.
- */
-export default function QuestNote({ board, resetsIn, hasSets }: { board: GoalBoard; resetsIn: string; hasSets: boolean }) {
+/** Today's quests as a compact link on phones and a full list on wide screens. */
+export default function QuestNote({ board }: { board: GoalBoard }) {
 	const { xp, goal, quests } = board.today;
 	const { done, total } = todayQuestCount(quests, xp, goal);
 	const percent = goal > 0 ? Math.min(100, Math.round((xp / goal) * 100)) : 0;
 	const week = board.week.quests[0];
 
-	return <section aria-labelledby="quest-note-heading" className="quest-note px-4 pt-4 pb-3.5 sm:pt-5 sm:pb-4">
+	return <>
+		<Link href="/progress" className="word-row flex-col items-stretch gap-2 lg:hidden">
+			<span className="flex w-full items-center justify-between gap-2"><span className="font-bold">Nhiệm vụ hôm nay</span><span className="shrink-0 font-bold tabular-nums">{done}/{total}</span></span>
+			<span className="game-progress-track block h-2 w-full overflow-hidden" role="progressbar" aria-label="XP hôm nay" aria-valuemin={0} aria-valuemax={goal} aria-valuenow={Math.min(xp, goal)}><span className="game-progress-fill block h-full" style={{ width: `${percent}%` }} /></span>
+		</Link>
+		<section aria-labelledby="quest-note-heading" className="quest-note hidden px-4 pt-4 pb-3.5 sm:pt-5 sm:pb-4 lg:block">
 		<div className="flex items-baseline justify-between gap-2">
 			<h2 id="quest-note-heading" className="text-base sm:text-lg">Nhiệm vụ hôm nay</h2>
-			{hasSets && <span className={`rounded-full px-2 py-0.5 text-xs font-black tabular-nums sm:text-sm ${done === total ? 'bg-success text-white' : 'bg-surface text-foreground'}`}>{done}/{total}</span>}
+			<span className={`rounded-full px-2 py-0.5 text-xs font-black tabular-nums sm:text-sm ${done === total ? 'bg-success text-white' : 'bg-surface text-foreground'}`}>{done}/{total}</span>
 		</div>
-		<p className="text-xs text-muted">Làm mới sau {resetsIn}</p>
 
 		<div className="mt-2.5">
 			<div className="mb-1 flex items-center justify-between gap-2 text-sm font-bold">
@@ -31,19 +32,16 @@ export default function QuestNote({ board, resetsIn, hasSets }: { board: GoalBoa
 			</div>
 		</div>
 
-		<ul className="mt-2">{quests.map((quest) => <QuestItem key={quest.key} quest={quest} dense locked={!hasSets} />)}</ul>
+		<ul className="mt-2">{quests.map((quest) => <QuestItem key={quest.key} quest={quest} dense />)}</ul>
 
-		{hasSets ? (
-			week ? (
+		{week ? (
 				<Link href="/progress" className="mt-2.5 flex min-h-10 items-center justify-between gap-2 rounded-control bg-surface/80 px-3 py-2 text-xs font-bold hover:bg-surface focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent">
 					<span className="flex min-w-0 items-center gap-1.5"><MaterialIcon name="calendar_month" size={16} className="shrink-0 text-muted" /><span>{week.title}</span></span>
 					<span className="shrink-0 tabular-nums text-accent">{week.current}/{week.target} ngày →</span>
 				</Link>
 			) : (
 				<Link href="/progress" className="mt-2 inline-flex min-h-10 items-center text-sm font-bold text-accent">Nhiệm vụ tuần và rương →</Link>
-			)
-		) : (
-			<p className="mt-3 text-sm font-semibold text-muted">Nhiệm vụ mở sau khi bạn tải bộ từ đầu tiên.</p>
-		)}
-	</section>;
+			)}
+		</section>
+	</>;
 }

@@ -35,12 +35,13 @@ export default function TestResultView({ result }: { result: TestResult }) {
             const right = option === question.correctText && question.options.indexOf(option) === index;
             return <li key={index} className={`flex items-start gap-2 rounded-control px-3 py-2 text-sm ${right ? 'bg-success-subtle' : chosen ? 'bg-error/5' : ''}`}><span className="font-bold">{String.fromCharCode(65 + index)}.</span><span className="min-w-0 flex-1">{option}</span>{right || chosen ? <span className={`shrink-0 ${right ? 'text-success' : 'text-error'}`}><MaterialIcon name={right ? 'check_circle' : 'cancel'} filled /><span className="sr-only">{right ? 'Đúng' : 'Sai'}</span></span> : null}</li>;
           })}</ul>
+          {question.answer === null && <p className="mt-2 text-sm text-muted">Chưa trả lời</p>}
         </> : <>
           <p className="mt-2 font-bold">{blank ? <>{blank.before}<span className={status === 'correct' ? 'text-success' : status === 'wrong' ? 'text-error line-through' : 'text-muted'}>{typed}</span>{blank.after}</> : question.prompt}</p>
           <p className="mt-2 text-sm">Bạn điền: {question.answer === null ? 'Chưa trả lời' : question.answer}</p>
           <p className="text-sm">{question.answers.length >= 2 ? `Đáp án chấp nhận: ${question.answers.join(' / ')}` : `Đáp án: ${question.correctText}`}</p>
         </>}
-        {question.explanationVi && <p className="mt-2 text-sm text-muted">{question.explanationVi}</p>}
+        {question.explanationVi && <p className="mt-2 text-sm text-muted">Giải thích: {question.explanationVi}</p>}
       </li>;
     })}</ul>
   </div>;

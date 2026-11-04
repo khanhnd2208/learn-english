@@ -112,7 +112,6 @@ export default function PracticeRunner({ detail, kind, seed }: { detail: English
 			{feedback && <AnswerFeedback correct={feedback.correct}>
 				{!feedback.correct && <p className="font-bold">Đáp án: {feedback.expected}</p>}
 				{bundle && <><div className="flex items-center justify-between gap-2"><p className="text-sm"><span className="font-bold">{bundle.word.lemma}</span> {bundle.word.ipa && <span className="font-mono text-muted">{bundle.word.ipa}</span>} · {bundle.sense.meaningVi}</p><EnglishAudioButton compact senseId={bundle.sense.id} lemma={bundle.word.lemma} recordedAudioAvailable={Boolean(bundle.word.audioPath)} /></div>{cardExample && <p className="text-sm text-muted">{cardExample.english.replace('___', cardExample.target)}</p>}</>}
-				{!feedback.correct && <p className="text-xs text-muted">Từ này sẽ quay lại sau vài câu.</p>}
 				<button type="button" autoFocus onClick={advance} className="min-h-11 w-full rounded-control bg-accent px-4 font-bold text-accent-foreground">Tiếp tục ↵</button>
 			</AnswerFeedback>}
 		</div>}

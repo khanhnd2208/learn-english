@@ -15,7 +15,6 @@ import LeaderboardTab from '@/components/english/progress/LeaderboardTab';
 import { HINTS } from '@/lib/english/hintCopy';
 import { accuracySeries, shortDayLabel, weekXpSummary, type WeekHistory } from '@/lib/english/progressStats';
 import type { countStages } from '@/lib/english/schedule';
-import { STAGE_META } from '@/lib/english/stageMeta';
 import { DAILY_GOAL_TIERS, XP } from '@/lib/english/xp';
 import type { GoalBoard } from '@/services/english/enGoalService';
 
@@ -180,26 +179,23 @@ function StatsTab({ board, weeks, wrong, stages, dueNext7Days }: { board: GoalBo
 
 	return <div className="grid gap-4 md:grid-cols-2">
 		<Card title={<>Kho từ của bạn <InfoHint title={HINTS.stages.title}>{HINTS.stages.body}</InfoHint></>}>
-			<p className="mt-1 mb-3 text-xs text-muted">Từ càng ôn đúng nhiều lần thì lịch ôn càng giãn ra và lên mức cao hơn.</p>
 			<StageDonut stages={stages} />
 			<h3 className="mt-4 text-sm font-bold">Lịch ôn 7 ngày tới</h3>
-			<p className="text-xs text-muted">Mỗi cột là số từ đến hạn trong một ngày.</p>
 			<div className="mt-2"><DueForecast days={dueNext7Days} height="h-20" /></div>
 		</Card>
 
 		<Card title="Tuần này" aside={<span className="xp-chip">{week.total} XP</span>}>
-			<p className="mt-1 text-xs text-muted"><strong className="text-foreground">{week.studiedDays}/7</strong> ngày có học · <strong className="text-foreground">{week.goalDays}</strong> ngày đạt mục tiêu · cao nhất <strong className="text-foreground">{week.best} XP</strong>. Mỗi cột là một ngày.</p>
+			<p className="mt-1 text-xs text-muted"><strong className="text-foreground">{week.studiedDays}/7</strong> ngày có học · <strong className="text-foreground">{week.goalDays}</strong> ngày đạt mục tiêu · cao nhất <strong className="text-foreground">{week.best} XP</strong></p>
 			{board.streak.longest > 0 && <p className="mt-1 text-xs text-muted">{board.streak.current > 0 ? `Chuỗi ${board.streak.current} ngày · kỷ lục ${board.streak.longest} ngày` : `Kỷ lục ${board.streak.longest} ngày học liên tiếp`}</p>}
 			<MiniBarChart label="XP mỗi ngày trong tuần" bars={dayBars} goal={{ value: board.today.goal, label: `Mục tiêu ${board.today.goal}` }} height={104} />
 		</Card>
 
 		<Card title="Tỉ lệ trả lời đúng" aside={<span className="game-number text-2xl tabular-nums">{thisWeek.percent === null ? '—' : `${thisWeek.percent}%`}</span>}>
-			<p className="mt-1 text-xs text-muted">{thisWeek.answers ? `${thisWeek.correct}/${thisWeek.answers} câu ôn luân phiên đúng tuần này` : 'Tuần này chưa có lượt ôn luân phiên'} · Mỗi cột là một tuần, bắt đầu từ ngày ghi bên dưới.</p>
+			<p className="mt-1 text-xs text-muted">{thisWeek.answers ? `${thisWeek.correct}/${thisWeek.answers} câu ôn luân phiên đúng tuần này` : 'Tuần này chưa có lượt ôn luân phiên'}</p>
 			<MiniBarChart label="Tỉ lệ trả lời đúng 8 tuần" bars={accuracyBars} max={100} band={{ from: 80, label: '≥80% tốt' }} height={104} empty="Chưa có lượt ôn luân phiên nào trong 8 tuần." />
 		</Card>
 
 		<Card title={<>Từ nhớ lâu <InfoHint title={HINTS.stages.title}>{HINTS.stages.body}</InfoHint></>} aside={<span className="text-sm"><span className="game-number text-2xl tabular-nums">{longTerm}</span> {longTermDelta !== 0 && <span className={`font-bold ${longTermDelta > 0 ? 'text-success' : 'text-error'}`}>{comparison(longTermDelta)}</span>}</span>}>
-			<p className="mt-1 text-xs text-muted">Số từ {STAGE_META.long_term.hint}, ước tính cuối mỗi tuần. Mỗi cột là một tuần, bắt đầu từ ngày ghi bên dưới.</p>
 			<MiniBarChart label="Số từ nhớ lâu 8 tuần" bars={longTermBars} height={104} empty="Chưa có từ nào lên mức nhớ lâu. Ôn đúng đều đặn để từ lên mức." />
 		</Card>
 		<Card title="Từ hay sai" aside={<Link href="/review" className="inline-flex min-h-11 items-center text-sm font-bold text-accent">Ôn theo bộ →</Link>} className="md:col-span-2">

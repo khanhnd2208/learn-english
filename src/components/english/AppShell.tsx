@@ -8,7 +8,6 @@ import type { NavLink } from '@/config/navigation';
 import ModeSwitch, { rememberPath } from '@/components/english/ModeSwitch';
 import { AdventureIcon } from '@/components/english/AdventureIcon';
 import AccountMenu from '@/components/english/AccountMenu';
-import OnboardingTour from '@/components/english/OnboardingTour';
 import GoalRing from '@/components/english/goals/GoalRing';
 import RewardCenter, { type ShellGoals } from '@/components/english/goals/RewardCenter';
 import MaterialIcon from '@/components/ui/MaterialIcon';
@@ -27,11 +26,10 @@ interface Props {
 	hasUpload: boolean;
 	/** Vocab area only: today's XP, level and quests. */
 	goals?: ShellGoals;
-	newLearner?: boolean;
 }
 
 /** Sidebar on desktop, top bar and bottom tabs on phones; shared by the Vocab and Test areas. */
-export default function AppShell({ children, nav, adminNav, adminHref, brandHref, tagline, isActive, focus, avatarUrl, hasUpload, goals, newLearner = false }: Props) {
+export default function AppShell({ children, nav, adminNav, adminHref, brandHref, tagline, isActive, focus, avatarUrl, hasUpload, goals }: Props) {
 	const pathname = usePathname();
 	const { data } = useSession();
 	const admin = (data?.user as { role?: string } | undefined)?.role === 'admin';
@@ -79,8 +77,6 @@ export default function AppShell({ children, nav, adminNav, adminHref, brandHref
 					{goals && (
 						<Link href="/progress" aria-label={`Mục tiêu ngày ${goals.xp}/${goals.goal} XP, cấp ${goals.level}`} className="flex min-h-11 items-center gap-1.5 rounded-control px-1.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent">
 							<GoalRing value={goals.xp} max={goals.goal} size={26} stroke={4} label="Mục tiêu ngày">{goals.xp >= goals.goal && <MaterialIcon name="check" size={14} className="text-success" />}</GoalRing>
-							{goals.xp > 0 && <span className="rounded-full bg-accent-subtle px-2 py-1 text-xs font-bold tabular-nums">{goals.xp}/{goals.goal}</span>}
-							<span className="level-badge text-xs">Cấp {goals.level}</span>
 						</Link>
 					)}
 					{account}
@@ -88,7 +84,6 @@ export default function AppShell({ children, nav, adminNav, adminHref, brandHref
 			</header>
 			<main className="min-h-screen bg-background pb-20 md:pb-0">{children}</main>
 			{goals && <RewardCenter goals={goals} />}
-			{goals && <OnboardingTour eligible={newLearner} />}
 			<nav aria-label="Điều hướng chính" className="adventure-mobile-nav fixed bottom-0 z-50 flex min-h-16 w-full items-center justify-around border-t px-1.5 pb-safe md:hidden">
 				{nav.map((item) => {
 					const active = isActive(pathname, item.href);

@@ -46,9 +46,53 @@ Không đổi schema, migration, API, service, chấm điểm, SRS, XP, màu, fo
 
 ## 5. Exact copy
 
-Thêm: `Đã làm {a}/{n}`, `Không lưu được câu trả lời.`, `Thử lại`, `Nộp bài?`, `Xem lại`, `Nộp bài`, `Còn {k} câu chưa làm`, `Câu chưa làm sẽ tính là sai.`, `Đến câu {m}`, `Chưa lưu được câu trả lời`, `Thoát bây giờ sẽ mất câu vừa làm.`, `Ở lại`, `Thoát`, `Lịch sử làm bài ({total})`, `Câu sai ({n})`, `Tất cả`, `Đạt từ 80%`, `Cao nhất {x}/{y}`, `Đã làm {a}/{n}`, `Của bạn`, `Cài đặt môn học`, `Không tìm thấy khóa học`, `Không tìm thấy môn học`, `Chưa có đề`, `Xem khóa học`, `Chọn khóa học`, `{d} đến hạn · {m} từ mới · ~{p} phút` (ẩn phần 0), `Xem thử {x}/{y} từ`, `Chọn ít nhất một bộ`, `Bản nháp`, `Chưa thuộc môn học`.
+**Thêm mới (đúng chữ):**
 
-Bỏ ở Kiểm tra: phụ đề thư viện và kết quả, thông báo chưa tham gia, giải thích đăng ký/làm bài, `Thử từ khóa khác.`, nút và nhãn trùng hàng (`Vào làm bài →`, `Xem khóa học →`, `Đã đăng ký`), `Chưa đạt · cần 80%`, `Bạn chọn`, `Đáp án đúng`, `Bạn chọn · Đáp án đúng`, `Thoát bài kiểm tra?` và mô tả cũ. Bỏ ở Từ vựng: phụ đề thư viện, giải thích trang chủ/review, `Bắt đầu` trên thẻ, mô tả bốn dạng câu hỏi, dòng tiến trình thừa trong guided, câu nhắc lặp trong practice, mô tả xem thử/bản nháp dài. Bỏ ở Tiến bộ: lời giải thích cột ngày/tuần và ước tính cuối tuần. Xóa ba bước onboarding. Giữ mọi chuỗi khác.
+| Nơi | Chữ |
+|---|---|
+| Danh sách câu, Sheet và sidebar | `Đã làm {a}/{n}` |
+| Lỗi lưu | `Không lưu được câu trả lời.` · `Thử lại` |
+| Hộp nộp, hết câu trống | `Nộp bài?` · `Xem lại` · `Nộp bài` |
+| Hộp nộp, còn câu trống | `Còn {k} câu chưa làm` · `Câu chưa làm sẽ tính là sai.` · `Đến câu {m}` · `Nộp bài` |
+| Hộp thoát khi lỗi lưu | `Chưa lưu được câu trả lời` · `Thoát bây giờ sẽ mất câu vừa làm.` · `Ở lại` · `Thoát` |
+| Lịch sử và lọc kết quả | `Lịch sử làm bài ({total})` · `Câu sai ({n})` · `Tất cả` |
+| Màn mở đầu | `Đạt từ {80}%` · `Cao nhất {x}/{y}` · `Đã làm {a}/{n}` |
+| Nhóm thư viện kiểm tra | `Của bạn` thay `Khóa học của bạn` |
+| Admin môn học | `Cài đặt môn học` |
+| Trống | `Không tìm thấy khóa học` · `Không tìm thấy môn học` · `Chưa có đề` · `Xem khóa học` · `Chọn khóa học` |
+| TodayHero | `{d} đến hạn · {m} từ mới · ~{p} phút`; ẩn phần có giá trị 0 |
+| SetDetail | `Xem thử {x}/{y} từ` · `Bản nháp` · `Chưa thuộc môn học` |
+| ReviewOverview | `Chọn ít nhất một bộ` |
+
+**Bỏ ở Kiểm tra (đúng chữ):**
+
+- `Chọn khóa học để làm bài kiểm tra.`, `Khóa nháp và khóa ẩn cũng hiện với quyền quản trị.`
+- `Bạn chưa tham gia khóa học nào. Chọn một khóa ở mục Khám phá.`, `Đăng ký khóa học để làm bài kiểm tra.`
+- `Bạn sẽ biết đáp án sau khi nộp bài.`, `Các lần nộp bài gần đây của bạn.`, `Thử từ khóa khác.`
+- `Chưa có khóa học nào. Quay lại sau nhé.`, `Làm một bài kiểm tra để xem kết quả ở đây.`, `Thoát bài kiểm tra?` và mô tả cũ của hộp thoát.
+- `Vào làm bài →`, `Xem khóa học →`, `Đã đăng ký`, `Chưa đạt · cần 80%`.
+- `Bạn chọn`, `Đáp án đúng`, `Bạn chọn · Đáp án đúng`.
+
+**Bỏ ở Từ vựng (đúng chữ):**
+
+- `Chọn môn học phù hợp với bạn.`, `Môn nháp và môn ẩn cũng hiện với quyền quản trị.`, `Các môn học sẽ xuất hiện khi được xuất bản.`
+- `Gõ lại từ để nhớ lâu. Từ đến hạn quay lại đúng lúc, bạn không phải tự nhớ lịch.`, `Tất cả bộ đang học:`, `Mỗi lượt 50 từ · lượt này`.
+- `Tải một bộ, app sẽ lên lịch ôn cho từng từ.`, nhãn `Bắt đầu` trên thẻ.
+- `Mỗi lượt 5 từ: xem thẻ, làm quiz, rồi làm lại câu sai. Không đổi lịch ôn luân phiên.`, `Mở sau khi bạn tải bộ từ đầu tiên.`, `Nhiệm vụ mở sau khi bạn tải bộ từ đầu tiên.`, `Làm mới sau …` ở trang chủ.
+- `Chọn một bộ, ôn từng lượt 5 từ.`, `{5} từ / chặng · …`, `Tải một bộ để có từ học thêm.`.
+- `Kết hợp chọn nghĩa, điền câu và nghe viết.`, `Nhìn từ tiếng Anh và chọn nghĩa đúng.`, `Chọn từ đúng để điền vào câu.`, `Nghe phát âm và gõ từ bạn nghe được.`, `Hiện thêm cụm từ và cách dùng trên thẻ học.`
+- `Dạng câu hỏi: …`, `Đã đi x/y từ trong các bộ đã chọn.`, `Từ này sẽ quay lại sau vài câu.`
+- `Đang xem x/y từ mẫu. Đăng ký môn học để xem cả bộ.`
+- `Bộ này còn là bản nháp: học viên chưa thấy và chưa tải được.` thay bằng `Bản nháp`.
+- `Bộ này chưa thuộc môn học nào nên học viên chưa thấy.` thay bằng `Chưa thuộc môn học`.
+
+**Bỏ ở Tiến bộ (đúng chữ):**
+
+- `Từ càng ôn đúng nhiều lần thì lịch ôn càng giãn ra và lên mức cao hơn.`
+- `Mỗi cột là số từ đến hạn trong một ngày.`, `Mỗi cột là một ngày.`, `Mỗi cột là một tuần, bắt đầu từ ngày ghi bên dưới.` ở cả hai chỗ.
+- `Số từ … ước tính cuối mỗi tuần.`
+
+Xóa toàn bộ ba bước tour onboarding. Các chuỗi khác giữ nguyên; không thêm chữ tiếng Anh cho học viên.
 
 ## 6. States
 

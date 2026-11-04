@@ -23,5 +23,5 @@ export default async function VocabLayout({ children }: { children: React.ReactN
 		// Ask for a goal once the learner has something to study, not on an empty first visit.
 		showGoalPicker: !board.goalChosen && (overview.enrolledSets > 0 || overview.learnedCount > 0),
 	};
-	return <VocabShell goals={goals} newLearner={overview.enrolledSets === 0 && overview.learnedCount === 0} avatarUrl={avatar.avatarUrl} hasUpload={avatar.hasUpload}>{children}</VocabShell>;
+	return <VocabShell goals={goals} avatarUrl={avatar.avatarUrl} hasUpload={avatar.hasUpload}>{children}</VocabShell>;
 }
