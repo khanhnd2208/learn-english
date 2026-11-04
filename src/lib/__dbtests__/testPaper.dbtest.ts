@@ -2,7 +2,9 @@ import { expect, test } from 'vitest';
 import { prisma } from '@/lib/prisma';
 import { resetEnTables } from './setup';
 import { buildTestWorkbook } from '@/services/english/enTestWorkbookService';
-import { deleteTestPaper, finishTestPaper, getTestPaperForLearner, listMyTestResults, reorderTestPapers, saveTestPaper, startTestPaper } from '@/services/english/enTestService';
+import { answerTestPaper, deleteTestPaper, exportTestPaper, finishTestPaper, getTestPaperForLearner, listMyTestResults, reorderTestPapers, saveTestPaper, startTestPaper } from '@/services/english/enTestService';
+import { readTestWorkbook } from '@/services/english/enTestWorkbookService';
+import { getTestSubjectDetail, listTestSubjects } from '@/services/english/enTestSubjectService';
 import type { TestQuestionInput } from '@/lib/english/testPaper';
 
 const one: TestQuestionInput[] = [{ type: 'mcq', prompt: 'Pick one.', options: ['no', 'yes'], correctIndex: 1, explanationVi: '' }];
@@ -110,4 +112,25 @@ test('history lists only my finished attempts, newest first, numbered', async ()
   const view = await getTestPaperForLearner('learner', paper.id, false);
   expect(view.history.map((row) => row.number)).toEqual([2, 1]);
   expect(view.attemptCount).toBe(2);
+});
+test('export round-trips the paper questions in order', async () => {
+  const { subject, paper } = await world();
+  const replaced = await saveTestPaper({ subjectId: subject.id, title: 'Paper', description: '', data: await file(two), publish: true, paperId: paper.id });
+  const exported = await exportTestPaper(replaced.id);
+  const rows = await readTestWorkbook(exported.data.buffer.slice(exported.data.byteOffset, exported.data.byteOffset + exported.data.byteLength) as ArrayBuffer);
+  expect(rows.slice(1).map((row) => row[1])).toEqual(['Pick one.', 'A ___ B.']);
+});
+test('course screens count paper entries', async () => {
+  const { subject, paper } = await world();
+  const detail = await getTestSubjectDetail('learner', subject.id, false);
+  expect(detail.papers.find((row) => row.id === paper.id)?.questionCount).toBe(1);
+  expect((await listTestSubjects('learner', false)).map((row) => row.id)).toContain(subject.id);
+});
+test('resuming returns the saved answers and position', async () => {
+  const { paper } = await world();
+  const first = await startTestPaper('learner', paper.id, false);
+  await answerTestPaper('learner', first.id, 0, '1');
+  const again = await startTestPaper('learner', paper.id, false);
+  expect(again.id).toBe(first.id);
+  expect(again.items[0]?.answer).toBe('1');
 });
