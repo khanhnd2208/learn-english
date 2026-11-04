@@ -2,7 +2,9 @@ import { expect, test } from 'vitest';
 import { prisma } from '@/lib/prisma';
 import { resetEnTables } from './setup';
 import { buildTestWorkbook } from '@/services/english/enTestWorkbookService';
-import { deleteTestPaper, finishTestPaper, listMyTestResults, reorderTestPapers, saveTestPaper, startTestPaper } from '@/services/english/enTestService';
+import { answerTestPaper, deleteTestPaper, exportTestPaper, finishTestPaper, getTestPaperForLearner, listMyTestResults, reorderTestPapers, saveTestPaper, startTestPaper } from '@/services/english/enTestService';
+import { readTestWorkbook } from '@/services/english/enTestWorkbookService';
+import { getTestSubjectDetail, listTestSubjects } from '@/services/english/enTestSubjectService';
 import type { TestQuestionInput } from '@/lib/english/testPaper';
 
 const one: TestQuestionInput[] = [{ type: 'mcq', prompt: 'Pick one.', options: ['no', 'yes'], correctIndex: 1, explanationVi: '' }];
@@ -68,4 +70,67 @@ test('reordering moves a paper to another course and is repeatable', async () =>
     expect(await prisma.enTestPaper.findUniqueOrThrow({ where: { id: paper.id } })).toMatchObject({ subjectId: other.id, sortOrder: 0 });
     expect(await prisma.enTestPaper.findUniqueOrThrow({ where: { id: second.id } })).toMatchObject({ subjectId: subject.id, sortOrder: 0 });
   }
+});
+test('a bank question shared by two papers survives deleting one paper', async () => {
+  const { subject, paper } = await world();
+  const entry = await prisma.enTestPaperEntry.findFirstOrThrow({ where: { paperId: paper.id } });
+  const second = await saveTestPaper({ subjectId: subject.id, title: 'Second', description: '', data: await file(one), publish: true });
+  await prisma.enTestPaperEntry.deleteMany({ where: { paperId: second.id } });
+  await prisma.enTestPaperEntry.create({ data: { paperId: second.id, questionId: entry.questionId, position: 0 } });
+  await deleteTestPaper(paper.id);
+  expect(await prisma.enTestQuestion.count({ where: { id: entry.questionId } })).toBe(1);
+  expect(await prisma.enTestPaperEntry.count({ where: { paperId: second.id } })).toBe(1);
+});
+test('a bank question in use cannot be deleted', async () => {
+  const { paper } = await world();
+  const entry = await prisma.enTestPaperEntry.findFirstOrThrow({ where: { paperId: paper.id } });
+  await expect(prisma.enTestQuestion.delete({ where: { id: entry.questionId } })).rejects.toSatisfy((error: unknown) => /foreign key|23503|P2003/i.test(JSON.stringify({ code: (error as { code?: string }).code, meta: (error as { meta?: unknown }).meta, message: String(error) })));
+});
+test('editing a bank question leaves a started attempt unchanged', async () => {
+  const { paper } = await world();
+  const entry = await prisma.enTestPaperEntry.findFirstOrThrow({ where: { paperId: paper.id } });
+  const active = await startTestPaper('learner', paper.id, false);
+  await prisma.enTestQuestion.update({ where: { id: entry.questionId }, data: { prompt: 'Changed.' } });
+  const item = await prisma.enTestPaperAttemptItem.findFirstOrThrow({ where: { attemptId: active.id } });
+  expect(item).toMatchObject({ prompt: 'Pick one.', questionId: entry.questionId });
+  await finishTestPaper('learner', active.id);
+  expect((await startTestPaper('learner', paper.id, false)).items[0]?.prompt).toBe('Changed.');
+});
+test('replacing a paper keeps the old questions in the bank', async () => {
+  const { subject, paper } = await world();
+  const before = await prisma.enTestPaperEntry.findFirstOrThrow({ where: { paperId: paper.id } });
+  await saveTestPaper({ subjectId: subject.id, title: 'Paper', description: '', data: await file(two), publish: true, paperId: paper.id });
+  expect(await prisma.enTestQuestion.count({ where: { id: before.questionId } })).toBe(1);
+  const entries = await prisma.enTestPaperEntry.findMany({ where: { paperId: paper.id }, orderBy: { position: 'asc' } });
+  expect(entries).toHaveLength(2);
+  expect(entries.map((entry) => entry.questionId)).not.toContain(before.questionId);
+});
+test('history lists only my finished attempts, newest first, numbered', async () => {
+  const { paper } = await world();
+  await prisma.enTestSubjectEnrollment.create({ data: { userId: 'other', subjectId: paper.subjectId } });
+  for (const userId of ['learner', 'other', 'learner']) await finishTestPaper(userId, (await startTestPaper(userId, paper.id, false)).id);
+  const view = await getTestPaperForLearner('learner', paper.id, false);
+  expect(view.history.map((row) => row.number)).toEqual([2, 1]);
+  expect(view.attemptCount).toBe(2);
+});
+test('export round-trips the paper questions in order', async () => {
+  const { subject, paper } = await world();
+  const replaced = await saveTestPaper({ subjectId: subject.id, title: 'Paper', description: '', data: await file(two), publish: true, paperId: paper.id });
+  const exported = await exportTestPaper(replaced.id);
+  const rows = await readTestWorkbook(exported.data.buffer.slice(exported.data.byteOffset, exported.data.byteOffset + exported.data.byteLength) as ArrayBuffer);
+  expect(rows.slice(1).map((row) => row[1])).toEqual(['Pick one.', 'A ___ B.']);
+});
+test('course screens count paper entries', async () => {
+  const { subject, paper } = await world();
+  const detail = await getTestSubjectDetail('learner', subject.id, false);
+  expect(detail.papers.find((row) => row.id === paper.id)?.questionCount).toBe(1);
+  expect((await listTestSubjects('learner', false)).map((row) => row.id)).toContain(subject.id);
+});
+test('resuming returns the saved answers and position', async () => {
+  const { paper } = await world();
+  const first = await startTestPaper('learner', paper.id, false);
+  await answerTestPaper('learner', first.id, 0, '1');
+  const again = await startTestPaper('learner', paper.id, false);
+  expect(again.id).toBe(first.id);
+  expect(again.items[0]?.answer).toBe('1');
 });

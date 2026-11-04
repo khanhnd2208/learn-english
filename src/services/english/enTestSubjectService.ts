@@ -18,7 +18,7 @@ export interface AdminTestSubject extends TestSubjectSummary { papersList: TestP
 
 const NOT_FOUND = 'Không tìm thấy khóa học';
 const visibleToLearner = (userId: string) => ({ OR: [
-  { status: 'published' as const, listed: true, papers: { some: { status: 'published' as const, questions: { some: {} } } } },
+  { status: 'published' as const, listed: true, papers: { some: { status: 'published' as const, entries: { some: {} } } } },
   { enrollments: { some: { userId } } },
 ] });
 
@@ -29,7 +29,7 @@ export async function listTestSubjects(userId: string, isAdmin: boolean): Promis
     include: {
       enrollments: { where: { userId }, select: { id: true } },
       _count: { select: { enrollments: true } },
-      papers: { where: { status: 'published', questions: { some: {} } }, select: { id: true, attempts: { where: { userId, status: 'finished' }, select: { score: true, total: true } } } },
+      papers: { where: { status: 'published', entries: { some: {} } }, select: { id: true, attempts: { where: { userId, status: 'finished' }, select: { score: true, total: true } } } },
     },
   });
   return subjects.map((subject) => ({
@@ -43,15 +43,15 @@ export async function listTestSubjects(userId: string, isAdmin: boolean): Promis
 
 export async function testPaperRows(userId: string, subjectId: string, isAdmin: boolean): Promise<TestPaperRow[]> {
   const papers = await prisma.enTestPaper.findMany({
-    where: { subjectId, ...(isAdmin ? {} : { status: 'published', questions: { some: {} } }) },
+    where: { subjectId, ...(isAdmin ? {} : { status: 'published', entries: { some: {} } }) },
     orderBy: [{ sortOrder: 'asc' }, { title: 'asc' }],
-    include: { _count: { select: { questions: true } }, attempts: { where: { userId }, select: { status: true, score: true, total: true, finishedAt: true } } },
+    include: { _count: { select: { entries: true } }, attempts: { where: { userId }, select: { status: true, score: true, total: true, finishedAt: true } } },
   });
   return papers.map((paper) => {
     const finished = paper.attempts.filter((attempt): attempt is typeof attempt & { score: number; finishedAt: Date } => attempt.status === 'finished' && attempt.score !== null && attempt.finishedAt !== null);
     const best = pickBestAttempt(finished);
     return {
-      id: paper.id, title: paper.title, status: paper.status, questionCount: paper._count.questions,
+      id: paper.id, title: paper.title, status: paper.status, questionCount: paper._count.entries,
       inProgress: paper.attempts.some((attempt) => attempt.status === 'in_progress'),
       best: best ? { score: best.score, total: best.total, passed: isTestPassed(best.score, best.total) } : null,
       attempts: finished.length,
@@ -63,7 +63,7 @@ export async function testPaperRows(userId: string, subjectId: string, isAdmin: 
 export async function getTestSubjectDetail(userId: string, subjectId: string, isAdmin: boolean): Promise<TestSubjectDetail> {
   const subject = await prisma.enTestSubject.findUnique({
     where: { id: subjectId },
-    include: { enrollments: { where: { userId }, select: { id: true } }, _count: { select: { enrollments: true } }, papers: { where: { status: 'published', questions: { some: {} } }, select: { id: true } } },
+    include: { enrollments: { where: { userId }, select: { id: true } }, _count: { select: { enrollments: true } }, papers: { where: { status: 'published', entries: { some: {} } }, select: { id: true } } },
   });
   if (!subject) throw new AppError(NOT_FOUND, 404);
   const enrolled = subject.enrollments.length > 0;

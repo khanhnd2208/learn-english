@@ -14,7 +14,7 @@ export default async function TestResultPage({ params }: { params: Promise<{ att
   try { result = await getTestResult(session.user.id, attemptId); }
   catch (error) { if (error instanceof AppError && error.status === 404) notFound(); throw error; }
   return <div className="mx-auto max-w-3xl space-y-4 px-4 py-5 sm:px-6 sm:py-8">
-    <BackLink href="/tests/results">Kết quả</BackLink>
+    <BackLink href={`/tests/papers/${result.paperId}`}>{result.paperTitle}</BackLink>
     <p className="text-sm text-muted">{result.paperTitle} · {result.subjectTitle} · {result.day}</p>
     <TestResultView result={result} />
   </div>;
