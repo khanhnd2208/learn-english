@@ -212,7 +212,7 @@ export default function TestRunner({ initial }: { initial: Initial }) {
         <ProgressBar value={answered} max={attempt.total} />
       </header>
       <div className="flex-1 md:grid md:grid-cols-[1fr_18rem] md:gap-6">
-        <main className="flex min-w-0 flex-col">
+        <div className="flex min-w-0 flex-col">
           <section className="flex-1 space-y-5 py-7">
             {item.type === 'mcq' ? <>
               <h1 className="text-lg font-bold leading-relaxed sm:text-2xl">{item.prompt}</h1>
@@ -235,7 +235,7 @@ export default function TestRunner({ initial }: { initial: Initial }) {
               <Button type="button" className="min-w-0 flex-1 text-sm" onClick={submit}>Nộp bài</Button>
             </> : <Button type="button" className="min-w-0 flex-1 text-sm" onClick={() => goTo(position + 1)}>Câu tiếp</Button>}
           </footer>
-        </main>
+        </div>
         <aside className="hidden md:block">
           <div className="sticky top-4 space-y-3 rounded-card border border-border bg-surface p-4">
             <p className="font-bold">Đã làm {answered}/{attempt.total}</p>
