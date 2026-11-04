@@ -13,8 +13,8 @@ export default function QuestNote({ board }: { board: GoalBoard }) {
 
 	return <>
 		<Link href="/progress" className="word-row flex-col items-stretch gap-2 lg:hidden">
-			<span className="flex items-center justify-between gap-2"><span className="font-bold">Nhiệm vụ hôm nay</span><span className="shrink-0 font-bold tabular-nums">{done}/{total}</span></span>
-			<span className="game-progress-track block h-2 overflow-hidden" role="progressbar" aria-label="XP hôm nay" aria-valuemin={0} aria-valuemax={goal} aria-valuenow={Math.min(xp, goal)}><span className="game-progress-fill block h-full" style={{ width: `${percent}%` }} /></span>
+			<span className="flex w-full items-center justify-between gap-2"><span className="font-bold">Nhiệm vụ hôm nay</span><span className="shrink-0 font-bold tabular-nums">{done}/{total}</span></span>
+			<span className="game-progress-track block h-2 w-full overflow-hidden" role="progressbar" aria-label="XP hôm nay" aria-valuemin={0} aria-valuemax={goal} aria-valuenow={Math.min(xp, goal)}><span className="game-progress-fill block h-full" style={{ width: `${percent}%` }} /></span>
 		</Link>
 		<section aria-labelledby="quest-note-heading" className="quest-note hidden px-4 pt-4 pb-3.5 sm:pt-5 sm:pb-4 lg:block">
 		<div className="flex items-baseline justify-between gap-2">

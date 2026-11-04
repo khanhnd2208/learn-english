@@ -81,7 +81,7 @@ export default function ReviewOverview({ guided: initial }: { guided: GuidedRevi
 		}
 	}
 
-	return <div className="mx-auto max-w-2xl px-4 py-4 sm:px-6 sm:py-8">
+	return <div className="mx-auto max-w-2xl space-y-3 px-4 py-4 sm:space-y-4 sm:px-6 sm:py-8">
 		<PageHeader title="Ôn theo bộ" action={<button type="button" title="Cài đặt câu hỏi" aria-label="Cài đặt câu hỏi" onClick={() => setSettingsOpen(true)} className="flex size-11 items-center justify-center rounded-control text-accent hover:bg-accent-subtle"><MaterialIcon name="tune" size={22} /></button>} />
 		<>
 		{noSets ? <section className="mode-card text-center">

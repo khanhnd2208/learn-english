@@ -87,26 +87,33 @@ export default function TestRunner({ initial }: { initial: Initial }) {
     });
   }
 
-  async function flush(): Promise<boolean> {
-    await saveQueue.current;
-    for (const [index, value] of [...unsaved.current]) {
-      try {
-        await api({ action: 'answer', attemptId: attempt?.id, position: index, answer: value ?? '' });
-        if (unsaved.current.get(index) === value) unsaved.current.delete(index);
-      } catch { setError('Không lưu được câu trả lời.'); return false; }
-    }
-    if (unsaved.current.size) return false;
-    // Retrying an older answer also moves the server's resume position.
-    const current = positionRef.current;
-    try {
-      await api({ action: 'answer', attemptId: attempt?.id, position: current, answer: answersRef.current[current] ?? '' });
-    } catch {
-      unsaved.current.set(current, answersRef.current[current] ?? null);
-      setError('Không lưu được câu trả lời.');
-      return false;
-    }
-    setError('');
-    return true;
+  function flush(): Promise<boolean> {
+    // Retries run inside the queue, so an old answer can never overwrite one chosen during the retry.
+    const run = saveQueue.current.then(async () => {
+      const retries = [...unsaved.current];
+      for (const [index, value] of retries) {
+        try {
+          await api({ action: 'answer', attemptId: attempt?.id, position: index, answer: value ?? '' });
+          if (unsaved.current.get(index) === value) unsaved.current.delete(index);
+        } catch { setError('Không lưu được câu trả lời.'); return false; }
+      }
+      if (retries.length) {
+        // Retrying an older answer also moves the server's resume position.
+        const current = positionRef.current;
+        const value = lastQueued.current[current] ?? null;
+        try {
+          await api({ action: 'answer', attemptId: attempt?.id, position: current, answer: value ?? '' });
+        } catch {
+          unsaved.current.set(current, value);
+          setError('Không lưu được câu trả lời.');
+          return false;
+        }
+      }
+      setError('');
+      return true;
+    });
+    saveQueue.current = run.then(() => undefined);
+    return run;
   }
 
   function cancelAuto() {
@@ -161,8 +168,9 @@ export default function TestRunner({ initial }: { initial: Initial }) {
     if (!attempt || pending) return;
     setPending(true);
     queueSave(positionRef.current, answersRef.current[positionRef.current] ?? null);
-    if (!await flush()) { setPending(false); return; }
+    const saved = await flush();
     setConfirmFinish(false);
+    if (!saved) { setPending(false); return; }
     try {
       setResult(await api({ action: 'finish', attemptId: attempt.id }) as TestResult);
       setStage('result');
@@ -194,7 +202,7 @@ export default function TestRunner({ initial }: { initial: Initial }) {
         <h1 className="text-3xl font-bold">{initial.paper.title}</h1>
         <p className="text-sm text-muted">{initial.paper.questionCount} câu · Đạt từ {EN_TEST_PASS_PERCENT}%</p>
         {initial.best && <p className="text-sm">Cao nhất {initial.best.score}/{initial.best.total}</p>}
-        {attempt && <p className="text-sm">Đã làm {answered}/{attempt.total}</p>}
+        {attempt && answered > 0 && <p className="text-sm">Đã làm {answered}/{attempt.total}</p>}
         <Button type="button" loading={pending} onClick={() => void start()} className="w-full sm:w-auto">{attempt ? 'Làm tiếp' : 'Bắt đầu'}</Button>
         {error && <p role="alert" className="text-sm text-error">{error}</p>}
       </div>
@@ -211,8 +219,8 @@ export default function TestRunner({ initial }: { initial: Initial }) {
         </div>
         <ProgressBar value={answered} max={attempt.total} />
       </header>
-      <div className="flex-1 md:grid md:grid-cols-[1fr_18rem] md:gap-6">
-        <div className="flex min-w-0 flex-col">
+      <div className="flex flex-1 flex-col md:grid md:grid-cols-[1fr_18rem] md:gap-6">
+        <div className="flex min-w-0 flex-1 flex-col">
           <section className="flex-1 space-y-5 py-7">
             {item.type === 'mcq' ? <>
               <h1 className="text-lg font-bold leading-relaxed sm:text-2xl">{item.prompt}</h1>
@@ -227,17 +235,17 @@ export default function TestRunner({ initial }: { initial: Initial }) {
               <input key={position} autoFocus disabled={pending} value={answers[position] ?? ''} onChange={(event) => updateFill(event.target.value)} onBlur={() => queueSave(positionRef.current, answersRef.current[positionRef.current] ?? null)} onKeyDown={(event) => { if (event.key !== 'Enter') return; event.preventDefault(); if (position === attempt.total - 1) submit(); else goTo(position + 1); }} aria-label={'Đáp án câu ' + (position + 1)} placeholder="Nhập đáp án" maxLength={200} autoCapitalize="none" autoCorrect="off" autoComplete="off" spellCheck={false} enterKeyHint={position === attempt.total - 1 ? 'done' : 'next'} className="min-h-12 w-full rounded-control border border-border bg-surface px-3 text-base" />
             </div>}
           </section>
-          {error && <p role="alert" className="flex items-center gap-2 text-sm text-error">{error}<Button type="button" variant="link" onClick={() => void flush()}>Thử lại</Button></p>}
+          {error && <p role="alert" className="flex items-center gap-2 text-sm text-error">{error}<Button type="button" variant="link" className="min-h-11" onClick={() => void flush()}>Thử lại</Button></p>}
           <footer className="sticky bottom-0 flex items-center gap-2 border-t border-border bg-background pb-[max(0.75rem,env(safe-area-inset-bottom))] pt-3">
-            <Button type="button" variant="secondary" disabled={position === 0} aria-label="Câu trước" className="size-12 shrink-0 p-0" onClick={() => goTo(position - 1)}><MaterialIcon name="arrow_back" /></Button>
+            <Button type="button" size="lg" variant="secondary" disabled={position === 0} aria-label="Câu trước" className="w-12 shrink-0 px-0! sm:px-0!" onClick={() => goTo(position - 1)}><MaterialIcon name="arrow_back" /></Button>
             {showSubmit ? <>
-              {position < attempt.total - 1 && <Button type="button" variant="secondary" aria-label="Câu tiếp" className="size-12 shrink-0 p-0" onClick={() => goTo(position + 1)}><MaterialIcon name="arrow_forward" /></Button>}
-              <Button type="button" className="min-w-0 flex-1 text-sm" onClick={submit}>Nộp bài</Button>
-            </> : <Button type="button" className="min-w-0 flex-1 text-sm" onClick={() => goTo(position + 1)}>Câu tiếp</Button>}
+              {position < attempt.total - 1 && <Button type="button" size="lg" variant="secondary" aria-label="Câu tiếp" className="w-12 shrink-0 px-0! sm:px-0!" onClick={() => goTo(position + 1)}><MaterialIcon name="arrow_forward" /></Button>}
+              <Button type="button" size="lg" className="min-w-0 flex-1 text-sm" onClick={submit}>Nộp bài</Button>
+            </> : <Button type="button" size="lg" className="min-w-0 flex-1 text-sm" onClick={() => goTo(position + 1)}>Câu tiếp</Button>}
           </footer>
         </div>
-        <aside className="hidden md:block">
-          <div className="sticky top-4 space-y-3 rounded-card border border-border bg-surface p-4">
+        <aside className="hidden pt-4 md:block">
+          <div className="sticky top-24 space-y-3 rounded-card border border-border bg-surface p-4">
             <p className="font-bold">Đã làm {answered}/{attempt.total}</p>
             <TestQuestionGrid items={attempt.items} answers={answers} position={position} onSelect={goTo} />
             {!showSubmit && <Button type="button" variant="secondary" className="w-full" onClick={submit}>Nộp bài</Button>}
