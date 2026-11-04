@@ -47,7 +47,7 @@ export default function RewardCenter({ goals }: { goals: ShellGoals }) {
 		<DailyGoalSheet open={step === 'goal'} intro current={goals.dailyGoalXp} todayGoal={goals.goal} onClose={() => setDismissed((current) => new Set(current).add('goal'))} />
 		<Dialog open={step === 'level'} onClose={close} title="Lên cấp!">
 			<div className="space-y-3 py-2 text-center">
-				<div className="animate-badge-pop mx-auto inline-flex"><span className="level-badge px-4 py-2 text-3xl">Lv {goals.level}</span></div>
+				<div className="animate-badge-pop mx-auto inline-flex"><span className="level-badge px-4 py-2 text-3xl">Cấp {goals.level}</span></div>
 				<p className="text-lg font-black">{goals.levelTitle}</p>
 				<p className="text-sm text-muted">Mỗi cấp là kết quả của những lần bạn nhớ lại được từ. Tiếp tục nhé!</p>
 				<button type="button" onClick={close} className="min-h-11 w-full rounded-control bg-accent px-5 font-bold text-accent-foreground">Tuyệt vời</button>

@@ -72,8 +72,8 @@ export default function UserMessageModal() {
 			>
 				{/* decorative icon */}
 				<div className="mb-5 flex justify-center">
-					<span className="flex size-14 items-center justify-center rounded-full bg-rose-100 text-2xl dark:bg-rose-900/50">
-						💌
+					<span className="flex size-14 items-center justify-center rounded-full bg-rose-100 text-rose-500 dark:bg-rose-900/50 dark:text-rose-200">
+						<MaterialIcon name="mail" size={28} />
 					</span>
 				</div>
 
@@ -95,7 +95,7 @@ export default function UserMessageModal() {
 					onClick={() => void handleDismiss()}
 					className="mt-8 w-full rounded-2xl bg-rose-400 px-4 py-3 text-sm font-semibold text-white shadow-sm transition-all hover:bg-rose-500 active:scale-95 disabled:opacity-50 dark:bg-rose-600 dark:hover:bg-rose-500"
 				>
-					{dismissing ? 'Đang đóng…' : 'Đã nhận được 💗'}
+					{dismissing ? 'Đang đóng…' : 'Đã nhận được'}
 				</button>
 
 				<button
