@@ -47,7 +47,7 @@ export default function AccountMenu({ name, goals, admin, adminHref, avatarUrl, 
 
  return <>
   <details ref={detailsRef} className="group relative">
-   <summary aria-label="Menu tài khoản" className="flex min-h-10 min-w-10 cursor-pointer list-none items-center justify-center gap-2.5 rounded-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent sm:min-h-11 sm:min-w-11 md:w-full md:justify-start md:rounded-card md:p-1.5 md:hover:bg-surface-hover [&::-webkit-details-marker]:hidden">
+   <summary aria-label="Menu tài khoản" className="flex min-h-11 min-w-11 cursor-pointer list-none items-center justify-center gap-2.5 rounded-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent md:w-full md:justify-start md:rounded-card md:p-1.5 md:hover:bg-surface-hover [&::-webkit-details-marker]:hidden">
     <Avatar src={avatarUrl} name={name} size="md" />
     <span className="hidden min-w-0 flex-1 truncate text-sm font-semibold md:block">{name}</span>
     <span className="hidden text-muted md:inline-flex"><MaterialIcon name="unfold_more" size={18} /></span>
@@ -67,7 +67,7 @@ export default function AccountMenu({ name, goals, admin, adminHref, avatarUrl, 
      <div className="grid grid-cols-3 gap-1 rounded-control bg-surface-container p-1">
       {THEMES.map((option) => {
        const active = activeTheme === option.value;
-       return <button key={option.value} type="button" role="radio" aria-checked={active} onClick={() => setTheme(option.value)} className={`flex min-h-9 flex-col items-center justify-center gap-0.5 rounded-md px-1 py-1 text-xs font-semibold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent ${active ? 'bg-surface text-foreground shadow-sm' : 'text-muted hover:text-foreground'}`}><MaterialIcon name={option.icon} size={18} />{option.label}</button>;
+       return <button key={option.value} type="button" role="radio" aria-checked={active} onClick={() => setTheme(option.value)} className={`flex min-h-11 flex-col items-center justify-center gap-0.5 rounded-md px-1 py-1 text-xs font-semibold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent ${active ? 'bg-surface text-foreground shadow-sm' : 'text-muted hover:text-foreground'}`}><MaterialIcon name={option.icon} size={18} />{option.label}</button>;
       })}
      </div>
     </div>

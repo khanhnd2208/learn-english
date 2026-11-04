@@ -532,3 +532,11 @@ input:focus-visible, textarea:focus-visible, select:focus-visible { outline-colo
 	.quest-card[data-done="true"] { border-color: color-mix(in srgb, var(--success) 55%, var(--border)); background: var(--success-subtle); }
 	.xp-chip { display: inline-flex; align-items: center; gap: 2px; border-radius: 999px; padding: 1px 8px; font-size: .75rem; font-weight: 800; background: color-mix(in srgb, var(--gold) 26%, var(--surface)); color: var(--foreground); white-space: nowrap; }
 }
+
+/* One visible keyboard focus style for links, buttons and tabs; components that draw their own ring opt out with `focus-visible:outline-none`. */
+@layer base {
+	a:focus-visible, button:focus-visible, summary:focus-visible, [role="tab"]:focus-visible {
+		outline: 2px solid var(--focus-ring);
+		outline-offset: 2px;
+	}
+}

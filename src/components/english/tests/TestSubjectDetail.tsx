@@ -6,6 +6,7 @@ import Dialog from '@/components/ui/Dialog';
 import Button from '@/components/ui/Button';
 import CourseEnrollButton from '@/components/english/tests/CourseEnrollButton';
 import type { TestSubjectDetail as TestSubjectDetailData } from '@/services/english/enTestSubjectService';
+import BackLink from '@/components/ui/BackLink';
 
 export default function TestSubjectDetail({ detail, isAdmin }: { detail: TestSubjectDetailData; isAdmin: boolean }) {
   const router = useRouter();
@@ -24,7 +25,7 @@ export default function TestSubjectDetail({ detail, isAdmin }: { detail: TestSub
   }
   const nextPaper = detail.papers.find((paper) => paper.id === detail.progress.nextId);
   return <div className="mx-auto max-w-3xl space-y-4 px-4 py-4 sm:space-y-5 sm:px-6 sm:py-10">
-    <Link href="/tests" className="inline-flex min-h-10 items-center text-sm font-bold text-accent">← Khóa học</Link>
+    <BackLink href="/tests">Khóa học</BackLink>
     <header className="mode-card space-y-3.5 sm:space-y-4">
       <div className="flex items-start justify-between gap-3"><div className="min-w-0"><h1 className="text-2xl sm:text-4xl">{detail.title}</h1>{detail.progress.total > 0 && <p className="mt-1 text-sm text-muted">{detail.progress.passed}/{detail.progress.total} đề đạt</p>}{detail.description && <p className="mt-1.5 text-sm text-muted">{detail.description}</p>}</div>{detail.enrolled && <details className="relative shrink-0"><summary aria-label="Tùy chọn khóa học" className="flex min-h-10 min-w-10 cursor-pointer items-center justify-center rounded-control border border-border text-xl">⋯</summary><div className="absolute right-0 z-20 mt-1 rounded-card border border-border bg-surface p-2 shadow-overlay"><Button type="button" variant="ghost" onClick={() => setConfirmLeave(true)}>Rời khóa học</Button></div></details>}</div>
       {detail.enrolled && detail.progress.total > 0 && <div role="progressbar" aria-label="Tiến độ khóa học" aria-valuemin={0} aria-valuemax={detail.progress.total} aria-valuenow={detail.progress.passed} className="h-2 overflow-hidden rounded-full bg-surface-container"><div className="h-full rounded-full bg-accent" style={{ width: `${Math.round(detail.progress.passed * 100 / detail.progress.total)}%` }} /></div>}

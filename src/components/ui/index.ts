@@ -22,6 +22,7 @@ export { Tabs, TabsList, TabsTrigger, TabsContent } from './Tabs';
 export { default as Pagination } from './Pagination';
 export { default as FormField } from './FormField';
 export { default as MaterialIcon } from './MaterialIcon';
+export { default as BackLink } from './BackLink';
 export { default as ProgressBar } from './ProgressBar';
 export { default as InfoHint } from './InfoHint';
 export { default as ThemeToggle } from './ThemeToggle';

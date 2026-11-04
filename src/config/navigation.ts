@@ -1,16 +1,17 @@
 export interface NavLink {
 	href: string;
 	label: string;
+	/** Material Symbols name. */
 	icon: string;
 	shortLabel?: string;
 }
 
 /** Main learner navigation. */
 export const MAIN_NAV: NavLink[] = [
- { href: '/', label: 'Hôm nay', icon: 'target', shortLabel: 'Hôm nay' },
- { href: '/review', label: 'Ôn theo bộ', icon: 'repeat', shortLabel: 'Ôn theo bộ' },
- { href: '/progress', label: 'Tiến bộ', icon: 'flag', shortLabel: 'Tiến bộ' },
- { href: '/store', label: 'Cửa hàng', icon: 'auto_stories', shortLabel: 'Cửa hàng' },
+ { href: '/', label: 'Hôm nay', icon: 'today', shortLabel: 'Hôm nay' },
+ { href: '/review', label: 'Ôn theo bộ', icon: 'style', shortLabel: 'Ôn theo bộ' },
+ { href: '/progress', label: 'Tiến bộ', icon: 'insights', shortLabel: 'Tiến bộ' },
+ { href: '/store', label: 'Cửa hàng', icon: 'storefront', shortLabel: 'Cửa hàng' },
 ];
 
 export const BOTTOM_NAV = MAIN_NAV;
